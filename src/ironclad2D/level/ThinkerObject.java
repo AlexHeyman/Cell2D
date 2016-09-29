@@ -2,6 +2,7 @@ package ironclad2D.level;
 
 import ironclad2D.Animation;
 import ironclad2D.IroncladGame;
+import java.util.Set;
 
 public abstract class ThinkerObject extends AnimatedObject {
     
@@ -30,6 +31,12 @@ public abstract class ThinkerObject extends AnimatedObject {
     void setTimeFactorActions(double timeFactor) {
         super.setTimeFactorActions(timeFactor);
         thinker.setTimeFactor(timeFactor);
+    }
+    
+    @Override
+    void updateNonLocatorHitboxes(Set<Hitbox> nonLocatorHitboxes) {
+        super.updateNonLocatorHitboxes(nonLocatorHitboxes);
+        nonLocatorHitboxes.add(physicsHitbox);
     }
     
     public final LevelThinker getThinker() {

@@ -50,6 +50,10 @@ public abstract class CompositeHitbox extends Hitbox {
         }
     }
     
+    public final boolean isComponent(Hitbox hitbox) {
+        return components.containsValue(hitbox);
+    }
+    
     public final Hitbox getComponent(int id) {
         return components.get(id);
     }

@@ -74,8 +74,8 @@ public abstract class IroncladGame {
     private int screenHeight;
     private double scaleFactor;
     private double effectiveScaleFactor = 1;
-    int screenXOffset = 0;
-    int screenYOffset = 0;
+    private int screenXOffset = 0;
+    private int screenYOffset = 0;
     private boolean fullscreen;
     private boolean updateScreen = true;
     private Path assetsPath;
@@ -699,21 +699,21 @@ public abstract class IroncladGame {
     }
     
     public final boolean commandPressed(int commandNum) {
-        return (commandStates[commandNum] == CommandState.PRESSED
+        return commandStates[commandNum] == CommandState.PRESSED
                 || commandStates[commandNum] == CommandState.TAPPED
-                || commandStates[commandNum] == CommandState.UNTAPPED);
+                || commandStates[commandNum] == CommandState.UNTAPPED;
     }
     
     public final boolean commandHeld(int commandNum) {
-        return (commandStates[commandNum] == CommandState.PRESSED
+        return commandStates[commandNum] == CommandState.PRESSED
                 || commandStates[commandNum] == CommandState.HELD
-                || commandStates[commandNum] == CommandState.TAPPED);
+                || commandStates[commandNum] == CommandState.TAPPED;
     }
     
     public final boolean commandReleased(int commandNum) {
-        return (commandStates[commandNum] == CommandState.RELEASED
+        return commandStates[commandNum] == CommandState.RELEASED
                 || commandStates[commandNum] == CommandState.TAPPED
-                || commandStates[commandNum] == CommandState.UNTAPPED);
+                || commandStates[commandNum] == CommandState.UNTAPPED;
     }
     
     public final int getMouseX() {

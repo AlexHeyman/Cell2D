@@ -50,13 +50,14 @@ public class LevelState extends IroncladGameState {
         
     }
     
-    private Chunk getChunk(Point point) {
-        Chunk chunk = chunks.get(point);
-        if (chunk == null) {
-            chunk = new Chunk();
-            chunks.put(point, chunk);
+    final void updateHitbox(Hitbox hitbox) {
+        int[] chunkRange = hitbox.chunkRange;
+        int[] newRange = getChunkRange(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
+        if (chunkRange == null || !chunkRangesEqual(chunkRange, newRange)) {
+            if (chunkRange != null) {
+                
+            }
         }
-        return chunk;
     }
     
     public final double getChunkWidth() {
@@ -80,6 +81,24 @@ public class LevelState extends IroncladGameState {
         if (!levelObjects.isEmpty()) {
             
         }
+    }
+    
+    private Chunk getChunk(Point point) {
+        Chunk chunk = chunks.get(point);
+        if (chunk == null) {
+            chunk = new Chunk();
+            chunks.put(point, chunk);
+        }
+        return chunk;
+    }
+    
+    private int[] getChunkRange(double x1, double y1, double x2, double y2) {
+        int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
+        return chunkRange;
+    }
+    
+    private boolean chunkRangesEqual(int[] range1, int[] range2) {
+        return range1[0] == range2[0] && range1[1] == range2[1] && range1[2] == range2[2] && range1[3] == range2[3];
     }
     
     public final void loadArea(Area area) {

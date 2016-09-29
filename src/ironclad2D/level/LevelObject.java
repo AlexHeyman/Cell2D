@@ -1,6 +1,8 @@
 package ironclad2D.level;
 
 import ironclad2D.Sprite;
+import java.util.HashSet;
+import java.util.Set;
 import org.newdawn.slick.Graphics;
 
 public abstract class LevelObject {
@@ -9,6 +11,7 @@ public abstract class LevelObject {
     LevelState newLevelState = null;
     private double timeFactor = 1;
     private Hitbox locatorHitbox = null;
+    private final Set<Hitbox> nonLocatorHitboxes = new HashSet<>();
     private Hitbox collisionHitbox = null;
     private Hitbox solidHitbox = null;
     private int drawLayer;
@@ -46,14 +49,14 @@ public abstract class LevelObject {
         return levelState.addObject(this);
     }
     
+    void addActions() {}
+    
     public final boolean remove() {
         if (newLevelState != null) {
             return newLevelState.removeObject(this);
         }
         return false;
     }
-    
-    void addActions() {}
     
     void removeActions() {}
     
@@ -81,10 +84,19 @@ public abstract class LevelObject {
             Hitbox parent = locatorHitbox.getParent();
             if ((object == null && parent == null)
                     || (object == this && parent == this.locatorHitbox
-                    && false)) {
+                    && !locatorHitbox.isComponentOf(this.locatorHitbox))) {
                 if (this.locatorHitbox != null) {
-                    this.locatorHitbox.setObject(null);
-                    
+                    for (Hitbox hitbox : nonLocatorHitboxes) {
+                        this.locatorHitbox.removeChild(hitbox);
+                    }
+                    this.locatorHitbox.removeRole(0);
+                }
+                this.locatorHitbox = locatorHitbox;
+                locatorHitbox.setObject(this);
+                locatorHitbox.addRole(0);
+                updateNonLocatorHitboxes();
+                for (Hitbox hitbox : nonLocatorHitboxes) {
+                    locatorHitbox.addChild(hitbox);
                 }
                 return true;
             }
@@ -163,6 +175,17 @@ public abstract class LevelObject {
     public final double getCenterY() {
         return locatorHitbox.getCenterY();
     }
+    
+    private void updateNonLocatorHitboxes() {
+        nonLocatorHitboxes.clear();
+        nonLocatorHitboxes.add(collisionHitbox);
+        nonLocatorHitboxes.add(solidHitbox);
+        updateNonLocatorHitboxes(nonLocatorHitboxes);
+        nonLocatorHitboxes.remove(null);
+        nonLocatorHitboxes.remove(locatorHitbox);
+    }
+    
+    void updateNonLocatorHitboxes(Set<Hitbox> nonLocatorHitboxes) {}
     
     public final Hitbox getCollisionHitbox() {
         return collisionHitbox;

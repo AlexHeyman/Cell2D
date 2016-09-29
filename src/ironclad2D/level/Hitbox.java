@@ -9,9 +9,10 @@ public abstract class Hitbox {
     private Hitbox parent = null;
     private final Set<Hitbox> children = new HashSet<>();
     private LevelObject object = null;
-    private LevelState levelState = null;
-    private boolean[] roles = new boolean[4];
-    int[] chunks = null;
+    LevelState levelState = null;
+    int[] chunkRange = null;
+    final boolean[] roles = new boolean[4];
+    private int numRoles = 0;
     private boolean active = true;
     private LevelVector relPosition, absPosition;
     private boolean relXFlip = false;
@@ -76,21 +77,52 @@ public abstract class Hitbox {
         updateAbsAngleActions();
     }
     
+    public final boolean isComponentOf(Hitbox hitbox) {
+        return hitbox instanceof CompositeHitbox && ((CompositeHitbox)hitbox).isComponent(this);
+    }
+    
     public final LevelObject getObject() {
         return object;
     }
     
     final void setObject(LevelObject object) {
+        if (object != this.object) {
+            recursivelySetObject(object);
+        }
+    }
+    
+    private void recursivelySetObject(LevelObject object) {
         this.object = object;
         if (!children.isEmpty()) {
             for (Hitbox child : children) {
-                child.setObject(object);
+                child.recursivelySetObject(object);
             }
         }
     }
     
     public final LevelState getLevelState() {
         return levelState;
+    }
+    
+    final void addRole(int role) {
+        roles[role] = true;
+        numRoles++;
+        if (numRoles == 1) {
+            levelState = object.getLevelState();
+            if (levelState != null) {
+                levelState.updateHitbox(this);
+            }
+        }
+    }
+    
+    final void removeRole(int role) {
+        roles[role] = false;
+        numRoles--;
+        if (numRoles == 0) {
+            setObject(null);
+            levelState = null;
+            chunkRange = null;
+        }
     }
     
     public final boolean getActive() {
