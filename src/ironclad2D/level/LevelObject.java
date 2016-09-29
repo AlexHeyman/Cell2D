@@ -124,12 +124,20 @@ public abstract class LevelObject {
         return locatorHitbox.getRelXFlip();
     }
     
+    public final int getXSign() {
+        return locatorHitbox.getRelXSign();
+    }
+    
     public final void setXFlip(boolean xFlip) {
         locatorHitbox.setRelXFlip(xFlip);
     }
     
     public final boolean getYFlip() {
         return locatorHitbox.getRelYFlip();
+    }
+    
+    public final int getYSign() {
+        return locatorHitbox.getRelYSign();
     }
     
     public final void setYFlip(boolean yFlip) {
