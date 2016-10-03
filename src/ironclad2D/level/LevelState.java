@@ -68,13 +68,9 @@ public class LevelState extends IroncladGameState {
         return chunk;
     }
     
-    final int[] getChunkRange(double x1, double y1, double x2, double y2) {
+    private int[] getChunkRange(double x1, double y1, double x2, double y2) {
         int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
         return chunkRange;
-    }
-    
-    final int[] getChunkRange(Hitbox hitbox) {
-        return getChunkRange(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
     
     private class ChunkRangeIterator implements Iterator<Chunk> {
@@ -105,6 +101,10 @@ public class LevelState extends IroncladGameState {
             return next;
         }
         
+    }
+    
+    final void updateChunkRange(Hitbox hitbox) {
+        hitbox.chunkRange = getChunkRange(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
     
     final void addLocatorHitbox(Hitbox hitbox, int drawLayer) {

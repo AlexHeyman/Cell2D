@@ -51,8 +51,9 @@ public abstract class LevelObject {
     
     void addActions() {
         locatorHitbox.setLevelState(levelState);
+        levelState.updateChunkRange(locatorHitbox);
         for (Hitbox hitbox : nonLocatorHitboxes) {
-            hitbox.setLevelState(levelState);
+            levelState.updateChunkRange(hitbox);
         }
         levelState.addLocatorHitbox(locatorHitbox, drawLayer);
     }
@@ -67,8 +68,9 @@ public abstract class LevelObject {
     void removeActions() {
         levelState.removeLocatorHitbox(locatorHitbox, drawLayer);
         locatorHitbox.setLevelState(null);
+        locatorHitbox.chunkRange = null;
         for (Hitbox hitbox : nonLocatorHitboxes) {
-            hitbox.setLevelState(null);
+            hitbox.chunkRange = null;
         }
     }
     

@@ -9,10 +9,10 @@ public abstract class Hitbox {
     private Hitbox parent = null;
     private final Set<Hitbox> children = new HashSet<>();
     private LevelObject object = null;
+    private final boolean[] roles = new boolean[4];
+    private int numRoles = 0;
     LevelState levelState = null;
     int[] chunkRange = null;
-    final boolean[] roles = new boolean[4];
-    int numRoles = 0;
     private boolean active = true;
     private LevelVector relPosition, absPosition;
     private boolean relXFlip = false;
@@ -58,10 +58,12 @@ public abstract class Hitbox {
     private void recursivelyUpdateData() {
         if (parent == null) {
             object = null;
+            levelState = null;
             absXFlip = relXFlip;
             absYFlip = relYFlip;
         } else {
             object = parent.object;
+            levelState = parent.levelState;
             absXFlip = parent.absXFlip ^ relXFlip;
             absYFlip = parent.absYFlip ^ relYFlip;
         }
@@ -87,13 +89,18 @@ public abstract class Hitbox {
     
     final void setObject(LevelObject object) {
         if (object != this.object) {
-            setLevelState(object == null ? null : object.levelState);
             recursivelySetObject(object);
+            if (levelState == null) {
+                chunkRange = null;
+            } else {
+                levelState.updateChunkRange(this);
+            }
         }
     }
     
     private void recursivelySetObject(LevelObject object) {
         this.object = object;
+        levelState = (object == null ? null : object.levelState);
         if (!children.isEmpty()) {
             for (Hitbox child : children) {
                 child.recursivelySetObject(object);
@@ -126,7 +133,11 @@ public abstract class Hitbox {
     
     final void setLevelState(LevelState levelState) {
         this.levelState = levelState;
-        chunkRange = (levelState == null ? null : levelState.getChunkRange(this));
+        if (!children.isEmpty()) {
+            for (Hitbox child : children) {
+                child.setLevelState(levelState);
+            }
+        }
     }
     
     public final boolean getActive() {
