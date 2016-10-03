@@ -1,6 +1,6 @@
 package ironclad2D.level;
 
-public class LineHitbox extends Hitbox implements CollisionHitbox {
+public class LineHitbox extends Hitbox implements OverlapHitbox {
     
     private LevelVector relDifference, absDifference;
     private double left, right, top, bottom;

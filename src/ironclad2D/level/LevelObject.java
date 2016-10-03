@@ -12,19 +12,19 @@ public abstract class LevelObject {
     private double timeFactor = 1;
     private Hitbox locatorHitbox = null;
     private final Set<Hitbox> nonLocatorHitboxes = new HashSet<>();
-    private Hitbox collisionHitbox = null;
+    private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
     private int drawLayer;
     private Sprite sprite;
     private double alpha = 1;
     private String filter = null;
     
-    public LevelObject(Hitbox locatorHitbox, Hitbox collisionHitbox,
+    public LevelObject(Hitbox locatorHitbox, Hitbox overlapHitbox,
             Hitbox solidHitbox, int drawLayer, Sprite sprite) {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a level object with an invalid locator hitbox");
         }
-        this.collisionHitbox = collisionHitbox;
+        this.overlapHitbox = overlapHitbox;
         this.solidHitbox = solidHitbox;
         this.drawLayer = drawLayer;
         this.sprite = sprite;
@@ -49,7 +49,13 @@ public abstract class LevelObject {
         return levelState.addObject(this);
     }
     
-    void addActions() {}
+    void addActions() {
+        locatorHitbox.setLevelState(levelState);
+        for (Hitbox hitbox : nonLocatorHitboxes) {
+            hitbox.setLevelState(levelState);
+        }
+        levelState.addLocatorHitbox(locatorHitbox, drawLayer);
+    }
     
     public final boolean remove() {
         if (newLevelState != null) {
@@ -58,7 +64,13 @@ public abstract class LevelObject {
         return false;
     }
     
-    void removeActions() {}
+    void removeActions() {
+        levelState.removeLocatorHitbox(locatorHitbox, drawLayer);
+        locatorHitbox.setLevelState(null);
+        for (Hitbox hitbox : nonLocatorHitboxes) {
+            hitbox.setLevelState(null);
+        }
+    }
     
     public final double getTimeFactor() {
         return timeFactor;
@@ -89,11 +101,11 @@ public abstract class LevelObject {
                     for (Hitbox hitbox : nonLocatorHitboxes) {
                         this.locatorHitbox.removeChild(hitbox);
                     }
-                    this.locatorHitbox.removeRole(0);
+                    this.locatorHitbox.removeAsLocatorHitbox();
                 }
                 this.locatorHitbox = locatorHitbox;
                 locatorHitbox.setObject(this);
-                locatorHitbox.addRole(0);
+                locatorHitbox.addAsLocatorHitbox();
                 updateNonLocatorHitboxes();
                 for (Hitbox hitbox : nonLocatorHitboxes) {
                     locatorHitbox.addChild(hitbox);
@@ -186,7 +198,7 @@ public abstract class LevelObject {
     
     private void updateNonLocatorHitboxes() {
         nonLocatorHitboxes.clear();
-        nonLocatorHitboxes.add(collisionHitbox);
+        nonLocatorHitboxes.add(overlapHitbox);
         nonLocatorHitboxes.add(solidHitbox);
         updateNonLocatorHitboxes(nonLocatorHitboxes);
         nonLocatorHitboxes.remove(null);
@@ -195,8 +207,8 @@ public abstract class LevelObject {
     
     void updateNonLocatorHitboxes(Set<Hitbox> nonLocatorHitboxes) {}
     
-    public final Hitbox getCollisionHitbox() {
-        return collisionHitbox;
+    public final Hitbox getOverlapHitbox() {
+        return overlapHitbox;
     }
     
     public final Hitbox getSolidHitbox() {
@@ -209,7 +221,7 @@ public abstract class LevelObject {
     
     public final void setDrawLayer(int drawLayer) {
         if (levelState != null) {
-            levelState.updateObjectDrawLayer(this, this.drawLayer, drawLayer);
+            levelState.changeLocatorHitboxDrawLayer(locatorHitbox, this.drawLayer, drawLayer);
         }
         this.drawLayer = drawLayer;
     }

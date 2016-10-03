@@ -6,6 +6,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,6 @@ public class LevelState extends IroncladGameState {
     private boolean thinkersHaveReactedToLevel = true;
     private boolean thinkersHaveReactedToInput = false;
     private final Set<LevelObject> levelObjects = new HashSet<>();
-    private final SortedMap<Integer,Set<LevelObject>> objectsByDrawLayer = new TreeMap<>();
     private double chunkWidth, chunkHeight;
     private final Map<Point,Chunk> chunks = new HashMap<>();
     private final SortedMap<Integer,LevelLayer> levelLayers = new TreeMap<>();
@@ -43,20 +43,90 @@ public class LevelState extends IroncladGameState {
     private class Chunk {
         
         private final SortedMap<Integer,Set<Hitbox>> locatorHitboxes = new TreeMap<>();
-        private final Set<Hitbox> collisionHitboxes = new HashSet<>();
+        private final Set<Hitbox> overlapHitboxes = new HashSet<>();
         private final Set<Hitbox> solidHitboxes = new HashSet<>();
         
         private Chunk() {}
         
+        private Set<Hitbox> getLocatorHitboxes(int drawLayer) {
+            Set<Hitbox> hitboxes = locatorHitboxes.get(drawLayer);
+            if (hitboxes == null) {
+                hitboxes = new HashSet<>();
+                locatorHitboxes.put(drawLayer, hitboxes);
+            }
+            return hitboxes;
+        }
+        
     }
     
-    final void updateHitbox(Hitbox hitbox) {
-        int[] chunkRange = hitbox.chunkRange;
-        int[] newRange = getChunkRange(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
-        if (chunkRange == null || !chunkRangesEqual(chunkRange, newRange)) {
-            if (chunkRange != null) {
-                
+    private Chunk getChunk(Point point) {
+        Chunk chunk = chunks.get(point);
+        if (chunk == null) {
+            chunk = new Chunk();
+            chunks.put(point, chunk);
+        }
+        return chunk;
+    }
+    
+    final int[] getChunkRange(double x1, double y1, double x2, double y2) {
+        int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
+        return chunkRange;
+    }
+    
+    final int[] getChunkRange(Hitbox hitbox) {
+        return getChunkRange(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
+    }
+    
+    private class ChunkRangeIterator implements Iterator<Chunk> {
+        
+        private final int[] chunkRange;
+        private int xPos, yPos;
+        
+        private ChunkRangeIterator(int[] chunkRange) {
+            this.chunkRange = chunkRange;
+            xPos = chunkRange[0];
+            yPos = chunkRange[1];
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return yPos > chunkRange[3];
+        }
+        
+        @Override
+        public Chunk next() {
+            Chunk next = getChunk(new Point(xPos, yPos));
+            if (xPos == chunkRange[2]) {
+                xPos = chunkRange[0];
+                yPos++;
+            } else {
+                xPos++;
             }
+            return next;
+        }
+        
+    }
+    
+    final void addLocatorHitbox(Hitbox hitbox, int drawLayer) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().getLocatorHitboxes(drawLayer).add(hitbox);
+        }
+    }
+    
+    final void removeLocatorHitbox(Hitbox hitbox, int drawLayer) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().getLocatorHitboxes(drawLayer).remove(hitbox);
+        }
+    }
+    
+    final void changeLocatorHitboxDrawLayer(Hitbox hitbox, int oldDrawLayer, int newDrawLayer) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            Chunk chunk = iterator.next();
+            chunk.getLocatorHitboxes(oldDrawLayer).remove(hitbox);
+            chunk.getLocatorHitboxes(newDrawLayer).add(hitbox);
         }
     }
     
@@ -81,24 +151,6 @@ public class LevelState extends IroncladGameState {
         if (!levelObjects.isEmpty()) {
             
         }
-    }
-    
-    private Chunk getChunk(Point point) {
-        Chunk chunk = chunks.get(point);
-        if (chunk == null) {
-            chunk = new Chunk();
-            chunks.put(point, chunk);
-        }
-        return chunk;
-    }
-    
-    private int[] getChunkRange(double x1, double y1, double x2, double y2) {
-        int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
-        return chunkRange;
-    }
-    
-    private boolean chunkRangesEqual(int[] range1, int[] range2) {
-        return range1[0] == range2[0] && range1[1] == range2[1] && range1[2] == range2[2] && range1[3] == range2[3];
     }
     
     public final void loadArea(Area area) {
@@ -173,13 +225,6 @@ public class LevelState extends IroncladGameState {
     }
     
     private void addActions(LevelObject object) {
-        int layer = object.getDrawLayer();
-        Set layerSet = objectsByDrawLayer.get(layer);
-        if (layerSet == null) {
-            layerSet = new HashSet<>();
-            objectsByDrawLayer.put(layer, layerSet);
-        }
-        layerSet.add(object);
         levelObjects.add(object);
         object.levelState = this;
         object.addActions();
@@ -200,14 +245,8 @@ public class LevelState extends IroncladGameState {
     
     private void removeActions(LevelObject object) {
         object.removeActions();
-        objectsByDrawLayer.get(object.getDrawLayer()).remove(object);
         levelObjects.remove(object);
         object.levelState = null;
-    }
-    
-    final void updateObjectDrawLayer(LevelObject object, int oldDrawLayer, int newDrawLayer) {
-        objectsByDrawLayer.get(oldDrawLayer).remove(object);
-        objectsByDrawLayer.get(newDrawLayer).add(object);
     }
     
     private void catchNewThinkersUp(IroncladGame game) {

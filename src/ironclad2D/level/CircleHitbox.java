@@ -1,6 +1,6 @@
 package ironclad2D.level;
 
-public class CircleHitbox extends Hitbox implements CollisionHitbox {
+public class CircleHitbox extends Hitbox implements OverlapHitbox {
     
     private double relRadius, absRadius;
     

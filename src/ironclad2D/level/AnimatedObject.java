@@ -11,9 +11,9 @@ public abstract class AnimatedObject extends LevelObject {
     private AnimationInstance animInstance;
     private final Map<Integer,AnimationInstance> extraAnimInstances = new HashMap<>();
     
-    public AnimatedObject(Hitbox locatorHitbox, Hitbox collisionHitbox,
+    public AnimatedObject(Hitbox locatorHitbox, Hitbox overlapHitbox,
             Hitbox solidHitbox, int drawLayer, Animation animation) {
-        super(locatorHitbox, collisionHitbox, solidHitbox, drawLayer, null);
+        super(locatorHitbox, overlapHitbox, solidHitbox, drawLayer, null);
         setAnimation(animation);
     }
     

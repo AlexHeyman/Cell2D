@@ -12,7 +12,7 @@ public abstract class Hitbox {
     LevelState levelState = null;
     int[] chunkRange = null;
     final boolean[] roles = new boolean[4];
-    private int numRoles = 0;
+    int numRoles = 0;
     private boolean active = true;
     private LevelVector relPosition, absPosition;
     private boolean relXFlip = false;
@@ -87,6 +87,7 @@ public abstract class Hitbox {
     
     final void setObject(LevelObject object) {
         if (object != this.object) {
+            setLevelState(object == null ? null : object.levelState);
             recursivelySetObject(object);
         }
     }
@@ -100,29 +101,32 @@ public abstract class Hitbox {
         }
     }
     
+    final void addAsLocatorHitbox() {
+        if (levelState != null) {
+            levelState.addLocatorHitbox(this, object.getDrawLayer());
+        }
+        roles[0] = true;
+        numRoles++;
+    }
+    
+    final void removeAsLocatorHitbox() {
+        roles[0] = false;
+        numRoles--;
+        if (levelState != null) {
+            levelState.removeLocatorHitbox(this, object.getDrawLayer());
+        }
+        if (numRoles == 0) {
+            setObject(null);
+        }
+    }
+    
     public final LevelState getLevelState() {
         return levelState;
     }
     
-    final void addRole(int role) {
-        roles[role] = true;
-        numRoles++;
-        if (numRoles == 1) {
-            levelState = object.getLevelState();
-            if (levelState != null) {
-                levelState.updateHitbox(this);
-            }
-        }
-    }
-    
-    final void removeRole(int role) {
-        roles[role] = false;
-        numRoles--;
-        if (numRoles == 0) {
-            setObject(null);
-            levelState = null;
-            chunkRange = null;
-        }
+    final void setLevelState(LevelState levelState) {
+        this.levelState = levelState;
+        chunkRange = (levelState == null ? null : levelState.getChunkRange(this));
     }
     
     public final boolean getActive() {

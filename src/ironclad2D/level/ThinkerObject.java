@@ -7,12 +7,12 @@ import java.util.Set;
 public abstract class ThinkerObject extends AnimatedObject {
     
     private final LevelThinker thinker = new ObjectThinker();
-    private Hitbox physicsHitbox;
+    private Hitbox collisionHitbox;
     
-    public ThinkerObject(Hitbox locatorHitbox, Hitbox collisionHitbox,
-            Hitbox solidHitbox, Hitbox physicsHitbox, int drawLayer, Animation animation) {
-        super(locatorHitbox, collisionHitbox, solidHitbox, drawLayer, animation);
-        this.physicsHitbox = physicsHitbox;
+    public ThinkerObject(Hitbox locatorHitbox, Hitbox overlapHitbox,
+            Hitbox solidHitbox, Hitbox collisionHitbox, int drawLayer, Animation animation) {
+        super(locatorHitbox, overlapHitbox, solidHitbox, drawLayer, animation);
+        this.collisionHitbox = collisionHitbox;
     }
     
     @Override
@@ -36,15 +36,15 @@ public abstract class ThinkerObject extends AnimatedObject {
     @Override
     void updateNonLocatorHitboxes(Set<Hitbox> nonLocatorHitboxes) {
         super.updateNonLocatorHitboxes(nonLocatorHitboxes);
-        nonLocatorHitboxes.add(physicsHitbox);
+        nonLocatorHitboxes.add(collisionHitbox);
     }
     
     public final LevelThinker getThinker() {
         return thinker;
     }
     
-    public final Hitbox getPhysicsHitbox() {
-        return physicsHitbox;
+    public final Hitbox getCollisionHitbox() {
+        return collisionHitbox;
     }
     
     public void timeUnitActions(IroncladGame game, LevelState levelState) {}

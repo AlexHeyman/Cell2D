@@ -1,6 +1,6 @@
 package ironclad2D.level;
 
-public class RectangleHitbox extends Hitbox implements CollisionHitbox, SolidHitbox, PhysicsHitbox {
+public class RectangleHitbox extends Hitbox implements OverlapHitbox, SolidHitbox, CollisionHitbox {
     
     private double relLeft, relRight, relTop, relBottom, absLeft, absRight, absTop, absBottom;
     
