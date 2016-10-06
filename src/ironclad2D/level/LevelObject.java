@@ -1,8 +1,6 @@
 package ironclad2D.level;
 
 import ironclad2D.Sprite;
-import java.util.HashSet;
-import java.util.Set;
 import org.newdawn.slick.Graphics;
 
 public abstract class LevelObject {
@@ -11,7 +9,6 @@ public abstract class LevelObject {
     LevelState newLevelState = null;
     private double timeFactor = 1;
     private Hitbox locatorHitbox = null;
-    private final Set<Hitbox> nonLocatorHitboxes = new HashSet<>();
     private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
     private int drawLayer;
@@ -51,11 +48,7 @@ public abstract class LevelObject {
     
     void addActions() {
         locatorHitbox.setLevelState(levelState);
-        levelState.updateChunkRange(locatorHitbox);
-        for (Hitbox hitbox : nonLocatorHitboxes) {
-            levelState.updateChunkRange(hitbox);
-        }
-        levelState.addLocatorHitbox(locatorHitbox, drawLayer);
+        levelState.addLocatorHitbox(locatorHitbox);
     }
     
     public final boolean remove() {
@@ -66,12 +59,8 @@ public abstract class LevelObject {
     }
     
     void removeActions() {
-        levelState.removeLocatorHitbox(locatorHitbox, drawLayer);
         locatorHitbox.setLevelState(null);
-        locatorHitbox.chunkRange = null;
-        for (Hitbox hitbox : nonLocatorHitboxes) {
-            hitbox.chunkRange = null;
-        }
+        levelState.removeLocatorHitbox(locatorHitbox);
     }
     
     public final double getTimeFactor() {
@@ -100,22 +89,27 @@ public abstract class LevelObject {
                     || (object == this && parent == this.locatorHitbox
                     && !locatorHitbox.isComponentOf(this.locatorHitbox))) {
                 if (this.locatorHitbox != null) {
-                    for (Hitbox hitbox : nonLocatorHitboxes) {
-                        this.locatorHitbox.removeChild(hitbox);
-                    }
+                    removeNonLocatorHitboxes(this.locatorHitbox);
                     this.locatorHitbox.removeAsLocatorHitbox();
                 }
                 this.locatorHitbox = locatorHitbox;
                 locatorHitbox.setObject(this);
-                locatorHitbox.addAsLocatorHitbox();
-                updateNonLocatorHitboxes();
-                for (Hitbox hitbox : nonLocatorHitboxes) {
-                    locatorHitbox.addChild(hitbox);
-                }
+                addNonLocatorHitboxes(locatorHitbox);
+                locatorHitbox.addAsLocatorHitbox(drawLayer);
                 return true;
             }
         }
         return false;
+    }
+    
+    void removeNonLocatorHitboxes(Hitbox locatorHitbox) {
+        locatorHitbox.removeChild(overlapHitbox);
+        locatorHitbox.removeChild(solidHitbox);
+    }
+    
+    void addNonLocatorHitboxes(Hitbox locatorHitbox) {
+        locatorHitbox.addChild(overlapHitbox);
+        locatorHitbox.addChild(solidHitbox);
     }
     
     public final double getX() {
@@ -198,17 +192,6 @@ public abstract class LevelObject {
         return locatorHitbox.getCenterY();
     }
     
-    private void updateNonLocatorHitboxes() {
-        nonLocatorHitboxes.clear();
-        nonLocatorHitboxes.add(overlapHitbox);
-        nonLocatorHitboxes.add(solidHitbox);
-        updateNonLocatorHitboxes(nonLocatorHitboxes);
-        nonLocatorHitboxes.remove(null);
-        nonLocatorHitboxes.remove(locatorHitbox);
-    }
-    
-    void updateNonLocatorHitboxes(Set<Hitbox> nonLocatorHitboxes) {}
-    
     public final Hitbox getOverlapHitbox() {
         return overlapHitbox;
     }
@@ -222,10 +205,8 @@ public abstract class LevelObject {
     }
     
     public final void setDrawLayer(int drawLayer) {
-        if (levelState != null) {
-            levelState.changeLocatorHitboxDrawLayer(locatorHitbox, this.drawLayer, drawLayer);
-        }
         this.drawLayer = drawLayer;
+        locatorHitbox.changeDrawLayer(drawLayer);
     }
     
     public final Sprite getSprite() {

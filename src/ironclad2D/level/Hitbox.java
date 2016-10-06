@@ -6,13 +6,17 @@ import org.newdawn.slick.util.FastTrig;
 
 public abstract class Hitbox {
     
+    static final int HITBOXES_PER_OBJECT = 4;
+    
     private Hitbox parent = null;
     private final Set<Hitbox> children = new HashSet<>();
     private LevelObject object = null;
-    private final boolean[] roles = new boolean[4];
+    final boolean[] roles = new boolean[HITBOXES_PER_OBJECT];
     private int numRoles = 0;
     LevelState levelState = null;
     int[] chunkRange = null;
+    int drawLayer = 0;
+    int numChunkRoles = 0;
     private boolean active = true;
     private LevelVector relPosition, absPosition;
     private boolean relXFlip = false;
@@ -36,7 +40,8 @@ public abstract class Hitbox {
     }
     
     final boolean addChild(Hitbox hitbox) {
-        if (hitbox.parent == null && hitbox.object == null) {
+        if (hitbox != null && hitbox != this
+                && hitbox.parent == null && hitbox.object == null) {
             children.add(hitbox);
             hitbox.parent = this;
             hitbox.recursivelyUpdateData();
@@ -46,7 +51,7 @@ public abstract class Hitbox {
     }
     
     final boolean removeChild(Hitbox hitbox) {
-        if (hitbox.parent == this) {
+        if (hitbox != null && hitbox.parent == this) {
             children.remove(hitbox);
             hitbox.parent = null;
             hitbox.recursivelyUpdateData();
@@ -90,11 +95,6 @@ public abstract class Hitbox {
     final void setObject(LevelObject object) {
         if (object != this.object) {
             recursivelySetObject(object);
-            if (levelState == null) {
-                chunkRange = null;
-            } else {
-                levelState.updateChunkRange(this);
-            }
         }
     }
     
@@ -108,23 +108,35 @@ public abstract class Hitbox {
         }
     }
     
-    final void addAsLocatorHitbox() {
+    final void addAsLocatorHitbox(int drawLayer) {
+        this.drawLayer = drawLayer;
         if (levelState != null) {
-            levelState.addLocatorHitbox(this, object.getDrawLayer());
+            levelState.addLocatorHitbox(this);
         }
         roles[0] = true;
         numRoles++;
     }
     
     final void removeAsLocatorHitbox() {
+        if (levelState != null) {
+            levelState.removeLocatorHitbox(this);
+        }
+        drawLayer = 0;
         roles[0] = false;
         numRoles--;
-        if (levelState != null) {
-            levelState.removeLocatorHitbox(this, object.getDrawLayer());
-        }
         if (numRoles == 0) {
             setObject(null);
+            if (parent != null) {
+                parent.removeChild(this);
+            }
         }
+    }
+    
+    final void changeDrawLayer(int drawLayer) {
+        if (levelState != null) {
+            levelState.changeLocatorHitboxDrawLayer(this, drawLayer);
+        }
+        this.drawLayer = drawLayer;
     }
     
     public final LevelState getLevelState() {

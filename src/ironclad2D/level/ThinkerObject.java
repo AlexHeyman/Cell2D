@@ -2,7 +2,6 @@ package ironclad2D.level;
 
 import ironclad2D.Animation;
 import ironclad2D.IroncladGame;
-import java.util.Set;
 
 public abstract class ThinkerObject extends AnimatedObject {
     
@@ -34,9 +33,15 @@ public abstract class ThinkerObject extends AnimatedObject {
     }
     
     @Override
-    void updateNonLocatorHitboxes(Set<Hitbox> nonLocatorHitboxes) {
-        super.updateNonLocatorHitboxes(nonLocatorHitboxes);
-        nonLocatorHitboxes.add(collisionHitbox);
+    void removeNonLocatorHitboxes(Hitbox locatorHitbox) {
+        super.removeNonLocatorHitboxes(locatorHitbox);
+        locatorHitbox.removeChild(collisionHitbox);
+    }
+    
+    @Override
+    void addNonLocatorHitboxes(Hitbox locatorHitbox) {
+        super.addNonLocatorHitboxes(locatorHitbox);
+        locatorHitbox.addChild(collisionHitbox);
     }
     
     public final LevelThinker getThinker() {

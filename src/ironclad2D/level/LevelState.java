@@ -68,7 +68,7 @@ public class LevelState extends IroncladGameState {
         return chunk;
     }
     
-    private int[] getChunkRange(double x1, double y1, double x2, double y2) {
+    final int[] getChunkRange(double x1, double y1, double x2, double y2) {
         int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
         return chunkRange;
     }
@@ -103,30 +103,76 @@ public class LevelState extends IroncladGameState {
         
     }
     
-    final void updateChunkRange(Hitbox hitbox) {
+    private void updateChunkRange(Hitbox hitbox) {
         hitbox.chunkRange = getChunkRange(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
     
-    final void addLocatorHitbox(Hitbox hitbox, int drawLayer) {
-        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
-        while (iterator.hasNext()) {
-            iterator.next().getLocatorHitboxes(drawLayer).add(hitbox);
+    final void updateChunks(Hitbox hitbox) {
+        int[] oldRange = hitbox.chunkRange;
+        updateChunkRange(hitbox);
+        if (oldRange[0] != hitbox.chunkRange[0]
+                || oldRange[1] != hitbox.chunkRange[1]
+                || oldRange[2] != hitbox.chunkRange[2]
+                || oldRange[3] != hitbox.chunkRange[3]) {
+            if (oldRange != null) {
+                Iterator<Chunk> iterator = new ChunkRangeIterator(oldRange);
+                while (iterator.hasNext()) {
+                    Chunk chunk = iterator.next();
+                    if (hitbox.roles[0]) {
+                        chunk.getLocatorHitboxes(hitbox.drawLayer).remove(hitbox);
+                    }
+                    if (hitbox.roles[1]) {
+                        chunk.overlapHitboxes.remove(hitbox);
+                    }
+                    if (hitbox.roles[2]) {
+                        chunk.solidHitboxes.remove(hitbox);
+                    }
+                }
+            }
+            Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+            while (iterator.hasNext()) {
+                Chunk chunk = iterator.next();
+                if (hitbox.roles[0]) {
+                    chunk.getLocatorHitboxes(hitbox.drawLayer).add(hitbox);
+                }
+                if (hitbox.roles[1]) {
+                    chunk.overlapHitboxes.add(hitbox);
+                }
+                if (hitbox.roles[2]) {
+                    chunk.solidHitboxes.add(hitbox);
+                }
+            }
         }
     }
     
-    final void removeLocatorHitbox(Hitbox hitbox, int drawLayer) {
+    final void addLocatorHitbox(Hitbox hitbox) {
+        if (hitbox.numChunkRoles == 0) {
+            updateChunkRange(hitbox);
+        }
+        hitbox.numChunkRoles++;
         Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
         while (iterator.hasNext()) {
-            iterator.next().getLocatorHitboxes(drawLayer).remove(hitbox);
+            iterator.next().getLocatorHitboxes(hitbox.drawLayer).add(hitbox);
         }
     }
     
-    final void changeLocatorHitboxDrawLayer(Hitbox hitbox, int oldDrawLayer, int newDrawLayer) {
+    final void removeLocatorHitbox(Hitbox hitbox) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().getLocatorHitboxes(hitbox.drawLayer).remove(hitbox);
+        }
+        hitbox.numChunkRoles--;
+        if (hitbox.numChunkRoles == 0) {
+            hitbox.chunkRange = null;
+        }
+    }
+    
+    final void changeLocatorHitboxDrawLayer(Hitbox hitbox, int drawLayer) {
         Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
         while (iterator.hasNext()) {
             Chunk chunk = iterator.next();
-            chunk.getLocatorHitboxes(oldDrawLayer).remove(hitbox);
-            chunk.getLocatorHitboxes(newDrawLayer).add(hitbox);
+            chunk.getLocatorHitboxes(hitbox.drawLayer).remove(hitbox);
+            chunk.getLocatorHitboxes(drawLayer).add(hitbox);
         }
     }
     
