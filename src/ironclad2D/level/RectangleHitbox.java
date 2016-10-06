@@ -36,6 +36,7 @@ public class RectangleHitbox extends Hitbox implements OverlapHitbox, SolidHitbo
         } else {
             absLeft = relLeft;
         }
+        updateChunks();
     }
     
     public final double getAbsLeft() {
@@ -56,6 +57,7 @@ public class RectangleHitbox extends Hitbox implements OverlapHitbox, SolidHitbo
         } else {
             absRight = relRight;
         }
+        updateChunks();
     }
     
     public final double getAbsRight() {
@@ -76,6 +78,7 @@ public class RectangleHitbox extends Hitbox implements OverlapHitbox, SolidHitbo
         } else {
             absTop = relTop;
         }
+        updateChunks();
     }
     
     public final double getAbsTop() {
@@ -96,6 +99,7 @@ public class RectangleHitbox extends Hitbox implements OverlapHitbox, SolidHitbo
         } else {
             absBottom = relBottom;
         }
+        updateChunks();
     }
     
     public final double getAbsBottom() {
@@ -149,6 +153,7 @@ public class RectangleHitbox extends Hitbox implements OverlapHitbox, SolidHitbo
             absLeft = relLeft;
             absRight = relRight;
         }
+        updateChunks();
     }
     
     @Override
@@ -160,6 +165,7 @@ public class RectangleHitbox extends Hitbox implements OverlapHitbox, SolidHitbo
             absTop = relTop;
             absBottom = relBottom;
         }
+        updateChunks();
     }
     
 }

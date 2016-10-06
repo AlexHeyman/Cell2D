@@ -17,6 +17,7 @@ public class LineHitbox extends Hitbox implements OverlapHitbox {
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
         bottom = Math.max(absDifference.getY(), 0);
+        updateChunks();
     }
     
     public final double getRelDX() {

@@ -69,7 +69,7 @@ public class LevelState extends IroncladGameState {
     }
     
     final int[] getChunkRange(double x1, double y1, double x2, double y2) {
-        int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
+        int[] chunkRange = {(int)Math.ceil(x1/chunkWidth) - 1, (int)Math.ceil(y1/chunkHeight) - 1, (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
         return chunkRange;
     }
     
@@ -110,12 +110,15 @@ public class LevelState extends IroncladGameState {
     final void updateChunks(Hitbox hitbox) {
         int[] oldRange = hitbox.chunkRange;
         updateChunkRange(hitbox);
-        if (oldRange[0] != hitbox.chunkRange[0]
-                || oldRange[1] != hitbox.chunkRange[1]
-                || oldRange[2] != hitbox.chunkRange[2]
-                || oldRange[3] != hitbox.chunkRange[3]) {
-            if (oldRange != null) {
-                Iterator<Chunk> iterator = new ChunkRangeIterator(oldRange);
+        int[] newRange = hitbox.chunkRange;
+        if (oldRange == null || oldRange[0] != newRange[0] || oldRange[1] != newRange[1]
+                || oldRange[2] != newRange[2] || oldRange[3] != newRange[3]) {
+            int[] addRange;
+            if (oldRange == null) {
+                addRange = newRange;
+            } else {
+                int[] removeRange = oldRange;
+                Iterator<Chunk> iterator = new ChunkRangeIterator(removeRange);
                 while (iterator.hasNext()) {
                     Chunk chunk = iterator.next();
                     if (hitbox.roles[0]) {
@@ -128,8 +131,9 @@ public class LevelState extends IroncladGameState {
                         chunk.solidHitboxes.remove(hitbox);
                     }
                 }
+                addRange = newRange;
             }
-            Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+            Iterator<Chunk> iterator = new ChunkRangeIterator(addRange);
             while (iterator.hasNext()) {
                 Chunk chunk = iterator.next();
                 if (hitbox.roles[0]) {

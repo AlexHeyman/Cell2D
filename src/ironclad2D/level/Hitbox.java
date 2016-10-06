@@ -108,6 +108,12 @@ public abstract class Hitbox {
         }
     }
     
+    final void updateChunks() {
+        if (levelState != null && chunkRange != null) {
+            levelState.updateChunks(this);
+        }
+    }
+    
     final void addAsLocatorHitbox(int drawLayer) {
         this.drawLayer = drawLayer;
         if (levelState != null) {
@@ -205,6 +211,7 @@ public abstract class Hitbox {
         } else {
             absPosition = parent.absPosition.getCopy().add(relPosition.getCopy().flip(parent.absXFlip, parent.absYFlip).changeAngle(parent.absAngle));
         }
+        updateChunks();
     }
     
     private void recursivelyUpdateAbsPosition() {

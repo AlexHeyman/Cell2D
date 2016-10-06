@@ -19,6 +19,7 @@ public class CircleHitbox extends Hitbox implements OverlapHitbox {
         }
         this.relRadius = relRadius;
         absRadius = relRadius;
+        updateChunks();
     }
     
     public final double getAbsRadius() {
