@@ -153,7 +153,7 @@ public abstract class IroncladGameState {
         if (delayState != null && (delayState == this || delayState == thinker.state)) {
             thinkersToChange.add(new ThinkerChangeData(thinker, this));
         } else {
-            addActions(getGame(), thinker);
+            addActions(game, thinker);
         }
     }
     
@@ -164,12 +164,12 @@ public abstract class IroncladGameState {
     }
     
     final boolean removeThinker(Thinker thinker) {
-        if (thinker.getNewState() == this) {
+        if (thinker.newState == this) {
             thinker.newState = null;
             if (delayState != null && (delayState == this || delayState == thinker.state)) {
                 thinkersToChange.add(new ThinkerChangeData(thinker, null));
             } else {
-                removeActions(getGame(), thinker);
+                removeActions(game, thinker);
             }
             return true;
         }
