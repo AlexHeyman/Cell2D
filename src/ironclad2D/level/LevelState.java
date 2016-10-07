@@ -180,6 +180,50 @@ public class LevelState extends IroncladGameState {
         }
     }
     
+    final void addOverlapHitbox(Hitbox hitbox) {
+        if (hitbox.numChunkRoles == 0) {
+            updateChunkRange(hitbox);
+        }
+        hitbox.numChunkRoles++;
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().overlapHitboxes.add(hitbox);
+        }
+    }
+    
+    final void removeOverlapHitbox(Hitbox hitbox) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().overlapHitboxes.remove(hitbox);
+        }
+        hitbox.numChunkRoles--;
+        if (hitbox.numChunkRoles == 0) {
+            hitbox.chunkRange = null;
+        }
+    }
+    
+    final void addSolidHitbox(Hitbox hitbox) {
+        if (hitbox.numChunkRoles == 0) {
+            updateChunkRange(hitbox);
+        }
+        hitbox.numChunkRoles++;
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().solidHitboxes.add(hitbox);
+        }
+    }
+    
+    final void removeSolidHitbox(Hitbox hitbox) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().solidHitboxes.remove(hitbox);
+        }
+        hitbox.numChunkRoles--;
+        if (hitbox.numChunkRoles == 0) {
+            hitbox.chunkRange = null;
+        }
+    }
+    
     public final double getChunkWidth() {
         return chunkWidth;
     }

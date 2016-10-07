@@ -1,6 +1,6 @@
 package ironclad2D.level;
 
-public class CompositeSolidHitbox extends CompositeHitbox implements SolidHitbox {
+public class CompositeSolidHitbox extends CompositeHitbox implements OverlapHitbox, SolidHitbox {
     
     public CompositeSolidHitbox(double relX, double relY) {
         super(relX, relY);

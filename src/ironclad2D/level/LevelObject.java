@@ -21,8 +21,8 @@ public abstract class LevelObject {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a level object with an invalid locator hitbox");
         }
-        this.overlapHitbox = overlapHitbox;
-        this.solidHitbox = solidHitbox;
+        setOverlapHitbox(overlapHitbox);
+        setSolidHitbox(solidHitbox);
         this.drawLayer = drawLayer;
         this.sprite = sprite;
     }
@@ -49,6 +49,8 @@ public abstract class LevelObject {
     void addActions() {
         locatorHitbox.setLevelState(levelState);
         levelState.addLocatorHitbox(locatorHitbox);
+        levelState.addOverlapHitbox(overlapHitbox);
+        levelState.addSolidHitbox(solidHitbox);
     }
     
     public final boolean remove() {
@@ -61,6 +63,8 @@ public abstract class LevelObject {
     void removeActions() {
         locatorHitbox.setLevelState(null);
         levelState.removeLocatorHitbox(locatorHitbox);
+        levelState.removeOverlapHitbox(overlapHitbox);
+        levelState.removeSolidHitbox(solidHitbox);
     }
     
     public final double getTimeFactor() {
@@ -196,8 +200,66 @@ public abstract class LevelObject {
         return overlapHitbox;
     }
     
+    public final boolean setOverlapHitbox(Hitbox overlapHitbox) {
+        if (overlapHitbox != this.overlapHitbox) {
+            boolean acceptable;
+            if (overlapHitbox == null) {
+                acceptable = true;
+            } else {
+                LevelObject object = overlapHitbox.getObject();
+                Hitbox parent = overlapHitbox.getParent();
+                acceptable = (overlapHitbox instanceof OverlapHitbox)
+                        && ((object == null && parent == null)
+                        || (overlapHitbox == locatorHitbox)
+                        || (object == this && parent == locatorHitbox
+                        && !overlapHitbox.isComponentOf(locatorHitbox)));
+            }
+            if (acceptable) {
+                if (this.overlapHitbox != null) {
+                    this.overlapHitbox.removeAsOverlapHitbox();
+                }
+                this.overlapHitbox = overlapHitbox;
+                if (overlapHitbox != null) {
+                    locatorHitbox.addChild(overlapHitbox);
+                    overlapHitbox.addAsOverlapHitbox();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public final Hitbox getSolidHitbox() {
         return solidHitbox;
+    }
+    
+    public final boolean setSolidHitbox(Hitbox solidHitbox) {
+        if (solidHitbox != this.solidHitbox) {
+            boolean acceptable;
+            if (solidHitbox == null) {
+                acceptable = true;
+            } else {
+                LevelObject object = solidHitbox.getObject();
+                Hitbox parent = solidHitbox.getParent();
+                acceptable = (solidHitbox instanceof SolidHitbox)
+                        && ((object == null && parent == null)
+                        || (solidHitbox == locatorHitbox)
+                        || (object == this && parent == locatorHitbox
+                        && !solidHitbox.isComponentOf(locatorHitbox)));
+            }
+            if (acceptable) {
+                if (this.solidHitbox != null) {
+                    this.solidHitbox.removeAsSolidHitbox();
+                }
+                this.solidHitbox = solidHitbox;
+                if (solidHitbox != null) {
+                    locatorHitbox.addChild(solidHitbox);
+                    solidHitbox.addAsSolidHitbox();
+                }
+                return true;
+            }
+        }
+        return false;
     }
     
     public final int getDrawLayer() {

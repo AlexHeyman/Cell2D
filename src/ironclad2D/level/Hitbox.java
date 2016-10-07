@@ -145,6 +145,50 @@ public abstract class Hitbox {
         this.drawLayer = drawLayer;
     }
     
+    final void addAsOverlapHitbox() {
+        if (levelState != null) {
+            levelState.addOverlapHitbox(this);
+        }
+        roles[1] = true;
+        numRoles++;
+    }
+    
+    final void removeAsOverlapHitbox() {
+        if (levelState != null) {
+            levelState.removeOverlapHitbox(this);
+        }
+        roles[1] = false;
+        numRoles--;
+        if (numRoles == 0) {
+            setObject(null);
+            if (parent != null) {
+                parent.removeChild(this);
+            }
+        }
+    }
+    
+    final void addAsSolidHitbox() {
+        if (levelState != null) {
+            levelState.addSolidHitbox(this);
+        }
+        roles[2] = true;
+        numRoles++;
+    }
+    
+    final void removeAsSolidHitbox() {
+        if (levelState != null) {
+            levelState.removeSolidHitbox(this);
+        }
+        roles[2] = false;
+        numRoles--;
+        if (numRoles == 0) {
+            setObject(null);
+            if (parent != null) {
+                parent.removeChild(this);
+            }
+        }
+    }
+    
     public final LevelState getLevelState() {
         return levelState;
     }
