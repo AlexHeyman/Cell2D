@@ -3,7 +3,7 @@ package ironclad2D.level;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class CompositeHitbox extends Hitbox {
+public class CompositeHitbox extends Hitbox {
     
     final Map<Integer,Hitbox> components = new HashMap<>();
     private double left = 0;
@@ -62,7 +62,7 @@ public abstract class CompositeHitbox extends Hitbox {
         if (hitbox == null) {
             return removeComponent(id);
         }
-        if (canBeComponent(hitbox) && addChild(hitbox)) {
+        if (addChild(hitbox)) {
             Hitbox oldHitbox = components.put(id, hitbox);
             if (oldHitbox == null) {
                 double x = getAbsX();
@@ -79,8 +79,6 @@ public abstract class CompositeHitbox extends Hitbox {
         }
         return false;
     }
-    
-    abstract boolean canBeComponent(Hitbox hitbox);
     
     public final boolean removeComponent(int id) {
         Hitbox hitbox = components.remove(id);

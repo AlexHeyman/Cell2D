@@ -208,11 +208,10 @@ public abstract class LevelObject {
             } else {
                 LevelObject object = overlapHitbox.getObject();
                 Hitbox parent = overlapHitbox.getParent();
-                acceptable = (overlapHitbox instanceof OverlapHitbox)
-                        && ((object == null && parent == null)
+                acceptable = (object == null && parent == null)
                         || (overlapHitbox == locatorHitbox)
                         || (object == this && parent == locatorHitbox
-                        && !overlapHitbox.isComponentOf(locatorHitbox)));
+                        && !overlapHitbox.isComponentOf(locatorHitbox));
             }
             if (acceptable) {
                 if (this.overlapHitbox != null) {
@@ -241,11 +240,10 @@ public abstract class LevelObject {
             } else {
                 LevelObject object = solidHitbox.getObject();
                 Hitbox parent = solidHitbox.getParent();
-                acceptable = (solidHitbox instanceof SolidHitbox)
-                        && ((object == null && parent == null)
+                acceptable = (object == null && parent == null)
                         || (solidHitbox == locatorHitbox)
                         || (object == this && parent == locatorHitbox
-                        && !solidHitbox.isComponentOf(locatorHitbox)));
+                        && !solidHitbox.isComponentOf(locatorHitbox));
             }
             if (acceptable) {
                 if (this.solidHitbox != null) {

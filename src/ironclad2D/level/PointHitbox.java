@@ -1,6 +1,6 @@
 package ironclad2D.level;
 
-public class PointHitbox extends Hitbox implements OverlapHitbox, SolidHitbox, CollisionHitbox {
+public class PointHitbox extends Hitbox {
     
     public PointHitbox(double relX, double relY) {
         super(relX, relY);
