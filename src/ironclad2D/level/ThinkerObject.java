@@ -1,6 +1,7 @@
 package ironclad2D.level;
 
 import ironclad2D.IroncladGame;
+import ironclad2D.TimedEvent;
 
 public abstract class ThinkerObject extends AnimatedObject {
     
@@ -52,15 +53,13 @@ public abstract class ThinkerObject extends AnimatedObject {
     
     public void timeUnitActions(IroncladGame game, LevelState levelState) {}
     
-    public final int getTimerValue(String name) {
-        return thinker.getTimerValue(name);
+    public final int getTimerValue(TimedEvent<LevelState> timedEvent) {
+        return thinker.getTimerValue(timedEvent);
     }
     
-    public final void setTimerValue(String name, int value) {
-        thinker.setTimerValue(name, value);
+    public final void setTimerValue(TimedEvent<LevelState> timedEvent, int value) {
+        thinker.setTimerValue(timedEvent, value);
     }
-    
-    public void timedEventActions(IroncladGame game, LevelState levelState, String eventName) {}
     
     public void stepActions(IroncladGame game, LevelState levelState) {}
     
@@ -79,11 +78,6 @@ public abstract class ThinkerObject extends AnimatedObject {
         @Override
         public final void timeUnitActions(IroncladGame game, LevelState levelState) {
             ThinkerObject.this.timeUnitActions(game, levelState);
-        }
-        
-        @Override
-        public final void timedEventActions(IroncladGame game, LevelState levelState, String eventName) {
-            ThinkerObject.this.timedEventActions(game, levelState, eventName);
         }
         
         @Override
