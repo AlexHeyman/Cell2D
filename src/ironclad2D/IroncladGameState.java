@@ -229,15 +229,13 @@ public abstract class IroncladGameState {
     
     public void timeUnitActions(IroncladGame game) {}
     
-    public final int getTimerValue(String name) {
-        return thinker.getTimerValue(name);
+    public final int getTimerValue(TimedEvent<IroncladGameState> timedEvent) {
+        return thinker.getTimerValue(timedEvent);
     }
     
-    public final void setTimerValue(String name, int value) {
-        thinker.setTimerValue(name, value);
+    public final void setTimerValue(TimedEvent<IroncladGameState> timedEvent, int value) {
+        thinker.setTimerValue(timedEvent, value);
     }
-    
-    public void timedEventActions(IroncladGame game, String eventName) {}
     
     public void stepActions(IroncladGame game) {}
     
@@ -248,11 +246,6 @@ public abstract class IroncladGameState {
         @Override
         public final void timeUnitActions(IroncladGame game, IroncladGameState state) {
             IroncladGameState.this.timeUnitActions(game);
-        }
-        
-        @Override
-        public final void timedEventActions(IroncladGame game, IroncladGameState state, String eventName) {
-            IroncladGameState.this.timedEventActions(game, eventName);
         }
         
         @Override

@@ -12,7 +12,7 @@ public class Thinker<T extends IroncladGameState> {
     T newState = null;
     private double timeFactor = 1;
     private double timeToRun = 0;
-    private final Map<String,Integer> timers = new HashMap<>();
+    private final Map<TimedEvent<T>,Integer> timers = new HashMap<>();
     
     public Thinker() {}
     
@@ -51,29 +51,24 @@ public class Thinker<T extends IroncladGameState> {
         this.timeFactor = timeFactor;
     }
     
-    public final int getTimerValue(String eventName) {
-        Integer value = timers.get(eventName);
+    public final int getTimerValue(TimedEvent<T> timedEvent) {
+        Integer value = timers.get(timedEvent);
         if (value == null) {
             return -1;
         }
         return value;
     }
     
-    public final void setTimerValue(String eventName, int value) {
-        if (eventName == null) {
-            throw new RuntimeException("Attempted to set the value of a timer with a null name");
-        }
-        if (eventName.equals("")) {
-            throw new RuntimeException("Attempted to set the value of a timer with the empty string as a name");
+    public final void setTimerValue(TimedEvent<T> timedEvent, int value) {
+        if (timedEvent == null) {
+            throw new RuntimeException("Attempted to set the value of a timer with no timed event");
         }
         if (value < 0) {
-            timers.remove(eventName);
+            timers.remove(timedEvent);
         } else {
-            timers.put(eventName, value);
+            timers.put(timedEvent, value);
         }
     }
-    
-    public void timedEventActions(IroncladGame game, T state, String eventName) {}
     
     public void timeUnitActions(IroncladGame game, T state) {}
     
@@ -89,10 +84,10 @@ public class Thinker<T extends IroncladGameState> {
         }
         timeToRun += time*timeFactor;
         while (timeToRun >= 1) {
-            List<String> timedEventsToDo = new LinkedList<>();
-            Iterator iterator = timers.entrySet().iterator();
+            List<TimedEvent<T>> timedEventsToDo = new LinkedList<>();
+            Iterator<Map.Entry<TimedEvent<T>,Integer>> iterator = timers.entrySet().iterator();
             while (iterator.hasNext()) {
-                Map.Entry<String,Integer> entry = (Map.Entry<String,Integer>)iterator.next();
+                Map.Entry<TimedEvent<T>,Integer> entry = iterator.next();
                 int value = entry.getValue();
                 if (value == 0) {
                     iterator.remove();
@@ -103,8 +98,8 @@ public class Thinker<T extends IroncladGameState> {
                     entry.setValue(value - 1);
                 }
             }
-            for (String eventName : timedEventsToDo) {
-                timedEventActions(game, state, eventName);
+            for (TimedEvent<T> timedEvent : timedEventsToDo) {
+                timedEvent.eventActions(game, state);
             }
             timeUnitActions(game, state);
             timeToRun -= 1;
