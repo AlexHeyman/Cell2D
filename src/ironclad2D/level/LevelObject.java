@@ -285,13 +285,8 @@ public abstract class LevelObject {
         return alpha;
     }
     
-    public final void setAlpha(float alpha) {
-        if (alpha < 0) {
-            alpha = 0;
-        } else if (alpha > 1) {
-            alpha = 1;
-        }
-        this.alpha = alpha;
+    public final void setAlpha(double alpha) {
+        this.alpha = Math.max(0, Math.min(1, alpha));
     }
     
     public final String getFilter() {
