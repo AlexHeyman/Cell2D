@@ -3,12 +3,10 @@ package ironclad2D.level;
 import ironclad2D.IroncladGame;
 import ironclad2D.Thinker;
 
-public class LevelThinker extends Thinker<LevelState> {
+public abstract class LevelThinker extends Thinker<LevelState> {
     
     LevelState levelState = null;
     LevelState newLevelState = null;
-    
-    public LevelThinker() {}
     
     public final LevelState getLevelState() {
         return levelState;

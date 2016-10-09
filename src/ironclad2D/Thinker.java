@@ -6,15 +6,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Thinker<T extends IroncladGameState> {
+public abstract class Thinker<T extends IroncladGameState> {
     
     T state = null;
     T newState = null;
     private double timeFactor = 1;
     private double timeToRun = 0;
     private final Map<TimedEvent<T>,Integer> timers = new HashMap<>();
-    
-    public Thinker() {}
     
     public final T getState() {
         return state;
