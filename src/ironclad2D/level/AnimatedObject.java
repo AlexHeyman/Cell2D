@@ -8,13 +8,11 @@ import org.newdawn.slick.Graphics;
 
 public abstract class AnimatedObject extends LevelObject {
     
-    private AnimationInstance animInstance;
+    private AnimationInstance animInstance = AnimationInstance.BLANK;
     private final Map<Integer,AnimationInstance> extraAnimInstances = new HashMap<>();
     
-    public AnimatedObject(Hitbox locatorHitbox, Hitbox overlapHitbox,
-            Hitbox solidHitbox, int drawLayer, Animation animation) {
-        super(locatorHitbox, overlapHitbox, solidHitbox, drawLayer, null);
-        setAnimation(animation);
+    public AnimatedObject(Hitbox locatorHitbox, int drawLayer) {
+        super(locatorHitbox, drawLayer);
     }
     
     @Override

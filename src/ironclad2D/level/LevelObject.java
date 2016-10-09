@@ -12,19 +12,15 @@ public abstract class LevelObject {
     private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
     private int drawLayer;
-    private Sprite sprite;
+    private Sprite sprite = null;
     private double alpha = 1;
     private String filter = null;
     
-    public LevelObject(Hitbox locatorHitbox, Hitbox overlapHitbox,
-            Hitbox solidHitbox, int drawLayer, Sprite sprite) {
+    public LevelObject(Hitbox locatorHitbox, int drawLayer) {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a level object with an invalid locator hitbox");
         }
-        setOverlapHitbox(overlapHitbox);
-        setSolidHitbox(solidHitbox);
         this.drawLayer = drawLayer;
-        this.sprite = sprite;
     }
     
     public final void copyProperties(LevelObject object) {
@@ -49,8 +45,12 @@ public abstract class LevelObject {
     void addActions() {
         locatorHitbox.setLevelState(levelState);
         levelState.addLocatorHitbox(locatorHitbox);
-        levelState.addOverlapHitbox(overlapHitbox);
-        levelState.addSolidHitbox(solidHitbox);
+        if (overlapHitbox != null) {
+            levelState.addOverlapHitbox(overlapHitbox);
+        }
+        if (solidHitbox != null) {
+            levelState.addSolidHitbox(solidHitbox);
+        }
     }
     
     public final boolean remove() {
@@ -63,8 +63,12 @@ public abstract class LevelObject {
     void removeActions() {
         locatorHitbox.setLevelState(null);
         levelState.removeLocatorHitbox(locatorHitbox);
-        levelState.removeOverlapHitbox(overlapHitbox);
-        levelState.removeSolidHitbox(solidHitbox);
+        if (overlapHitbox != null) {
+            levelState.removeOverlapHitbox(overlapHitbox);
+        }
+        if (solidHitbox != null) {
+            levelState.removeSolidHitbox(solidHitbox);
+        }
     }
     
     public final double getTimeFactor() {

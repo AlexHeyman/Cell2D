@@ -2,12 +2,15 @@ package ironclad2D.level;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import org.newdawn.slick.util.FastTrig;
 
 public abstract class Hitbox {
     
     static final int HITBOXES_PER_OBJECT = 4;
+    private static final AtomicLong idCounter = new AtomicLong(0);
     
+    final long id;
     private Hitbox parent = null;
     private final Set<Hitbox> children = new HashSet<>();
     private LevelObject object = null;
@@ -17,7 +20,6 @@ public abstract class Hitbox {
     int[] chunkRange = null;
     int drawLayer = 0;
     int numChunkRoles = 0;
-    private boolean active = true;
     private LevelVector relPosition, absPosition;
     private boolean relXFlip = false;
     private boolean absXFlip = false;
@@ -31,8 +33,13 @@ public abstract class Hitbox {
     private double absAngleY = 0;
     
     public Hitbox(double relX, double relY) {
+        id = getNextID();
         relPosition = new LevelVector(relX, relY);
         absPosition = relPosition.getCopy();
+    }
+    
+    private static long getNextID() {
+        return idCounter.getAndIncrement();
     }
     
     final Hitbox getParent() {
@@ -139,10 +146,11 @@ public abstract class Hitbox {
     }
     
     final void changeDrawLayer(int drawLayer) {
-        if (levelState != null) {
+        if (levelState == null) {
+            this.drawLayer = drawLayer;
+        } else {
             levelState.changeLocatorHitboxDrawLayer(this, drawLayer);
         }
-        this.drawLayer = drawLayer;
     }
     
     final void addAsOverlapHitbox() {
@@ -200,14 +208,6 @@ public abstract class Hitbox {
                 child.setLevelState(levelState);
             }
         }
-    }
-    
-    public final boolean getActive() {
-        return active;
-    }
-    
-    public final void setActive(boolean active) {
-        this.active = active;
     }
     
     public final double getRelX() {

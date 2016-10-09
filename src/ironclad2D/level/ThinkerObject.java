@@ -1,6 +1,5 @@
 package ironclad2D.level;
 
-import ironclad2D.Animation;
 import ironclad2D.IroncladGame;
 
 public abstract class ThinkerObject extends AnimatedObject {
@@ -8,9 +7,8 @@ public abstract class ThinkerObject extends AnimatedObject {
     private final LevelThinker thinker = new ObjectThinker();
     private Hitbox collisionHitbox;
     
-    public ThinkerObject(Hitbox locatorHitbox, Hitbox overlapHitbox,
-            Hitbox solidHitbox, Hitbox collisionHitbox, int drawLayer, Animation animation) {
-        super(locatorHitbox, overlapHitbox, solidHitbox, drawLayer, animation);
+    public ThinkerObject(Hitbox locatorHitbox, Hitbox collisionHitbox, int drawLayer) {
+        super(locatorHitbox, drawLayer);
         this.collisionHitbox = collisionHitbox;
     }
     
