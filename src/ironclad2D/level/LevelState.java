@@ -3,22 +3,48 @@ package ironclad2D.level;
 import ironclad2D.IroncladGame;
 import ironclad2D.IroncladGameState;
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import javafx.util.Pair;
 import org.newdawn.slick.Graphics;
 
 public class LevelState extends IroncladGameState {
     
     private static LevelState delayState = null;
     private static final List<ObjectChangeData> objectsToChange = new LinkedList<>();
+    
+    private static abstract class LevelComparator<T> implements Comparator<T>, Serializable {}
+    
+    private static final Comparator<Hitbox> drawLayerComparator = new LevelComparator<Hitbox>() {
+        
+        @Override
+        public int compare(Hitbox hitbox1, Hitbox hitbox2) {
+            int drawLayerDifference = hitbox1.drawLayer - hitbox2.drawLayer;
+            return (drawLayerDifference == 0 ? drawLayerDifference : Long.signum(hitbox1.id - hitbox2.id));
+        }
+        
+    };
+    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawLayerIteratorComparator = new LevelComparator<Pair<Hitbox,Iterator<Hitbox>>>() {
+
+        @Override
+        public int compare(Pair<Hitbox, Iterator<Hitbox>> pair1, Pair<Hitbox, Iterator<Hitbox>> pair2) {
+            return drawLayerComparator.compare(pair1.getKey(), pair2.getKey());
+        }
+        
+    };
     
     private final Set<LevelThinker> levelThinkers = new HashSet<>();
     private final Set<LevelThinker> newThinkers = new HashSet<>();
@@ -42,20 +68,11 @@ public class LevelState extends IroncladGameState {
     
     private class Chunk {
         
-        private final SortedMap<Integer,Set<Hitbox>> locatorHitboxes = new TreeMap<>();
+        private final SortedSet<Hitbox> locatorHitboxes = new TreeSet<>(drawLayerComparator);
         private final Set<Hitbox> overlapHitboxes = new HashSet<>();
         private final Set<Hitbox> solidHitboxes = new HashSet<>();
         
         private Chunk() {}
-        
-        private Set<Hitbox> getLocatorHitboxes(int drawLayer) {
-            Set<Hitbox> hitboxes = locatorHitboxes.get(drawLayer);
-            if (hitboxes == null) {
-                hitboxes = new HashSet<>();
-                locatorHitboxes.put(drawLayer, hitboxes);
-            }
-            return hitboxes;
-        }
         
     }
     
@@ -68,9 +85,18 @@ public class LevelState extends IroncladGameState {
         return chunk;
     }
     
-    final int[] getChunkRange(double x1, double y1, double x2, double y2) {
+    private int[] getChunkRangeInclusive(double x1, double y1, double x2, double y2) {
         int[] chunkRange = {(int)Math.ceil(x1/chunkWidth) - 1, (int)Math.ceil(y1/chunkHeight) - 1, (int)Math.floor(x2/chunkWidth), (int)Math.floor(y2/chunkHeight)};
         return chunkRange;
+    }
+    
+    private int[] getChunkRangeExclusive(double x1, double y1, double x2, double y2) {
+        int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.ceil(x2/chunkWidth) - 1, (int)Math.ceil(y2/chunkHeight) - 1};
+        return chunkRange;
+    }
+    
+    private void updateChunkRange(Hitbox hitbox) {
+        hitbox.chunkRange = getChunkRangeInclusive(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
     
     private class ChunkRangeIterator implements Iterator<Chunk> {
@@ -86,7 +112,7 @@ public class LevelState extends IroncladGameState {
         
         @Override
         public boolean hasNext() {
-            return yPos > chunkRange[3];
+            return yPos <= chunkRange[3];
         }
         
         @Override
@@ -103,8 +129,15 @@ public class LevelState extends IroncladGameState {
         
     }
     
-    private void updateChunkRange(Hitbox hitbox) {
-        hitbox.chunkRange = getChunkRange(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
+    private Chunk[] getChunks(int[] chunkRange) {
+        Chunk[] chunkArray = new Chunk[(chunkRange[2] - chunkRange[0] + 1)*(chunkRange[3] - chunkRange[1] + 1)];
+        int i = 0;
+        Iterator<Chunk> iterator = new ChunkRangeIterator(chunkRange);
+        while (iterator.hasNext()) {
+            chunkArray[i] = iterator.next();
+            i++;
+        }
+        return chunkArray;
     }
     
     final void updateChunks(Hitbox hitbox) {
@@ -122,7 +155,7 @@ public class LevelState extends IroncladGameState {
                 while (iterator.hasNext()) {
                     Chunk chunk = iterator.next();
                     if (hitbox.roles[0]) {
-                        chunk.getLocatorHitboxes(hitbox.drawLayer).remove(hitbox);
+                        chunk.locatorHitboxes.remove(hitbox);
                     }
                     if (hitbox.roles[1]) {
                         chunk.overlapHitboxes.remove(hitbox);
@@ -137,7 +170,7 @@ public class LevelState extends IroncladGameState {
             while (iterator.hasNext()) {
                 Chunk chunk = iterator.next();
                 if (hitbox.roles[0]) {
-                    chunk.getLocatorHitboxes(hitbox.drawLayer).add(hitbox);
+                    chunk.locatorHitboxes.add(hitbox);
                 }
                 if (hitbox.roles[1]) {
                     chunk.overlapHitboxes.add(hitbox);
@@ -156,14 +189,14 @@ public class LevelState extends IroncladGameState {
         hitbox.numChunkRoles++;
         Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
         while (iterator.hasNext()) {
-            iterator.next().getLocatorHitboxes(hitbox.drawLayer).add(hitbox);
+            iterator.next().locatorHitboxes.add(hitbox);
         }
     }
     
     final void removeLocatorHitbox(Hitbox hitbox) {
         Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
         while (iterator.hasNext()) {
-            iterator.next().getLocatorHitboxes(hitbox.drawLayer).remove(hitbox);
+            iterator.next().locatorHitboxes.remove(hitbox);
         }
         hitbox.numChunkRoles--;
         if (hitbox.numChunkRoles == 0) {
@@ -172,11 +205,13 @@ public class LevelState extends IroncladGameState {
     }
     
     final void changeLocatorHitboxDrawLayer(Hitbox hitbox, int drawLayer) {
-        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
-        while (iterator.hasNext()) {
-            Chunk chunk = iterator.next();
-            chunk.getLocatorHitboxes(hitbox.drawLayer).remove(hitbox);
-            chunk.getLocatorHitboxes(drawLayer).add(hitbox);
+        Chunk[] chunkArray = getChunks(hitbox.chunkRange);
+        for (Chunk chunk : chunkArray) {
+            chunk.locatorHitboxes.remove(hitbox);
+        }
+        hitbox.drawLayer = drawLayer;
+        for (Chunk chunk : chunkArray) {
+            chunk.locatorHitboxes.add(hitbox);
         }
     }
     
@@ -498,6 +533,18 @@ public class LevelState extends IroncladGameState {
         viewports.clear();
     }
     
+    private void draw(Graphics g, Hitbox locatorHitbox,
+            int left, int right, int top, int bottom, int xOffset, int yOffset) {
+        if (locatorHitbox.getLeftEdge() < right
+                && locatorHitbox.getRightEdge() > left
+                && locatorHitbox.getTopEdge() < bottom
+                && locatorHitbox.getBottomEdge() > top) {
+            locatorHitbox.getObject().draw(g,
+                    (int)Math.round(locatorHitbox.getAbsX()) + xOffset,
+                    (int)Math.round(locatorHitbox.getAbsY()) + yOffset);
+        }
+    }
+    
     @Override
     public final void renderActions(IroncladGame game, Graphics g, int x1, int y1, int x2, int y2) {
         g.clearWorldClip();
@@ -512,11 +559,94 @@ public class LevelState extends IroncladGameState {
                     double cx = viewport.camera.getCenterX();
                     double cy = viewport.camera.getCenterY();
                     for (LevelLayer layer : levelLayers.headMap(0).values()) {
-                        layer.renderActions(game, delayState, g, cx, cy, vx1, vy1, vx2, vy2);
+                        layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
-                    
+                    int rx = (int)Math.round(cx);
+                    int ry = (int)Math.round(cy);
+                    int left = rx + viewport.left;
+                    int right = rx + viewport.right;
+                    int top = ry + viewport.top;
+                    int bottom = ry + viewport.bottom;
+                    int xOffset = vx1 - left;
+                    int yOffset = vy1 - top;
+                    int[] chunkRange = getChunkRangeExclusive(left, top, right, bottom);
+                    if (chunkRange[0] == chunkRange[2] && chunkRange[1] == chunkRange[3]) {
+                        for (Hitbox locatorHitbox : getChunk(new Point(chunkRange[0], chunkRange[1])).locatorHitboxes) {
+                            draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
+                        }
+                    } else {
+                        List<Set<Hitbox>> hitboxesList = new ArrayList<>((chunkRange[2] - chunkRange[0] + 1)*(chunkRange[3] - chunkRange[1] + 1));
+                        Iterator<Chunk> iterator = new ChunkRangeIterator(chunkRange);
+                        while (iterator.hasNext()) {
+                            hitboxesList.add(iterator.next().locatorHitboxes);
+                        }
+                        if (hitboxesList.size() == 2) {
+                            Iterator<Hitbox> iterator1 = hitboxesList.get(0).iterator();
+                            Hitbox hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
+                            Iterator<Hitbox> iterator2 = hitboxesList.get(1).iterator();
+                            Hitbox hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
+                            Hitbox lastHitbox = null;
+                            while (hitbox1 != null || hitbox2 != null) {
+                                if (hitbox1 == null) {
+                                    do {
+                                       if (hitbox2 != lastHitbox) {
+                                            draw(g, hitbox2, left, right, top, bottom, xOffset, yOffset);
+                                            lastHitbox = hitbox2;
+                                        }
+                                        hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
+                                    } while (hitbox2 != null);
+                                    break;
+                                } else if (hitbox2 == null) {
+                                    do {
+                                       if (hitbox1 != lastHitbox) {
+                                            draw(g, hitbox1, left, right, top, bottom, xOffset, yOffset);
+                                            lastHitbox = hitbox1;
+                                        }
+                                        hitbox1 = (iterator1.hasNext() ? iterator1.next() : null); 
+                                    } while (hitbox1 != null);
+                                    break;
+                                } else {
+                                    int comparison = drawLayerComparator.compare(hitbox1, hitbox2);
+                                    if (comparison > 0) {
+                                        if (hitbox1 != lastHitbox) {
+                                            draw(g, hitbox1, left, right, top, bottom, xOffset, yOffset);
+                                            lastHitbox = hitbox1;
+                                        }
+                                        hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
+                                    } else {
+                                        if (hitbox2 != lastHitbox) {
+                                            draw(g, hitbox2, left, right, top, bottom, xOffset, yOffset);
+                                            lastHitbox = hitbox2;
+                                        }
+                                        hitbox2 = (iterator2.hasNext() ? iterator2.next() : null);
+                                    }
+                                }
+                            }
+                        } else {
+                            PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawLayerIteratorComparator);
+                            for (Set<Hitbox> locatorHitboxes : hitboxesList) {
+                                if (!locatorHitboxes.isEmpty()) {
+                                    Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
+                                    queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
+                                }
+                            }
+                            Hitbox lastHitbox = null;
+                            while (!queue.isEmpty()) {
+                                Pair<Hitbox,Iterator<Hitbox>> pair = queue.poll();
+                                Hitbox locatorHitbox = pair.getKey();
+                                if (locatorHitbox != lastHitbox) {
+                                    draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
+                                    lastHitbox = locatorHitbox;
+                                }
+                                Iterator<Hitbox> hitboxIterator = pair.getValue();
+                                if (hitboxIterator.hasNext()) {
+                                    queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
+                                }
+                            }
+                        }
+                    }
                     for (LevelLayer layer : levelLayers.tailMap(1).values()) {
-                        layer.renderActions(game, delayState, g, cx, cy, vx1, vy1, vx2, vy2);
+                        layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                 }
                 if (viewport.hud != null) {

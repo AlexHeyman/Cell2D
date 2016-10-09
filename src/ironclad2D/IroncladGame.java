@@ -974,13 +974,13 @@ public abstract class IroncladGame {
         return spriteSheets.get(name);
     }
     
-    public final Animation createAnimation(String name, Animatable frame) {
+    public final Animation createAnimation(Animatable frame) {
         Animatable[] frames = new Sprite[1];
         frames[0] = frame;
-        return createAnimation(name, frames);
+        return createAnimation(frames);
     }
     
-    public final Animation createAnimation(String name, Animatable[] frames) {
+    public final Animation createAnimation(Animatable[] frames) {
         if (frames == null || frames.length == 0) {
             throw new RuntimeException("Attempted to create an empty sprite animation");
         }
@@ -994,8 +994,7 @@ public abstract class IroncladGame {
         return new Animation(frames, frameDurations);
     }
     
-    public final Animation createAnimation(String name,
-            Animatable[] frames, double[] frameDurations) {
+    public final Animation createAnimation(Animatable[] frames, double[] frameDurations) {
         if (frames == null || frames.length == 0) {
             throw new RuntimeException("Attempted to create an empty animation");
         }
@@ -1013,13 +1012,12 @@ public abstract class IroncladGame {
         return new Animation(frames, frameDurations);
     }
     
-    private Animatable[] spriteSheetToAnimation(String spriteSheetName,
+    private Animatable[] spriteSheetToAnimation(SpriteSheet spriteSheet,
             int x1, int y1, int x2, int y2, boolean columns) {
         if (x2 < x1 || y2 < y1) {
             throw new RuntimeException("Attempted to create a animation from a part of a sprite sheet defined by invalid coordinates");
         }
         Animatable[] frames = new Animatable[(x2 - x1 + 1)*(y2 - y1 + 1)];
-        SpriteSheet spriteSheet = getSpriteSheet(spriteSheetName);
         int i = 0;
         if (columns) {
             for (int x = x1; x <= x2; x++) {
@@ -1039,14 +1037,14 @@ public abstract class IroncladGame {
         return frames;
     }
     
-    public final Animation createAnimation(String name, String spriteSheetName,
+    public final Animation createAnimation(SpriteSheet spriteSheet,
             int x1, int y1, int x2, int y2, boolean columns) {
-        return createAnimation(name, spriteSheetToAnimation(spriteSheetName, x1, y1, x2, y2, columns));
+        return createAnimation(spriteSheetToAnimation(spriteSheet, x1, y1, x2, y2, columns));
     }
     
-    public final Animation createAnimation(String name, String spriteSheetName,
+    public final Animation createAnimation(SpriteSheet spriteSheet,
             int x1, int y1, int x2, int y2, boolean columns, double[] frameDurations) {
-        return createAnimation(name, spriteSheetToAnimation(spriteSheetName, x1, y1, x2, y2, columns), frameDurations);
+        return createAnimation(spriteSheetToAnimation(spriteSheet, x1, y1, x2, y2, columns), frameDurations);
     }
     
     public final Animation getAnimation(String name) {

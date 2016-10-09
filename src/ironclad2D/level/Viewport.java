@@ -7,7 +7,7 @@ public class Viewport extends LevelThinker {
     LevelObject camera = null;
     HUD hud;
     private double x1, y1, x2, y2;
-    int roundX1, roundY1, roundX2, roundY2;
+    int roundX1, roundY1, roundX2, roundY2, left, right, top, bottom;
     
     public Viewport(HUD hud, double x1, double y1, double x2, double y2) {
         this.hud = hud;
@@ -29,6 +29,18 @@ public class Viewport extends LevelThinker {
         roundY1 = (int)Math.round(y1);
         roundX2 = (int)Math.round(x2);
         roundY2 = (int)Math.round(y2);
+        updateXData();
+        updateYData();
+    }
+    
+    private void updateXData() {
+        left = -(int)Math.round((roundX1 + roundX2)/2.0);
+        right = left + roundX2 - roundX1;
+    }
+    
+    private void updateYData() {
+        top = -(int)Math.round((roundY1 + roundY2)/2.0);
+        bottom = top + roundY2 - roundY1;
     }
     
     @Override
@@ -95,6 +107,7 @@ public class Viewport extends LevelThinker {
         }
         x1 = x;
         roundX1 = (int)Math.round(x1);
+        updateXData();
     }
     
     public final void setRightEdge(double x) {
@@ -103,6 +116,7 @@ public class Viewport extends LevelThinker {
         }
         x2 = x;
         roundX2 = (int)Math.round(x2);
+        updateXData();
     }
     
     public final void setTopEdge(double y) {
@@ -111,6 +125,7 @@ public class Viewport extends LevelThinker {
         }
         y1 = y;
         roundY1 = (int)Math.round(y1);
+        updateYData();
     }
     
     public final void setBottomEdge(double y) {
@@ -119,6 +134,7 @@ public class Viewport extends LevelThinker {
         }
         y2 = y;
         roundY2 = (int)Math.round(y2);
+        updateYData();
     }
     
 }

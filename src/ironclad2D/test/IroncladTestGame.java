@@ -1,6 +1,7 @@
 package ironclad2D.test;
 
 import ironclad2D.IroncladGame;
+import ironclad2D.level.LevelObject;
 import ironclad2D.level.Viewport;
 import ironclad2D.level.LevelState;
 import org.newdawn.slick.Input;
@@ -9,19 +10,21 @@ import org.newdawn.slick.command.KeyControl;
 
 public class IroncladTestGame extends IroncladGame {
     
+    private LevelState levelState;
+    
     public IroncladTestGame() throws SlickException {
-        super("Ironclad2D Test Game", 6, 60, 640, 512, 1, false, "assets", true, null);
+        super("Ironclad2D Test Game", 6, 60, 256, 224, 2, false, "assets", true, null);
     }
     
     @Override
     public void initStates() throws SlickException {
-        LevelState levelState = new LevelState(this, 0);
+        levelState = new LevelState(this, 0, 256, 224);
         levelState.setViewport(0, new Viewport(new IroncladTestHUD(), 0, 0, getScreenWidth(), getScreenHeight()));
     }
     
     @Override
     public void initAssets() throws SlickException {
-        add("megaman", createSprite("megaman.png", 12, 24, 0, 255, 255, null));
+        add("megaman", createAnimation(createSprite("megaman.png", 12, 24, 0, 255, 255, null)));
         add("wilystage", createSpriteSheet("wilytiles.png", 6, 5, 16, 16, 1, 0, 0, null));
     }
     
@@ -33,6 +36,10 @@ public class IroncladTestGame extends IroncladGame {
         bindControl(3, new KeyControl(Input.KEY_RIGHT));
         bindControl(4, new KeyControl(Input.KEY_Z));
         bindControl(5, new KeyControl(Input.KEY_X));
+        levelState.addObject(new MegaMan(this, 512, 448));
+        LevelObject camera = new Camera(512, 512);
+        levelState.addObject(camera);
+        levelState.getViewport(0).setCamera(camera);
     }
     
 }
