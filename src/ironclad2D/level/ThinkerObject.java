@@ -6,10 +6,21 @@ import ironclad2D.TimedEvent;
 public abstract class ThinkerObject extends AnimatedObject {
     
     private final LevelThinker thinker = new ObjectThinker();
+    private final TimedEvent<LevelState> nextState;
+    private ObjectState currentState = null;
+    private boolean changingState = false;
     private Hitbox collisionHitbox;
     
     public ThinkerObject(Hitbox locatorHitbox, Hitbox collisionHitbox, int drawLayer) {
         super(locatorHitbox, drawLayer);
+        nextState = new TimedEvent<LevelState>() {
+            
+            @Override
+            public void eventActions(IroncladGame game, LevelState levelState) {
+                changeState(game, levelState, currentState.getNextState());
+            }
+            
+        };
         this.collisionHitbox = collisionHitbox;
     }
     
@@ -47,10 +58,6 @@ public abstract class ThinkerObject extends AnimatedObject {
         return thinker;
     }
     
-    public final Hitbox getCollisionHitbox() {
-        return collisionHitbox;
-    }
-    
     public void timeUnitActions(IroncladGame game, LevelState levelState) {}
     
     public final int getTimerValue(TimedEvent<LevelState> timedEvent) {
@@ -77,21 +84,33 @@ public abstract class ThinkerObject extends AnimatedObject {
         
         @Override
         public final void timeUnitActions(IroncladGame game, LevelState levelState) {
+            if (currentState != null) {
+                currentState.timeUnitActions(game, levelState);
+            }
             ThinkerObject.this.timeUnitActions(game, levelState);
         }
         
         @Override
         public final void stepActions(IroncladGame game, LevelState levelState) {
+            if (currentState != null) {
+                currentState.stepActions(game, levelState);
+            }
             ThinkerObject.this.stepActions(game, levelState);
         }
         
         @Override
         public final void reactToLevel(IroncladGame game, LevelState levelState) {
+            if (currentState != null) {
+                currentState.reactToLevel(game, levelState);
+            }
             ThinkerObject.this.reactToLevel(game, levelState);
         }
         
         @Override
         public final void reactToInput(IroncladGame game, LevelState levelState) {
+            if (currentState != null) {
+                currentState.reactToInput(game, levelState);
+            }
             ThinkerObject.this.reactToInput(game, levelState);
         }
         
@@ -105,6 +124,39 @@ public abstract class ThinkerObject extends AnimatedObject {
             ThinkerObject.this.removedActions(game, levelState);
         }
         
+    }
+    
+    public final ObjectState getCurrentState() {
+        return currentState;
+    }
+    
+    private boolean changeState(IroncladGame game, LevelState levelState, ObjectState newState) {
+        if (!changingState) {
+            changingState = true;
+            if (currentState != null) {
+                setTimerValue(nextState, -1);
+                currentState.leftActions(game, levelState);
+            }
+            currentState = newState;
+            if (currentState != null) {
+                currentState.enteredActions(game, levelState);
+                int duration = currentState.getDuration();
+                if (duration == 0) {
+                    changingState = false;
+                    changeState(game, levelState, currentState.getNextState());
+                    return true;
+                } else if (duration > 0) {
+                    setTimerValue(nextState, duration);
+                }
+            }
+            changingState = false;
+            return true;
+        }
+        return false;
+    }
+    
+    public final Hitbox getCollisionHitbox() {
+        return collisionHitbox;
     }
     
 }
