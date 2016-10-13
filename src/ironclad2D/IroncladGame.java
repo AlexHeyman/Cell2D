@@ -43,6 +43,10 @@ import org.newdawn.slick.state.transition.Transition;
 
 public abstract class IroncladGame {
     
+    private static enum CommandState {
+        NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
+    }
+    
     private static final Color transparent = new Color(0, 0, 0, 0);
     private static final int transparentInt = colorToInt(transparent);
     

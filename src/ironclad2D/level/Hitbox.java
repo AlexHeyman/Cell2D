@@ -1,5 +1,6 @@
 package ironclad2D.level;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,6 +14,7 @@ public abstract class Hitbox {
     final long id;
     private Hitbox parent = null;
     private final Set<Hitbox> children = new HashSet<>();
+    EnumSet<Direction> solidSurfaces = EnumSet.noneOf(Direction.class);
     private LevelObject object = null;
     final boolean[] roles = new boolean[HITBOXES_PER_OBJECT];
     private int numRoles = 0;
@@ -49,6 +51,13 @@ public abstract class Hitbox {
     final boolean addChild(Hitbox hitbox) {
         if (hitbox != null && hitbox != this
                 && hitbox.parent == null && hitbox.object == null) {
+            Hitbox ancestor = parent;
+            while (ancestor != null) {
+                if (ancestor == hitbox) {
+                    return false;
+                }
+                ancestor = ancestor.parent;
+            }
             children.add(hitbox);
             hitbox.parent = this;
             hitbox.recursivelyUpdateData();
@@ -93,6 +102,36 @@ public abstract class Hitbox {
     
     public final boolean isComponentOf(Hitbox hitbox) {
         return hitbox instanceof CompositeHitbox && ((CompositeHitbox)hitbox).isComponent(this);
+    }
+    
+    public final boolean surfaceIsSolid(Direction direction) {
+        return solidSurfaces.contains(direction);
+    }
+    
+    public final void setSufaceSolid(Direction direction, boolean solid) {
+        if (solid) {
+            if (solidSurfaces.add(direction) && levelState != null) {
+                levelState.addSolidHitbox(this, direction);
+            }
+        } else {
+            if (solidSurfaces.remove(direction) && levelState != null) {
+                levelState.removeSolidHitbox(this, direction);
+            }
+        }
+    }
+    
+    public final void setSolid(boolean solid) {
+        if (solid) {
+            if (roles[2] && levelState != null) {
+                levelState.completeSolidHitbox(this);
+            }
+            solidSurfaces = EnumSet.allOf(Direction.class);
+        } else {
+            if (roles[2] && levelState != null) {
+                levelState.removeSolidHitbox(this);
+            }
+            solidSurfaces.clear();
+        }
     }
     
     public final LevelObject getObject() {

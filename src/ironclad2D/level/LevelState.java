@@ -6,6 +6,8 @@ import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,9 +72,18 @@ public class LevelState extends IroncladGameState {
         
         private final SortedSet<Hitbox> locatorHitboxes = new TreeSet<>(drawLayerComparator);
         private final Set<Hitbox> overlapHitboxes = new HashSet<>();
-        private final Set<Hitbox> solidHitboxes = new HashSet<>();
+        private final Map<Direction,Set<Hitbox>> solidHitboxes = new EnumMap<>(Direction.class);
         
         private Chunk() {}
+        
+        private Set<Hitbox> getSolidHitboxes(Direction direction) {
+            Set<Hitbox> hitboxes = solidHitboxes.get(direction);
+            if (hitboxes == null) {
+                hitboxes = new HashSet<>();
+                solidHitboxes.put(direction, hitboxes);
+            }
+            return hitboxes;
+        }
         
     }
     
@@ -161,7 +172,9 @@ public class LevelState extends IroncladGameState {
                         chunk.overlapHitboxes.remove(hitbox);
                     }
                     if (hitbox.roles[2]) {
-                        chunk.solidHitboxes.remove(hitbox);
+                        for (Direction direction : hitbox.solidSurfaces) {
+                            chunk.getSolidHitboxes(direction).remove(hitbox);
+                        }
                     }
                 }
                 addRange = newRange;
@@ -176,7 +189,9 @@ public class LevelState extends IroncladGameState {
                     chunk.overlapHitboxes.add(hitbox);
                 }
                 if (hitbox.roles[2]) {
-                    chunk.solidHitboxes.add(hitbox);
+                    for (Direction direction : hitbox.solidSurfaces) {
+                        chunk.getSolidHitboxes(direction).add(hitbox);
+                    }
                 }
             }
         }
@@ -237,25 +252,68 @@ public class LevelState extends IroncladGameState {
         }
     }
     
-    final void addSolidHitbox(Hitbox hitbox) {
+    final void addSolidHitbox(Hitbox hitbox, Direction direction) {
         if (hitbox.numChunkRoles == 0) {
             updateChunkRange(hitbox);
         }
         hitbox.numChunkRoles++;
         Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
         while (iterator.hasNext()) {
-            iterator.next().solidHitboxes.add(hitbox);
+            iterator.next().getSolidHitboxes(direction).add(hitbox);
+        }
+    }
+    
+    final void addSolidHitbox(Hitbox hitbox) {
+        if (hitbox.numChunkRoles == 0) {
+            updateChunkRange(hitbox);
+        }
+        hitbox.numChunkRoles += hitbox.solidSurfaces.size();
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            Chunk chunk = iterator.next();
+            for (Direction direction : hitbox.solidSurfaces) {
+                chunk.getSolidHitboxes(direction).add(hitbox);
+            }
+        }
+    }
+    
+    final void removeSolidHitbox(Hitbox hitbox, Direction direction) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().getSolidHitboxes(direction).remove(hitbox);
+        }
+        hitbox.numChunkRoles--;
+        if (hitbox.numChunkRoles == 0) {
+            hitbox.chunkRange = null;
         }
     }
     
     final void removeSolidHitbox(Hitbox hitbox) {
         Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
         while (iterator.hasNext()) {
-            iterator.next().solidHitboxes.remove(hitbox);
+            Chunk chunk = iterator.next();
+            for (Direction direction : hitbox.solidSurfaces) {
+                chunk.getSolidHitboxes(direction).remove(hitbox);
+            }
         }
-        hitbox.numChunkRoles--;
+        hitbox.numChunkRoles -= hitbox.solidSurfaces.size();
         if (hitbox.numChunkRoles == 0) {
             hitbox.chunkRange = null;
+        }
+    }
+    
+    final void completeSolidHitbox(Hitbox hitbox) {
+        Set<Direction> directionsToAdd = EnumSet.complementOf(hitbox.solidSurfaces);
+        if (hitbox.numChunkRoles == 0) {
+            updateChunkRange(hitbox);
+        }
+        hitbox.numChunkRoles += directionsToAdd.size();
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            Chunk chunk = iterator.next();
+            for (Direction direction : directionsToAdd) {
+                chunk.getSolidHitboxes(direction).add(hitbox);
+            }
         }
     }
     
