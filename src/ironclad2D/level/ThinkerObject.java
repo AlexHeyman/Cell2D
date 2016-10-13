@@ -17,7 +17,7 @@ public abstract class ThinkerObject extends AnimatedObject {
             
             @Override
             public void eventActions(IroncladGame game, LevelState levelState) {
-                changeState(game, levelState, currentState.getNextState());
+                changeState(game, levelState, currentState.nextState());
             }
             
         };
@@ -143,7 +143,7 @@ public abstract class ThinkerObject extends AnimatedObject {
                 int duration = currentState.getDuration();
                 if (duration == 0) {
                     changingState = false;
-                    changeState(game, levelState, currentState.getNextState());
+                    changeState(game, levelState, currentState.nextState());
                     return true;
                 } else if (duration > 0) {
                     setTimerValue(nextState, duration);
