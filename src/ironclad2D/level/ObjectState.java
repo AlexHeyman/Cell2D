@@ -4,17 +4,9 @@ import ironclad2D.IroncladGame;
 
 public abstract class ObjectState {
     
-    private final int duration;
+    public abstract int getDuration();
     
-    public ObjectState(int duration) {
-        this.duration = duration;
-    }
-    
-    public int getDuration() {
-        return duration;
-    }
-    
-    public abstract ObjectState nextState();
+    public abstract ObjectState getNextState();
     
     public void enteredActions(IroncladGame game, LevelState levelState) {}
     

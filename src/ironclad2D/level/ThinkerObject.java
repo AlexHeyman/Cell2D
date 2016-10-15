@@ -2,25 +2,27 @@ package ironclad2D.level;
 
 import ironclad2D.IroncladGame;
 import ironclad2D.TimedEvent;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public abstract class ThinkerObject extends AnimatedObject {
     
     private final LevelThinker thinker = new ObjectThinker();
-    private final TimedEvent<LevelState> nextState;
     private ObjectState currentState = null;
+    private final Queue<ObjectState> upcomingStates = new LinkedList<>();
     private boolean changingState = false;
+    private final TimedEvent<LevelState> nextState = new TimedEvent<LevelState>() {
+        
+        @Override
+        public void eventActions(IroncladGame game, LevelState levelState) {
+            endState(game, levelState, true);
+        }
+        
+    };
     private Hitbox collisionHitbox;
     
     public ThinkerObject(Hitbox locatorHitbox, Hitbox collisionHitbox, int drawLayer) {
         super(locatorHitbox, drawLayer);
-        nextState = new TimedEvent<LevelState>() {
-            
-            @Override
-            public void eventActions(IroncladGame game, LevelState levelState) {
-                changeState(game, levelState, currentState.nextState());
-            }
-            
-        };
         this.collisionHitbox = collisionHitbox;
     }
     
@@ -28,6 +30,9 @@ public abstract class ThinkerObject extends AnimatedObject {
     void addActions() {
         super.addActions();
         levelState.addThinker(thinker);
+        if (!upcomingStates.isEmpty()) {
+            endState(levelState.getGame(), levelState, false);
+        }
     }
     
     @Override
@@ -130,29 +135,46 @@ public abstract class ThinkerObject extends AnimatedObject {
         return currentState;
     }
     
-    private boolean changeState(IroncladGame game, LevelState levelState, ObjectState newState) {
-        if (!changingState) {
+    private void endState(IroncladGame game, LevelState levelState, boolean useNextState) {
+        if (currentState != null) {
+            setTimerValue(nextState, -1);
             changingState = true;
+            currentState.leftActions(game, levelState);
+            changingState = false;
+        }
+        if (!upcomingStates.isEmpty()) {
+            beginState(game, levelState, upcomingStates.remove());
+        } else if (useNextState) {
+            beginState(game, levelState, currentState.getNextState());
+        }
+    }
+    
+    private void beginState(IroncladGame game, LevelState levelState, ObjectState newState) {
+        currentState = newState;
+        if (currentState != null) {
+            changingState = true;
+            currentState.enteredActions(game, levelState);
+            changingState = false;
+        }
+        if (upcomingStates.isEmpty()) {
             if (currentState != null) {
-                setTimerValue(nextState, -1);
-                currentState.leftActions(game, levelState);
-            }
-            currentState = newState;
-            if (currentState != null) {
-                currentState.enteredActions(game, levelState);
                 int duration = currentState.getDuration();
-                if (duration == 0) {
-                    changingState = false;
-                    changeState(game, levelState, currentState.nextState());
-                    return true;
-                } else if (duration > 0) {
+                if (duration > 0) {
                     setTimerValue(nextState, duration);
+                } else if (duration == 0) {
+                    endState(game, levelState, true);
                 }
             }
-            changingState = false;
-            return true;
+        } else {
+            endState(game, levelState, false);
         }
-        return false;
+    }
+    
+    public final void changeState(ObjectState newState) {
+        upcomingStates.add(newState);
+        if (levelState != null && !changingState) {
+            endState(levelState.getGame(), levelState, false);
+        }
     }
     
     public final Hitbox getCollisionHitbox() {
