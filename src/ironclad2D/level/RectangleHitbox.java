@@ -22,6 +22,11 @@ public class RectangleHitbox extends Hitbox {
         absBottom = relBottom;
     }
     
+    @Override
+    public Hitbox getCopy() {
+        return new RectangleHitbox(0, 0, relLeft, relRight, relTop, relBottom);
+    }
+    
     public final double getRelLeft() {
         return relLeft;
     }

@@ -19,6 +19,7 @@ public abstract class ThinkerObject extends AnimatedObject {
         }
         
     };
+    private boolean hasCollision = false;
     private Hitbox collisionHitbox;
     
     public ThinkerObject(Hitbox locatorHitbox, Hitbox collisionHitbox, int drawLayer) {
@@ -75,9 +76,9 @@ public abstract class ThinkerObject extends AnimatedObject {
     
     public void stepActions(IroncladGame game, LevelState levelState) {}
     
-    public void reactToLevel(IroncladGame game, LevelState levelState) {}
+    public void beforeMovementActions(IroncladGame game, LevelState levelState) {}
     
-    public void reactToInput(IroncladGame game, LevelState levelState) {}
+    public void afterMovementActions(IroncladGame game, LevelState levelState) {}
     
     public void addedActions(IroncladGame game, LevelState levelState) {}
     
@@ -104,19 +105,19 @@ public abstract class ThinkerObject extends AnimatedObject {
         }
         
         @Override
-        public final void reactToLevel(IroncladGame game, LevelState levelState) {
+        public final void beforeMovementActions(IroncladGame game, LevelState levelState) {
             if (currentState != null) {
-                currentState.reactToLevel(game, levelState);
+                currentState.beforeMovementActions(game, levelState);
             }
-            ThinkerObject.this.reactToLevel(game, levelState);
+            ThinkerObject.this.beforeMovementActions(game, levelState);
         }
         
         @Override
-        public final void reactToInput(IroncladGame game, LevelState levelState) {
+        public final void afterMovementActions(IroncladGame game, LevelState levelState) {
             if (currentState != null) {
-                currentState.reactToInput(game, levelState);
+                currentState.afterMovementActions(game, levelState);
             }
-            ThinkerObject.this.reactToInput(game, levelState);
+            ThinkerObject.this.afterMovementActions(game, levelState);
         }
         
         @Override
@@ -175,6 +176,14 @@ public abstract class ThinkerObject extends AnimatedObject {
         if (levelState != null && !changingState) {
             endState(levelState.getGame(), levelState, false);
         }
+    }
+    
+    public final boolean hasCollision() {
+        return hasCollision;
+    }
+    
+    public final void setCollision(boolean hasCollision) {
+        this.hasCollision = hasCollision;
     }
     
     public final Hitbox getCollisionHitbox() {

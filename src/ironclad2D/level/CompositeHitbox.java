@@ -15,6 +15,19 @@ public class CompositeHitbox extends Hitbox {
         super(relX, relY);
     }
     
+    @Override
+    public Hitbox getCopy() {
+        CompositeHitbox copy = new CompositeHitbox(0, 0);
+        for (Map.Entry<Integer,Hitbox> entry : components.entrySet()) {
+            Hitbox component = entry.getValue();
+            Hitbox componentCopy = component.getCopy();
+            componentCopy.copyProperties(component);
+            componentCopy.setRelPosition(component.getRelX(), component.getRelY());
+            copy.setComponent(entry.getKey(), componentCopy);
+        }
+        return copy;
+    }
+    
     private void updateData() {
         if (components.isEmpty()) {
             left = 0;

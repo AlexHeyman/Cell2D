@@ -16,8 +16,8 @@ public abstract class ObjectState {
     
     public void stepActions(IroncladGame game, LevelState levelState) {}
     
-    public void reactToLevel(IroncladGame game, LevelState levelState) {}
+    public void beforeMovementActions(IroncladGame game, LevelState levelState) {}
     
-    public void reactToInput(IroncladGame game, LevelState levelState) {}
+    public void afterMovementActions(IroncladGame game, LevelState levelState) {}
     
 }

@@ -236,6 +236,24 @@ public abstract class LevelObject {
         return solidHitbox;
     }
     
+    public final boolean surfaceIsSolid(Direction direction) {
+        return (solidHitbox == null ? false : solidHitbox.surfaceIsSolid(direction));
+    }
+    
+    public final void setSurfaceSolid(Direction direction, boolean solid) {
+        if (solidHitbox == null) {
+            setSolidHitbox(locatorHitbox.getCopy());
+        }
+        solidHitbox.setSurfaceSolid(direction, solid);
+    }
+    
+    public final void setSolid(boolean solid) {
+        if (solidHitbox == null) {
+            setSolidHitbox(locatorHitbox.getCopy());
+        }
+        solidHitbox.setSolid(solid);
+    }
+    
     public final boolean setSolidHitbox(Hitbox solidHitbox) {
         if (solidHitbox != this.solidHitbox) {
             boolean acceptable;

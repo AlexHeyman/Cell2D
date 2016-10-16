@@ -40,7 +40,7 @@ public class LevelState extends IroncladGameState {
         
     };
     private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawLayerIteratorComparator = new LevelComparator<Pair<Hitbox,Iterator<Hitbox>>>() {
-
+        
         @Override
         public int compare(Pair<Hitbox, Iterator<Hitbox>> pair1, Pair<Hitbox, Iterator<Hitbox>> pair2) {
             return drawLayerComparator.compare(pair1.getKey(), pair2.getKey());
@@ -49,9 +49,7 @@ public class LevelState extends IroncladGameState {
     };
     
     private final Set<LevelThinker> levelThinkers = new HashSet<>();
-    private final Set<LevelThinker> newThinkers = new HashSet<>();
-    private boolean thinkersHaveReactedToLevel = true;
-    private boolean thinkersHaveReactedToInput = false;
+    private boolean movementHasOccurred = true;
     private final Set<LevelObject> levelObjects = new HashSet<>();
     private double chunkWidth, chunkHeight;
     private final Map<Point,Chunk> chunks = new HashMap<>();
@@ -374,7 +372,6 @@ public class LevelState extends IroncladGameState {
     private void addActions(LevelThinker thinker) {
         levelThinkers.add(thinker);
         thinker.levelState = this;
-        newThinkers.add(thinker);
         thinker.addTo(this);
     }
     
@@ -393,7 +390,6 @@ public class LevelState extends IroncladGameState {
     
     private void removeActions(LevelThinker thinker) {
         thinker.remove();
-        newThinkers.remove(thinker);
         levelThinkers.remove(thinker);
         thinker.levelState = null;
     }
@@ -436,36 +432,20 @@ public class LevelState extends IroncladGameState {
         object.levelState = null;
     }
     
-    private void catchNewThinkersUp(IroncladGame game) {
-        if (!newThinkers.isEmpty()) {
-            List<LevelThinker> thinkers = new ArrayList<>(newThinkers);
-            newThinkers.clear();
-            if (thinkersHaveReactedToLevel) {
-                for (LevelThinker thinker : thinkers) {
-                    thinker.reactToLevel(game, this);
-                }
-                changeObjects(game);
-            }
-            if (thinkersHaveReactedToInput) {
-                for (LevelThinker thinker : thinkers) {
-                    thinker.reactToInput(game, this);
-                }
-                changeObjects(game);
-            }
-        }
-    }
-    
     private void changeObjects(IroncladGame game) {
+        Set<LevelThinker> newThinkers = new HashSet<>();
         while (!objectsToChange.isEmpty()) {
             List<ObjectChangeData> newChanges = new ArrayList<>(objectsToChange);
             objectsToChange.clear();
             for (ObjectChangeData data : newChanges) {
                 if (data.thinker != null) {
                     if (data.thinker.levelState != null) {
+                        newThinkers.remove(data.thinker);
                         data.thinker.levelState.removeActions(data.thinker);
                     }
                     if (data.newLevelState != null) {
                         data.newLevelState.addActions(data.thinker);
+                        newThinkers.add(data.thinker);
                     }
                 } else if (data.object != null) {
                     if (data.object.levelState != null) {
@@ -477,27 +457,35 @@ public class LevelState extends IroncladGameState {
                 }
             }
         }
-        catchNewThinkersUp(game);
+        if (!newThinkers.isEmpty()) {
+            if (movementHasOccurred) {
+                for (LevelThinker thinker : newThinkers) {
+                    thinker.afterMovementActions(game, this);
+                }
+            } else {
+                for (LevelThinker thinker : newThinkers) {
+                    thinker.beforeMovementActions(game, this);
+                }
+            }
+            changeObjects(game);
+        }
     }
     
     @Override
     public final void stepActions(IroncladGame game) {
         delayState = this;
         double timeFactor = getTimeFactor();
-        catchNewThinkersUp(game);
         for (LevelThinker thinker : levelThinkers) {
-            thinker.reactToInput(game, this);
+            thinker.beforeMovementActions(game, this);
         }
-        thinkersHaveReactedToInput = true;
         changeObjects(game);
         
-        thinkersHaveReactedToLevel = false;
-        thinkersHaveReactedToInput = false;
+        movementHasOccurred = true;
         for (LevelThinker thinker : levelThinkers) {
-            thinker.reactToLevel(game, this);
+            thinker.afterMovementActions(game, this);
         }
-        thinkersHaveReactedToLevel = true;
         changeObjects(game);
+        movementHasOccurred = false;
         delayState = null;
     }
     

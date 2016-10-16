@@ -9,6 +9,11 @@ public class CircleHitbox extends Hitbox {
         setRelRadius(relRadius);
     }
     
+    @Override
+    public Hitbox getCopy() {
+        return new CircleHitbox(0, 0, relRadius);
+    }
+    
     public final double getRelRadius() {
         return relRadius;
     }

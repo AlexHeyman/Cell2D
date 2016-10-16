@@ -40,6 +40,14 @@ public abstract class Hitbox {
         absPosition = relPosition.getCopy();
     }
     
+    public abstract Hitbox getCopy();
+    
+    public final void copyProperties(Hitbox hitbox) {
+        setRelXFlip(hitbox.relXFlip);
+        setRelYFlip(hitbox.relYFlip);
+        setRelAngle(hitbox.relAngle);
+    }
+    
     private static long getNextID() {
         return idCounter.getAndIncrement();
     }
@@ -108,13 +116,13 @@ public abstract class Hitbox {
         return solidSurfaces.contains(direction);
     }
     
-    public final void setSufaceSolid(Direction direction, boolean solid) {
+    public final void setSurfaceSolid(Direction direction, boolean solid) {
         if (solid) {
-            if (solidSurfaces.add(direction) && levelState != null) {
+            if (solidSurfaces.add(direction) && roles[2] && levelState != null) {
                 levelState.addSolidHitbox(this, direction);
             }
         } else {
-            if (solidSurfaces.remove(direction) && levelState != null) {
+            if (solidSurfaces.remove(direction) && roles[2] && levelState != null) {
                 levelState.removeSolidHitbox(this, direction);
             }
         }

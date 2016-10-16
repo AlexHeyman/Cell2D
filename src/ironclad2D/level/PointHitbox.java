@@ -7,6 +7,11 @@ public class PointHitbox extends Hitbox {
     }
     
     @Override
+    public Hitbox getCopy() {
+        return new PointHitbox(0, 0);
+    }
+    
+    @Override
     public final double getLeftEdge() {
         return getAbsX();
     }

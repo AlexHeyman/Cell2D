@@ -11,6 +11,11 @@ public class LineHitbox extends Hitbox {
         updateData();
     }
     
+    @Override
+    public Hitbox getCopy() {
+        return new LineHitbox(0, 0, relDifference.getX(), relDifference.getY());
+    }
+    
     private void updateData() {
         absDifference = relDifference.getCopy().flip(getAbsXFlip(), getAbsYFlip()).changeAngle(getAbsAngle());
         left = Math.min(absDifference.getX(), 0);
