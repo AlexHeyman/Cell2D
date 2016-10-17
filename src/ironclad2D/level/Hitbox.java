@@ -244,6 +244,28 @@ public abstract class Hitbox {
         }
     }
     
+    final void addAsCollisionHitbox(boolean hasCollision) {
+        if (levelState != null && hasCollision) {
+            levelState.addCollisionHitbox(this);
+        }
+        roles[3] = true;
+        numRoles++;
+    }
+    
+    final void removeAsCollisionHitbox(boolean hasCollision) {
+        if (levelState != null && hasCollision) {
+            levelState.removeCollisionHitbox(this);
+        }
+        roles[3] = false;
+        numRoles--;
+        if (numRoles == 0) {
+            setObject(null);
+            if (parent != null) {
+                parent.removeChild(this);
+            }
+        }
+    }
+    
     public final LevelState getLevelState() {
         return levelState;
     }

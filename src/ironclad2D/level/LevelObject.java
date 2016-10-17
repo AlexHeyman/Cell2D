@@ -44,6 +44,9 @@ public abstract class LevelObject {
     
     void addActions() {
         locatorHitbox.setLevelState(levelState);
+    }
+    
+    void addChunkData() {
         levelState.addLocatorHitbox(locatorHitbox);
         if (overlapHitbox != null) {
             levelState.addOverlapHitbox(overlapHitbox);

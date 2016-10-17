@@ -4,9 +4,13 @@ import ironclad2D.IroncladGame;
 import ironclad2D.TimedEvent;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ThinkerObject extends AnimatedObject {
     
+    private static final AtomicLong idCounter = new AtomicLong(0);
+    
+    final long id;
     private final LevelThinker thinker = new ObjectThinker();
     private ObjectState currentState = null;
     private final Queue<ObjectState> upcomingStates = new LinkedList<>();
@@ -19,12 +23,18 @@ public abstract class ThinkerObject extends AnimatedObject {
         }
         
     };
+    int movementPriority = 0;
     private boolean hasCollision = false;
     private Hitbox collisionHitbox;
     
     public ThinkerObject(Hitbox locatorHitbox, Hitbox collisionHitbox, int drawLayer) {
         super(locatorHitbox, drawLayer);
+        id = getNextID();
         this.collisionHitbox = collisionHitbox;
+    }
+    
+    private static long getNextID() {
+        return idCounter.getAndIncrement();
     }
     
     @Override
@@ -34,12 +44,26 @@ public abstract class ThinkerObject extends AnimatedObject {
         if (!upcomingStates.isEmpty()) {
             endState(levelState.getGame(), levelState, false);
         }
+        if (hasCollision && collisionHitbox != null) {
+            levelState.addCollisionHitbox(collisionHitbox);
+        }
+    }
+    
+    @Override
+    void addChunkData() {
+        if (hasCollision && collisionHitbox != null) {
+            levelState.addCollisionHitbox(collisionHitbox);
+        }
     }
     
     @Override
     void removeActions() {
         super.removeActions();
         levelState.removeThinker(thinker);
+        if (hasCollision && collisionHitbox != null) {
+            levelState.removeCollidingObject(this);
+            levelState.removeCollisionHitbox(collisionHitbox);
+        }
     }
     
     @Override
@@ -178,16 +202,74 @@ public abstract class ThinkerObject extends AnimatedObject {
         }
     }
     
+    public final int getMovementPriority() {
+        return movementPriority;
+    }
+    
+    public final void setMovementPriority(int movementPriority) {
+        if (levelState != null && hasCollision && collisionHitbox != null) {
+            levelState.changeCollidingObjectMovementPriority(this, movementPriority);
+        } else {
+            this.movementPriority = movementPriority;
+        }
+    }
+    
     public final boolean hasCollision() {
         return hasCollision;
     }
     
     public final void setCollision(boolean hasCollision) {
+        if (levelState != null && collisionHitbox != null) {
+            if (hasCollision && !this.hasCollision) {
+                levelState.addCollidingObject(this);
+                levelState.addCollisionHitbox(collisionHitbox);
+            } else if (!hasCollision && this.hasCollision) {
+                levelState.removeCollidingObject(this);
+                levelState.removeCollisionHitbox(collisionHitbox);
+            }
+        }
         this.hasCollision = hasCollision;
     }
     
     public final Hitbox getCollisionHitbox() {
         return collisionHitbox;
+    }
+    
+    public final boolean setCollisionHitbox(Hitbox collisionHitbox) {
+        if (collisionHitbox != this.collisionHitbox) {
+            boolean acceptable;
+            Hitbox locatorHitbox = getLocatorHitbox();
+            if (collisionHitbox == null) {
+                acceptable = true;
+            } else {
+                LevelObject object = collisionHitbox.getObject();
+                Hitbox parent = collisionHitbox.getParent();
+                acceptable = (object == null && parent == null)
+                        || (collisionHitbox == locatorHitbox)
+                        || (object == this && parent == locatorHitbox
+                        && !collisionHitbox.isComponentOf(locatorHitbox));
+            }
+            if (acceptable) {
+                if (this.collisionHitbox != null) {
+                    this.collisionHitbox.removeAsCollisionHitbox(hasCollision);
+                }
+                boolean hasCollisionHitbox = this.collisionHitbox != null;
+                this.collisionHitbox = collisionHitbox;
+                if (collisionHitbox == null) {
+                    if (levelState != null && hasCollision && hasCollisionHitbox) {
+                        levelState.removeCollidingObject(this);
+                    }
+                } else {
+                    locatorHitbox.addChild(collisionHitbox);
+                    collisionHitbox.addAsCollisionHitbox(hasCollision);
+                    if (levelState != null && hasCollision && !hasCollisionHitbox) {
+                        levelState.addCollidingObject(this);
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
     
 }

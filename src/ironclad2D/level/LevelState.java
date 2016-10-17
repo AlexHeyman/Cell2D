@@ -30,6 +30,15 @@ public class LevelState extends IroncladGameState {
     
     private static abstract class LevelComparator<T> implements Comparator<T>, Serializable {}
     
+    private static final Comparator<ThinkerObject> movementPriorityComparator = new LevelComparator<ThinkerObject>() {
+        
+        @Override
+        public int compare(ThinkerObject object1, ThinkerObject object2) {
+            int priorityDifference = object1.movementPriority - object2.movementPriority;
+            return (priorityDifference == 0 ? Long.signum(object1.id - object2.id) : priorityDifference);
+        }
+        
+    };
     private static final Comparator<Hitbox> drawLayerComparator = new LevelComparator<Hitbox>() {
         
         @Override
@@ -51,6 +60,7 @@ public class LevelState extends IroncladGameState {
     private final Set<LevelThinker> levelThinkers = new HashSet<>();
     private boolean movementHasOccurred = true;
     private final Set<LevelObject> levelObjects = new HashSet<>();
+    private final SortedSet<ThinkerObject> collidingObjects = new TreeSet<>(movementPriorityComparator);
     private double chunkWidth, chunkHeight;
     private final Map<Point,Chunk> chunks = new HashMap<>();
     private final SortedMap<Integer,LevelLayer> levelLayers = new TreeMap<>();
@@ -71,6 +81,7 @@ public class LevelState extends IroncladGameState {
         private final SortedSet<Hitbox> locatorHitboxes = new TreeSet<>(drawLayerComparator);
         private final Set<Hitbox> overlapHitboxes = new HashSet<>();
         private final Map<Direction,Set<Hitbox>> solidHitboxes = new EnumMap<>(Direction.class);
+        private final Set<Hitbox> collisionHitboxes = new HashSet<>();
         
         private Chunk() {}
         
@@ -101,6 +112,14 @@ public class LevelState extends IroncladGameState {
     
     private int[] getChunkRangeExclusive(double x1, double y1, double x2, double y2) {
         int[] chunkRange = {(int)Math.floor(x1/chunkWidth), (int)Math.floor(y1/chunkHeight), (int)Math.ceil(x2/chunkWidth) - 1, (int)Math.ceil(y2/chunkHeight) - 1};
+        if (chunkRange[0] > chunkRange[2]) {
+            chunkRange[0]--;
+            chunkRange[2]++;
+        }
+        if (chunkRange[1] > chunkRange[3]) {
+            chunkRange[1]--;
+            chunkRange[3]++;
+        }
         return chunkRange;
     }
     
@@ -174,6 +193,9 @@ public class LevelState extends IroncladGameState {
                             chunk.getSolidHitboxes(direction).remove(hitbox);
                         }
                     }
+                    if (hitbox.roles[3]) {
+                        chunk.collisionHitboxes.remove(hitbox);
+                    }
                 }
                 addRange = newRange;
             }
@@ -190,6 +212,9 @@ public class LevelState extends IroncladGameState {
                     for (Direction direction : hitbox.solidSurfaces) {
                         chunk.getSolidHitboxes(direction).add(hitbox);
                     }
+                }
+                if (hitbox.roles[3]) {
+                    chunk.collisionHitboxes.add(hitbox);
                 }
             }
         }
@@ -315,6 +340,42 @@ public class LevelState extends IroncladGameState {
         }
     }
     
+    final void addCollisionHitbox(Hitbox hitbox) {
+        if (hitbox.numChunkRoles == 0) {
+            updateChunkRange(hitbox);
+        }
+        hitbox.numChunkRoles++;
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().collisionHitboxes.add(hitbox);
+        }
+    }
+    
+    final void removeCollisionHitbox(Hitbox hitbox) {
+        Iterator<Chunk> iterator = new ChunkRangeIterator(hitbox.chunkRange);
+        while (iterator.hasNext()) {
+            iterator.next().collisionHitboxes.remove(hitbox);
+        }
+        hitbox.numChunkRoles--;
+        if (hitbox.numChunkRoles == 0) {
+            hitbox.chunkRange = null;
+        }
+    }
+    
+    final void addCollidingObject(ThinkerObject object) {
+        collidingObjects.add(object);
+    }
+    
+    final void removeCollidingObject(ThinkerObject object) {
+        collidingObjects.remove(object);
+    }
+    
+    final void changeCollidingObjectMovementPriority(ThinkerObject object, int movementPriority) {
+        collidingObjects.remove(object);
+        object.movementPriority = movementPriority;
+        collidingObjects.add(object);
+    }
+    
     public final double getChunkWidth() {
         return chunkWidth;
     }
@@ -334,7 +395,9 @@ public class LevelState extends IroncladGameState {
         this.chunkHeight = chunkHeight;
         chunks.clear();
         if (!levelObjects.isEmpty()) {
-            
+            for (LevelObject object : levelObjects) {
+                object.addChunkData();
+            }
         }
     }
     
@@ -411,6 +474,7 @@ public class LevelState extends IroncladGameState {
         levelObjects.add(object);
         object.levelState = this;
         object.addActions();
+        object.addChunkData();
     }
     
     public final boolean removeObject(LevelObject object) {
