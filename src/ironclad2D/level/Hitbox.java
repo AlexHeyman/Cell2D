@@ -505,4 +505,36 @@ public abstract class Hitbox {
     
     public abstract double getCenterY();
     
-}
+    public final boolean overlaps(Hitbox hitbox) {
+        return overlap(this, hitbox);
+    }
+    
+    public static final boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
+        if (hitbox1.levelState != null && hitbox1.levelState == hitbox2.levelState
+                && hitbox1.getLeftEdge() < hitbox2.getRightEdge()
+                && hitbox1.getRightEdge() > hitbox2.getLeftEdge()
+                && hitbox1.getTopEdge() < hitbox2.getBottomEdge()
+                && hitbox1.getBottomEdge() > hitbox2.getTopEdge()) {
+            if (hitbox1 instanceof CompositeHitbox) {
+                for (Hitbox component : ((CompositeHitbox)hitbox1).components.values()) {
+                    if (overlap(component, hitbox2)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            if (hitbox2 instanceof CompositeHitbox) {
+                for (Hitbox component : ((CompositeHitbox)hitbox2).components.values()) {
+                    if (overlap(hitbox1, component)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            return true;
+        }
+        return false;
+    }
+    
+ }

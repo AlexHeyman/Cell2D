@@ -207,6 +207,15 @@ public abstract class LevelObject {
         return overlapHitbox;
     }
     
+    public final boolean overlaps(LevelObject object) {
+        return overlap(this, object);
+    }
+    
+    public static final boolean overlap(LevelObject object1, LevelObject object2) {
+        return object1.overlapHitbox != null && object2.overlapHitbox != null
+                && Hitbox.overlap(object1.overlapHitbox, object2.overlapHitbox);
+    }
+    
     public final boolean setOverlapHitbox(Hitbox overlapHitbox) {
         if (overlapHitbox != this.overlapHitbox) {
             boolean acceptable;
