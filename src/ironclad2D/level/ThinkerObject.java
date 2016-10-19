@@ -27,10 +27,9 @@ public abstract class ThinkerObject extends AnimatedObject {
     private boolean hasCollision = false;
     private Hitbox collisionHitbox;
     
-    public ThinkerObject(Hitbox locatorHitbox, Hitbox collisionHitbox, int drawLayer) {
+    public ThinkerObject(Hitbox locatorHitbox, int drawLayer) {
         super(locatorHitbox, drawLayer);
         id = getNextID();
-        this.collisionHitbox = collisionHitbox;
     }
     
     private static long getNextID() {

@@ -6,7 +6,7 @@ import ironclad2D.level.ThinkerObject;
 public class Camera extends ThinkerObject {
 
     public Camera(double x, double y) {
-        super(new PointHitbox(x, y), null, 0);
+        super(new PointHitbox(x, y), 0);
     }
     
 }
