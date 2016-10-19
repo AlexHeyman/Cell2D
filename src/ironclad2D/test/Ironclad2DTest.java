@@ -5,7 +5,7 @@ import org.newdawn.slick.SlickException;
 
 public class Ironclad2DTest {
     
-    public static void main(String[] args) throws SlickException {
+    public static final void main(String[] args) throws SlickException {
         IroncladGame.startGame(new IroncladTestGame());
     }
     

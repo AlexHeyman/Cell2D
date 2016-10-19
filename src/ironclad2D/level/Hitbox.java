@@ -322,7 +322,7 @@ public abstract class Hitbox {
         if (parent == null) {
             absPosition = relPosition.getCopy();
         } else {
-            absPosition = parent.absPosition.getCopy().add(relPosition.getCopy().flip(parent.absXFlip, parent.absYFlip).changeAngle(parent.absAngle));
+            absPosition = parent.absPosition.getCopy().add(relPosition.getCopy().relativeTo(parent));
         }
         updateChunks();
     }

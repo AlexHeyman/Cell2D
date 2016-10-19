@@ -17,7 +17,7 @@ public class LineHitbox extends Hitbox {
     }
     
     private void updateData() {
-        absDifference = relDifference.getCopy().flip(getAbsXFlip(), getAbsYFlip()).changeAngle(getAbsAngle());
+        absDifference = relDifference.getCopy().relativeTo(this);
         left = Math.min(absDifference.getX(), 0);
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);

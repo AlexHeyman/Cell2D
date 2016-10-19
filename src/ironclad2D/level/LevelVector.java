@@ -178,4 +178,12 @@ public class LevelVector {
         return first.x*second.x + first.y*second.y;
     }
     
+    public final LevelVector relativeTo(Hitbox hitbox) {
+        return flip(hitbox.getAbsXFlip(), hitbox.getAbsYFlip()).changeAngle(hitbox.getAbsAngle());
+    }
+    
+    public final LevelVector relativeTo(LevelObject object) {
+        return relativeTo(object.getLocatorHitbox());
+    }
+    
 }

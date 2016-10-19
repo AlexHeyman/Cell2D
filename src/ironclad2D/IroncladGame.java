@@ -130,7 +130,7 @@ public abstract class IroncladGame {
         }
     }
     
-    public static void startGame(IroncladGame game) throws SlickException {
+    public static final void startGame(IroncladGame game) throws SlickException {
         AppGameContainer container = new AppGameContainer(game.game);
         game.updateScreen(container);
         container.setTargetFrameRate(game.getUpdateFPS());
@@ -146,7 +146,7 @@ public abstract class IroncladGame {
         return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, (color >> 24) & 0xFF);
     }
     
-    static Pair<Image,BufferedImage> getTransparentImage(String path, Color transColor) throws SlickException {
+    static final Pair<Image,BufferedImage> getTransparentImage(String path, Color transColor) throws SlickException {
         BufferedImage bufferedImage;
         try {
             bufferedImage = ImageIO.read(new File(path));
@@ -191,7 +191,7 @@ public abstract class IroncladGame {
         return new Pair<>(image, bufferedImage);
     }
     
-    static Pair<Image,BufferedImage> getRecoloredImage(
+    static final Pair<Image,BufferedImage> getRecoloredImage(
             BufferedImage bufferedImage, Map<Color,Color> colorMap) throws SlickException {
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
@@ -245,7 +245,7 @@ public abstract class IroncladGame {
         return new Pair<>(image, newImage);
     }
     
-    static Pair<Image,BufferedImage> getRecoloredImage(
+    static final Pair<Image,BufferedImage> getRecoloredImage(
             BufferedImage bufferedImage, Color newColor) throws SlickException {
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
@@ -944,19 +944,19 @@ public abstract class IroncladGame {
     }
     
     public final SpriteSheet createSpriteSheet(String path, int width, int height, int spriteWidth,
-            int spriteHeight, int spriteSpacing, int centerX, int centerY, List<String> filters) throws SlickException {
+            int spriteHeight, int spriteSpacing, int centerX, int centerY, String[] filters) throws SlickException {
         return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, centerX, centerY, null, filters);
     }
     
     public final SpriteSheet createSpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spriteSpacing, int centerX,
-            int centerY, int transR, int transG, int transB, List<String> filters) throws SlickException {
+            int centerY, int transR, int transG, int transB, String[] filters) throws SlickException {
         return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, centerX, centerY, new Color(transR, transG, transB), filters);
     }
     
     public final SpriteSheet createSpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spriteSpacing, int centerX,
-            int centerY, Color transColor, List<String> filters) throws SlickException {
+            int centerY, Color transColor, String[] filters) throws SlickException {
         Set<Filter> filterSet = new HashSet<>();
         if (filters != null) {
             for (String name : filters) {
