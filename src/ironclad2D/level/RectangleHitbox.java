@@ -4,8 +4,8 @@ public class RectangleHitbox extends Hitbox {
     
     private double relLeft, relRight, relTop, relBottom, absLeft, absRight, absTop, absBottom;
     
-    public RectangleHitbox(double x, double y, double relLeft, double relRight, double relTop, double relBottom) {
-        super(x, y);
+    public RectangleHitbox(LevelVector relPosition, double relLeft, double relRight, double relTop, double relBottom) {
+        super(relPosition);
         if (relLeft > relRight) {
             throw new RuntimeException("Attempted to give a rectangle hitbox a negative width");
         }
@@ -20,6 +20,10 @@ public class RectangleHitbox extends Hitbox {
         absRight = relRight;
         absTop = relTop;
         absBottom = relBottom;
+    }
+    
+    public RectangleHitbox(double relX, double relY, double relLeft, double relRight, double relTop, double relBottom) {
+        this(new LevelVector(relX, relY), relLeft, relRight, relTop, relBottom);
     }
     
     @Override

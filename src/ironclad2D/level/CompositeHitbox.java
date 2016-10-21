@@ -11,6 +11,10 @@ public class CompositeHitbox extends Hitbox {
     private double top = 0;
     private double bottom = 0;
     
+    public CompositeHitbox(LevelVector relPosition) {
+        super(relPosition);
+    }
+    
     public CompositeHitbox(double relX, double relY) {
         super(relX, relY);
     }

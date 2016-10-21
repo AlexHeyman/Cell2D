@@ -123,16 +123,28 @@ public abstract class LevelObject {
         locatorHitbox.addChild(solidHitbox);
     }
     
+    public final LevelVector getPosition() {
+        return locatorHitbox.getRelPosition();
+    }
+    
     public final double getX() {
         return locatorHitbox.getRelX();
     }
     
-    public final void setX(double x) {
-        locatorHitbox.setRelX(x);
-    }
-    
     public final double getY() {
         return locatorHitbox.getRelY();
+    }
+    
+    public final void setPosition(LevelVector position) {
+        locatorHitbox.setRelPosition(position);
+    }
+    
+    public final void setPosition(double x, double y) {
+        locatorHitbox.setRelPosition(x, y);
+    }
+    
+    public final void setX(double x) {
+        locatorHitbox.setRelX(x);
     }
     
     public final void setY(double y) {

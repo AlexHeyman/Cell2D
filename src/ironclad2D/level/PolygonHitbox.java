@@ -8,19 +8,27 @@ public class PolygonHitbox extends Hitbox {
     private final List<RelAbsPair> vertices;
     private double left, right, top, bottom, centerX, centerY;
     
-    public PolygonHitbox(double relX, double relY, LevelVector[] relVertices) {
-        super(relX, relY);
+    public PolygonHitbox(LevelVector relPosition, LevelVector[] relVertices) {
+        super(relPosition);
         vertices = new ArrayList<>(relVertices.length);
         for (LevelVector relVertex : relVertices) {
-            vertices.add(new RelAbsPair(relVertex.getCopy(), null));
+            vertices.add(new RelAbsPair(new LevelVector(relVertex), null));
         }
         updateData();
     }
     
-    public PolygonHitbox(double relX, double relY) {
-        super(relX, relY);
+    public PolygonHitbox(double relX, double relY, LevelVector[] relVertices) {
+        this(new LevelVector(relX, relY), relVertices);
+    }
+    
+    public PolygonHitbox(LevelVector relPosition) {
+        super(relPosition);
         vertices = new ArrayList<>();
         updateData();
+    }
+    
+    public PolygonHitbox(double relX, double relY) {
+        this(new LevelVector(relX, relY));
     }
     
     private PolygonHitbox(double relX, double relY, List<RelAbsPair> vertices) {
@@ -62,7 +70,7 @@ public class PolygonHitbox extends Hitbox {
     public Hitbox getCopy() {
         List<RelAbsPair> newVertices = new ArrayList<>(vertices.size());
         for (RelAbsPair vertex : vertices) {
-            newVertices.add(new RelAbsPair(vertex.rel.getCopy(), null));
+            newVertices.add(new RelAbsPair(new LevelVector(vertex.rel), null));
         }
         return new PolygonHitbox(0, 0, newVertices);
     }
@@ -78,7 +86,7 @@ public class PolygonHitbox extends Hitbox {
         } else {
             boolean comparing = false;
             for (RelAbsPair vertex : vertices) {
-                vertex.abs = vertex.rel.getCopy().relativeTo(this);
+                vertex.abs.copy(vertex.rel).relativeTo(this);
                 centerX += vertex.abs.getX();
                 centerY += vertex.abs.getY();
                 if (comparing) {
@@ -105,7 +113,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     public final LevelVector getRelVertex(int index) {
-        return vertices.get(index).rel.getCopy();
+        return new LevelVector(vertices.get(index).rel);
     }
     
     public final double getRelVertexX(int index) {
@@ -117,7 +125,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     public final LevelVector getAbsVertex(int index) {
-        return vertices.get(index).abs.getCopy();
+        return new LevelVector(vertices.get(index).abs);
     }
     
     public final double getAbsVertexX(int index) {
@@ -129,7 +137,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     public final void addVertex(LevelVector relVertex) {
-        vertices.add(new RelAbsPair(relVertex.getCopy(), null));
+        vertices.add(new RelAbsPair(new LevelVector(relVertex), null));
         updateData();
     }
     
@@ -139,7 +147,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     public final void setRelVertex(int index, LevelVector relVertex) {
-        vertices.set(index, new RelAbsPair(relVertex.getCopy(), null));
+        vertices.set(index, new RelAbsPair(new LevelVector(relVertex), null));
         updateData();
     }
     
