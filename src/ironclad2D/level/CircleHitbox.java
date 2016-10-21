@@ -6,7 +6,9 @@ public class CircleHitbox extends Hitbox {
     
     public CircleHitbox(double relX, double relY, double relRadius) {
         super(relX, relY);
-        setRelRadius(relRadius);
+        if (!setRelRadius(relRadius)) {
+            throw new RuntimeException("Attempted to give a circle hitbox a negative radius");
+        }
     }
     
     @Override
@@ -18,13 +20,14 @@ public class CircleHitbox extends Hitbox {
         return relRadius;
     }
     
-    public final void setRelRadius(double relRadius) {
-        if (relRadius < 0) {
-            throw new RuntimeException("Attempted to give a circle hitbox a negative radius");
+    public final boolean setRelRadius(double relRadius) {
+        if (relRadius >= 0) {
+            this.relRadius = relRadius;
+            absRadius = relRadius;
+            updateChunks();
+            return true;
         }
-        this.relRadius = relRadius;
-        absRadius = relRadius;
-        updateChunks();
+        return false;
     }
     
     public final double getAbsRadius() {

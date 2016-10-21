@@ -31,17 +31,18 @@ public class RectangleHitbox extends Hitbox {
         return relLeft;
     }
     
-    public final void setRelLeft(double relLeft) {
-        if (relLeft > relRight) {
-            throw new RuntimeException("Attempted to give a rectangle hitbox a negative width");
+    public final boolean setRelLeft(double relLeft) {
+        if (relLeft <= relRight) {
+            this.relLeft = relLeft;
+            if (getAbsXFlip()) {
+                absRight = -relLeft;
+            } else {
+                absLeft = relLeft;
+            }
+            updateChunks();
+            return true;
         }
-        this.relLeft = relLeft;
-        if (getAbsXFlip()) {
-            absRight = -relLeft;
-        } else {
-            absLeft = relLeft;
-        }
-        updateChunks();
+        return false;
     }
     
     public final double getAbsLeft() {
@@ -52,17 +53,18 @@ public class RectangleHitbox extends Hitbox {
         return relRight;
     }
     
-    public final void setRelRight(double relRight) {
-        if (relLeft > relRight) {
-            throw new RuntimeException("Attempted to give a rectangle hitbox a negative width");
+    public final boolean setRelRight(double relRight) {
+        if (relLeft <= relRight) {
+            this.relRight = relRight;
+            if (getAbsXFlip()) {
+                absLeft = -relRight;
+            } else {
+                absRight = relRight;
+            }
+            updateChunks();
+            return true;
         }
-        this.relRight = relRight;
-        if (getAbsXFlip()) {
-            absLeft = -relRight;
-        } else {
-            absRight = relRight;
-        }
-        updateChunks();
+        return false;
     }
     
     public final double getAbsRight() {
@@ -73,17 +75,18 @@ public class RectangleHitbox extends Hitbox {
         return relTop;
     }
     
-    public final void setRelTop(double relTop) {
-        if (relTop > relBottom) {
-            throw new RuntimeException("Attempted to give a rectangle hitbox a negative height");
+    public final boolean setRelTop(double relTop) {
+        if (relTop <= relBottom) {
+            this.relTop = relTop;
+            if (getAbsYFlip()) {
+                absBottom = -relTop;
+            } else {
+                absTop = relTop;
+            }
+            updateChunks();
+            return true;
         }
-        this.relTop = relTop;
-        if (getAbsYFlip()) {
-            absBottom = -relTop;
-        } else {
-            absTop = relTop;
-        }
-        updateChunks();
+        return false;
     }
     
     public final double getAbsTop() {
@@ -94,17 +97,18 @@ public class RectangleHitbox extends Hitbox {
         return relBottom;
     }
     
-    public final void setRelBottom(double relBottom) {
-        if (relTop > relBottom) {
-            throw new RuntimeException("Attempted to give a rectangle hitbox a negative height");
+    public final boolean setRelBottom(double relBottom) {
+        if (relTop <= relBottom) {
+            this.relBottom = relBottom;
+            if (getAbsYFlip()) {
+                absTop = -relBottom;
+            } else {
+                absBottom = relBottom;
+            }
+            updateChunks();
+            return true;
         }
-        this.relBottom = relBottom;
-        if (getAbsYFlip()) {
-            absTop = -relBottom;
-        } else {
-            absBottom = relBottom;
-        }
-        updateChunks();
+        return false;
     }
     
     public final double getAbsBottom() {

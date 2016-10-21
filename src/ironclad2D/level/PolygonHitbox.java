@@ -163,6 +163,11 @@ public class PolygonHitbox extends Hitbox {
         updateData();
     }
     
+    public final void clearVertices() {
+        vertices.clear();
+        updateData();
+    }
+    
     public final PolygonHitbox translate(LevelVector translation) {
         for (RelAbsPair vertex : vertices) {
             vertex.rel.add(translation);

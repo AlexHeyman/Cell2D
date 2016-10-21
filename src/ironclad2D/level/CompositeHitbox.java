@@ -103,6 +103,14 @@ public class CompositeHitbox extends Hitbox {
         return false;
     }
     
+    public final void clearComponents() {
+        for (Hitbox hitbox : components.values()) {
+            removeChild(hitbox);
+        }
+        components.clear();
+        updateData();
+    }
+    
     @Override
     public final double getLeftEdge() {
         return getAbsX() + left;
