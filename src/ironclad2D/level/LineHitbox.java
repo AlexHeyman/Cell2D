@@ -2,12 +2,20 @@ package ironclad2D.level;
 
 public class LineHitbox extends Hitbox {
     
-    private LevelVector relDifference, absDifference;
+    private final LevelVector relDifference, absDifference;
     private double left, right, top, bottom;
+    
+    public LineHitbox(LevelVector relPosition, LevelVector relDifference) {
+        super(relPosition);
+        this.relDifference = new LevelVector(relDifference);
+        absDifference = new LevelVector();
+        updateData();
+    }
     
     public LineHitbox(double relX, double relY, double relDX, double relDY) {
         super(relX, relY);
         relDifference = new LevelVector(relDX, relDY);
+        absDifference = new LevelVector();
         updateData();
     }
     
@@ -17,7 +25,7 @@ public class LineHitbox extends Hitbox {
     }
     
     private void updateData() {
-        absDifference = relDifference.getCopy().relativeTo(this);
+        absDifference.copy(relDifference).relativeTo(this);
         left = Math.min(absDifference.getX(), 0);
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
@@ -25,34 +33,21 @@ public class LineHitbox extends Hitbox {
         updateChunks();
     }
     
+    public final LevelVector getRelDifference() {
+        return new LevelVector(relDifference);
+    }
+    
     public final double getRelDX() {
         return relDifference.getX();
-    }
-    
-    public final void setRelDX(double relDX) {
-        relDifference.setX(relDX);
-        updateData();
-    }
-    
-    public final double getAbsDX() {
-        return absDifference.getX();
     }
     
     public final double getRelDY() {
         return relDifference.getY();
     }
     
-    public final void setRelDY(double relDY) {
-        relDifference.setY(relDY);
+    public final void setRelDifference(LevelVector difference) {
+        relDifference.copy(difference);
         updateData();
-    }
-    
-    public final double getAbsDY() {
-        return absDifference.getY();
-    }
-    
-    public final LevelVector getRelDifference() {
-        return relDifference.getCopy();
     }
     
     public final void setRelDifference(double relDX, double relDY) {
@@ -60,8 +55,26 @@ public class LineHitbox extends Hitbox {
         updateData();
     }
     
+    public final void setRelDX(double relDX) {
+        relDifference.setX(relDX);
+        updateData();
+    }
+    
+    public final void setRelDY(double relDY) {
+        relDifference.setY(relDY);
+        updateData();
+    }
+    
     public final LevelVector getAbsDifference() {
-        return absDifference.getCopy();
+        return new LevelVector(absDifference);
+    }
+    
+    public final double getAbsDX() {
+        return absDifference.getX();
+    }
+    
+    public final double getAbsDY() {
+        return absDifference.getY();
     }
     
     public final double getLength() {

@@ -4,11 +4,15 @@ public class CircleHitbox extends Hitbox {
     
     private double relRadius, absRadius;
     
-    public CircleHitbox(double relX, double relY, double relRadius) {
-        super(relX, relY);
+    public CircleHitbox(LevelVector relPosition, double relRadius) {
+        super(relPosition);
         if (!setRelRadius(relRadius)) {
             throw new RuntimeException("Attempted to give a circle hitbox a negative radius");
         }
+    }
+    
+    public CircleHitbox(double relX, double relY, double relRadius) {
+        this(new LevelVector(relX, relY), relRadius);
     }
     
     @Override

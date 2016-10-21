@@ -22,7 +22,7 @@ public abstract class Hitbox {
     int[] chunkRange = null;
     int drawLayer = 0;
     int numChunkRoles = 0;
-    private LevelVector relPosition, absPosition;
+    private final LevelVector relPosition, absPosition;
     private boolean relXFlip = false;
     private boolean absXFlip = false;
     private boolean relYFlip = false;
@@ -34,10 +34,14 @@ public abstract class Hitbox {
     private double absAngleX = 1;
     private double absAngleY = 0;
     
-    public Hitbox(double relX, double relY) {
+    public Hitbox(LevelVector relPosition) {
         id = getNextID();
-        relPosition = new LevelVector(relX, relY);
-        absPosition = relPosition.getCopy();
+        this.relPosition = new LevelVector(relPosition);
+        absPosition = new LevelVector(relPosition);
+    }
+    
+    public Hitbox(double relX, double relY) {
+        this(new LevelVector(relX, relY));
     }
     
     public abstract Hitbox getCopy();
@@ -279,34 +283,21 @@ public abstract class Hitbox {
         }
     }
     
+    public final LevelVector getRelPosition() {
+        return new LevelVector(relPosition);
+    }
+    
     public final double getRelX() {
         return relPosition.getX();
-    }
-    
-    public final void setRelX(double relX) {
-        relPosition.setX(relX);
-        recursivelyUpdateAbsPosition();
-    }
-    
-    public final double getAbsX() {
-        return absPosition.getX();
     }
     
     public final double getRelY() {
         return relPosition.getY();
     }
     
-    public final void setRelY(double relY) {
-        relPosition.setY(relY);
+    public final void setRelPosition(LevelVector relPosition) {
+        this.relPosition.copy(relPosition);
         recursivelyUpdateAbsPosition();
-    }
-    
-    public final double getAbsY() {
-        return absPosition.getY();
-    }
-    
-    public final LevelVector getRelPosition() {
-        return relPosition.getCopy();
     }
     
     public final void setRelPosition(double relX, double relY) {
@@ -314,15 +305,33 @@ public abstract class Hitbox {
         recursivelyUpdateAbsPosition();
     }
     
+    public final void setRelX(double relX) {
+        relPosition.setX(relX);
+        recursivelyUpdateAbsPosition();
+    }
+    
+    public final void setRelY(double relY) {
+        relPosition.setY(relY);
+        recursivelyUpdateAbsPosition();
+    }
+    
     public final LevelVector getAbsPosition() {
-        return absPosition.getCopy();
+        return new LevelVector(absPosition);
+    }
+    
+    public final double getAbsX() {
+        return absPosition.getX();
+    }
+    
+    public final double getAbsY() {
+        return absPosition.getY();
     }
     
     private void updateAbsPosition() {
         if (parent == null) {
-            absPosition = relPosition.getCopy();
+            absPosition.copy(relPosition);
         } else {
-            absPosition = parent.absPosition.getCopy().add(relPosition.getCopy().relativeTo(parent));
+            absPosition.copy(parent.absPosition).add(new LevelVector(relPosition).relativeTo(parent));
         }
         updateChunks();
     }

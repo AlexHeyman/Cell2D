@@ -6,6 +6,16 @@ public class LevelVector {
     
     private double x, y, lengthSquared, length, angle, angleX, angleY;
     
+    public LevelVector() {
+        x = 0;
+        y = 0;
+        lengthSquared = 0;
+        length = 0;
+        angle = 0;
+        angleX = 1;
+        angleY = 0;
+    }
+    
     public LevelVector(double x, double y) {
         setCoordinates(x, y);
     }
@@ -21,19 +31,19 @@ public class LevelVector {
         length = 1;
     }
     
-    private LevelVector(double x, double y, double lengthSquared,
-            double length, double angle, double angleX, double angleY) {
-        this.x = x;
-        this.y = y;
-        this.lengthSquared = lengthSquared;
-        this.length = length;
-        this.angle = angle;
-        this.angleX = angleX;
-        this.angleY = angleY;
+    public LevelVector(LevelVector vector) {
+        copy(vector);
     }
     
-    public final LevelVector getCopy() {
-        return new LevelVector(x, y, lengthSquared, length, angle, angleX, angleY);
+    public final LevelVector copy(LevelVector vector) {
+        x = vector.x;
+        y = vector.y;
+        lengthSquared = vector.lengthSquared;
+        length = vector.length;
+        angle = vector.angle;
+        angleX = vector.angleX;
+        angleY = vector.angleY;
+        return this;
     }
     
     public final double getX() {
