@@ -50,6 +50,7 @@ public abstract class ThinkerObject extends AnimatedObject {
     
     @Override
     void addChunkData() {
+        super.addChunkData();
         if (hasCollision && collisionHitbox != null) {
             levelState.addCollisionHitbox(collisionHitbox);
         }

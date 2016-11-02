@@ -1,18 +1,18 @@
 package ironclad2D.level;
 
-public class LineHitbox extends Hitbox {
+public class SlopeHitbox extends Hitbox {
     
     private final LevelVector relDifference, absDifference;
     private double left, right, top, bottom;
     
-    public LineHitbox(LevelVector relPosition, LevelVector relDifference) {
+    public SlopeHitbox(LevelVector relPosition, LevelVector relDifference) {
         super(relPosition);
         this.relDifference = new LevelVector(relDifference);
         absDifference = new LevelVector();
         updateData();
     }
     
-    public LineHitbox(double relX, double relY, double relDX, double relDY) {
+    public SlopeHitbox(double relX, double relY, double relDX, double relDY) {
         super(relX, relY);
         relDifference = new LevelVector(relDX, relDY);
         absDifference = new LevelVector();
@@ -21,11 +21,11 @@ public class LineHitbox extends Hitbox {
     
     @Override
     public Hitbox getCopy() {
-        return new LineHitbox(new LevelVector(0, 0), relDifference);
+        return new SlopeHitbox(new LevelVector(0, 0), relDifference);
     }
     
     private void updateData() {
-        absDifference.copy(relDifference).relativeTo(this);
+        absDifference.copy(relDifference).flip(getAbsXFlip(), getAbsYFlip());
         left = Math.min(absDifference.getX(), 0);
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
@@ -77,20 +77,6 @@ public class LineHitbox extends Hitbox {
         return absDifference.getY();
     }
     
-    public final double getLength() {
-        return relDifference.getLength();
-    }
-    
-    public final void setLength(double length) {
-        relDifference.setLength(length);
-        updateData();
-    }
-    
-    public final void scale(double scaleFactor) {
-        relDifference.scale(scaleFactor);
-        updateData();
-    }
-    
     public final double getX2() {
         return getAbsX() + absDifference.getX();
     }
@@ -136,11 +122,6 @@ public class LineHitbox extends Hitbox {
     
     @Override
     final void updateAbsYFlipActions() {
-        updateData();
-    }
-    
-    @Override
-    final void updateAbsAngleActions() {
         updateData();
     }
     
