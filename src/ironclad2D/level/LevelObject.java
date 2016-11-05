@@ -191,6 +191,10 @@ public abstract class LevelObject {
         locatorHitbox.setRelAngle(angle);
     }
     
+    public final void changeAngle(double angle) {
+        locatorHitbox.changeRelAngle(angle);
+    }
+    
     public final double getLeftEdge() {
         return locatorHitbox.getLeftEdge();
     }

@@ -459,6 +459,10 @@ public abstract class Hitbox {
         updateAbsAngleActions();
     }
     
+    public final void changeRelAngle(double relAngle) {
+        setRelAngle(this.relAngle + relAngle);
+    }
+    
     public final double getAbsAngle() {
         return absAngle;
     }

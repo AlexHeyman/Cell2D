@@ -216,7 +216,7 @@ public class PolygonHitbox extends Hitbox {
         return this;
     }
     
-    public final PolygonHitbox changeAngle(double angle) {
+    public final PolygonHitbox rotate(double angle) {
         for (RelAbsPair vertex : vertices) {
             vertex.rel.changeAngle(angle);
         }

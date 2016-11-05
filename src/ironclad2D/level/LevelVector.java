@@ -168,12 +168,20 @@ public class LevelVector {
         return setCoordinates(x + vector.x, y + vector.y);
     }
     
+    public final LevelVector add(double x, double y) {
+        return setCoordinates(this.x + x, this.y + y);
+    }
+    
     public static final LevelVector add(LevelVector first, LevelVector second) {
         return new LevelVector(first.x + second.x, first.y + second.y);
     }
     
     public final LevelVector sub(LevelVector vector) {
         return setCoordinates(x - vector.x, y - vector.y);
+    }
+    
+    public final LevelVector sub(double x, double y) {
+        return setCoordinates(this.x - x, this.y - y);
     }
     
     public static final LevelVector sub(LevelVector first, LevelVector second) {

@@ -58,9 +58,9 @@ public class LevelState extends IroncladGameState {
     };
     
     private final Set<LevelThinker> levelThinkers = new HashSet<>();
-    private boolean movementHasOccurred = true;
+    private boolean movementHasOccurred = false;
     private final Set<LevelObject> levelObjects = new HashSet<>();
-    private final SortedSet<ThinkerObject> collidingObjects = new TreeSet<>(movementPriorityComparator);
+    private final SortedSet<ThinkerObject> thinkerObjects = new TreeSet<>(movementPriorityComparator);
     private double chunkWidth, chunkHeight;
     private final Map<Point,Chunk> chunks = new HashMap<>();
     private final SortedMap<Integer,LevelLayer> levelLayers = new TreeMap<>();
@@ -362,18 +362,18 @@ public class LevelState extends IroncladGameState {
         }
     }
     
-    final void addCollidingObject(ThinkerObject object) {
-        collidingObjects.add(object);
+    final void addThinkerObject(ThinkerObject object) {
+        thinkerObjects.add(object);
     }
     
-    final void removeCollidingObject(ThinkerObject object) {
-        collidingObjects.remove(object);
+    final void removeThinkerObject(ThinkerObject object) {
+        thinkerObjects.remove(object);
     }
     
-    final void changeCollidingObjectMovementPriority(ThinkerObject object, int movementPriority) {
-        collidingObjects.remove(object);
+    final void changeThinkerObjectMovementPriority(ThinkerObject object, int movementPriority) {
+        thinkerObjects.remove(object);
         object.movementPriority = movementPriority;
-        collidingObjects.add(object);
+        thinkerObjects.add(object);
     }
     
     public final double getChunkWidth() {
@@ -391,9 +391,9 @@ public class LevelState extends IroncladGameState {
         if (chunkHeight <= 0) {
             throw new RuntimeException("Attempted to give a level state a non-positive chunk height");
         }
+        chunks.clear();
         this.chunkWidth = chunkWidth;
         this.chunkHeight = chunkHeight;
-        chunks.clear();
         if (!levelObjects.isEmpty()) {
             for (LevelObject object : levelObjects) {
                 object.addChunkData();
@@ -539,17 +539,31 @@ public class LevelState extends IroncladGameState {
     public final void stepActions(IroncladGame game) {
         delayState = this;
         double timeFactor = getTimeFactor();
-        for (LevelThinker thinker : levelThinkers) {
-            thinker.beforeMovementActions(game, this);
+        if (timeFactor > 0) {
+            for (LevelThinker thinker : levelThinkers) {
+                thinker.beforeMovementActions(game, this);
+            }
+            changeObjects(game);
+            for (ThinkerObject object : thinkerObjects) {
+                double objectTimeFactor = timeFactor*object.getTimeFactor();
+                double dx = objectTimeFactor*(object.getVelocityX() + object.getDisplacementX());
+                double dy = objectTimeFactor*(object.getVelocityY() + object.getDisplacementY());
+                if (dx != 0 || dy != 0) {
+                    if (object.hasCollision() && object.getCollisionHitbox() != null) {
+                        object.setPosition(object.getX() + dx, object.getY() + dy);
+                    } else {
+                        object.setPosition(object.getX() + dx, object.getY() + dy);
+                    }
+                }
+                object.setDisplacement(0, 0);
+            }
+            movementHasOccurred = true;
+            for (LevelThinker thinker : levelThinkers) {
+                thinker.afterMovementActions(game, this);
+            }
+            changeObjects(game);
+            movementHasOccurred = false;
         }
-        changeObjects(game);
-        
-        movementHasOccurred = true;
-        for (LevelThinker thinker : levelThinkers) {
-            thinker.afterMovementActions(game, this);
-        }
-        changeObjects(game);
-        movementHasOccurred = false;
         delayState = null;
     }
     

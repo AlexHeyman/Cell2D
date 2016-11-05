@@ -26,6 +26,8 @@ public abstract class ThinkerObject extends AnimatedObject {
     int movementPriority = 0;
     private boolean hasCollision = false;
     private Hitbox collisionHitbox;
+    private final LevelVector velocity = new LevelVector();
+    private final LevelVector displacement = new LevelVector();
     
     public ThinkerObject(Hitbox locatorHitbox, int drawLayer) {
         super(locatorHitbox, drawLayer);
@@ -40,11 +42,9 @@ public abstract class ThinkerObject extends AnimatedObject {
     void addActions() {
         super.addActions();
         levelState.addThinker(thinker);
+        levelState.addThinkerObject(this);
         if (!upcomingStates.isEmpty()) {
             endState(levelState.getGame(), levelState, false);
-        }
-        if (hasCollision && collisionHitbox != null) {
-            levelState.addCollisionHitbox(collisionHitbox);
         }
     }
     
@@ -60,8 +60,8 @@ public abstract class ThinkerObject extends AnimatedObject {
     void removeActions() {
         super.removeActions();
         levelState.removeThinker(thinker);
+        levelState.removeThinkerObject(this);
         if (hasCollision && collisionHitbox != null) {
-            levelState.removeCollidingObject(this);
             levelState.removeCollisionHitbox(collisionHitbox);
         }
     }
@@ -207,10 +207,10 @@ public abstract class ThinkerObject extends AnimatedObject {
     }
     
     public final void setMovementPriority(int movementPriority) {
-        if (levelState != null && hasCollision && collisionHitbox != null) {
-            levelState.changeCollidingObjectMovementPriority(this, movementPriority);
-        } else {
+        if (levelState == null) {
             this.movementPriority = movementPriority;
+        } else {
+            levelState.changeThinkerObjectMovementPriority(this, movementPriority);
         }
     }
     
@@ -221,10 +221,8 @@ public abstract class ThinkerObject extends AnimatedObject {
     public final void setCollision(boolean hasCollision) {
         if (levelState != null && collisionHitbox != null) {
             if (hasCollision && !this.hasCollision) {
-                levelState.addCollidingObject(this);
                 levelState.addCollisionHitbox(collisionHitbox);
             } else if (!hasCollision && this.hasCollision) {
-                levelState.removeCollidingObject(this);
                 levelState.removeCollisionHitbox(collisionHitbox);
             }
         }
@@ -253,23 +251,87 @@ public abstract class ThinkerObject extends AnimatedObject {
                 if (this.collisionHitbox != null) {
                     this.collisionHitbox.removeAsCollisionHitbox(hasCollision);
                 }
-                boolean hasCollisionHitbox = this.collisionHitbox != null;
                 this.collisionHitbox = collisionHitbox;
-                if (collisionHitbox == null) {
-                    if (levelState != null && hasCollision && hasCollisionHitbox) {
-                        levelState.removeCollidingObject(this);
-                    }
-                } else {
+                if (collisionHitbox != null) {
                     locatorHitbox.addChild(collisionHitbox);
                     collisionHitbox.addAsCollisionHitbox(hasCollision);
-                    if (levelState != null && hasCollision && !hasCollisionHitbox) {
-                        levelState.addCollidingObject(this);
-                    }
                 }
                 return true;
             }
         }
         return false;
+    }
+    
+    public final LevelVector getVelocity() {
+        return new LevelVector(velocity);
+    }
+    
+    public final double getVelocityX() {
+        return velocity.getX();
+    }
+    
+    public final double getVelocityY() {
+        return velocity.getY();
+    }
+    
+    public final void setVelocity(LevelVector velocity) {
+        this.velocity.copy(velocity);
+    }
+    
+    public final void setVelocity(double velocityX, double velocityY) {
+        velocity.setCoordinates(velocityX, velocityY);
+    }
+    
+    public final void setVelocityX(double velocityX) {
+        velocity.setX(velocityX);
+    }
+    
+    public final void setVelocityY(double velocityY) {
+        velocity.setY(velocityY);
+    }
+    
+    public final LevelVector getDisplacement() {
+        return new LevelVector(displacement);
+    }
+    
+    public final double getDisplacementX() {
+        return displacement.getX();
+    }
+    
+    public final double getDisplacementY() {
+        return displacement.getY();
+    }
+    
+    public final void setDisplacement(LevelVector displacement) {
+        this.displacement.copy(displacement);
+    }
+    
+    public final void changeDisplacement(LevelVector displacement) {
+        this.displacement.add(displacement);
+    }
+    
+    public final void setDisplacement(double displacementX, double displacementY) {
+        displacement.setCoordinates(displacementX, displacementY);
+    }
+    
+    public final void changeDisplacement(double displacementX, double displacementY) {
+        displacement.add(displacementX, displacementY);
+    }
+    
+    public final void setDisplacementX(double displacementX) {
+        displacement.setX(displacementX);
+    }
+    
+    public final void changeDisplacementX(double displacementX) {
+        displacement.add(displacementX, 0);
+    }
+    
+    public final void setDisplacementY(double displacementY) {
+        displacement.setY(displacementY);
+    }
+    
+    public final void changeDisplacementY(double displacementY) {
+        displacement.add(0, displacementY);
     }
     
 }
