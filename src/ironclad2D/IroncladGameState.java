@@ -1,26 +1,28 @@
 package ironclad2D;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import org.newdawn.slick.Graphics;
 
-public abstract class IroncladGameState {
+public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
     
-    private static IroncladGameState delayState = null;
-    private static final List<ThinkerChangeData> thinkersToChange = new LinkedList<>();
-    
+    private boolean initialized = false;
+    private final T thisState;
     private IroncladGame game;
     private int id;
     boolean isActive = false;
+    private double timeFactor = 1;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
-    private final Thinker<IroncladGameState> thinker = new StateThinker();
-    private final Set<Thinker> thinkers = new HashSet<>();
+    private final Set<U> thinkers = new HashSet<>();
+    private int thinkerIterators = 0;
+    private final Queue<ThinkerChangeData<T,U,V>> thinkersToChange = new LinkedList<>();
+    private boolean changingThinkers = false;
     
     public IroncladGameState(IroncladGame game, int id) {
         if (game == null) {
@@ -29,7 +31,11 @@ public abstract class IroncladGameState {
         this.game = game;
         this.id = id;
         game.addState(this);
+        thisState = getThis();
+        initialized = true;
     }
+    
+    public abstract T getThis();
     
     public final IroncladGame getGame() {
         return game;
@@ -41,6 +47,17 @@ public abstract class IroncladGameState {
     
     public final boolean isActive() {
         return isActive;
+    }
+    
+    public final double getTimeFactor() {
+        return timeFactor;
+    }
+    
+    public final void setTimeFactor(double timeFactor) {
+        if (timeFactor < 0) {
+            throw new RuntimeException("Attempted to give a game state a negative time factor");
+        }
+        this.timeFactor = timeFactor;
     }
     
     public final boolean addAnimInstance(AnimationInstance instance) {
@@ -137,123 +154,167 @@ public abstract class IroncladGameState {
         IDInstances.clear();
     }
     
-    private class ThinkerChangeData {
+    public class ThinkerIterator implements Iterator<U> {
         
-        private final Thinker thinker;
-        private final IroncladGameState newState;
+        private boolean disposed = false;
+        private final Iterator<U> iterator = thinkers.iterator();
+        private U lastThinker = null;
         
-        private ThinkerChangeData(Thinker thinker, IroncladGameState newState) {
+        private ThinkerIterator() {
+            thinkerIterators++;
+        }
+        
+        @Override
+        public final boolean hasNext() {
+            if (disposed) {
+                return false;
+            }
+            boolean hasNext = iterator.hasNext();
+            if (!hasNext) {
+                dispose();
+            }
+            return hasNext;
+            
+        }
+        
+        @Override
+        public final U next() {
+            if (disposed) {
+                return null;
+            }
+            lastThinker = iterator.next();
+            return lastThinker;
+        }
+        
+        @Override
+        public final void remove() {
+            if (!disposed && lastThinker != null) {
+                removeThinker(lastThinker);
+                lastThinker = null;
+            }
+        }
+        
+        public final boolean hasBeenDisposed() {
+            return disposed;
+        }
+        
+        public final void dispose() {
+            if (!disposed) {
+                disposed = true;
+                thinkerIterators--;
+                changeThinkers();
+            }
+        }
+        
+    }
+    
+    public final ThinkerIterator thinkerIterator() {
+        return new ThinkerIterator();
+    }
+    
+    private static class ThinkerChangeData<T extends IroncladGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
+        
+        private boolean used = false;
+        private final U thinker;
+        private final T newState;
+        
+        private ThinkerChangeData(U thinker, T newState) {
             this.thinker = thinker;
             this.newState = newState;
         }
         
     }
     
-    final void addThinker(Thinker thinker) {
-        if (delayState != null && (delayState == this || delayState == thinker.state)) {
-            thinkersToChange.add(new ThinkerChangeData(thinker, this));
-        } else {
-            addActions(game, thinker);
-        }
-    }
-    
-    private void addActions(IroncladGame game, Thinker thinker) {
-        thinkers.add(thinker);
-        thinker.state = this;
-        thinker.addedActions(game, thinker.state);
-    }
-    
-    final boolean removeThinker(Thinker thinker) {
-        if (thinker.newState == this) {
-            thinker.newState = null;
-            if (delayState != null && (delayState == this || delayState == thinker.state)) {
-                thinkersToChange.add(new ThinkerChangeData(thinker, null));
-            } else {
-                removeActions(game, thinker);
-            }
+    public final boolean addThinker(U thinker) {
+        if (initialized && thinker.newState == null) {
+            addThinkerChangeData(thinker, thisState);
             return true;
         }
         return false;
     }
     
-    private void removeActions(IroncladGame game, Thinker thinker) {
-        thinker.removedActions(game, thinker.state);
+    private void addActions(U thinker) {
+        thinkers.add(thinker);
+        thinker.state = thisState;
+        thinker.addActions();
+        thinker.addedActions(game, thisState);
+        addThinkerActions(game, thinker);
+    }
+    
+    public final boolean removeThinker(U thinker) {
+        if (initialized && thinker.newState == thisState) {
+            addThinkerChangeData(thinker, null);
+            return true;
+        }
+        return false;
+    }
+    
+    private void removeActions(U thinker) {
+        removeThinkerActions(game, thinker);
+        thinker.removedActions(game, thisState);
         thinkers.remove(thinker);
         thinker.state = null;
     }
     
-    private void changeThinkers(IroncladGame game) {
-        while (!thinkersToChange.isEmpty()) {
-            List<ThinkerChangeData> newChanges = new ArrayList<>(thinkersToChange);
-            thinkersToChange.clear();
-            for (ThinkerChangeData data : newChanges) {
-                if (data.thinker.state != null) {
-                    data.thinker.state.removeActions(game, data.thinker);
-                }
-                if (data.newState != null) {
-                    data.newState.addActions(game, data.thinker);
-                }
-            }
+    private void addThinkerChangeData(U thinker, T newState) {
+        thinker.newState = newState;
+        ThinkerChangeData<T,U,V> data = new ThinkerChangeData<>(thinker, newState);
+        if (thinker.state != null) {
+            IroncladGameState<T,U,V> state = thinker.state;
+            state.thinkersToChange.add(data);
+            state.changeThinkers();
+        }
+        if (newState != null) {
+            IroncladGameState<T,U,V> state = newState;
+            state.thinkersToChange.add(data);
+            state.changeThinkers();
         }
     }
     
-    final void doStep(IroncladGame game) {
-        delayState = this;
-        double timeFactor = getTimeFactor();
-        if (timeFactor > 0) {
+    private void changeThinkers() {
+        if (thinkerIterators == 0 && !changingThinkers) {
+            changingThinkers = true;
+            while (!thinkersToChange.isEmpty()) {
+                ThinkerChangeData<T,U,V> data = thinkersToChange.remove();
+                if (!data.used) {
+                    data.used = true;
+                    IroncladGameState<T,U,V> thinkerState = data.thinker.state;
+                    if (thinkerState != null) {
+                        thinkerState.removeActions(data.thinker);
+                    }
+                    IroncladGameState<T,U,V> newState = data.newState;
+                    if (newState != null) {
+                        newState.addActions(data.thinker);
+                    }
+                }
+            }
+            changingThinkers = false;
+        }
+    }
+    
+    final void doStep() {
+        double currentTimeFactor = timeFactor;
+        if (currentTimeFactor > 0) {
             for (AnimationInstance instance : animInstances) {
-                instance.update(timeFactor);
+                instance.update(currentTimeFactor);
             }
-            for (Thinker listThinker : thinkers) {
-                listThinker.update(game, timeFactor);
+            Iterator<U> iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().update(game, currentTimeFactor);
             }
-            changeThinkers(game);
-            thinker.update(game, 1);
-            changeThinkers(game);
         }
-        for (Thinker listThinker : thinkers) {
-            listThinker.stepActions(game, listThinker.state);
+        Iterator<U> iterator = thinkerIterator();
+        while (iterator.hasNext()) {
+            iterator.next().step(game, thisState);
         }
-        changeThinkers(game);
-        delayState = null;
-        thinker.stepActions(game, thinker.state);
+        stepActions(game);
     }
     
-    public final double getTimeFactor() {
-        return thinker.getTimeFactor();
-    }
+    public void addThinkerActions(IroncladGame game, U thinker) {}
     
-    public final void setTimeFactor(double timeFactor) {
-        thinker.setTimeFactor(timeFactor);
-    }
-    
-    public void timeUnitActions(IroncladGame game) {}
-    
-    public final int getTimerValue(TimedEvent<IroncladGameState> timedEvent) {
-        return thinker.getTimerValue(timedEvent);
-    }
-    
-    public final void setTimerValue(TimedEvent<IroncladGameState> timedEvent, int value) {
-        thinker.setTimerValue(timedEvent, value);
-    }
+    public void removeThinkerActions(IroncladGame game, U thinker) {}
     
     public void stepActions(IroncladGame game) {}
-    
-    private class StateThinker extends Thinker<IroncladGameState> {
-        
-        private StateThinker() {}
-        
-        @Override
-        public final void timeUnitActions(IroncladGame game, IroncladGameState state) {
-            IroncladGameState.this.timeUnitActions(game);
-        }
-        
-        @Override
-        public final void stepActions(IroncladGame game, IroncladGameState state) {
-            IroncladGameState.this.stepActions(game);
-        }
-        
-    }
     
     public void renderActions(IroncladGame game, Graphics g, int x1, int y1, int x2, int y2) {}
     

@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -23,17 +24,14 @@ import java.util.TreeSet;
 import javafx.util.Pair;
 import org.newdawn.slick.Graphics;
 
-public class LevelState extends IroncladGameState {
-    
-    private static LevelState delayState = null;
-    private static final List<ObjectChangeData> objectsToChange = new LinkedList<>();
+public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelThinkerState> {
     
     private static abstract class LevelComparator<T> implements Comparator<T>, Serializable {}
     
     private static final Comparator<ThinkerObject> movementPriorityComparator = new LevelComparator<ThinkerObject>() {
         
         @Override
-        public int compare(ThinkerObject object1, ThinkerObject object2) {
+        public final int compare(ThinkerObject object1, ThinkerObject object2) {
             int priorityDifference = object1.movementPriority - object2.movementPriority;
             return (priorityDifference == 0 ? Long.signum(object1.id - object2.id) : priorityDifference);
         }
@@ -42,7 +40,7 @@ public class LevelState extends IroncladGameState {
     private static final Comparator<Hitbox> drawLayerComparator = new LevelComparator<Hitbox>() {
         
         @Override
-        public int compare(Hitbox hitbox1, Hitbox hitbox2) {
+        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
             int drawLayerDifference = hitbox1.drawLayer - hitbox2.drawLayer;
             return (drawLayerDifference == 0 ? Long.signum(hitbox1.id - hitbox2.id) : drawLayerDifference);
         }
@@ -51,18 +49,20 @@ public class LevelState extends IroncladGameState {
     private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawLayerIteratorComparator = new LevelComparator<Pair<Hitbox,Iterator<Hitbox>>>() {
         
         @Override
-        public int compare(Pair<Hitbox, Iterator<Hitbox>> pair1, Pair<Hitbox, Iterator<Hitbox>> pair2) {
+        public final int compare(Pair<Hitbox, Iterator<Hitbox>> pair1, Pair<Hitbox, Iterator<Hitbox>> pair2) {
             return drawLayerComparator.compare(pair1.getKey(), pair2.getKey());
         }
         
     };
     
-    private final Set<LevelThinker> levelThinkers = new HashSet<>();
     private boolean movementHasOccurred = false;
     private final Set<LevelObject> levelObjects = new HashSet<>();
+    private int objectIterators = 0;
     private final SortedSet<ThinkerObject> thinkerObjects = new TreeSet<>(movementPriorityComparator);
     private double chunkWidth, chunkHeight;
     private final Map<Point,Chunk> chunks = new HashMap<>();
+    private final Queue<ObjectChangeData> objectsToChange = new LinkedList<>();
+    private boolean changingObjects = false;
     private final SortedMap<Integer,LevelLayer> levelLayers = new TreeMap<>();
     private HUD hud = null;
     private final Map<Integer,Viewport> viewports = new HashMap<>();
@@ -74,6 +74,11 @@ public class LevelState extends IroncladGameState {
     
     public LevelState(IroncladGame game, int id) {
         this(game, id, 256, 256);
+    }
+    
+    @Override
+    public final LevelState getThis() {
+        return this;
     }
     
     private class Chunk {
@@ -405,66 +410,80 @@ public class LevelState extends IroncladGameState {
         
     }
     
-    private class ObjectChangeData {
+    public class ObjectIterator implements Iterator<LevelObject> {
         
-        private final LevelThinker thinker;
+        private boolean disposed = false;
+        private final Iterator<LevelObject> iterator = levelObjects.iterator();
+        private LevelObject lastObject = null;
+        
+        private ObjectIterator() {
+            objectIterators++;
+        }
+        
+        @Override
+        public final boolean hasNext() {
+            if (disposed) {
+                return false;
+            }
+            boolean hasNext = iterator.hasNext();
+            if (!hasNext) {
+                dispose();
+            }
+            return hasNext;
+            
+        }
+        
+        @Override
+        public final LevelObject next() {
+            if (disposed) {
+                return null;
+            }
+            lastObject = iterator.next();
+            return lastObject;
+        }
+        
+        @Override
+        public final void remove() {
+            if (!disposed && lastObject != null) {
+                removeObject(lastObject);
+                lastObject = null;
+            }
+        }
+        
+        public final boolean hasBeenDisposed() {
+            return disposed;
+        }
+        
+        public final void dispose() {
+            if (!disposed) {
+                disposed = true;
+                objectIterators--;
+                changeObjects();
+            }
+        }
+        
+    }
+    
+    public final ObjectIterator objectIterator() {
+        return new ObjectIterator();
+    }
+    
+    private static class ObjectChangeData {
+        
+        private boolean used = false;
         private final LevelObject object;
-        private final LevelState newLevelState;
+        private final LevelState newState;
         
-        private ObjectChangeData(LevelThinker thinker, LevelObject object, LevelState newLevelState) {
-            this.thinker = thinker;
+        private ObjectChangeData(LevelObject object, LevelState newState) {
             this.object = object;
-            this.newLevelState = newLevelState;
+            this.newState = newState;
         }
         
-    }
-    
-    public final boolean addThinker(LevelThinker thinker) {
-        if (thinker.newLevelState == null) {
-            thinker.newLevelState = this;
-            if (delayState != null && (delayState == this || delayState == thinker.levelState)) {
-                objectsToChange.add(new ObjectChangeData(thinker, null, this));
-            } else {
-                addActions(thinker);
-            }
-            return true;
-        }
-        return false;
-    }
-    
-    private void addActions(LevelThinker thinker) {
-        levelThinkers.add(thinker);
-        thinker.levelState = this;
-        thinker.addTo(this);
-    }
-    
-    public final boolean removeThinker(LevelThinker thinker) {
-        if (thinker.newLevelState == this) {
-            thinker.newLevelState = null;
-            if (delayState != null && (delayState == this || delayState == thinker.levelState)) {
-                objectsToChange.add(new ObjectChangeData(thinker, null, null));
-            } else {
-                removeActions(thinker);
-            }
-            return true;
-        }
-        return false;
-    }
-    
-    private void removeActions(LevelThinker thinker) {
-        thinker.remove();
-        levelThinkers.remove(thinker);
-        thinker.levelState = null;
     }
     
     public final boolean addObject(LevelObject object) {
-        if (object.newLevelState == null) {
-            object.newLevelState = this;
-            if (delayState != null && (delayState == this || delayState == object.levelState)) {
-                objectsToChange.add(new ObjectChangeData(null, object, this));
-            } else {
-                addActions(object);
-            }
+        if (object.newState == null) {
+            addObjectChangeData(object, this);
             return true;
         }
         return false;
@@ -472,19 +491,14 @@ public class LevelState extends IroncladGameState {
     
     private void addActions(LevelObject object) {
         levelObjects.add(object);
-        object.levelState = this;
+        object.state = this;
         object.addActions();
         object.addChunkData();
     }
     
     public final boolean removeObject(LevelObject object) {
-        if (object.newLevelState == this) {
-            object.newLevelState = null;
-            if (delayState != null && (delayState == this || delayState == object.levelState)) {
-                objectsToChange.add(new ObjectChangeData(null, object, null));
-            } else {
-                removeActions(object);
-            }
+        if (object.newState == this) {
+            addObjectChangeData(object, null);
             return true;
         }
         return false;
@@ -493,57 +507,59 @@ public class LevelState extends IroncladGameState {
     private void removeActions(LevelObject object) {
         object.removeActions();
         levelObjects.remove(object);
-        object.levelState = null;
+        object.state = null;
     }
     
-    private void changeObjects(IroncladGame game) {
-        Set<LevelThinker> newThinkers = new HashSet<>();
-        while (!objectsToChange.isEmpty()) {
-            List<ObjectChangeData> newChanges = new ArrayList<>(objectsToChange);
-            objectsToChange.clear();
-            for (ObjectChangeData data : newChanges) {
-                if (data.thinker != null) {
-                    if (data.thinker.levelState != null) {
-                        newThinkers.remove(data.thinker);
-                        data.thinker.levelState.removeActions(data.thinker);
-                    }
-                    if (data.newLevelState != null) {
-                        data.newLevelState.addActions(data.thinker);
-                        newThinkers.add(data.thinker);
-                    }
-                } else if (data.object != null) {
-                    if (data.object.levelState != null) {
-                        data.object.levelState.removeActions(data.object);
-                    }
-                    if (data.newLevelState != null) {
-                        data.newLevelState.addActions(data.object);
-                    }
-                }
-            }
+    @Override
+    public void addThinkerActions(IroncladGame game, LevelThinker thinker) {
+        
+    }
+    
+    @Override
+    public void removeThinkerActions(IroncladGame game, LevelThinker thinker) {
+        
+    }
+    
+    private void addObjectChangeData(LevelObject object, LevelState newState) {
+        object.newState = newState;
+        ObjectChangeData data = new ObjectChangeData(object, newState);
+        if (object.state != null) {
+            object.state.objectsToChange.add(data);
+            object.state.changeObjects();
         }
-        if (!newThinkers.isEmpty()) {
-            if (movementHasOccurred) {
-                for (LevelThinker thinker : newThinkers) {
-                    thinker.afterMovementActions(game, this);
-                }
-            } else {
-                for (LevelThinker thinker : newThinkers) {
-                    thinker.beforeMovementActions(game, this);
+        if (newState != null) {
+            newState.objectsToChange.add(data);
+            newState.changeObjects();
+        }
+    }
+    
+    private void changeObjects() {
+        if (objectIterators == 0 && !changingObjects) {
+            changingObjects = true;
+            while (!objectsToChange.isEmpty()) {
+                ObjectChangeData data = objectsToChange.remove();
+                if (!data.used) {
+                    data.used = true;
+                    if (data.object.state != null) {
+                        data.object.state.removeActions(data.object);
+                    }
+                    if (data.newState != null) {
+                        data.newState.addActions(data.object);
+                    }
                 }
             }
-            changeObjects(game);
+            changingObjects = false;
         }
     }
     
     @Override
     public final void stepActions(IroncladGame game) {
-        delayState = this;
         double timeFactor = getTimeFactor();
         if (timeFactor > 0) {
-            for (LevelThinker thinker : levelThinkers) {
-                thinker.beforeMovementActions(game, this);
+            Iterator<LevelThinker> iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().beforeMovement(game, this);
             }
-            changeObjects(game);
             for (ThinkerObject object : thinkerObjects) {
                 double objectTimeFactor = timeFactor*object.getTimeFactor();
                 double dx = objectTimeFactor*(object.getVelocityX() + object.getDisplacementX());
@@ -558,13 +574,12 @@ public class LevelState extends IroncladGameState {
                 object.setDisplacement(0, 0);
             }
             movementHasOccurred = true;
-            for (LevelThinker thinker : levelThinkers) {
-                thinker.afterMovementActions(game, this);
+            iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().afterMovement(game, this);
             }
-            changeObjects(game);
             movementHasOccurred = false;
         }
-        delayState = null;
     }
     
     public final LevelLayer getLayer(int id) {
@@ -679,7 +694,7 @@ public class LevelState extends IroncladGameState {
                 int vx2 = x1 + viewport.roundX2;
                 int vy2 = y1 + viewport.roundY2;
                 g.setWorldClip(vx1, vy1, vx2 - vx1, vy2 - vy1);
-                if (viewport.camera != null && viewport.camera.levelState == this) {
+                if (viewport.camera != null && viewport.camera.state == this) {
                     double cx = viewport.camera.getCenterX();
                     double cy = viewport.camera.getCenterY();
                     for (LevelLayer layer : levelLayers.headMap(0).values()) {

@@ -5,8 +5,8 @@ import org.newdawn.slick.Graphics;
 
 public abstract class LevelObject {
     
-    LevelState levelState = null;
-    LevelState newLevelState = null;
+    LevelState state = null;
+    LevelState newState = null;
     private double timeFactor = 1;
     private Hitbox locatorHitbox = null;
     private Hitbox overlapHitbox = null;
@@ -30,12 +30,12 @@ public abstract class LevelObject {
         setAngle(object.getAngle());
     }
     
-    public final LevelState getLevelState() {
-        return levelState;
+    public final LevelState getGameState() {
+        return state;
     }
     
-    public final LevelState getNewLevelState() {
-        return newLevelState;
+    public final LevelState getNewGameState() {
+        return newState;
     }
     
     public final boolean addTo(LevelState levelState) {
@@ -43,34 +43,34 @@ public abstract class LevelObject {
     }
     
     void addActions() {
-        locatorHitbox.setLevelState(levelState);
+        locatorHitbox.setGameState(state);
     }
     
     void addChunkData() {
-        levelState.addLocatorHitbox(locatorHitbox);
+        state.addLocatorHitbox(locatorHitbox);
         if (overlapHitbox != null) {
-            levelState.addOverlapHitbox(overlapHitbox);
+            state.addOverlapHitbox(overlapHitbox);
         }
         if (solidHitbox != null) {
-            levelState.addSolidHitbox(solidHitbox);
+            state.addSolidHitbox(solidHitbox);
         }
     }
     
     public final boolean remove() {
-        if (newLevelState != null) {
-            return newLevelState.removeObject(this);
+        if (newState != null) {
+            return newState.removeObject(this);
         }
         return false;
     }
     
     void removeActions() {
-        locatorHitbox.setLevelState(null);
-        levelState.removeLocatorHitbox(locatorHitbox);
+        locatorHitbox.setGameState(null);
+        state.removeLocatorHitbox(locatorHitbox);
         if (overlapHitbox != null) {
-            levelState.removeOverlapHitbox(overlapHitbox);
+            state.removeOverlapHitbox(overlapHitbox);
         }
         if (solidHitbox != null) {
-            levelState.removeSolidHitbox(solidHitbox);
+            state.removeSolidHitbox(solidHitbox);
         }
     }
     

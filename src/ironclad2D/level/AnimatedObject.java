@@ -18,18 +18,18 @@ public abstract class AnimatedObject extends LevelObject {
     @Override
     void addActions() {
         super.addActions();
-        levelState.addAnimInstance(animInstance);
+        state.addAnimInstance(animInstance);
         for (AnimationInstance instance : extraAnimInstances.values()) {
-            levelState.addAnimInstance(instance);
+            state.addAnimInstance(instance);
         }
     }
     
     @Override
     void removeActions() {
         super.removeActions();
-        levelState.removeAnimInstance(animInstance);
+        state.removeAnimInstance(animInstance);
         for (AnimationInstance instance : extraAnimInstances.values()) {
-            levelState.removeAnimInstance(instance);
+            state.removeAnimInstance(instance);
         }
     }
     
@@ -52,17 +52,17 @@ public abstract class AnimatedObject extends LevelObject {
     
     public final AnimationInstance setAnimation(Animation animation) {
         if (animation == Animation.BLANK) {
-            if (levelState != null) {
-                levelState.removeAnimInstance(animInstance);
+            if (state != null) {
+                state.removeAnimInstance(animInstance);
             }
             animInstance = AnimationInstance.BLANK;
             return AnimationInstance.BLANK;
         }
         AnimationInstance oldInstance = animInstance;
         animInstance = new AnimationInstance(animation);
-        if (levelState != null) {
-            levelState.addAnimInstance(animInstance);
-            levelState.removeAnimInstance(oldInstance);
+        if (state != null) {
+            state.addAnimInstance(animInstance);
+            state.removeAnimInstance(oldInstance);
         }
         animInstance.setTimeFactor(getTimeFactor());
         return animInstance;
@@ -83,17 +83,17 @@ public abstract class AnimatedObject extends LevelObject {
     public final AnimationInstance setExtraAnimation(int id, Animation animation) {
         if (animation == Animation.BLANK) {
             AnimationInstance oldInstance = extraAnimInstances.remove(id);
-            if (levelState != null && oldInstance != null) {
-                levelState.removeAnimInstance(oldInstance);
+            if (state != null && oldInstance != null) {
+                state.removeAnimInstance(oldInstance);
             }
             return AnimationInstance.BLANK;
         }
         AnimationInstance instance = new AnimationInstance(animation);
         AnimationInstance oldInstance = extraAnimInstances.put(id, instance);
-        if (levelState != null) {
-            levelState.addAnimInstance(instance);
+        if (state != null) {
+            state.addAnimInstance(instance);
             if (oldInstance != null) {
-                levelState.removeAnimInstance(oldInstance);
+                state.removeAnimInstance(oldInstance);
             }
         }
         instance.setTimeFactor(getTimeFactor());
@@ -101,9 +101,9 @@ public abstract class AnimatedObject extends LevelObject {
     }
     
     public final void clearExtraAnimInstances() {
-        if (levelState != null) {
+        if (state != null) {
             for (AnimationInstance instance : extraAnimInstances.values()) {
-                levelState.removeAnimInstance(instance);
+                state.removeAnimInstance(instance);
             }
         }
         extraAnimInstances.clear();

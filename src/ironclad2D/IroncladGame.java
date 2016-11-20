@@ -388,7 +388,7 @@ public abstract class IroncladGame {
                                 && !musics.get(currentMusic.name).playing()) {
                             takeNewMusicFromStack();
                         }
-                        IroncladGame.this.getCurrentState().doStep(IroncladGame.this);
+                        IroncladGame.this.getCurrentState().doStep();
                         msToRun -= msPerStep;
                         if (closeRequested) {
                             container.exit();
@@ -576,14 +576,14 @@ public abstract class IroncladGame {
         
     }
     
-    private class LoadingState extends IroncladGameState {
+    private class LoadingState extends ironclad2D.BasicGameState {
         
         private LoadingState(int id) {
             super(IroncladGame.this, id);
         }
         
         @Override
-        public void renderActions(IroncladGame game, Graphics g, int x1, int y1, int x2, int y2) {
+        public final void renderActions(IroncladGame game, Graphics g, int x1, int y1, int x2, int y2) {
             if (loadingImage != null) {
                 loadingImage.draw((x1 + x2 - loadingImage.getWidth())/2, (y1 + y2 - loadingImage.getHeight())/2);
             }

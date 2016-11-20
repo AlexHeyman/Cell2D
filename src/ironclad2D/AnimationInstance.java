@@ -50,7 +50,7 @@ public class AnimationInstance {
         return currentSprite;
     }
     
-    public final IroncladGameState getState() {
+    public final IroncladGameState getGameState() {
         return state;
     }
     

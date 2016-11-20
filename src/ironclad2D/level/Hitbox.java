@@ -18,7 +18,7 @@ public abstract class Hitbox {
     private LevelObject object = null;
     final boolean[] roles = new boolean[HITBOXES_PER_OBJECT];
     private int numRoles = 0;
-    LevelState levelState = null;
+    LevelState state = null;
     int[] chunkRange = null;
     int drawLayer = 0;
     int numChunkRoles = 0;
@@ -91,12 +91,12 @@ public abstract class Hitbox {
     private void recursivelyUpdateData() {
         if (parent == null) {
             object = null;
-            levelState = null;
+            state = null;
             absXFlip = relXFlip;
             absYFlip = relYFlip;
         } else {
             object = parent.object;
-            levelState = parent.levelState;
+            state = parent.state;
             absXFlip = parent.absXFlip ^ relXFlip;
             absYFlip = parent.absYFlip ^ relYFlip;
         }
@@ -122,25 +122,25 @@ public abstract class Hitbox {
     
     public final void setSurfaceSolid(Direction direction, boolean solid) {
         if (solid) {
-            if (solidSurfaces.add(direction) && roles[2] && levelState != null) {
-                levelState.addSolidHitbox(this, direction);
+            if (solidSurfaces.add(direction) && roles[2] && state != null) {
+                state.addSolidHitbox(this, direction);
             }
         } else {
-            if (solidSurfaces.remove(direction) && roles[2] && levelState != null) {
-                levelState.removeSolidHitbox(this, direction);
+            if (solidSurfaces.remove(direction) && roles[2] && state != null) {
+                state.removeSolidHitbox(this, direction);
             }
         }
     }
     
     public final void setSolid(boolean solid) {
         if (solid) {
-            if (roles[2] && levelState != null) {
-                levelState.completeSolidHitbox(this);
+            if (roles[2] && state != null) {
+                state.completeSolidHitbox(this);
             }
             solidSurfaces = EnumSet.allOf(Direction.class);
         } else {
-            if (roles[2] && levelState != null) {
-                levelState.removeSolidHitbox(this);
+            if (roles[2] && state != null) {
+                state.removeSolidHitbox(this);
             }
             solidSurfaces.clear();
         }
@@ -158,7 +158,7 @@ public abstract class Hitbox {
     
     private void recursivelySetObject(LevelObject object) {
         this.object = object;
-        levelState = (object == null ? null : object.levelState);
+        state = (object == null ? null : object.state);
         if (!children.isEmpty()) {
             for (Hitbox child : children) {
                 child.recursivelySetObject(object);
@@ -167,23 +167,23 @@ public abstract class Hitbox {
     }
     
     final void updateChunks() {
-        if (levelState != null && chunkRange != null) {
-            levelState.updateChunks(this);
+        if (state != null && chunkRange != null) {
+            state.updateChunks(this);
         }
     }
     
     final void addAsLocatorHitbox(int drawLayer) {
         this.drawLayer = drawLayer;
-        if (levelState != null) {
-            levelState.addLocatorHitbox(this);
+        if (state != null) {
+            state.addLocatorHitbox(this);
         }
         roles[0] = true;
         numRoles++;
     }
     
     final void removeAsLocatorHitbox() {
-        if (levelState != null) {
-            levelState.removeLocatorHitbox(this);
+        if (state != null) {
+            state.removeLocatorHitbox(this);
         }
         drawLayer = 0;
         roles[0] = false;
@@ -197,24 +197,24 @@ public abstract class Hitbox {
     }
     
     final void changeDrawLayer(int drawLayer) {
-        if (levelState == null) {
+        if (state == null) {
             this.drawLayer = drawLayer;
         } else {
-            levelState.changeLocatorHitboxDrawLayer(this, drawLayer);
+            state.changeLocatorHitboxDrawLayer(this, drawLayer);
         }
     }
     
     final void addAsOverlapHitbox() {
-        if (levelState != null) {
-            levelState.addOverlapHitbox(this);
+        if (state != null) {
+            state.addOverlapHitbox(this);
         }
         roles[1] = true;
         numRoles++;
     }
     
     final void removeAsOverlapHitbox() {
-        if (levelState != null) {
-            levelState.removeOverlapHitbox(this);
+        if (state != null) {
+            state.removeOverlapHitbox(this);
         }
         roles[1] = false;
         numRoles--;
@@ -227,16 +227,16 @@ public abstract class Hitbox {
     }
     
     final void addAsSolidHitbox() {
-        if (levelState != null) {
-            levelState.addSolidHitbox(this);
+        if (state != null) {
+            state.addSolidHitbox(this);
         }
         roles[2] = true;
         numRoles++;
     }
     
     final void removeAsSolidHitbox() {
-        if (levelState != null) {
-            levelState.removeSolidHitbox(this);
+        if (state != null) {
+            state.removeSolidHitbox(this);
         }
         roles[2] = false;
         numRoles--;
@@ -249,16 +249,16 @@ public abstract class Hitbox {
     }
     
     final void addAsCollisionHitbox(boolean hasCollision) {
-        if (levelState != null && hasCollision) {
-            levelState.addCollisionHitbox(this);
+        if (state != null && hasCollision) {
+            state.addCollisionHitbox(this);
         }
         roles[3] = true;
         numRoles++;
     }
     
     final void removeAsCollisionHitbox(boolean hasCollision) {
-        if (levelState != null && hasCollision) {
-            levelState.removeCollisionHitbox(this);
+        if (state != null && hasCollision) {
+            state.removeCollisionHitbox(this);
         }
         roles[3] = false;
         numRoles--;
@@ -270,15 +270,15 @@ public abstract class Hitbox {
         }
     }
     
-    public final LevelState getLevelState() {
-        return levelState;
+    public final LevelState getGameState() {
+        return state;
     }
     
-    final void setLevelState(LevelState levelState) {
-        this.levelState = levelState;
+    final void setGameState(LevelState state) {
+        this.state = state;
         if (!children.isEmpty()) {
             for (Hitbox child : children) {
-                child.setLevelState(levelState);
+                child.setGameState(state);
             }
         }
     }
@@ -523,7 +523,7 @@ public abstract class Hitbox {
     }
     
     public static final boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
-        if (hitbox1.levelState != null && hitbox1.levelState == hitbox2.levelState
+        if (hitbox1.state != null && hitbox1.state == hitbox2.state
                 && hitbox1.getLeftEdge() < hitbox2.getRightEdge()
                 && hitbox1.getRightEdge() > hitbox2.getLeftEdge()
                 && hitbox1.getTopEdge() < hitbox2.getBottomEdge()

@@ -70,7 +70,7 @@ public class Viewport extends LevelThinker {
     }
     
     public final boolean setHUD(HUD hud) {
-        LevelState state = getLevelState();
+        LevelState state = getGameState();
         if (state == null) {
             this.hud = hud;
             return true;
