@@ -21,7 +21,7 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
     private final Set<U> thinkers = new HashSet<>();
     private int thinkerIterators = 0;
-    private final Queue<ThinkerChangeData<T,U,V>> thinkersToChange = new LinkedList<>();
+    private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
     private boolean changingThinkers = false;
     
     public IroncladGameState(IroncladGame game, int id) {
@@ -261,12 +261,12 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
         ThinkerChangeData<T,U,V> data = new ThinkerChangeData<>(thinker, newState);
         if (thinker.state != null) {
             IroncladGameState<T,U,V> state = thinker.state;
-            state.thinkersToChange.add(data);
+            state.thinkerChanges.add(data);
             state.changeThinkers();
         }
         if (newState != null) {
             IroncladGameState<T,U,V> state = newState;
-            state.thinkersToChange.add(data);
+            state.thinkerChanges.add(data);
             state.changeThinkers();
         }
     }
@@ -274,8 +274,8 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
     private void changeThinkers() {
         if (thinkerIterators == 0 && !changingThinkers) {
             changingThinkers = true;
-            while (!thinkersToChange.isEmpty()) {
-                ThinkerChangeData<T,U,V> data = thinkersToChange.remove();
+            while (!thinkerChanges.isEmpty()) {
+                ThinkerChangeData<T,U,V> data = thinkerChanges.remove();
                 if (!data.used) {
                     data.used = true;
                     IroncladGameState<T,U,V> thinkerState = data.thinker.state;

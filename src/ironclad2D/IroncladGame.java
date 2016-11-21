@@ -27,7 +27,6 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.Sound;
 import org.newdawn.slick.command.BasicCommand;
 import org.newdawn.slick.command.Command;
 import org.newdawn.slick.command.Control;
@@ -888,6 +887,18 @@ public abstract class IroncladGame {
         }
     }
     
+    public final void add(String name, Sound sound) throws SlickException {
+        if (name == null) {
+            throw new RuntimeException("Attempted to add a sound effect with a null name");
+        }
+        if (name.equals("")) {
+            throw new RuntimeException("Attempted to add a sound effect with the empty string as a name");
+        }
+        if (sounds.put(name, sound) != null) {
+            throw new RuntimeException("Attempted to add multiple sounds with the name " + name);
+        }
+    }
+    
     public final void createFilter(String name, Map<Color,Color> colorMap) {
         createFilter(name, new ColorMapFilter(name, colorMap));
     }
@@ -1107,50 +1118,12 @@ public abstract class IroncladGame {
         return recolor;
     }
     
-    public final void createSoundEffect(String name, String path) throws SlickException {
-        if (name == null) {
-            throw new RuntimeException("Attempted to create a sound effect with a null name");
-        }
-        if (name.equals("")) {
-            throw new RuntimeException("Attempted to create a sound effect with the empty string as a name");
-        }
-        if (sounds.put(name, new Sound(getSubFolderPath("sounds") + path)) != null) {
-            throw new RuntimeException("Attempted to create multiple sounds with the name " + name);
-        }
+    public final Sound createSound(String path) throws SlickException {
+        return new Sound(getSubFolderPath("sounds") + path);
     }
     
-    public final boolean isSoundEffectPlaying(String name) {
-        return sounds.get(name).playing();
-    }
-    
-    public final void stopSoundEffect(String name) {
-        sounds.get(name).stop();
-    }
-    
-    public final void playSoundEffect(String name) {
-        playSoundEffect(name, 1, 1);
-    }
-    
-    public final void playSoundEffect(String name, float pitch, float volume) {
-        if (name == null || name.equals("")) {
-            return;
-        }
-        Sound sound = sounds.get(name);
-        sound.stop();
-        sound.play(pitch, volume);
-    }
-    
-    public final void loopSoundEffect(String name) {
-        loopSoundEffect(name, 1, 1);
-    }
-    
-    public final void loopSoundEffect(String name, float pitch, float volume) {
-        if (name == null || name.equals("")) {
-            return;
-        }
-        Sound sound = sounds.get(name);
-        sound.stop();
-        sound.loop(pitch, volume);
+    public final Sound getSound(String name) {
+        return sounds.get(name);
     }
     
     public final void createMusic(String name, String path) throws SlickException {

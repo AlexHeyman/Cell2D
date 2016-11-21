@@ -58,11 +58,11 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
     private boolean movementHasOccurred = false;
     private final Set<LevelObject> levelObjects = new HashSet<>();
     private int objectIterators = 0;
+    private final Queue<ObjectChangeData> objectChanges = new LinkedList<>();
+    private boolean changingObjects = false;
     private final SortedSet<ThinkerObject> thinkerObjects = new TreeSet<>(movementPriorityComparator);
     private double chunkWidth, chunkHeight;
     private final Map<Point,Chunk> chunks = new HashMap<>();
-    private final Queue<ObjectChangeData> objectsToChange = new LinkedList<>();
-    private boolean changingObjects = false;
     private final SortedMap<Integer,LevelLayer> levelLayers = new TreeMap<>();
     private HUD hud = null;
     private final Map<Integer,Viewport> viewports = new HashMap<>();
@@ -524,11 +524,11 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
         object.newState = newState;
         ObjectChangeData data = new ObjectChangeData(object, newState);
         if (object.state != null) {
-            object.state.objectsToChange.add(data);
+            object.state.objectChanges.add(data);
             object.state.changeObjects();
         }
         if (newState != null) {
-            newState.objectsToChange.add(data);
+            newState.objectChanges.add(data);
             newState.changeObjects();
         }
     }
@@ -536,8 +536,8 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
     private void changeObjects() {
         if (objectIterators == 0 && !changingObjects) {
             changingObjects = true;
-            while (!objectsToChange.isEmpty()) {
-                ObjectChangeData data = objectsToChange.remove();
+            while (!objectChanges.isEmpty()) {
+                ObjectChangeData data = objectChanges.remove();
                 if (!data.used) {
                     data.used = true;
                     if (data.object.state != null) {
