@@ -511,12 +511,12 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
     }
     
     @Override
-    public void addThinkerActions(IroncladGame game, LevelThinker thinker) {
+    public final void addThinkerActions(IroncladGame game, LevelThinker thinker) {
         
     }
     
     @Override
-    public void removeThinkerActions(IroncladGame game, LevelThinker thinker) {
+    public final void removeThinkerActions(IroncladGame game, LevelThinker thinker) {
         
     }
     
@@ -788,14 +788,14 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                 }
-                if (viewport.hud != null) {
+                if (viewport.hud != null && viewport.hud.getGameState() == this) {
                     viewport.hud.renderActions(game, this, g, vx1, vy1, vx2, vy2);
                 }
                 g.clearWorldClip();
             }
         }
         g.setWorldClip(x1, y1, x2 - x1, y2 - y1);
-        if (hud != null) {
+        if (hud != null && hud.getGameState() == this) {
             hud.renderActions(game, this, g, x1, y1, x2, y2);
         }
     }

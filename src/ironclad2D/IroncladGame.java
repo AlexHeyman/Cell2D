@@ -92,9 +92,16 @@ public abstract class IroncladGame {
     private final Map<String,Animation> animations = new HashMap<>();
     private final Map<String,Sound> sounds = new HashMap<>();
     private final Map<String,Music> musics = new HashMap<>();
+    private MusicData currentMusic = new MusicData(null, 0, 0, false);
     private final SortedMap<Integer,MusicData> musicStack = new TreeMap<>();
     private boolean stackOverridden = false;
-    private MusicData currentMusic = new MusicData(null, 0, 0, false);
+    private boolean musicPaused = false;
+    private float musicPosition = 0;
+    private int musicFadeType = 0;
+    private double fadeStartVolume = 0;
+    private double fadeEndVolume = 0;
+    private double fadeDuration = 0;
+    private double msFading = 0;
     
     public IroncladGame(String gamename, int numCommands, int updateFPS,
             int screenWidth, int screenHeight, double scaleFactor, boolean fullscreen,
@@ -367,7 +374,25 @@ public abstract class IroncladGame {
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
             if (loadingScreenRenderedOnce) {
                 if (assetsInitialized) {
-                    msToRun += Math.min(delta, msPerStep);
+                    double timeElapsed = Math.min(delta, msPerStep);
+                    msToRun += timeElapsed;
+                    if (currentMusic.music != null && !musicPaused) {
+                        if (musicFadeType != 0) {
+                            msFading = Math.min(msFading + timeElapsed, fadeDuration);
+                            if (msFading == fadeDuration) {
+                                currentMusic.music.setVolume((float)fadeEndVolume);
+                                if (musicFadeType == 2) {
+                                    currentMusic.music.stop();
+                                }
+                                musicFadeType = 0;
+                            } else {
+                                currentMusic.music.setVolume((float)(fadeStartVolume + (msFading/fadeDuration)*(fadeEndVolume - fadeStartVolume)));
+                            }
+                        }
+                        if (!currentMusic.music.playing()) {
+                            stopMusic();
+                        }
+                    }
                     if (msToRun >= msPerStep) {
                         for (int i = 0; i < commandChanges.length; i++) {
                             commandStates[i] = commandChanges[i];
@@ -383,10 +408,6 @@ public abstract class IroncladGame {
                         adjustedMouseY = Math.min(Math.max((int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
                         mouseWheel = newMouseWheel;
                         newMouseWheel = 0;
-                        if (currentMusic.name != null && !currentMusic.name.equals("")
-                                && !musics.get(currentMusic.name).playing()) {
-                            takeNewMusicFromStack();
-                        }
                         IroncladGame.this.getCurrentState().doStep();
                         msToRun -= msPerStep;
                         if (closeRequested) {
@@ -1138,93 +1159,17 @@ public abstract class IroncladGame {
         }
     }
     
-    public final String getCurrentMusic() {
-        return currentMusic.name;
-    }
-    
-    public final void stopMusic() {
-        if (currentMusic.name != null) {
-            if (!currentMusic.name.equals("")) {
-                musics.get(currentMusic.name).stop();
-            }
-            takeNewMusicFromStack();
-        }
-    }
-    
-    public final void stopMusic(String name) {
-        if (currentMusic.name != null && currentMusic.name.equals(name)) {
-            if (!name.equals("")) {
-                musics.get(name).stop();
-            }
-            takeNewMusicFromStack();
-        }
-    }
-    
-    private void takeNewMusicFromStack() {
-        if (musicStack.isEmpty()) {
-            currentMusic = new MusicData(null, 0, 0, false);
-            stackOverridden = false;
-            return;
-        }
-        if (!stackOverridden) {
-            musicStack.remove(musicStack.lastKey());
-            if (musicStack.isEmpty()) {
-                currentMusic = new MusicData(null, 0, 0, false);
-                return;
-            }
-        }
-        MusicData newData = musicStack.get(musicStack.lastKey());
-        startMusic(newData.name, newData.pitch, newData.volume, newData.loop);
-        stackOverridden = false;
-    }
-    
-    public final void playMusic(String name) {
-        startMusic(name, 1, 1, false);
-        stackOverridden = true;
-    }
-    
-    public final void playMusic(String name, float pitch, float volume) {
-        startMusic(name, pitch, volume, false);
-        stackOverridden = true;
-    }
-    
-    public final void loopMusic(String name) {
-        startMusic(name, 1, 1, true);
-        stackOverridden = true;
-    }
-    
-    public final void loopMusic(String name, float pitch, float volume) {
-        startMusic(name, pitch, volume, true);
-        stackOverridden = true;
-    }
-    
-    private void startMusic(String name, float pitch, float volume, boolean loop) {
-        if (name == null) {
-            stopMusic();
-            return;
-        }
-        if (currentMusic.name != null && !currentMusic.name.equals("")) {
-            musics.get(currentMusic.name).stop();
-        }
-        if (!name.equals("")) {
-            if (loop) {
-                musics.get(name).loop(pitch, volume);
-            } else {
-                musics.get(name).play(pitch, volume);
-            }
-        }
-        currentMusic = new MusicData(name, pitch, volume, loop);
-    }
-    
     private class MusicData {
         
         private final String name;
-        private final float pitch;
-        private final float volume;
+        private final Music music;
+        private final double pitch;
+        private double volume;
         private final boolean loop;
         
-        private MusicData(String name, float pitch, float volume, boolean loop) {
+        private MusicData(String name, double pitch, double volume, boolean loop) {
             this.name = name;
+            this.music = musics.get(name);
             this.pitch = pitch;
             this.volume = volume;
             this.loop = loop;
@@ -1232,55 +1177,224 @@ public abstract class IroncladGame {
         
     }
     
-    public final String getMusicInStack(int level) {
-        MusicData data = musicStack.get(level);
+    public final String getCurrentMusic() {
+        return currentMusic.name;
+    }
+    
+    public final String getMusic(int priority) {
+        MusicData data = musicStack.get(priority);
         if (data == null) {
             return null;
         }
         return data.name;
     }
     
-    public final void playMusicInStack(int level, String name) {
-        addMusicToStack(level, name, 1, 1, false);
-    }
-    
-    public final void playMusicInStack(int level, String name, float pitch, float volume) {
-        addMusicToStack(level, name, pitch, volume, false);
-    }
-    
-    public final void loopMusicInStack(int level, String name) {
-        addMusicToStack(level, name, 1, 1, true);
-    }
-    
-    public final void loopMusicInStack(int level, String name, float pitch, float volume) {
-        addMusicToStack(level, name, pitch, volume, true);
-    }
-    
-    private void addMusicToStack(int level, String name, float pitch, float volume, boolean loop) {
-        musicStack.put(level, new MusicData(name, pitch, volume, loop));
-        if (level == musicStack.lastKey() && !stackOverridden) {
-            startMusic(name, pitch, volume, loop);
+    private void changeMusic(MusicData data) {
+        if (!musicPaused) {
+            if (currentMusic.music != null) {
+                currentMusic.music.stop();
+            }
+            if (data.music != null) {
+                if (data.loop) {
+                    data.music.loop((float)data.pitch, (float)data.volume);
+                } else {
+                    data.music.play((float)data.pitch, (float)data.volume);
+                }
+            }
         }
+        currentMusic = data;
+        musicPosition = 0;
+        musicFadeType = 0;
     }
     
-    public final void removeMusicInStack(int level) {
-        if (musicStack.isEmpty()) {
+    private void startMusic(String name, double pitch, double volume, boolean loop) {
+        if (name == null) {
+            stopMusic();
             return;
         }
-        int stackTop = musicStack.lastKey();
-        musicStack.remove(level);
-        if (level == stackTop && !stackOverridden) {
+        if (musicFadeType == 2 && !musicStack.isEmpty() && !stackOverridden) {
+            musicStack.remove(musicStack.lastKey());
+        }
+        changeMusic(new MusicData(name, pitch, volume, loop));
+        stackOverridden = true;
+    }
+    
+    private void addMusicToStack(int priority, String name, double pitch, double volume, boolean loop) {
+        if (name == null) {
+            stopMusic(priority);
+            return;
+        }
+        MusicData data = new MusicData(name, pitch, volume, loop);
+        if ((musicStack.isEmpty() || priority >= musicStack.lastKey()) && !stackOverridden) {
+            if (musicFadeType == 2 && !musicStack.isEmpty() && priority > musicStack.lastKey()) {
+                musicStack.remove(musicStack.lastKey());
+            }
+            changeMusic(data);
+        }
+        musicStack.put(priority, data);
+    }
+    
+    public final void playMusic(String name) {
+        startMusic(name, 1, 1, false);
+    }
+    
+    public final void playMusic(String name, double pitch, double volume) {
+        startMusic(name, pitch, volume, false);
+    }
+    
+    public final void playMusic(int priority, String name) {
+        addMusicToStack(priority, name, 1, 1, false);
+    }
+    
+    public final void playMusic(int priority, String name, double pitch, double volume) {
+        addMusicToStack(priority, name, pitch, volume, false);
+    }
+    
+    public final void loopMusic(String name) {
+        startMusic(name, 1, 1, true);
+    }
+    
+    public final void loopMusic(String name, double pitch, double volume) {
+        startMusic(name, pitch, volume, true);
+    }
+    
+    public final void loopMusic(int priority, String name) {
+        addMusicToStack(priority, name, 1, 1, true);
+    }
+    
+    public final void loopMusic(int priority, String name, double pitch, double volume) {
+        addMusicToStack(priority, name, pitch, volume, true);
+    }
+    
+    public final void stopMusic() {
+        if (musicStack.isEmpty()) {
+            changeMusic(new MusicData(null, 0, 0, false));
+            stackOverridden = false;
+            return;
+        }
+        if (!stackOverridden) {
+            musicStack.remove(musicStack.lastKey());
+            if (musicStack.isEmpty()) {
+                changeMusic(new MusicData(null, 0, 0, false));
+                return;
+            }
+        }
+        changeMusic(musicStack.get(musicStack.lastKey()));
+        stackOverridden = false;
+    }
+    
+    public final void stopMusic(String name) {
+        if (currentMusic.name != null && currentMusic.name.equals(name)) {
             stopMusic();
         }
     }
     
-    public final void removeMusicInStack(int level, String name) {
-        MusicData data = musicStack.get(level);
+    public final void stopMusic(int priority) {
+        if (musicStack.isEmpty()) {
+            return;
+        }
+        if (priority == musicStack.lastKey() && !stackOverridden) {
+            stopMusic();
+        } else {
+            musicStack.remove(priority);
+        }
+    }
+    
+    public final void stopMusic(int priority, String name) {
+        if (musicStack.isEmpty()) {
+            return;
+        }
+        MusicData data = musicStack.get(priority);
         if (data != null && data.name != null && data.name.equals(name)) {
-            int stackTop = musicStack.lastKey();
-            musicStack.remove(level);
-            if (level == stackTop && !stackOverridden) {
+            if (priority == musicStack.lastKey() && !stackOverridden) {
                 stopMusic();
+            } else {
+                musicStack.remove(priority);
+            }
+        }
+    }
+    
+    public final boolean musicIsPaused() {
+        return musicPaused;
+    }
+    
+    public final void pauseMusic() {
+        if (currentMusic.name != null && !musicPaused) {
+            if (currentMusic.music != null) {
+                musicPosition = currentMusic.music.getPosition();
+                currentMusic.music.stop();
+            }
+            musicPaused = true;
+        }
+    }
+    
+    public final void resumeMusic() {
+        if (currentMusic.name != null && musicPaused) {
+            if (currentMusic.music != null) {
+                if (currentMusic.loop) {
+                    currentMusic.music.loop((float)currentMusic.pitch, currentMusic.music.getVolume());
+                } else {
+                    currentMusic.music.play((float)currentMusic.pitch, currentMusic.music.getVolume());
+                }
+                currentMusic.music.setPosition(musicPosition);
+            }
+            musicPaused = false;
+        }
+    }
+    
+    public final double getMusicPosition() {
+        if (currentMusic.music == null) {
+            return 0;
+        }
+        return currentMusic.music.getPosition();
+    }
+    
+    public final void setMusicPosition(double position) {
+        if (currentMusic.music != null) {
+            currentMusic.music.setPosition((float)position);
+        }
+    }
+    
+    public final double getMusicVolume() {
+        if (currentMusic.music == null) {
+            return 0;
+        }
+        return currentMusic.music.getVolume();
+    }
+    
+    public final void setMusicVolume(double volume) {
+        if (currentMusic.name != null) {
+            currentMusic.volume = volume;
+            if (currentMusic.music != null) {
+                currentMusic.music.setVolume((float)volume);
+                musicFadeType = 0;
+            }
+        }
+    }
+    
+    public final void fadeMusicVolume(double volume, double duration) {
+        if (currentMusic.name != null) {
+            if (currentMusic.music != null) {
+                musicFadeType = 1;
+                fadeStartVolume = currentMusic.music.getVolume();
+                fadeEndVolume = volume;
+                fadeDuration = duration*1000;
+                msFading = 0;
+            }
+            currentMusic.volume = volume;
+        }
+    }
+    
+    public final void fadeMusicOut(double duration) {
+        if (currentMusic.name != null) {
+            if (currentMusic.music == null) {
+                stopMusic();
+            } else {
+                musicFadeType = 2;
+                fadeStartVolume = currentMusic.music.getVolume();
+                fadeEndVolume = 0;
+                fadeDuration = duration*1000;
+                msFading = 0;
             }
         }
     }
