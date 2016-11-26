@@ -55,7 +55,7 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
         
     };
     
-    private boolean movementHasOccurred = false;
+    private int stepState = 0;
     private final Set<LevelObject> levelObjects = new HashSet<>();
     private int objectIterators = 0;
     private final Queue<ObjectChangeData> objectChanges = new LinkedList<>();
@@ -412,7 +412,7 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
     
     public class ObjectIterator implements Iterator<LevelObject> {
         
-        private boolean disposed = false;
+        private boolean finished = false;
         private final Iterator<LevelObject> iterator = levelObjects.iterator();
         private LevelObject lastObject = null;
         
@@ -422,20 +422,19 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
         
         @Override
         public final boolean hasNext() {
-            if (disposed) {
+            if (finished) {
                 return false;
             }
             boolean hasNext = iterator.hasNext();
             if (!hasNext) {
-                dispose();
+                finish();
             }
             return hasNext;
-            
         }
         
         @Override
         public final LevelObject next() {
-            if (disposed) {
+            if (finished) {
                 return null;
             }
             lastObject = iterator.next();
@@ -444,19 +443,19 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
         
         @Override
         public final void remove() {
-            if (!disposed && lastObject != null) {
+            if (!finished && lastObject != null) {
                 removeObject(lastObject);
                 lastObject = null;
             }
         }
         
-        public final boolean hasBeenDisposed() {
-            return disposed;
+        public final boolean isFinished() {
+            return finished;
         }
         
-        public final void dispose() {
-            if (!disposed) {
-                disposed = true;
+        public final void finish() {
+            if (!finished) {
+                finished = true;
                 objectIterators--;
                 changeObjects();
             }
@@ -512,12 +511,11 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
     
     @Override
     public final void addThinkerActions(IroncladGame game, LevelThinker thinker) {
-        
-    }
-    
-    @Override
-    public final void removeThinkerActions(IroncladGame game, LevelThinker thinker) {
-        
+        if (stepState == 2) {
+            thinker.afterMovement(game, this);
+        } else if (stepState == 1) {
+            thinker.beforeMovement(game, this);
+        }
     }
     
     private void addObjectChangeData(LevelObject object, LevelState newState) {
@@ -556,6 +554,7 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
     public final void stepActions(IroncladGame game) {
         double timeFactor = getTimeFactor();
         if (timeFactor > 0) {
+            stepState = 1;
             Iterator<LevelThinker> iterator = thinkerIterator();
             while (iterator.hasNext()) {
                 iterator.next().beforeMovement(game, this);
@@ -573,12 +572,12 @@ public class LevelState extends IroncladGameState<LevelState,LevelThinker,LevelT
                 }
                 object.setDisplacement(0, 0);
             }
-            movementHasOccurred = true;
+            stepState = 2;
             iterator = thinkerIterator();
             while (iterator.hasNext()) {
                 iterator.next().afterMovement(game, this);
             }
-            movementHasOccurred = false;
+            stepState = 0;
         }
     }
     

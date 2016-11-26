@@ -17,6 +17,7 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
     private int id;
     boolean isActive = false;
     private double timeFactor = 1;
+    private boolean performingStepActions = false;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
     private final Set<U> thinkers = new HashSet<>();
@@ -156,7 +157,7 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
     
     public class ThinkerIterator implements Iterator<U> {
         
-        private boolean disposed = false;
+        private boolean finished = false;
         private final Iterator<U> iterator = thinkers.iterator();
         private U lastThinker = null;
         
@@ -166,20 +167,19 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
         
         @Override
         public final boolean hasNext() {
-            if (disposed) {
+            if (finished) {
                 return false;
             }
             boolean hasNext = iterator.hasNext();
             if (!hasNext) {
-                dispose();
+                finish();
             }
             return hasNext;
-            
         }
         
         @Override
         public final U next() {
-            if (disposed) {
+            if (finished) {
                 return null;
             }
             lastThinker = iterator.next();
@@ -188,19 +188,19 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
         
         @Override
         public final void remove() {
-            if (!disposed && lastThinker != null) {
+            if (!finished && lastThinker != null) {
                 removeThinker(lastThinker);
                 lastThinker = null;
             }
         }
         
-        public final boolean hasBeenDisposed() {
-            return disposed;
+        public final boolean isFinished() {
+            return finished;
         }
         
-        public final void dispose() {
-            if (!disposed) {
-                disposed = true;
+        public final void finish() {
+            if (!finished) {
+                finished = true;
                 thinkerIterators--;
                 changeThinkers();
             }
@@ -239,6 +239,9 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
         thinker.addActions();
         thinker.addedActions(game, thisState);
         addThinkerActions(game, thinker);
+        if (performingStepActions) {
+            thinker.step(game, thisState);
+        }
     }
     
     public final boolean removeThinker(U thinker) {
@@ -303,11 +306,13 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
                 iterator.next().update(game, currentTimeFactor);
             }
         }
+        performingStepActions = true;
         Iterator<U> iterator = thinkerIterator();
         while (iterator.hasNext()) {
             iterator.next().step(game, thisState);
         }
         stepActions(game);
+        performingStepActions = false;
     }
     
     public void addThinkerActions(IroncladGame game, U thinker) {}
