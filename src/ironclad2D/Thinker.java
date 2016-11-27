@@ -122,10 +122,7 @@ public abstract class Thinker<T extends IroncladGameState<T,U,V>, U extends Thin
     
     public final int getTimerValue(TimedEvent<T> timedEvent) {
         Integer value = timers.get(timedEvent);
-        if (value == null) {
-            return -1;
-        }
-        return value;
+        return (value == null ? -1 : value);
     }
     
     public final void setTimerValue(TimedEvent<T> timedEvent, int value) {

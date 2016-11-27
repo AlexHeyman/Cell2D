@@ -70,10 +70,7 @@ public abstract class AnimatedObject extends LevelObject {
     
     public final AnimationInstance getExtraAnimInstance(int id) {
         AnimationInstance instance = extraAnimInstances.get(id);
-        if (instance == null) {
-            return AnimationInstance.BLANK;
-        }
-        return instance;
+        return (instance == null ? AnimationInstance.BLANK : instance);
     }
     
     public final Animation getExtraAnimation(int id) {

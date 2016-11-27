@@ -52,34 +52,6 @@ public class Sprite implements Animatable {
         return new Sprite(false, this, recolorFilter, null, null, null, filters, centerX, centerY);
     }
     
-    @Override
-    public int getLevel() {
-        return 0;
-    }
-    
-    @Override
-    public int getLength() {
-        return 1;
-    }
-    
-    @Override
-    public Animatable getFrame(int index) {
-        if (index == 0) {
-            return this;
-        }
-        return BLANK;
-    }
-    
-    @Override
-    public boolean framesAreCompatible(int index1, int index2) {
-        return (index1 == 0 && index2 == 0);
-    }
-    
-    @Override
-    public double getFrameDuration(int index) {
-        return 0;
-    }
-    
     public final boolean isLoaded() {
         return isLoaded;
     }
@@ -150,6 +122,31 @@ public class Sprite implements Animatable {
         height = 0;
         right = 0;
         bottom = 0;
+    }
+    
+    @Override
+    public int getLevel() {
+        return 0;
+    }
+    
+    @Override
+    public int getLength() {
+        return 1;
+    }
+    
+    @Override
+    public Animatable getFrame(int index) {
+        return (index == 0 ? this : BLANK);
+    }
+    
+    @Override
+    public boolean framesAreCompatible(int index1, int index2) {
+        return (index1 == 0 && index2 == 0);
+    }
+    
+    @Override
+    public double getFrameDuration(int index) {
+        return 0;
     }
     
     public final SpriteSheet getSpriteSheet() {

@@ -70,10 +70,7 @@ public class Animation implements Animatable {
     
     @Override
     public Animatable getFrame(int index) {
-        if (index >= 0 && index < frames.length) {
-            return frames[index];
-        }
-        return Sprite.BLANK;
+        return (index >= 0 && index < frames.length ? frames[index] : Sprite.BLANK);
     }
     
     @Override
@@ -90,10 +87,7 @@ public class Animation implements Animatable {
     
     @Override
     public double getFrameDuration(int index) {
-        if (index >= 0 && index < frameDurations.length) {
-            return frameDurations[index];
-        }
-        return 0;
+        return (index >= 0 && index < frameDurations.length ? frameDurations[index] : 0);
     }
     
 }

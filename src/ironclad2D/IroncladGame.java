@@ -25,7 +25,6 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.command.BasicCommand;
 import org.newdawn.slick.command.Command;
@@ -92,8 +91,8 @@ public abstract class IroncladGame {
     private final Map<String,Animation> animations = new HashMap<>();
     private final Map<String,Sound> sounds = new HashMap<>();
     private final Map<String,Music> musics = new HashMap<>();
-    private MusicData currentMusic = new MusicData(null, 0, 0, false);
-    private final SortedMap<Integer,MusicData> musicStack = new TreeMap<>();
+    private MusicInstance currentMusic = new MusicInstance(null, 0, 0, false);
+    private final SortedMap<Integer,MusicInstance> musicStack = new TreeMap<>();
     private boolean stackOverridden = false;
     private boolean musicPaused = false;
     private float musicPosition = 0;
@@ -613,17 +612,11 @@ public abstract class IroncladGame {
     }
     
     public final IroncladGameState getState(int id) {
-        if (id < 0 && negativeIDsOffLimits) {
-            return null;
-        }
-        return states.get(id);
+        return (id < 0 && negativeIDsOffLimits ? null : states.get(id));
     }
     
     public final IroncladGameState getCurrentState() {
-        if (currentID < 0 && negativeIDsOffLimits) {
-            return null;
-        }
-        return states.get(currentID);
+        return getState(currentID);
     }
     
     public final int getCurrentStateID() {
@@ -671,10 +664,7 @@ public abstract class IroncladGame {
         if (commandNum < 0 || commandNum >= commands.length) {
             throw new RuntimeException("Attempted to get the controls for nonexistent command number " + commandNum);
         }
-        if (provider != null) {
-            return provider.getControlsFor(commands[commandNum]);
-        }
-        return new ArrayList<>();
+        return (provider == null ? new ArrayList<>() : provider.getControlsFor(commands[commandNum]));
     }
     
     public final void bindControl(int commandNum, Control control) {
@@ -870,6 +860,10 @@ public abstract class IroncladGame {
     
     public final boolean getAutoLoadAssets() {
         return autoLoadAssets;
+    }
+    
+    public final void setAutoLoadAssets(boolean autoLoadAssets) {
+        this.autoLoadAssets = autoLoadAssets;
     }
     
     public final void add(String name, Sprite sprite) {
@@ -1140,11 +1134,45 @@ public abstract class IroncladGame {
     }
     
     public final Sound createSound(String path) throws SlickException {
-        return new Sound(getSubFolderPath("sounds") + path);
+        Sound sound = new Sound(getSubFolderPath("sounds") + path);
+        if (autoLoadAssets) {
+            sound.load();
+        }
+        return sound;
     }
     
     public final Sound getSound(String name) {
         return sounds.get(name);
+    }
+    
+    private class Music {
+        
+        private boolean isLoaded = false;
+        private final String path;
+        private org.newdawn.slick.Music music = null;
+        
+        private Music(String path) {
+            this.path = path;
+        }
+        
+        private boolean load() throws SlickException {
+            if (!isLoaded) {
+                isLoaded = true;
+                music = new org.newdawn.slick.Music(path);
+                return true;
+            }
+            return false;
+        }
+        
+        private boolean unload() {
+            if (isLoaded) {
+                isLoaded = false;
+                music = null;
+                return true;
+            }
+            return false;
+        }
+        
     }
     
     public final void createMusic(String name, String path) throws SlickException {
@@ -1154,22 +1182,48 @@ public abstract class IroncladGame {
         if (name.equals("")) {
             throw new RuntimeException("Attempted to create a music track with the empty string as a name");
         }
-        if (musics.put(name, new Music(getSubFolderPath("music") + path)) != null) {
+        Music music = new Music(getSubFolderPath("music") + path);
+        if (musics.put(name, music) != null) {
             throw new RuntimeException("Attempted to create multiple music tracks with the name " + name);
+        }
+        if (autoLoadAssets) {
+            music.load();
         }
     }
     
-    private class MusicData {
+    public final boolean isMusicLoaded(String name) {
+        Music music = musics.get(name);
+        return (music == null ? false : music.isLoaded);
+    }
+    
+    public final boolean loadMusic(String name) throws SlickException {
+        Music music = musics.get(name);
+        if (music != null) {
+            return music.load();
+        }
+        return false;
+    }
+    
+    public final boolean unloadMusic(String name) {
+        Music music = musics.get(name);
+        if (music != null) {
+            return music.unload();
+        }
+        return false;
+    }
+    
+    private class MusicInstance {
         
         private final String name;
-        private final Music music;
+        private final org.newdawn.slick.Music music;
         private final double pitch;
         private double volume;
         private final boolean loop;
         
-        private MusicData(String name, double pitch, double volume, boolean loop) {
+        private MusicInstance(String name, double pitch, double volume, boolean loop) {
             this.name = name;
-            this.music = musics.get(name);
+            Music musicData = musics.get(name);
+            this.music = (musicData == null ? null : musicData.music);
             this.pitch = pitch;
             this.volume = volume;
             this.loop = loop;
@@ -1182,27 +1236,24 @@ public abstract class IroncladGame {
     }
     
     public final String getMusic(int priority) {
-        MusicData data = musicStack.get(priority);
-        if (data == null) {
-            return null;
-        }
-        return data.name;
+        MusicInstance instance = musicStack.get(priority);
+        return (instance == null ? null : instance.name);
     }
     
-    private void changeMusic(MusicData data) {
+    private void changeMusic(MusicInstance instance) {
         if (!musicPaused) {
             if (currentMusic.music != null) {
                 currentMusic.music.stop();
             }
-            if (data.music != null) {
-                if (data.loop) {
-                    data.music.loop((float)data.pitch, (float)data.volume);
+            if (instance.music != null) {
+                if (instance.loop) {
+                    instance.music.loop((float)instance.pitch, (float)instance.volume);
                 } else {
-                    data.music.play((float)data.pitch, (float)data.volume);
+                    instance.music.play((float)instance.pitch, (float)instance.volume);
                 }
             }
         }
-        currentMusic = data;
+        currentMusic = instance;
         musicPosition = 0;
         musicFadeType = 0;
     }
@@ -1215,7 +1266,7 @@ public abstract class IroncladGame {
         if (musicFadeType == 2 && !musicStack.isEmpty() && !stackOverridden) {
             musicStack.remove(musicStack.lastKey());
         }
-        changeMusic(new MusicData(name, pitch, volume, loop));
+        changeMusic(new MusicInstance(name, pitch, volume, loop));
         stackOverridden = true;
     }
     
@@ -1224,14 +1275,14 @@ public abstract class IroncladGame {
             stopMusic(priority);
             return;
         }
-        MusicData data = new MusicData(name, pitch, volume, loop);
+        MusicInstance instance = new MusicInstance(name, pitch, volume, loop);
         if ((musicStack.isEmpty() || priority >= musicStack.lastKey()) && !stackOverridden) {
             if (musicFadeType == 2 && !musicStack.isEmpty() && priority > musicStack.lastKey()) {
                 musicStack.remove(musicStack.lastKey());
             }
-            changeMusic(data);
+            changeMusic(instance);
         }
-        musicStack.put(priority, data);
+        musicStack.put(priority, instance);
     }
     
     public final void playMusic(String name) {
@@ -1268,14 +1319,14 @@ public abstract class IroncladGame {
     
     public final void stopMusic() {
         if (musicStack.isEmpty()) {
-            changeMusic(new MusicData(null, 0, 0, false));
+            changeMusic(new MusicInstance(null, 0, 0, false));
             stackOverridden = false;
             return;
         }
         if (!stackOverridden) {
             musicStack.remove(musicStack.lastKey());
             if (musicStack.isEmpty()) {
-                changeMusic(new MusicData(null, 0, 0, false));
+                changeMusic(new MusicInstance(null, 0, 0, false));
                 return;
             }
         }
@@ -1304,8 +1355,8 @@ public abstract class IroncladGame {
         if (musicStack.isEmpty()) {
             return;
         }
-        MusicData data = musicStack.get(priority);
-        if (data != null && data.name != null && data.name.equals(name)) {
+        MusicInstance instance = musicStack.get(priority);
+        if (instance != null && instance.name != null && instance.name.equals(name)) {
             if (priority == musicStack.lastKey() && !stackOverridden) {
                 stopMusic();
             } else {
@@ -1343,10 +1394,7 @@ public abstract class IroncladGame {
     }
     
     public final double getMusicPosition() {
-        if (currentMusic.music == null) {
-            return 0;
-        }
-        return currentMusic.music.getPosition();
+        return (currentMusic.music == null ? 0 : currentMusic.music.getPosition());
     }
     
     public final void setMusicPosition(double position) {
@@ -1356,10 +1404,7 @@ public abstract class IroncladGame {
     }
     
     public final double getMusicVolume() {
-        if (currentMusic.music == null) {
-            return 0;
-        }
-        return currentMusic.music.getVolume();
+        return (currentMusic.music == null ? 0 : currentMusic.music.getVolume());
     }
     
     public final void setMusicVolume(double volume) {

@@ -97,10 +97,7 @@ public abstract class IroncladGameState<T extends IroncladGameState<T,U,V>, U ex
     
     public final AnimationInstance getAnimInstance(int id) {
         AnimationInstance instance = IDInstances.get(id);
-        if (instance == null) {
-            return AnimationInstance.BLANK;
-        }
-        return instance;
+        return (instance == null ? AnimationInstance.BLANK : instance);
     }
     
     public final Animation getAnimation(int id) {

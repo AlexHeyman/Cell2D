@@ -88,10 +88,7 @@ public class AnimationInstance {
     }
     
     public final int getIndex(int level) {
-        if (level >= 0 && level < indices.length) {
-            return indices[level];
-        }
-        return -1;
+        return (level >= 0 && level < indices.length ? indices[level] : -1);
     }
     
     private double setIndex(int level, Animatable frame, int index, boolean resetLowerIndices) {
@@ -138,10 +135,7 @@ public class AnimationInstance {
     }
     
     public final double getSpeed(int level) {
-        if (level >= 0 && level < speeds.length) {
-            return speeds[level];
-        }
-        return 0;
+        return (level >= 0 && level < speeds.length ? speeds[level] : 0);
     }
     
     public final void setSpeed(int level, double speed) {

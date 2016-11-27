@@ -4,10 +4,34 @@ import org.newdawn.slick.SlickException;
 
 public class Sound {
     
-    private final org.newdawn.slick.Sound sound;
+    private boolean isLoaded = false;
+    private final String path;
+    private org.newdawn.slick.Sound sound = null;
     
-    Sound(String path) throws SlickException {
-        sound = new org.newdawn.slick.Sound(path);
+    Sound(String path) {
+        this.path = path;
+    }
+    
+    public final boolean isLoaded() {
+        return isLoaded;
+    }
+    
+    public final boolean load() throws SlickException {
+        if (!isLoaded) {
+            isLoaded = true;
+            sound = new org.newdawn.slick.Sound(path);
+            return true;
+        }
+        return false;
+    }
+    
+    public final boolean unload() {
+        if (isLoaded) {
+            isLoaded = false;
+            sound = null;
+            return true;
+        }
+        return false;
     }
     
     public final boolean isPlaying() {
@@ -19,7 +43,9 @@ public class Sound {
     }
     
     public final void play(double pitch, double volume) {
-        sound.play((float)pitch, (float)volume);
+        if (isLoaded) {
+            sound.play((float)pitch, (float)volume);
+        }
     }
     
     public final void loop() {
@@ -27,11 +53,15 @@ public class Sound {
     }
     
     public final void loop(double pitch, double volume) {
-        sound.loop((float)pitch, (float)volume);
+        if (isLoaded) {
+            sound.loop((float)pitch, (float)volume);
+        }
     }
     
     public final void stop() {
-        sound.stop();
+        if (isLoaded) {
+            sound.stop();
+        }
     }
     
 }
