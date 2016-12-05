@@ -43,7 +43,7 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absLeft = relLeft;
             }
-            updateChunks();
+            updateCells();
             return true;
         }
         return false;
@@ -65,7 +65,7 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absRight = relRight;
             }
-            updateChunks();
+            updateCells();
             return true;
         }
         return false;
@@ -87,7 +87,7 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absTop = relTop;
             }
-            updateChunks();
+            updateCells();
             return true;
         }
         return false;
@@ -109,7 +109,7 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absBottom = relBottom;
             }
-            updateChunks();
+            updateCells();
             return true;
         }
         return false;
@@ -166,7 +166,7 @@ public class RectangleHitbox extends Hitbox {
             absLeft = relLeft;
             absRight = relRight;
         }
-        updateChunks();
+        updateCells();
     }
     
     @Override
@@ -178,7 +178,7 @@ public class RectangleHitbox extends Hitbox {
             absTop = relTop;
             absBottom = relBottom;
         }
-        updateChunks();
+        updateCells();
     }
     
 }

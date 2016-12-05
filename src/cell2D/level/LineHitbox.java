@@ -30,7 +30,7 @@ public class LineHitbox extends Hitbox {
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
         bottom = Math.max(absDifference.getY(), 0);
-        updateChunks();
+        updateCells();
     }
     
     public final LevelVector getRelDifference() {

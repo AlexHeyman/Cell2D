@@ -105,7 +105,7 @@ public class PolygonHitbox extends Hitbox {
             centerX /= vertices.size();
             centerY /= vertices.size();
         }
-        updateChunks();
+        updateCells();
     }
     
     public final int getNumVertices() {

@@ -166,7 +166,7 @@ public abstract class Hitbox {
         }
     }
     
-    final void updateChunks() {
+    final void updateCells() {
         if (state != null && cellRange != null) {
             state.updateCells(this);
         }
@@ -333,7 +333,7 @@ public abstract class Hitbox {
         } else {
             absPosition.copy(parent.absPosition).add(new LevelVector(relPosition).relativeTo(parent));
         }
-        updateChunks();
+        updateCells();
     }
     
     private void recursivelyUpdateAbsPosition() {

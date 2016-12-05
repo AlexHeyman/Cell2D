@@ -28,7 +28,7 @@ public class CircleHitbox extends Hitbox {
         if (relRadius >= 0) {
             this.relRadius = relRadius;
             absRadius = relRadius;
-            updateChunks();
+            updateCells();
             return true;
         }
         return false;
