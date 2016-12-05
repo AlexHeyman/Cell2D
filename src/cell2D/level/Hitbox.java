@@ -550,4 +550,4 @@ public abstract class Hitbox {
         return false;
     }
     
- }
+}

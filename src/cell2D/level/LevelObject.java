@@ -44,10 +44,6 @@ public abstract class LevelObject {
         return levelState.addObject(this);
     }
     
-    void addActions() {
-        locatorHitbox.setGameState(state);
-    }
-    
     void addCellData() {
         state.addLocatorHitbox(locatorHitbox);
         if (overlapHitbox != null) {
@@ -56,6 +52,10 @@ public abstract class LevelObject {
         if (solidHitbox != null) {
             state.addSolidHitbox(solidHitbox);
         }
+    }
+    
+    void addActions() {
+        locatorHitbox.setGameState(state);
     }
     
     public final boolean remove() {

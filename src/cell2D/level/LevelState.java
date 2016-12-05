@@ -63,6 +63,10 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     private final SortedSet<ThinkerObject> thinkerObjects = new TreeSet<>(movementPriorityComparator);
     private double cellWidth, cellHeight;
     private final Map<Point,Cell> cells = new HashMap<>();
+    private int cellLeft = 0;
+    private int cellRight = 0;
+    private int cellTop = 0;
+    private int cellBottom = 0;
     private final SortedMap<Integer,LevelLayer> levelLayers = new TreeMap<>();
     private HUD hud = null;
     private final Map<Integer,Viewport> viewports = new HashMap<>();
@@ -104,6 +108,25 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     private Cell getCell(Point point) {
         Cell cell = cells.get(point);
         if (cell == null) {
+            int pointX = (int)point.getX();
+            int pointY = (int)point.getY();
+            if (cells.isEmpty()) {
+                cellLeft = pointX;
+                cellRight = pointX;
+                cellTop = pointY;
+                cellBottom = pointY;
+            } else {
+                if (pointX < cellLeft) {
+                    cellLeft = pointX;
+                } else if (pointX > cellRight) {
+                    cellRight = pointX;
+                }
+                if (pointY < cellTop) {
+                    cellTop = pointY;
+                } else if (pointY > cellBottom) {
+                    cellBottom = pointY;
+                }
+            }
             cell = new Cell();
             cells.put(point, cell);
         }
@@ -179,6 +202,39 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             i++;
         }
         return cellArray;
+    }
+    
+    public final double getCellWidth() {
+        return cellWidth;
+    }
+    
+    public final double getCellHeight() {
+        return cellHeight;
+    }
+    
+    public final void setCellDimensions(double cellWidth, double cellHeight) {
+        if (cellWidth <= 0) {
+            throw new RuntimeException("Attempted to give a level state a non-positive cell width");
+        }
+        if (cellHeight <= 0) {
+            throw new RuntimeException("Attempted to give a level state a non-positive cell height");
+        }
+        this.cellWidth = cellWidth;
+        this.cellHeight = cellHeight;
+        rebuildCells();
+    }
+    
+    public final void rebuildCells() {
+        cells.clear();
+        if (!levelObjects.isEmpty()) {
+            for (LevelObject object : levelObjects) {
+                object.addCellData();
+            }
+        }
+    }
+    
+    public final void loadArea(Area area) {
+        
     }
     
     final void updateCells(Hitbox hitbox) {
@@ -389,35 +445,6 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         thinkerObjects.add(object);
     }
     
-    public final double getCellWidth() {
-        return cellWidth;
-    }
-    
-    public final double getCellHeight() {
-        return cellHeight;
-    }
-    
-    public final void setCellDimensions(double cellWidth, double cellHeight) {
-        if (cellWidth <= 0) {
-            throw new RuntimeException("Attempted to give a level state a non-positive cell width");
-        }
-        if (cellHeight <= 0) {
-            throw new RuntimeException("Attempted to give a level state a non-positive cell height");
-        }
-        cells.clear();
-        this.cellWidth = cellWidth;
-        this.cellHeight = cellHeight;
-        if (!levelObjects.isEmpty()) {
-            for (LevelObject object : levelObjects) {
-                object.addCellData();
-            }
-        }
-    }
-    
-    public final void loadArea(Area area) {
-        
-    }
-    
     public class ObjectIterator implements Iterator<LevelObject> {
         
         private boolean finished = false;
@@ -499,8 +526,8 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     private void addActions(LevelObject object) {
         levelObjects.add(object);
         object.state = this;
-        object.addActions();
         object.addCellData();
+        object.addActions();
     }
     
     public final boolean removeObject(LevelObject object) {

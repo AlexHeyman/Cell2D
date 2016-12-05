@@ -58,18 +58,18 @@ public abstract class ThinkerObject extends AnimatedObject {
     }
     
     @Override
-    void addActions() {
-        super.addActions();
-        state.addThinker(thinker);
-        state.addThinkerObject(this);
-    }
-    
-    @Override
     void addCellData() {
         super.addCellData();
         if (hasCollision && collisionHitbox != null) {
             state.addCollisionHitbox(collisionHitbox);
         }
+    }
+    
+    @Override
+    void addActions() {
+        super.addActions();
+        state.addThinkerObject(this);
+        state.addThinker(thinker);
     }
     
     @Override
