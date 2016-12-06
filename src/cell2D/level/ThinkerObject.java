@@ -48,8 +48,8 @@ public abstract class ThinkerObject extends AnimatedObject {
     private final LevelVector velocity = new LevelVector();
     private final LevelVector displacement = new LevelVector();
     
-    public ThinkerObject(Hitbox locatorHitbox, int drawLayer) {
-        super(locatorHitbox, drawLayer);
+    public ThinkerObject(Hitbox locatorHitbox, int drawPriority) {
+        super(locatorHitbox, drawPriority);
         id = getNextID();
     }
     

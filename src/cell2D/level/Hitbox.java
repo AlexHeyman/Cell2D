@@ -20,7 +20,7 @@ public abstract class Hitbox {
     private int numRoles = 0;
     LevelState state = null;
     int[] cellRange = null;
-    int drawLayer = 0;
+    int drawPriority = 0;
     int numCellRoles = 0;
     private final LevelVector relPosition, absPosition;
     private boolean relXFlip = false;
@@ -172,8 +172,8 @@ public abstract class Hitbox {
         }
     }
     
-    final void addAsLocatorHitbox(int drawLayer) {
-        this.drawLayer = drawLayer;
+    final void addAsLocatorHitbox(int drawPriority) {
+        this.drawPriority = drawPriority;
         if (state != null) {
             state.addLocatorHitbox(this);
         }
@@ -185,7 +185,7 @@ public abstract class Hitbox {
         if (state != null) {
             state.removeLocatorHitbox(this);
         }
-        drawLayer = 0;
+        drawPriority = 0;
         roles[0] = false;
         numRoles--;
         if (numRoles == 0) {
@@ -196,11 +196,11 @@ public abstract class Hitbox {
         }
     }
     
-    final void changeDrawLayer(int drawLayer) {
+    final void changeDrawPriority(int drawPriority) {
         if (state == null) {
-            this.drawLayer = drawLayer;
+            this.drawPriority = drawPriority;
         } else {
-            state.changeLocatorHitboxDrawLayer(this, drawLayer);
+            state.changeLocatorHitboxDrawPriority(this, drawPriority);
         }
     }
     

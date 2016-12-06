@@ -37,20 +37,20 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
         
     };
-    private static final Comparator<Hitbox> drawLayerComparator = new LevelComparator<Hitbox>() {
+    private static final Comparator<Hitbox> drawPriorityComparator = new LevelComparator<Hitbox>() {
         
         @Override
         public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
-            int drawLayerDifference = hitbox1.drawLayer - hitbox2.drawLayer;
-            return (drawLayerDifference == 0 ? Long.signum(hitbox1.id - hitbox2.id) : drawLayerDifference);
+            int drawPriorityDifference = hitbox1.drawPriority - hitbox2.drawPriority;
+            return (drawPriorityDifference == 0 ? Long.signum(hitbox1.id - hitbox2.id) : drawPriorityDifference);
         }
         
     };
-    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawLayerIteratorComparator = new LevelComparator<Pair<Hitbox,Iterator<Hitbox>>>() {
+    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawPriorityIteratorComparator = new LevelComparator<Pair<Hitbox,Iterator<Hitbox>>>() {
         
         @Override
         public final int compare(Pair<Hitbox, Iterator<Hitbox>> pair1, Pair<Hitbox, Iterator<Hitbox>> pair2) {
-            return drawLayerComparator.compare(pair1.getKey(), pair2.getKey());
+            return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
         }
         
     };
@@ -87,7 +87,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     
     private class Cell {
         
-        private final SortedSet<Hitbox> locatorHitboxes = new TreeSet<>(drawLayerComparator);
+        private final SortedSet<Hitbox> locatorHitboxes = new TreeSet<>(drawPriorityComparator);
         private final Set<Hitbox> overlapHitboxes = new HashSet<>();
         private final Map<Direction,Set<Hitbox>> solidHitboxes = new EnumMap<>(Direction.class);
         private final Set<Hitbox> collisionHitboxes = new HashSet<>();
@@ -311,12 +311,12 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
-    final void changeLocatorHitboxDrawLayer(Hitbox hitbox, int drawLayer) {
+    final void changeLocatorHitboxDrawPriority(Hitbox hitbox, int drawPriority) {
         Cell[] cellArray = getCells(hitbox.cellRange);
         for (Cell cell : cellArray) {
             cell.locatorHitboxes.remove(hitbox);
         }
-        hitbox.drawLayer = drawLayer;
+        hitbox.drawPriority = drawPriority;
         for (Cell cell : cellArray) {
             cell.locatorHitboxes.add(hitbox);
         }
@@ -798,7 +798,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                                     } while (hitbox1 != null);
                                     break;
                                 } else {
-                                    int comparison = drawLayerComparator.compare(hitbox1, hitbox2);
+                                    double comparison = drawPriorityComparator.compare(hitbox1, hitbox2);
                                     if (comparison > 0) {
                                         if (hitbox1 != lastHitbox) {
                                             draw(g, hitbox1, left, right, top, bottom, xOffset, yOffset);
@@ -815,7 +815,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                                 }
                             }
                         } else {
-                            PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawLayerIteratorComparator);
+                            PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawPriorityIteratorComparator);
                             for (Set<Hitbox> locatorHitboxes : hitboxesList) {
                                 if (!locatorHitboxes.isEmpty()) {
                                     Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
@@ -837,7 +837,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                             }
                         }
                     }
-                    for (LevelLayer layer : levelLayers.tailMap(1).values()) {
+                    for (LevelLayer layer : levelLayers.tailMap(0).values()) {
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                 }

@@ -13,16 +13,16 @@ public abstract class LevelObject {
     private Hitbox locatorHitbox = null;
     private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
-    private int drawLayer;
+    private int drawPriority;
     private Sprite sprite = null;
     private double alpha = 1;
     private String filter = null;
     
-    public LevelObject(Hitbox locatorHitbox, int drawLayer) {
+    public LevelObject(Hitbox locatorHitbox, int drawPriority) {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a level object with an invalid locator hitbox");
         }
-        this.drawLayer = drawLayer;
+        this.drawPriority = drawPriority;
     }
     
     public final void copyProperties(LevelObject object) {
@@ -108,7 +108,7 @@ public abstract class LevelObject {
                 this.locatorHitbox = locatorHitbox;
                 locatorHitbox.setObject(this);
                 addNonLocatorHitboxes(locatorHitbox);
-                locatorHitbox.addAsLocatorHitbox(drawLayer);
+                locatorHitbox.addAsLocatorHitbox(drawPriority);
                 return true;
             }
         }
@@ -324,13 +324,13 @@ public abstract class LevelObject {
         return false;
     }
     
-    public final int getDrawLayer() {
-        return drawLayer;
+    public final int getDrawPriority() {
+        return drawPriority;
     }
     
-    public final void setDrawLayer(int drawLayer) {
-        this.drawLayer = drawLayer;
-        locatorHitbox.changeDrawLayer(drawLayer);
+    public final void setDrawPriority(int drawPriority) {
+        this.drawPriority = drawPriority;
+        locatorHitbox.changeDrawPriority(drawPriority);
     }
     
     public final Sprite getSprite() {
