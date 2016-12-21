@@ -6,15 +6,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
     
+    private static final AtomicLong idCounter = new AtomicLong(0);
+    
+    final long id;
     private boolean initialized = false;
     private final U thisThinker;
     T state = null;
     T newState = null;
-    private double timeFactor = 1;
+    private double timeFactor = -1;
     private double timeToRun = 0;
+    int actionPriority = 0;
+    int newActionPriority = 0;
     private final Map<TimedEvent<T>,Integer> timers = new HashMap<>();
     private V thinkerState = null;
     private final Queue<V> upcomingStates = new LinkedList<>();
@@ -29,10 +35,15 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     };
     
     public Thinker() {
+        id = getNextID();
         thisThinker = getThis();
         initialized = true;
     }
     
+    private static long getNextID() {
+        return idCounter.getAndIncrement();
+    }
+
     public abstract U getThis();
     
     public final T getGameState() {
@@ -67,11 +78,30 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         return timeFactor;
     }
     
+    public final double getEffectiveTimeFactor() {
+        return (timeFactor < 0 ? (state == null ? 0 : state.getTimeFactor()) : timeFactor);
+    }
+    
     public final void setTimeFactor(double timeFactor) {
-        if (timeFactor < 0) {
-            throw new RuntimeException("Attempted to give a thinker a negative time factor");
-        }
         this.timeFactor = timeFactor;
+    }
+    
+    public final int getActionPriority() {
+        return actionPriority;
+    }
+    
+    public final int getNewActionPriority() {
+        return newActionPriority;
+    }
+    
+    public final void setActionPriority(int actionPriority) {
+        if (state == null) {
+            newActionPriority = actionPriority;
+            this.actionPriority = actionPriority;
+        } else if (newActionPriority != actionPriority) {
+            newActionPriority = actionPriority;
+            state.changeThinkerActionPriority(thisThinker, actionPriority);
+        }
     }
     
     public final V getThinkerState() {
@@ -151,11 +181,12 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     
     public void removedActions(CellGame game, T state) {}
     
-    final void update(CellGame game, double time) {
-        if (timeFactor == 0) {
+    final void update(CellGame game) {
+        double time = getEffectiveTimeFactor();
+        if (time == 0) {
             return;
         }
-        timeToRun += time*timeFactor;
+        timeToRun += time;
         while (timeToRun >= 1) {
             List<TimedEvent<T>> timedEventsToDo = new LinkedList<>();
             Iterator<Map.Entry<TimedEvent<T>,Integer>> iterator = timers.entrySet().iterator();

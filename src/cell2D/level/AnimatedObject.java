@@ -61,8 +61,8 @@ public abstract class AnimatedObject extends LevelObject {
         AnimationInstance oldInstance = animInstance;
         animInstance = new AnimationInstance(animation);
         if (state != null) {
-            state.addAnimInstance(animInstance);
             state.removeAnimInstance(oldInstance);
+            state.addAnimInstance(animInstance);
         }
         animInstance.setTimeFactor(getTimeFactor());
         return animInstance;
@@ -88,10 +88,10 @@ public abstract class AnimatedObject extends LevelObject {
         AnimationInstance instance = new AnimationInstance(animation);
         AnimationInstance oldInstance = extraAnimInstances.put(id, instance);
         if (state != null) {
-            state.addAnimInstance(instance);
             if (oldInstance != null) {
                 state.removeAnimInstance(oldInstance);
             }
+            state.addAnimInstance(instance);
         }
         instance.setTimeFactor(getTimeFactor());
         return instance;

@@ -6,7 +6,7 @@ import java.util.List;
 public class PolygonHitbox extends Hitbox {
     
     private final List<RelAbsPair> vertices;
-    private double left, right, top, bottom, centerX, centerY;
+    private double left, right, top, bottom;
     
     public PolygonHitbox(LevelVector relPosition, LevelVector[] relVertices) {
         super(relPosition);
@@ -56,8 +56,8 @@ public class PolygonHitbox extends Hitbox {
     
     private class RelAbsPair {
         
-        private LevelVector rel;
-        private LevelVector abs;
+        private final LevelVector rel;
+        private final LevelVector abs;
         
         private RelAbsPair(LevelVector rel, LevelVector abs) {
             this.rel = rel;
@@ -76,19 +76,20 @@ public class PolygonHitbox extends Hitbox {
     }
     
     private void updateData() {
-        centerX = 0;
-        centerY = 0;
         if (vertices.isEmpty()) {
             left = 0;
             right = 0;
             top = 0;
             bottom = 0;
+            center.clear();
         } else {
+            double sumX = 0;
+            double sumY = 0;
             boolean comparing = false;
             for (RelAbsPair vertex : vertices) {
                 vertex.abs.copy(vertex.rel).relativeTo(this);
-                centerX += vertex.abs.getX();
-                centerY += vertex.abs.getY();
+                sumX += vertex.abs.getX();
+                sumY += vertex.abs.getY();
                 if (comparing) {
                     left = Math.min(left, vertex.abs.getX());
                     right = Math.max(right, vertex.abs.getX());
@@ -102,8 +103,7 @@ public class PolygonHitbox extends Hitbox {
                     comparing = true;
                 }
             }
-            centerX /= vertices.size();
-            centerY /= vertices.size();
+            center.setCoordinates(sumX/vertices.size(), sumY/vertices.size());
         }
         updateCells();
     }
@@ -242,16 +242,6 @@ public class PolygonHitbox extends Hitbox {
     @Override
     public final double getBottomEdge() {
         return getAbsY() + bottom;
-    }
-    
-    @Override
-    public final double getCenterX() {
-        return getAbsX() + centerX;
-    }
-    
-    @Override
-    public final double getCenterY() {
-        return getAbsY() + centerY;
     }
     
     @Override

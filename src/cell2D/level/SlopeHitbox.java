@@ -21,11 +21,12 @@ public class SlopeHitbox extends Hitbox {
     
     @Override
     public Hitbox getCopy() {
-        return new SlopeHitbox(new LevelVector(0, 0), relDifference);
+        return new SlopeHitbox(new LevelVector(), relDifference);
     }
     
     private void updateData() {
         absDifference.copy(relDifference).flip(getAbsXFlip(), getAbsYFlip());
+        center.copy(absDifference).scale(0.5);
         left = Math.min(absDifference.getX(), 0);
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
@@ -103,16 +104,6 @@ public class SlopeHitbox extends Hitbox {
     @Override
     public final double getBottomEdge() {
         return getAbsY() + bottom;
-    }
-    
-    @Override
-    public final double getCenterX() {
-        return getAbsX() + absDifference.getX()/2;
-    }
-    
-    @Override
-    public final double getCenterY() {
-        return getAbsY() + absDifference.getY()/2;
     }
     
     @Override

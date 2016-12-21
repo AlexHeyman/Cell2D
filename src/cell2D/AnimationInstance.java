@@ -6,7 +6,7 @@ public class AnimationInstance {
     
     private final boolean isBlank;
     CellGameState state = null;
-    private double timeFactor = 1;
+    private double timeFactor = -1;
     private final Animation animation;
     private final int level;
     private final int[] indices;
@@ -69,12 +69,13 @@ public class AnimationInstance {
         return timeFactor;
     }
     
+    public final double getEffectiveTimeFactor() {
+        return (timeFactor < 0 ? (state == null ? 0 : state.getTimeFactor()) : timeFactor);
+    }
+    
     public final void setTimeFactor(double timeFactor) {
         if (isBlank) {
             return;
-        }
-        if (timeFactor < 0) {
-            throw new RuntimeException("Attempted to give an animation instance a negative time factor");
         }
         this.timeFactor = timeFactor;
     }
@@ -147,17 +148,19 @@ public class AnimationInstance {
         }
     }
     
-    final void update(double time) {
-        if (isBlank || timeFactor == 0) {
+    final void update() {
+        if (isBlank) {
             return;
         }
-        time *= timeFactor;
+        double time = getEffectiveTimeFactor();
+        if (time == 0) {
+            return;
+        }
         boolean spriteChanged = false;
         Animatable frame = animation;
-        double duration;
         for (int i = indices.length - 1; i >= 0; i--) {
             if (speeds[i] != 0) {
-                duration = frame.getFrameDuration(indices[i]);
+                double duration = frame.getFrameDuration(indices[i]);
                 if (duration > 0) {
                     indexChanges[i] += time*speeds[i];
                     if (speeds[i] > 0) {

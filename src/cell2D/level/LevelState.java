@@ -2,6 +2,7 @@ package cell2D.level;
 
 import cell2D.CellGame;
 import cell2D.CellGameState;
+import cell2D.SafeIterator;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,15 +29,6 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     
     private static abstract class LevelComparator<T> implements Comparator<T>, Serializable {}
     
-    private static final Comparator<ThinkerObject> movementPriorityComparator = new LevelComparator<ThinkerObject>() {
-        
-        @Override
-        public final int compare(ThinkerObject object1, ThinkerObject object2) {
-            int priorityDifference = object1.movementPriority - object2.movementPriority;
-            return (priorityDifference == 0 ? Long.signum(object1.id - object2.id) : priorityDifference);
-        }
-        
-    };
     private static final Comparator<Hitbox> drawPriorityComparator = new LevelComparator<Hitbox>() {
         
         @Override
@@ -51,6 +43,15 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         @Override
         public final int compare(Pair<Hitbox, Iterator<Hitbox>> pair1, Pair<Hitbox, Iterator<Hitbox>> pair2) {
             return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
+        }
+        
+    };
+    private static final Comparator<ThinkerObject> movementPriorityComparator = new LevelComparator<ThinkerObject>() {
+        
+        @Override
+        public final int compare(ThinkerObject object1, ThinkerObject object2) {
+            int priorityDifference = object1.movementPriority - object2.movementPriority;
+            return (priorityDifference == 0 ? Long.signum(object1.id - object2.id) : priorityDifference);
         }
         
     };
@@ -431,21 +432,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
-    final void addThinkerObject(ThinkerObject object) {
-        thinkerObjects.add(object);
-    }
-    
-    final void removeThinkerObject(ThinkerObject object) {
-        thinkerObjects.remove(object);
-    }
-    
-    final void changeThinkerObjectMovementPriority(ThinkerObject object, int movementPriority) {
-        thinkerObjects.remove(object);
-        object.movementPriority = movementPriority;
-        thinkerObjects.add(object);
-    }
-    
-    public class ObjectIterator implements Iterator<LevelObject> {
+    private class ObjectIterator implements SafeIterator<LevelObject> {
         
         private boolean finished = false;
         private final Iterator<LevelObject> iterator = levelObjects.iterator();
@@ -484,10 +471,12 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             }
         }
         
+        @Override
         public final boolean isFinished() {
             return finished;
         }
         
+        @Override
         public final void finish() {
             if (!finished) {
                 finished = true;
@@ -498,7 +487,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         
     }
     
-    public final ObjectIterator objectIterator() {
+    public final SafeIterator<LevelObject> objectIterator() {
         return new ObjectIterator();
     }
     
@@ -585,23 +574,56 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
+    final void addThinkerObject(ThinkerObject object) {
+        thinkerObjects.add(object);
+    }
+    
+    final void removeThinkerObject(ThinkerObject object) {
+        thinkerObjects.remove(object);
+    }
+    
+    final void changeThinkerObjectMovementPriority(ThinkerObject object, int movementPriority) {
+        thinkerObjects.remove(object);
+        object.movementPriority = movementPriority;
+        thinkerObjects.add(object);
+    }
+    
     public final <T extends LevelObject> boolean isOverlapping(LevelObject object, Class<T> type) {
         return overlappingObject(object, type) != null;
     }
     
     public final <T extends LevelObject> T overlappingObject(LevelObject object, Class<T> type) {
-        if (object == null || object.getGameState() != this || object.getOverlapHitbox() == null) {
-            return null;
-        }
-        Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
-        while (iterator.hasNext()) {
-            
+        if (object.getGameState() == this && object.getOverlapHitbox() != null) {
+            Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
+            while (iterator.hasNext()) {
+                
+            }
         }
         return null;
     }
     
     public final <T extends LevelObject> Set<T> overlappingObjects(LevelObject object, Class<T> type) {
         return new HashSet<>();
+    }
+    
+    public final void moveObject(ThinkerObject object, LevelVector change) {
+        if (object.getGameState() == this) {
+            move(object, change.getX(), change.getY());
+        }
+    }
+    
+    public final void moveObject(ThinkerObject object, double dx, double dy) {
+        if (object.getGameState() == this) {
+            move(object, dx, dy);
+        }
+    }
+    
+    final void move(ThinkerObject object, double dx, double dy) {
+        if (object.hasCollision() && object.getCollisionHitbox() != null) {
+            object.setPosition(object.getX() + dx, object.getY() + dy);
+        } else {
+            object.setPosition(object.getX() + dx, object.getY() + dy);
+        }
     }
     
     @Override
@@ -614,15 +636,11 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 iterator.next().beforeMovement(game, this);
             }
             for (ThinkerObject object : thinkerObjects) {
-                double objectTimeFactor = timeFactor*object.getTimeFactor();
+                double objectTimeFactor = object.getEffectiveTimeFactor();
                 double dx = objectTimeFactor*(object.getVelocityX() + object.getDisplacementX());
                 double dy = objectTimeFactor*(object.getVelocityY() + object.getDisplacementY());
                 if (dx != 0 || dy != 0) {
-                    if (object.hasCollision() && object.getCollisionHitbox() != null) {
-                        object.setPosition(object.getX() + dx, object.getY() + dy);
-                    } else {
-                        object.setPosition(object.getX() + dx, object.getY() + dy);
-                    }
+                    move(object, dx, dy);
                 }
                 object.setDisplacement(0, 0);
             }

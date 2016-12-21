@@ -9,7 +9,7 @@ public abstract class LevelObject {
     
     LevelState state = null;
     LevelState newState = null;
-    private double timeFactor = 1;
+    private double timeFactor = -1;
     private Hitbox locatorHitbox = null;
     private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
@@ -80,10 +80,11 @@ public abstract class LevelObject {
         return timeFactor;
     }
     
+    public final double getEffectiveTimeFactor() {
+        return (timeFactor < 0 ? (state == null ? 0 : state.getTimeFactor()) : timeFactor);
+    }
+    
     public final void setTimeFactor(double timeFactor) {
-        if (timeFactor < 0) {
-            throw new RuntimeException("Attempted to give a level object a negative time factor");
-        }
         this.timeFactor = timeFactor;
         setTimeFactorActions(timeFactor);
     }
@@ -153,6 +154,14 @@ public abstract class LevelObject {
         locatorHitbox.setRelY(y);
     }
     
+    public final double getCenterX() {
+        return locatorHitbox.getCenterX();
+    }
+    
+    public final double getCenterY() {
+        return locatorHitbox.getCenterY();
+    }
+    
     public final boolean getXFlip() {
         return locatorHitbox.getRelXFlip();
     }
@@ -211,14 +220,6 @@ public abstract class LevelObject {
     
     public final double getBottomEdge() {
         return locatorHitbox.getBottomEdge();
-    }
-    
-    public final double getCenterX() {
-        return locatorHitbox.getCenterX();
-    }
-    
-    public final double getCenterY() {
-        return locatorHitbox.getCenterY();
     }
     
     public final Hitbox getOverlapHitbox() {

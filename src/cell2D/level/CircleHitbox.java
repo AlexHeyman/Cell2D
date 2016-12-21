@@ -58,14 +58,4 @@ public class CircleHitbox extends Hitbox {
         return getAbsY() + absRadius;
     }
     
-    @Override
-    public double getCenterX() {
-        return getAbsX();
-    }
-    
-    @Override
-    public double getCenterY() {
-        return getAbsY();
-    }
-    
 }

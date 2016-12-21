@@ -38,6 +38,7 @@ public class CompositeHitbox extends Hitbox {
             right = 0;
             top = 0;
             bottom = 0;
+            center.clear();
         } else {
             boolean compare = false;
             double newLeft = 0;
@@ -64,6 +65,7 @@ public class CompositeHitbox extends Hitbox {
             right = newRight - x;
             top = newTop - y;
             bottom = newBottom - y;
+            center.setCoordinates((left + right)/2, (top + bottom)/2);
         }
     }
     
@@ -133,16 +135,6 @@ public class CompositeHitbox extends Hitbox {
     @Override
     public final double getBottomEdge() {
         return getAbsY() + bottom;
-    }
-    
-    @Override
-    public final double getCenterX() {
-        return getAbsX() + (left + right)/2;
-    }
-    
-    @Override
-    public final double getCenterY() {
-        return getAbsY() + (top + bottom)/2;
     }
     
     @Override

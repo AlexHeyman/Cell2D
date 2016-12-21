@@ -43,6 +43,7 @@ public abstract class ThinkerObject extends AnimatedObject {
         
     };
     int movementPriority = 0;
+    int newMovementPriority = 0;
     private boolean hasCollision = false;
     private Hitbox collisionHitbox;
     private final LevelVector velocity = new LevelVector();
@@ -100,6 +101,18 @@ public abstract class ThinkerObject extends AnimatedObject {
         locatorHitbox.addChild(collisionHitbox);
     }
     
+    public final int getActionPriority() {
+        return thinker.getActionPriority();
+    }
+    
+    public final int getNewActionPriority() {
+        return thinker.getNewActionPriority();
+    }
+    
+    public final void setActionPriority(int actionPriority) {
+        thinker.setActionPriority(actionPriority);
+    }
+    
     public final int getTimerValue(TimedEvent<LevelState> timedEvent) {
         return thinker.getTimerValue(timedEvent);
     }
@@ -132,10 +145,16 @@ public abstract class ThinkerObject extends AnimatedObject {
         return movementPriority;
     }
     
+    public final int getNewMovementPriority() {
+        return newMovementPriority;
+    }
+    
     public final void setMovementPriority(int movementPriority) {
         if (state == null) {
+            newMovementPriority = movementPriority;
             this.movementPriority = movementPriority;
-        } else {
+        } else if (newMovementPriority != movementPriority) {
+            newMovementPriority = movementPriority;
             state.changeThinkerObjectMovementPriority(this, movementPriority);
         }
     }
@@ -200,6 +219,10 @@ public abstract class ThinkerObject extends AnimatedObject {
         return velocity.getY();
     }
     
+    public final double getSpeed() {
+        return velocity.getLength();
+    }
+    
     public final void setVelocity(LevelVector velocity) {
         this.velocity.copy(velocity);
     }
@@ -216,6 +239,10 @@ public abstract class ThinkerObject extends AnimatedObject {
         velocity.setY(velocityY);
     }
     
+    public final void setSpeed(double speed) {
+        velocity.setLength(speed);
+    }
+    
     public final LevelVector getDisplacement() {
         return new LevelVector(displacement);
     }
@@ -228,36 +255,52 @@ public abstract class ThinkerObject extends AnimatedObject {
         return displacement.getY();
     }
     
+    public final double getDisplacementMagnitude() {
+        return displacement.getLength();
+    }
+    
     public final void setDisplacement(LevelVector displacement) {
         this.displacement.copy(displacement);
     }
     
-    public final void changeDisplacement(LevelVector displacement) {
-        this.displacement.add(displacement);
+    public final void changeDisplacement(LevelVector change) {
+        this.displacement.add(change);
     }
     
     public final void setDisplacement(double displacementX, double displacementY) {
         displacement.setCoordinates(displacementX, displacementY);
     }
     
-    public final void changeDisplacement(double displacementX, double displacementY) {
-        displacement.add(displacementX, displacementY);
+    public final void changeDisplacement(double changeX, double changeY) {
+        displacement.add(changeX, changeY);
     }
     
     public final void setDisplacementX(double displacementX) {
         displacement.setX(displacementX);
     }
     
-    public final void changeDisplacementX(double displacementX) {
-        displacement.add(displacementX, 0);
+    public final void changeDisplacementX(double changeX) {
+        displacement.add(changeX, 0);
     }
     
     public final void setDisplacementY(double displacementY) {
         displacement.setY(displacementY);
     }
     
-    public final void changeDisplacementY(double displacementY) {
-        displacement.add(0, displacementY);
+    public final void changeDisplacementY(double changeY) {
+        displacement.add(0, changeY);
+    }
+    
+    public final void move(LevelVector change) {
+        move(change.getX(), change.getY());
+    }
+    
+    public final void move(double dx, double dy) {
+        if (state == null) {
+            setPosition(getX() + dx, getY() + dy);
+        } else {
+            state.move(this, dx, dy);
+        }
     }
     
     public final void moveTo(LevelVector position) {
@@ -268,6 +311,22 @@ public abstract class ThinkerObject extends AnimatedObject {
     public final void moveTo(double x, double y) {
         setVelocity(0, 0);
         setDisplacement(x - getX(), y - getY());
+    }
+    
+    public final void moveToward(LevelVector position, double speed) {
+        setVelocity(0, 0);
+        setDisplacement(LevelVector.sub(position, getPosition()));
+        if (displacement.getLength() > speed) {
+            displacement.setLength(speed);
+        }
+    }
+    
+    public final void moveToward(double x, double y, double speed) {
+        setVelocity(0, 0);
+        setDisplacement(x - getX(), y - getY());
+        if (displacement.getLength() > speed) {
+            displacement.setLength(speed);
+        }
     }
     
 }

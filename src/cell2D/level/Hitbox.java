@@ -23,6 +23,7 @@ public abstract class Hitbox {
     int drawPriority = 0;
     int numCellRoles = 0;
     private final LevelVector relPosition, absPosition;
+    final LevelVector center = new LevelVector();
     private boolean relXFlip = false;
     private boolean absXFlip = false;
     private boolean relYFlip = false;
@@ -41,7 +42,9 @@ public abstract class Hitbox {
     }
     
     public Hitbox(double relX, double relY) {
-        this(new LevelVector(relX, relY));
+        id = getNextID();
+        this.relPosition = new LevelVector(relX, relY);
+        absPosition = new LevelVector(relPosition);
     }
     
     public abstract Hitbox getCopy();
@@ -345,6 +348,18 @@ public abstract class Hitbox {
         }
     }
     
+    public final LevelVector getCenter() {
+        return LevelVector.add(absPosition, center);
+    }
+    
+    public final double getCenterX() {
+        return absPosition.getX() + center.getX();
+    }
+    
+    public final double getCenterY() {
+        return absPosition.getY() + center.getY();
+    }
+    
     public final boolean getRelXFlip() {
         return relXFlip;
     }
@@ -513,10 +528,6 @@ public abstract class Hitbox {
     public abstract double getTopEdge();
     
     public abstract double getBottomEdge();
-    
-    public abstract double getCenterX();
-    
-    public abstract double getCenterY();
     
     public final boolean overlaps(Hitbox hitbox) {
         return overlap(this, hitbox);

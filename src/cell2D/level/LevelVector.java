@@ -7,13 +7,7 @@ public class LevelVector {
     private double x, y, lengthSquared, length, angle, angleX, angleY;
     
     public LevelVector() {
-        x = 0;
-        y = 0;
-        lengthSquared = 0;
-        length = 0;
-        angle = 0;
-        angleX = 1;
-        angleY = 0;
+        clear();
     }
     
     public LevelVector(double x, double y) {
@@ -33,6 +27,17 @@ public class LevelVector {
     
     public LevelVector(LevelVector vector) {
         copy(vector);
+    }
+    
+    public final LevelVector clear() {
+        x = 0;
+        y = 0;
+        lengthSquared = 0;
+        length = 0;
+        angle = 0;
+        angleX = 1;
+        angleY = 0;
+        return this;
     }
     
     public final LevelVector copy(LevelVector vector) {
@@ -94,14 +99,14 @@ public class LevelVector {
     
     public final LevelVector flip(boolean xFlip, boolean yFlip) {
         if (xFlip) {
-            x *= -1;
+            x = -x;
             angle = modAngle(180 - angle);
-            angleX *= -1;
+            angleX = -angleX;
         }
         if (yFlip) {
-            y *= -1;
+            y = -y;
             angle = modAngle(360 - angle);
-            angleY *= -1;
+            angleY = -angleY;
         }
         return this;
     }
@@ -117,7 +122,7 @@ public class LevelVector {
     public final LevelVector setLength(double length) {
         if (length < 0) {
             flip();
-            length *= -1;
+            length = -length;
         }
         x = length*angleX;
         y = length*angleY;

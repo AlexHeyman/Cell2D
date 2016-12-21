@@ -1,5 +1,7 @@
 package cell2D;
 
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,9 +9,23 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.newdawn.slick.Graphics;
 
 public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
+    
+    private static abstract class StateComparator<T> implements Comparator<T>, Serializable {}
+    
+    private static final Comparator<Thinker> actionPriorityComparator = new StateComparator<Thinker>() {
+        
+        @Override
+        public final int compare(Thinker thinker1, Thinker thinker2) {
+            int priorityDifference = thinker1.actionPriority - thinker2.actionPriority;
+            return (priorityDifference == 0 ? Long.signum(thinker1.id - thinker2.id) : priorityDifference);
+        }
+        
+    };
     
     private boolean initialized = false;
     private final T thisState;
@@ -20,7 +36,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     private boolean performingStepActions = false;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
-    private final Set<U> thinkers = new HashSet<>();
+    private final SortedSet<U> thinkers = new TreeSet<>(actionPriorityComparator);
     private int thinkerIterators = 0;
     private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
     private boolean changingThinkers = false;
@@ -113,13 +129,13 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
             return true;
         }
         if (instance.state == null) {
-            animInstances.add(instance);
-            instance.state = this;
             AnimationInstance oldInstance = IDInstances.put(id, instance);
             if (oldInstance != null) {
                 animInstances.remove(oldInstance);
                 oldInstance.state = null;
             }
+            animInstances.add(instance);
+            instance.state = this;
             return true;
         }
         return false;
@@ -134,13 +150,13 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
             return AnimationInstance.BLANK;
         }
         AnimationInstance instance = new AnimationInstance(animation);
-        animInstances.add(instance);
-        instance.state = this;
         AnimationInstance oldInstance = IDInstances.put(id, instance);
         if (oldInstance != null) {
             animInstances.remove(oldInstance);
             oldInstance.state = null;
         }
+        animInstances.add(instance);
+        instance.state = this;
         return instance;
     }
     
@@ -152,7 +168,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         IDInstances.clear();
     }
     
-    public class ThinkerIterator implements Iterator<U> {
+    private class ThinkerIterator implements SafeIterator<U> {
         
         private boolean finished = false;
         private final Iterator<U> iterator = thinkers.iterator();
@@ -191,10 +207,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
             }
         }
         
+        @Override
         public final boolean isFinished() {
             return finished;
         }
         
+        @Override
         public final void finish() {
             if (!finished) {
                 finished = true;
@@ -205,19 +223,30 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         
     }
     
-    public final ThinkerIterator thinkerIterator() {
+    public final SafeIterator<U> thinkerIterator() {
         return new ThinkerIterator();
     }
     
     private static class ThinkerChangeData<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
         
         private boolean used = false;
+        private final boolean changePriority;
         private final U thinker;
         private final T newState;
+        private final int actionPriority;
         
         private ThinkerChangeData(U thinker, T newState) {
+            changePriority = false;
             this.thinker = thinker;
             this.newState = newState;
+            actionPriority = 0;
+        }
+        
+        private ThinkerChangeData(U thinker, int actionPriority) {
+            changePriority = true;
+            this.thinker = thinker;
+            newState = null;
+            this.actionPriority = actionPriority;
         }
         
     }
@@ -256,6 +285,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         thinker.state = null;
     }
     
+    final void changeThinkerActionPriority(U thinker, int actionPriority) {
+        thinkerChanges.add(new ThinkerChangeData<>(thinker, actionPriority));
+        changeThinkers();
+    }
+    
     private void addThinkerChangeData(U thinker, T newState) {
         thinker.newState = newState;
         ThinkerChangeData<T,U,V> data = new ThinkerChangeData<>(thinker, newState);
@@ -278,13 +312,23 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
                 ThinkerChangeData<T,U,V> data = thinkerChanges.remove();
                 if (!data.used) {
                     data.used = true;
-                    CellGameState<T,U,V> thinkerState = data.thinker.state;
-                    if (thinkerState != null) {
-                        thinkerState.removeActions(data.thinker);
-                    }
-                    CellGameState<T,U,V> newState = data.newState;
-                    if (newState != null) {
-                        newState.addActions(data.thinker);
+                    if (data.changePriority) {
+                        if (data.thinker.state == null) {
+                            data.thinker.actionPriority = data.actionPriority;
+                        } else {
+                            thinkers.remove(data.thinker);
+                            data.thinker.actionPriority = data.actionPriority;
+                            thinkers.add(data.thinker);
+                        }
+                    } else {
+                        CellGameState<T,U,V> thinkerState = data.thinker.state;
+                        if (thinkerState != null) {
+                            thinkerState.removeActions(data.thinker);
+                        }
+                        CellGameState<T,U,V> newState = data.newState;
+                        if (newState != null) {
+                            newState.addActions(data.thinker);
+                        }
                     }
                 }
             }
@@ -293,14 +337,13 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     }
     
     final void doStep() {
-        double currentTimeFactor = timeFactor;
-        if (currentTimeFactor > 0) {
+        if (timeFactor > 0) {
             for (AnimationInstance instance : animInstances) {
-                instance.update(currentTimeFactor);
+                instance.update();
             }
             Iterator<U> iterator = thinkerIterator();
             while (iterator.hasNext()) {
-                iterator.next().update(game, currentTimeFactor);
+                iterator.next().update(game);
             }
         }
         performingStepActions = true;
