@@ -46,6 +46,24 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
         
     };
+    private static final Comparator<Hitbox> overModeComparator = new LevelComparator<Hitbox>() {
+        
+        @Override
+        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
+            int yDiffSignum = (int)Math.signum(hitbox1.getRelY() - hitbox2.getRelY());
+            return (yDiffSignum == 0 ? drawPriorityComparator.compare(hitbox1, hitbox2) : yDiffSignum);
+        }
+        
+    };
+    private static final Comparator<Hitbox> underModeComparator = new LevelComparator<Hitbox>() {
+        
+        @Override
+        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
+            int yDiffSignum = (int)Math.signum(hitbox2.getRelY() - hitbox1.getRelY());
+            return (yDiffSignum == 0 ? drawPriorityComparator.compare(hitbox1, hitbox2) : yDiffSignum);
+        }
+        
+    };
     private static final Comparator<ThinkerObject> movementPriorityComparator = new LevelComparator<ThinkerObject>() {
         
         @Override
@@ -70,17 +88,15 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     private int cellRight = 0;
     private int cellTop = 0;
     private int cellBottom = 0;
+    private DrawMode drawMode;
     private final SortedMap<Integer,LevelLayer> levelLayers = new TreeMap<>();
     private HUD hud = null;
     private final Map<Integer,Viewport> viewports = new HashMap<>();
     
-    public LevelState(CellGame game, int id, double cellWidth, double cellHeight) {
+    public LevelState(CellGame game, int id, double cellWidth, double cellHeight, DrawMode drawMode) {
         super(game, id);
         setCellDimensions(cellWidth, cellHeight);
-    }
-    
-    public LevelState(CellGame game, int id) {
-        this(game, id, 256, 256);
+        setDrawMode(drawMode);
     }
     
     @Override
@@ -90,12 +106,22 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     
     private class Cell {
         
-        private final SortedSet<Hitbox> locatorHitboxes = new TreeSet<>(drawPriorityComparator);
+        private Set<Hitbox> locatorHitboxes;
         private final Set<Hitbox> overlapHitboxes = new HashSet<>();
         private final Map<Direction,Set<Hitbox>> solidHitboxes = new EnumMap<>(Direction.class);
         private final Set<Hitbox> collisionHitboxes = new HashSet<>();
         
-        private Cell() {}
+        private Cell() {
+            initializeLocatorHitboxes();
+        }
+        
+        private void initializeLocatorHitboxes() {
+            if (drawMode == DrawMode.FLAT) {
+                locatorHitboxes = new TreeSet<>(drawPriorityComparator);
+            } else {
+                locatorHitboxes = new HashSet<>();
+            }
+        }
         
         private Set<Hitbox> getSolidHitboxes(Direction direction) {
             Set<Hitbox> hitboxes = solidHitboxes.get(direction);
@@ -232,6 +258,23 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         if (!levelObjects.isEmpty()) {
             for (LevelObject object : levelObjects) {
                 object.addCellData();
+            }
+        }
+    }
+    
+    public final DrawMode getDrawMode() {
+        return drawMode;
+    }
+    
+    public final void setDrawMode(DrawMode drawMode) {
+        this.drawMode = drawMode;
+        if (!cells.isEmpty()) {
+            for (Cell cell : cells.values()) {
+                Set<Hitbox> oldLocatorHitboxes = cell.locatorHitboxes;
+                cell.initializeLocatorHitboxes();
+                for (Hitbox hitbox : oldLocatorHitboxes) {
+                    cell.locatorHitboxes.add(hitbox);
+                }
             }
         }
     }
@@ -892,79 +935,86 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                     int xOffset = vx1 - left;
                     int yOffset = vy1 - top;
                     int[] cellRange = getCellRangeExclusive(left, top, right, bottom);
-                    if (cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
-                        for (Hitbox locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).locatorHitboxes) {
-                            draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
-                        }
-                    } else {
-                        List<Set<Hitbox>> hitboxesList = new ArrayList<>((cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
-                        Iterator<Cell> iterator = new CellRangeIterator(cellRange);
-                        while (iterator.hasNext()) {
-                            hitboxesList.add(iterator.next().locatorHitboxes);
-                        }
-                        if (hitboxesList.size() == 2) {
-                            Iterator<Hitbox> iterator1 = hitboxesList.get(0).iterator();
-                            Hitbox hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
-                            Iterator<Hitbox> iterator2 = hitboxesList.get(1).iterator();
-                            Hitbox hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
-                            Hitbox lastHitbox = null;
-                            while (hitbox1 != null || hitbox2 != null) {
-                                if (hitbox1 == null) {
-                                    do {
-                                       if (hitbox2 != lastHitbox) {
+                    if (drawMode == DrawMode.FLAT) {
+                        if (cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
+                            for (Hitbox locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).locatorHitboxes) {
+                                draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
+                            }
+                        } else {
+                            List<Set<Hitbox>> hitboxesList = new ArrayList<>((cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
+                            Iterator<Cell> iterator = new CellRangeIterator(cellRange);
+                            while (iterator.hasNext()) {
+                                hitboxesList.add(iterator.next().locatorHitboxes);
+                            }
+                            if (hitboxesList.size() == 2) {
+                                Iterator<Hitbox> iterator1 = hitboxesList.get(0).iterator();
+                                Hitbox hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
+                                Iterator<Hitbox> iterator2 = hitboxesList.get(1).iterator();
+                                Hitbox hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
+                                Hitbox lastHitbox = null;
+                                while (hitbox1 != null || hitbox2 != null) {
+                                    if (hitbox1 == null) {
+                                        do {
                                             draw(g, hitbox2, left, right, top, bottom, xOffset, yOffset);
-                                            lastHitbox = hitbox2;
-                                        }
-                                        hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
-                                    } while (hitbox2 != null);
-                                    break;
-                                } else if (hitbox2 == null) {
-                                    do {
-                                       if (hitbox1 != lastHitbox) {
+                                            hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
+                                        } while (hitbox2 != null);
+                                        break;
+                                    } else if (hitbox2 == null) {
+                                        do {
                                             draw(g, hitbox1, left, right, top, bottom, xOffset, yOffset);
-                                            lastHitbox = hitbox1;
-                                        }
-                                        hitbox1 = (iterator1.hasNext() ? iterator1.next() : null); 
-                                    } while (hitbox1 != null);
-                                    break;
-                                } else {
-                                    double comparison = drawPriorityComparator.compare(hitbox1, hitbox2);
-                                    if (comparison > 0) {
-                                        if (hitbox1 != lastHitbox) {
-                                            draw(g, hitbox1, left, right, top, bottom, xOffset, yOffset);
-                                            lastHitbox = hitbox1;
-                                        }
-                                        hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
+                                            hitbox1 = (iterator1.hasNext() ? iterator1.next() : null); 
+                                        } while (hitbox1 != null);
+                                        break;
                                     } else {
-                                        if (hitbox2 != lastHitbox) {
-                                            draw(g, hitbox2, left, right, top, bottom, xOffset, yOffset);
-                                            lastHitbox = hitbox2;
+                                        double comparison = drawPriorityComparator.compare(hitbox1, hitbox2);
+                                        if (comparison > 0) {
+                                            if (hitbox1 != lastHitbox) {
+                                                draw(g, hitbox1, left, right, top, bottom, xOffset, yOffset);
+                                                lastHitbox = hitbox1;
+                                            }
+                                            hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
+                                        } else {
+                                            if (hitbox2 != lastHitbox) {
+                                                draw(g, hitbox2, left, right, top, bottom, xOffset, yOffset);
+                                                lastHitbox = hitbox2;
+                                            }
+                                            hitbox2 = (iterator2.hasNext() ? iterator2.next() : null);
                                         }
-                                        hitbox2 = (iterator2.hasNext() ? iterator2.next() : null);
+                                    }
+                                }
+                            } else {
+                                PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawPriorityIteratorComparator);
+                                for (Set<Hitbox> locatorHitboxes : hitboxesList) {
+                                    if (!locatorHitboxes.isEmpty()) {
+                                        Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
+                                        queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
+                                    }
+                                }
+                                Hitbox lastHitbox = null;
+                                while (!queue.isEmpty()) {
+                                    Pair<Hitbox,Iterator<Hitbox>> pair = queue.poll();
+                                    Hitbox locatorHitbox = pair.getKey();
+                                    if (locatorHitbox != lastHitbox) {
+                                        draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
+                                        lastHitbox = locatorHitbox;
+                                    }
+                                    Iterator<Hitbox> hitboxIterator = pair.getValue();
+                                    if (hitboxIterator.hasNext()) {
+                                        queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
                                     }
                                 }
                             }
-                        } else {
-                            PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawPriorityIteratorComparator);
-                            for (Set<Hitbox> locatorHitboxes : hitboxesList) {
-                                if (!locatorHitboxes.isEmpty()) {
-                                    Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
-                                    queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
-                                }
+                        }
+                    } else {
+                        SortedSet<Hitbox> toDraw = new TreeSet<>(drawMode == DrawMode.OVER ? overModeComparator : underModeComparator);
+                        Iterator<Cell> iterator = new CellRangeIterator(cellRange);
+                        while (iterator.hasNext()) {
+                            for (Hitbox locatorHitbox : iterator.next().locatorHitboxes) {
+                                toDraw.add(locatorHitbox);
                             }
-                            Hitbox lastHitbox = null;
-                            while (!queue.isEmpty()) {
-                                Pair<Hitbox,Iterator<Hitbox>> pair = queue.poll();
-                                Hitbox locatorHitbox = pair.getKey();
-                                if (locatorHitbox != lastHitbox) {
-                                    draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
-                                    lastHitbox = locatorHitbox;
-                                }
-                                Iterator<Hitbox> hitboxIterator = pair.getValue();
-                                if (hitboxIterator.hasNext()) {
-                                    queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
-                                }
-                            }
+                        }
+                        for (Hitbox locatorHitbox : toDraw) {
+                            draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
                         }
                     }
                     for (LevelLayer layer : levelLayers.tailMap(0).values()) {
