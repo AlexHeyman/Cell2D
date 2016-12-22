@@ -62,6 +62,8 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     private final Queue<ObjectChangeData> objectChanges = new LinkedList<>();
     private boolean changingObjects = false;
     private final SortedSet<ThinkerObject> thinkerObjects = new TreeSet<>(movementPriorityComparator);
+    private int thinkerObjectIterators = 0;
+    private final Queue<ThinkerObjectChangeData> thinkerObjectChanges = new LinkedList<>();
     private double cellWidth, cellHeight;
     private final Map<Point,Cell> cells = new HashMap<>();
     private int cellLeft = 0;
@@ -533,15 +535,6 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         object.state = null;
     }
     
-    @Override
-    public final void addThinkerActions(CellGame game, LevelThinker thinker) {
-        if (stepState == 2) {
-            thinker.afterMovement(game, this);
-        } else if (stepState == 1) {
-            thinker.beforeMovement(game, this);
-        }
-    }
-    
     private void addObjectChangeData(LevelObject object, LevelState newState) {
         object.newState = newState;
         ObjectChangeData data = new ObjectChangeData(object, newState);
@@ -574,18 +567,126 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
+    private class ThinkerObjectIterator implements SafeIterator<ThinkerObject> {
+        
+        private boolean finished = false;
+        private final Iterator<ThinkerObject> iterator = thinkerObjects.iterator();
+        private ThinkerObject lastObject = null;
+        
+        private ThinkerObjectIterator() {
+            thinkerObjectIterators++;
+        }
+        
+        @Override
+        public final boolean hasNext() {
+            if (finished) {
+                return false;
+            }
+            boolean hasNext = iterator.hasNext();
+            if (!hasNext) {
+                finish();
+            }
+            return hasNext;
+        }
+        
+        @Override
+        public final ThinkerObject next() {
+            if (finished) {
+                return null;
+            }
+            lastObject = iterator.next();
+            return lastObject;
+        }
+        
+        @Override
+        public final void remove() {
+            if (!finished && lastObject != null) {
+                removeObject(lastObject);
+                lastObject = null;
+            }
+        }
+        
+        @Override
+        public final boolean isFinished() {
+            return finished;
+        }
+        
+        @Override
+        public final void finish() {
+            if (!finished) {
+                finished = true;
+                thinkerObjectIterators--;
+                changeThinkerObjects();
+            }
+        }
+        
+    }
+    
+    public final SafeIterator<ThinkerObject> thinkerObjectIterator() {
+        return new ThinkerObjectIterator();
+    }
+    
+    private static class ThinkerObjectChangeData {
+        
+        private boolean used = false;
+        private final boolean changePriority;
+        private final ThinkerObject object;
+        private final boolean add;
+        private final int movementPriority;
+        
+        private ThinkerObjectChangeData(ThinkerObject object, boolean add) {
+            changePriority = false;
+            this.object = object;
+            this.add = add;
+            movementPriority = 0;
+        }
+        
+        private ThinkerObjectChangeData(ThinkerObject object, int movementPriority) {
+            changePriority = true;
+            this.object = object;
+            add = false;
+            this.movementPriority = movementPriority;
+        }
+        
+    }
+    
     final void addThinkerObject(ThinkerObject object) {
-        thinkerObjects.add(object);
+        thinkerObjectChanges.add(new ThinkerObjectChangeData(object, true));
+        changeThinkerObjects();
     }
     
     final void removeThinkerObject(ThinkerObject object) {
-        thinkerObjects.remove(object);
+        thinkerObjectChanges.add(new ThinkerObjectChangeData(object, false));
+        changeThinkerObjects();
     }
     
     final void changeThinkerObjectMovementPriority(ThinkerObject object, int movementPriority) {
-        thinkerObjects.remove(object);
-        object.movementPriority = movementPriority;
-        thinkerObjects.add(object);
+        thinkerObjectChanges.add(new ThinkerObjectChangeData(object, movementPriority));
+        changeThinkerObjects();
+    }
+    
+    private void changeThinkerObjects() {
+        if (thinkerObjectIterators == 0) {
+            while (!thinkerObjectChanges.isEmpty()) {
+                ThinkerObjectChangeData data = thinkerObjectChanges.remove();
+                if (!data.used) {
+                    data.used = true;
+                    if (data.changePriority) {
+                        if (data.object.state == null) {
+                            data.object.movementPriority = data.movementPriority;
+                        } else {
+                            thinkerObjects.remove(data.object);
+                            data.object.movementPriority = data.movementPriority;
+                            thinkerObjects.add(data.object);
+                        }
+                    } else if (data.add) {
+                        thinkerObjects.add(data.object);
+                    } else {
+                        thinkerObjects.remove(data.object);
+                    }
+                }
+            }
+        }
     }
     
     public final <T extends LevelObject> boolean isOverlapping(LevelObject object, Class<T> type) {
@@ -635,7 +736,9 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             while (iterator.hasNext()) {
                 iterator.next().beforeMovement(game, this);
             }
-            for (ThinkerObject object : thinkerObjects) {
+            Iterator<ThinkerObject> thinkerObjectIterator = thinkerObjectIterator();
+            while (thinkerObjectIterator.hasNext()) {
+                ThinkerObject object = thinkerObjectIterator.next();
                 double objectTimeFactor = object.getEffectiveTimeFactor();
                 double dx = objectTimeFactor*(object.getVelocityX() + object.getDisplacementX());
                 double dy = objectTimeFactor*(object.getVelocityY() + object.getDisplacementY());
@@ -650,6 +753,15 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 iterator.next().afterMovement(game, this);
             }
             stepState = 0;
+        }
+    }
+    
+    @Override
+    public final void addThinkerActions(CellGame game, LevelThinker thinker) {
+        if (stepState == 2) {
+            thinker.afterMovement(game, this);
+        } else if (stepState == 1) {
+            thinker.beforeMovement(game, this);
         }
     }
     
