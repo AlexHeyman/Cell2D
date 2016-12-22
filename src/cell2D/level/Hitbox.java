@@ -14,6 +14,7 @@ public abstract class Hitbox {
     final long id;
     private Hitbox parent = null;
     private final Set<Hitbox> children = new HashSet<>();
+    CompositeHitbox componentOf = null;
     EnumSet<Direction> solidSurfaces = EnumSet.noneOf(Direction.class);
     private LevelObject object = null;
     final boolean[] roles = new boolean[HITBOXES_PER_OBJECT];
@@ -42,9 +43,7 @@ public abstract class Hitbox {
     }
     
     public Hitbox(double relX, double relY) {
-        id = getNextID();
-        this.relPosition = new LevelVector(relX, relY);
-        absPosition = new LevelVector(relPosition);
+        this(new LevelVector(relX, relY));
     }
     
     public abstract Hitbox getCopy();
@@ -115,8 +114,8 @@ public abstract class Hitbox {
         updateAbsAngleActions();
     }
     
-    public final boolean isComponentOf(Hitbox hitbox) {
-        return hitbox instanceof CompositeHitbox && ((CompositeHitbox)hitbox).isComponent(this);
+    public final CompositeHitbox getComponentOf() {
+        return componentOf;
     }
     
     public final boolean surfaceIsSolid(Direction direction) {
@@ -169,7 +168,10 @@ public abstract class Hitbox {
         }
     }
     
-    final void updateCells() {
+    final void updateBoundaries() {
+        if (componentOf != null) {
+            componentOf.updateShape();
+        }
         if (state != null && cellRange != null) {
             state.updateCells(this);
         }
@@ -336,7 +338,7 @@ public abstract class Hitbox {
         } else {
             absPosition.copy(parent.absPosition).add(new LevelVector(relPosition).relativeTo(parent));
         }
-        updateCells();
+        updateBoundaries();
     }
     
     private void recursivelyUpdateAbsPosition() {

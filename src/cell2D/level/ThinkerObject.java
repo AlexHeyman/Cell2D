@@ -190,7 +190,7 @@ public abstract class ThinkerObject extends AnimatedObject {
                 acceptable = (object == null && parent == null)
                         || (collisionHitbox == locatorHitbox)
                         || (object == this && parent == locatorHitbox
-                        && !collisionHitbox.isComponentOf(locatorHitbox));
+                        && collisionHitbox.getComponentOf() != locatorHitbox);
             }
             if (acceptable) {
                 if (this.collisionHitbox != null) {

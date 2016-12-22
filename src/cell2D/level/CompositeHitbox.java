@@ -32,7 +32,7 @@ public class CompositeHitbox extends Hitbox {
         return copy;
     }
     
-    private void updateData() {
+    final void updateShape() {
         if (components.isEmpty()) {
             left = 0;
             right = 0;
@@ -67,6 +67,7 @@ public class CompositeHitbox extends Hitbox {
             bottom = newBottom - y;
             center.setCoordinates((left + right)/2, (top + bottom)/2);
         }
+        updateBoundaries();
     }
     
     public final boolean isComponent(Hitbox hitbox) {
@@ -82,6 +83,7 @@ public class CompositeHitbox extends Hitbox {
             return removeComponent(id);
         }
         if (addChild(hitbox)) {
+            hitbox.componentOf = this;
             Hitbox oldHitbox = components.put(id, hitbox);
             if (oldHitbox == null) {
                 double x = getAbsX();
@@ -90,9 +92,10 @@ public class CompositeHitbox extends Hitbox {
                 right = Math.max(right, hitbox.getRightEdge() - x);
                 top = Math.min(top, hitbox.getTopEdge() - y);
                 bottom = Math.max(bottom, hitbox.getBottomEdge() - y);
+                center.setCoordinates((left + right)/2, (top + bottom)/2);
             } else {
                 removeChild(oldHitbox);
-                updateData();
+                updateShape();
             }
             return true;
         }
@@ -103,7 +106,8 @@ public class CompositeHitbox extends Hitbox {
         Hitbox hitbox = components.remove(id);
         if (hitbox != null) {
             removeChild(hitbox);
-            updateData();
+            hitbox.componentOf = null;
+            updateShape();
             return true;
         }
         return false;
@@ -114,7 +118,7 @@ public class CompositeHitbox extends Hitbox {
             removeChild(hitbox);
         }
         components.clear();
-        updateData();
+        updateShape();
     }
     
     @Override
@@ -139,17 +143,17 @@ public class CompositeHitbox extends Hitbox {
     
     @Override
     final void updateAbsXFlipActions() {
-        updateData();
+        updateShape();
     }
     
     @Override
     final void updateAbsYFlipActions() {
-        updateData();
+        updateShape();
     }
     
     @Override
     final void updateAbsAngleActions() {
-        updateData();
+        updateShape();
     }
     
 }

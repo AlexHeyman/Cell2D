@@ -101,7 +101,7 @@ public abstract class LevelObject {
             Hitbox parent = locatorHitbox.getParent();
             if ((object == null && parent == null)
                     || (object == this && parent == this.locatorHitbox
-                    && !locatorHitbox.isComponentOf(this.locatorHitbox))) {
+                    && locatorHitbox.getComponentOf() != this.locatorHitbox)) {
                 if (this.locatorHitbox != null) {
                     removeNonLocatorHitboxes(this.locatorHitbox);
                     this.locatorHitbox.removeAsLocatorHitbox();
@@ -246,7 +246,7 @@ public abstract class LevelObject {
                 acceptable = (object == null && parent == null)
                         || (overlapHitbox == locatorHitbox)
                         || (object == this && parent == locatorHitbox
-                        && !overlapHitbox.isComponentOf(locatorHitbox));
+                        && overlapHitbox.getComponentOf() != locatorHitbox);
             }
             if (acceptable) {
                 if (this.overlapHitbox != null) {
@@ -308,7 +308,7 @@ public abstract class LevelObject {
                 acceptable = (object == null && parent == null)
                         || (solidHitbox == locatorHitbox)
                         || (object == this && parent == locatorHitbox
-                        && !solidHitbox.isComponentOf(locatorHitbox));
+                        && solidHitbox.getComponentOf() != locatorHitbox);
             }
             if (acceptable) {
                 if (this.solidHitbox != null) {

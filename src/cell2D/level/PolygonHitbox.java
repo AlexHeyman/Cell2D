@@ -105,7 +105,7 @@ public class PolygonHitbox extends Hitbox {
             }
             center.setCoordinates(sumX/vertices.size(), sumY/vertices.size());
         }
-        updateCells();
+        updateBoundaries();
     }
     
     public final int getNumVertices() {

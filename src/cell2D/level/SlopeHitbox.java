@@ -13,10 +13,7 @@ public class SlopeHitbox extends Hitbox {
     }
     
     public SlopeHitbox(double relX, double relY, double relDX, double relDY) {
-        super(relX, relY);
-        relDifference = new LevelVector(relDX, relDY);
-        absDifference = new LevelVector();
-        updateData();
+        this(new LevelVector(relX, relY), new LevelVector(relDX, relDY));
     }
     
     @Override
@@ -31,7 +28,7 @@ public class SlopeHitbox extends Hitbox {
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
         bottom = Math.max(absDifference.getY(), 0);
-        updateCells();
+        updateBoundaries();
     }
     
     public final LevelVector getRelDifference() {

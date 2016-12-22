@@ -44,7 +44,7 @@ public class RectangleHitbox extends Hitbox {
                 absLeft = relLeft;
             }
             center.setX((absLeft + absRight)/2);
-            updateCells();
+            updateBoundaries();
             return true;
         }
         return false;
@@ -67,7 +67,7 @@ public class RectangleHitbox extends Hitbox {
                 absRight = relRight;
             }
             center.setX((absLeft + absRight)/2);
-            updateCells();
+            updateBoundaries();
             return true;
         }
         return false;
@@ -90,7 +90,7 @@ public class RectangleHitbox extends Hitbox {
                 absTop = relTop;
             }
             center.setY((absTop + absBottom)/2);
-            updateCells();
+            updateBoundaries();
             return true;
         }
         return false;
@@ -113,7 +113,7 @@ public class RectangleHitbox extends Hitbox {
                 absBottom = relBottom;
             }
             center.setY((absTop + absBottom)/2);
-            updateCells();
+            updateBoundaries();
             return true;
         }
         return false;
@@ -161,7 +161,7 @@ public class RectangleHitbox extends Hitbox {
             absRight = relRight;
         }
         center.setX((absLeft + absRight)/2);
-        updateCells();
+        updateBoundaries();
     }
     
     @Override
@@ -174,7 +174,7 @@ public class RectangleHitbox extends Hitbox {
             absBottom = relBottom;
         }
         center.setY((absTop + absBottom)/2);
-        updateCells();
+        updateBoundaries();
     }
     
 }
