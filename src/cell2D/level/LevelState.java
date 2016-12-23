@@ -50,8 +50,12 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         
         @Override
         public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
-            int yDiffSignum = (int)Math.signum(hitbox1.getRelY() - hitbox2.getRelY());
-            return (yDiffSignum == 0 ? drawPriorityComparator.compare(hitbox1, hitbox2) : yDiffSignum);
+            int drawPriorityDifference = hitbox1.drawPriority - hitbox2.drawPriority;
+            if (drawPriorityDifference == 0) {
+                int yDiffSignum = (int)Math.signum(hitbox1.getRelY() - hitbox2.getRelY());
+                return (yDiffSignum == 0 ? Long.signum(hitbox1.id - hitbox2.id) : yDiffSignum);
+            }
+            return drawPriorityDifference;
         }
         
     };
@@ -59,8 +63,12 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         
         @Override
         public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
-            int yDiffSignum = (int)Math.signum(hitbox2.getRelY() - hitbox1.getRelY());
-            return (yDiffSignum == 0 ? drawPriorityComparator.compare(hitbox1, hitbox2) : yDiffSignum);
+            int drawPriorityDifference = hitbox1.drawPriority - hitbox2.drawPriority;
+            if (drawPriorityDifference == 0) {
+                int yDiffSignum = (int)Math.signum(hitbox2.getRelY() - hitbox1.getRelY());
+                return (yDiffSignum == 0 ? Long.signum(hitbox1.id - hitbox2.id) : yDiffSignum);
+            }
+            return drawPriorityDifference;
         }
         
     };
