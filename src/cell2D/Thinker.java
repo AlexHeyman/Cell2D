@@ -1,5 +1,6 @@
 package cell2D;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -188,7 +189,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
         timeToRun += time;
         while (timeToRun >= 1) {
-            List<TimedEvent<T>> timedEventsToDo = new LinkedList<>();
+            List<TimedEvent<T>> timedEventsToDo = new ArrayList<>();
             Iterator<Map.Entry<TimedEvent<T>,Integer>> iterator = timers.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<TimedEvent<T>,Integer> entry = iterator.next();

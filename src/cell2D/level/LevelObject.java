@@ -1,8 +1,8 @@
 package cell2D.level;
 
 import cell2D.Sprite;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import org.newdawn.slick.Graphics;
 
 public abstract class LevelObject {
@@ -263,16 +263,16 @@ public abstract class LevelObject {
         return false;
     }
     
-    public final <T extends LevelObject> boolean isOverlapping(Class<T> type) {
-        return (state == null ? false : state.isOverlapping(this, type));
+    public final <T extends LevelObject> boolean isOverlapping(Class<T> cls) {
+        return (state == null ? false : state.isOverlapping(this, cls));
     }
     
-    public final <T extends LevelObject> T overlappingObject(Class<T> type) {
-        return (state == null ? null : state.overlappingObject(this, type));
+    public final <T extends LevelObject> T overlappingObject(Class<T> cls) {
+        return (state == null ? null : state.overlappingObject(this, cls));
     }
     
-    public final <T extends LevelObject> Set<T> overlappingObjects(Class<T> type) {
-        return (state == null ? new HashSet<>() : state.overlappingObjects(this, type));
+    public final <T extends LevelObject> List<T> overlappingObjects(Class<T> cls) {
+        return (state == null ? new ArrayList<>() : state.overlappingObjects(this, cls));
     }
     
     public final Hitbox getSolidHitbox() {

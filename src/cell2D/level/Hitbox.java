@@ -21,6 +21,7 @@ public abstract class Hitbox {
     private int numRoles = 0;
     LevelState state = null;
     int[] cellRange = null;
+    boolean scanned = false;
     int drawPriority = 0;
     int numCellRoles = 0;
     private final LevelVector relPosition, absPosition;

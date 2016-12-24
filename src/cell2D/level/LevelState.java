@@ -740,22 +740,62 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
-    public final <T extends LevelObject> boolean isOverlapping(LevelObject object, Class<T> type) {
-        return overlappingObject(object, type) != null;
+    public final <T extends LevelObject> boolean isOverlapping(LevelObject object, Class<T> cls) {
+        return overlappingObject(object, cls) != null;
     }
     
-    public final <T extends LevelObject> T overlappingObject(LevelObject object, Class<T> type) {
-        if (object.getGameState() == this && object.getOverlapHitbox() != null) {
+    public final <T extends LevelObject> T overlappingObject(LevelObject object, Class<T> cls) {
+        Hitbox objectHitbox = object.getOverlapHitbox();
+        if (object.getGameState() == this && objectHitbox != null) {
+            List<Hitbox> scanned = new ArrayList<>();
             Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
             while (iterator.hasNext()) {
-                
+                Cell cell = iterator.next();
+                for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+                    if (!overlapHitbox.scanned) {
+                        if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
+                                && Hitbox.overlap(objectHitbox, overlapHitbox)) {
+                            for (Hitbox hitbox : scanned) {
+                                hitbox.scanned = false;
+                            }
+                            return cls.cast(overlapHitbox.getObject());
+                        }
+                        overlapHitbox.scanned = true;
+                        scanned.add(overlapHitbox);
+                    }
+                }
+            }
+            for (Hitbox hitbox : scanned) {
+                hitbox.scanned = false;
             }
         }
         return null;
     }
     
-    public final <T extends LevelObject> Set<T> overlappingObjects(LevelObject object, Class<T> type) {
-        return new HashSet<>();
+    public final <T extends LevelObject> List<T> overlappingObjects(LevelObject object, Class<T> cls) {
+        List<T> overlapping = new ArrayList<>();
+        Hitbox objectHitbox = object.getOverlapHitbox();
+        if (object.getGameState() == this && objectHitbox != null) {
+            List<Hitbox> scanned = new ArrayList<>();
+            Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
+            while (iterator.hasNext()) {
+                Cell cell = iterator.next();
+                for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+                    if (!overlapHitbox.scanned) {
+                        if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
+                                && Hitbox.overlap(objectHitbox, overlapHitbox)) {
+                            overlapping.add(cls.cast(overlapHitbox.getObject()));
+                            overlapHitbox.scanned = true;
+                            scanned.add(overlapHitbox);
+                        }
+                    }
+                }
+            }
+            for (Hitbox hitbox : scanned) {
+                hitbox.scanned = false;
+            }
+        }
+        return overlapping;
     }
     
     public final void moveObject(ThinkerObject object, LevelVector change) {

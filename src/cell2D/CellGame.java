@@ -477,49 +477,49 @@ public abstract class CellGame {
                     CellGame.this.getCurrentState().charTyped(c);
                 }
             } else if (commandToBind >= 0) {
-                finishBindingCommand(new KeyControl(key));
+                finishBindingToCommand(new KeyControl(key));
             }
         }
         
         @Override
         public final void mouseClicked(int button, int x, int y, int clickCount) {
             if (commandToBind >= 0) {
-                finishBindingCommand(new MouseButtonControl(button));
+                finishBindingToCommand(new MouseButtonControl(button));
             }
         }
         
         @Override
         public final void controllerUpPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.UP));
+                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.UP));
             }
         }
         
         @Override
         public final void controllerDownPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.DOWN));
+                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.DOWN));
             }
         }
         
         @Override
         public final void controllerLeftPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.LEFT));
+                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.LEFT));
             }
         }
         
         @Override
         public final void controllerRightPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.RIGHT));
+                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.RIGHT));
             }
         }
         
         @Override
         public final void controllerButtonPressed(int controller, int button) {
             if (commandToBind >= 0) {
-                finishBindingCommand(new ControllerButtonControl(controller, button));
+                finishBindingToCommand(new ControllerButtonControl(controller, button));
             }
         }
         
@@ -655,7 +655,7 @@ public abstract class CellGame {
     
     public void renderActions(GameContainer container, Graphics g, int x1, int y1, int x2, int y2) {}
     
-    private void finishBindingCommand(Control control) {
+    private void finishBindingToCommand(Control control) {
         bindControl(commandToBind, control);
         commandToBind = -1;
     }
@@ -695,7 +695,7 @@ public abstract class CellGame {
         return commandToBind;
     }
     
-    public final void waitToBindCommand(int commandNum) {
+    public final void waitToBindToCommand(int commandNum) {
         if (commandNum < 0 || commandNum >= commands.length) {
             throw new RuntimeException("Attempted to begin waiting to bind nonexistent command number " + commandNum);
         }
@@ -708,7 +708,7 @@ public abstract class CellGame {
         }
     }
     
-    public final void cancelBindCommand() {
+    public final void cancelBindToCommand() {
         commandToBind = -1;
     }
     
