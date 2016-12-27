@@ -2,6 +2,8 @@ package cell2D.level;
 
 import cell2D.CellGame;
 import cell2D.TimedEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ThinkerObject extends AnimatedObject {
@@ -44,8 +46,9 @@ public abstract class ThinkerObject extends AnimatedObject {
     };
     int movementPriority = 0;
     int newMovementPriority = 0;
-    private boolean hasCollision = false;
+    private CollisionMode collisionMode = CollisionMode.NONE;
     private Hitbox collisionHitbox;
+    Map<LevelObject,Direction> justCollidedWith = new HashMap<>();
     private final LevelVector velocity = new LevelVector();
     private final LevelVector displacement = new LevelVector();
     
@@ -61,7 +64,7 @@ public abstract class ThinkerObject extends AnimatedObject {
     @Override
     void addCellData() {
         super.addCellData();
-        if (hasCollision && collisionHitbox != null) {
+        if (collisionMode != CollisionMode.NONE && collisionHitbox != null) {
             state.addCollisionHitbox(collisionHitbox);
         }
     }
@@ -78,9 +81,10 @@ public abstract class ThinkerObject extends AnimatedObject {
         super.removeActions();
         state.removeThinker(thinker);
         state.removeThinkerObject(this);
-        if (hasCollision && collisionHitbox != null) {
+        if (collisionMode != CollisionMode.NONE && collisionHitbox != null) {
             state.removeCollisionHitbox(collisionHitbox);
         }
+        justCollidedWith.clear();
     }
     
     @Override
@@ -151,27 +155,27 @@ public abstract class ThinkerObject extends AnimatedObject {
     
     public final void setMovementPriority(int movementPriority) {
         if (state == null) {
-            newMovementPriority = movementPriority;
+            this.newMovementPriority = movementPriority;
             this.movementPriority = movementPriority;
-        } else if (newMovementPriority != movementPriority) {
-            newMovementPriority = movementPriority;
+        } else if (this.newMovementPriority != movementPriority) {
+            this.newMovementPriority = movementPriority;
             state.changeThinkerObjectMovementPriority(this, movementPriority);
         }
     }
     
-    public final boolean hasCollision() {
-        return hasCollision;
+    public final CollisionMode getCollisionMode() {
+        return collisionMode;
     }
     
-    public final void setCollision(boolean hasCollision) {
+    public final void setCollisionMode(CollisionMode collisionMode) {
         if (state != null && collisionHitbox != null) {
-            if (hasCollision && !this.hasCollision) {
+            if (collisionMode != CollisionMode.NONE && this.collisionMode == CollisionMode.NONE) {
                 state.addCollisionHitbox(collisionHitbox);
-            } else if (!hasCollision && this.hasCollision) {
+            } else if (collisionMode == CollisionMode.NONE && this.collisionMode != CollisionMode.NONE) {
                 state.removeCollisionHitbox(collisionHitbox);
             }
         }
-        this.hasCollision = hasCollision;
+        this.collisionMode = collisionMode;
     }
     
     public final Hitbox getCollisionHitbox() {
@@ -194,17 +198,37 @@ public abstract class ThinkerObject extends AnimatedObject {
             }
             if (acceptable) {
                 if (this.collisionHitbox != null) {
-                    this.collisionHitbox.removeAsCollisionHitbox(hasCollision);
+                    this.collisionHitbox.removeAsCollisionHitbox(collisionMode);
                 }
                 this.collisionHitbox = collisionHitbox;
                 if (collisionHitbox != null) {
                     locatorHitbox.addChild(collisionHitbox);
-                    collisionHitbox.addAsCollisionHitbox(hasCollision);
+                    collisionHitbox.addAsCollisionHitbox(collisionMode);
                 }
                 return true;
             }
         }
         return false;
+    }
+    
+    public final void doMovement(LevelVector change) {
+        doMovement(change.getX(), change.getY());
+    }
+    
+    public final void doMovement(double dx, double dy) {
+        if (state == null) {
+            setPosition(getX() + dx, getY() + dy);
+        } else {
+            state.move(this, dx, dy);
+        }
+    }
+    
+    public boolean shouldCollide(LevelObject object) {
+        return true;
+    }
+    
+    public final Map<LevelObject,Direction> getJustCollidedWith() {
+        return new HashMap<>(justCollidedWith);
     }
     
     public final LevelVector getVelocity() {
@@ -289,18 +313,6 @@ public abstract class ThinkerObject extends AnimatedObject {
     
     public final void changeDisplacementY(double changeY) {
         displacement.add(0, changeY);
-    }
-    
-    public final void move(LevelVector change) {
-        move(change.getX(), change.getY());
-    }
-    
-    public final void move(double dx, double dy) {
-        if (state == null) {
-            setPosition(getX() + dx, getY() + dy);
-        } else {
-            state.move(this, dx, dy);
-        }
     }
     
     public final void moveTo(LevelVector position) {

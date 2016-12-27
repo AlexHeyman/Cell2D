@@ -50,7 +50,7 @@ public abstract class LevelObject {
             state.addOverlapHitbox(overlapHitbox);
         }
         if (solidHitbox != null) {
-            state.addSolidHitbox(solidHitbox);
+            state.addAllSolidSurfaces(solidHitbox);
         }
     }
     
@@ -72,7 +72,7 @@ public abstract class LevelObject {
             state.removeOverlapHitbox(overlapHitbox);
         }
         if (solidHitbox != null) {
-            state.removeSolidHitbox(solidHitbox);
+            state.removeAllSolidSurfaces(solidHitbox);
         }
     }
     

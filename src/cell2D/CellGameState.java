@@ -39,7 +39,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     private final SortedSet<U> thinkers = new TreeSet<>(actionPriorityComparator);
     private int thinkerIterators = 0;
     private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
-    private boolean changingThinkers = false;
+    private boolean updatingThinkerList = false;
     
     public CellGameState(CellGame game, int id) {
         if (game == null) {
@@ -217,10 +217,14 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
             if (!finished) {
                 finished = true;
                 thinkerIterators--;
-                changeThinkers();
+                updateThinkerList();
             }
         }
         
+    }
+    
+    public final boolean iteratingThroughThinkers() {
+        return thinkerIterators > 0;
     }
     
     public final SafeIterator<U> thinkerIterator() {
@@ -266,7 +270,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         thinker.addedActions(game, thisState);
         addThinkerActions(game, thinker);
         if (performingStepActions) {
-            thinker.step(game, thisState);
+            thinker.doStep(game, thisState);
         }
     }
     
@@ -287,7 +291,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     final void changeThinkerActionPriority(U thinker, int actionPriority) {
         thinkerChanges.add(new ThinkerChangeData<>(thinker, actionPriority));
-        changeThinkers();
+        updateThinkerList();
     }
     
     private void addThinkerChangeData(U thinker, T newState) {
@@ -296,18 +300,18 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         if (thinker.state != null) {
             CellGameState<T,U,V> state = thinker.state;
             state.thinkerChanges.add(data);
-            state.changeThinkers();
+            state.updateThinkerList();
         }
         if (newState != null) {
             CellGameState<T,U,V> state = newState;
             state.thinkerChanges.add(data);
-            state.changeThinkers();
+            state.updateThinkerList();
         }
     }
     
-    private void changeThinkers() {
-        if (thinkerIterators == 0 && !changingThinkers) {
-            changingThinkers = true;
+    private void updateThinkerList() {
+        if (thinkerIterators == 0 && !updatingThinkerList) {
+            updatingThinkerList = true;
             while (!thinkerChanges.isEmpty()) {
                 ThinkerChangeData<T,U,V> data = thinkerChanges.remove();
                 if (!data.used) {
@@ -332,7 +336,8 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
                     }
                 }
             }
-            changingThinkers = false;
+            updatingThinkerList = false;
+            updateThinkerListActions(game);
         }
     }
     
@@ -349,7 +354,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         performingStepActions = true;
         Iterator<U> iterator = thinkerIterator();
         while (iterator.hasNext()) {
-            iterator.next().step(game, thisState);
+            iterator.next().doStep(game, thisState);
         }
         stepActions(game);
         performingStepActions = false;
@@ -358,6 +363,8 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     public void addThinkerActions(CellGame game, U thinker) {}
     
     public void removeThinkerActions(CellGame game, U thinker) {}
+    
+    public void updateThinkerListActions(CellGame game) {}
     
     public void stepActions(CellGame game) {}
     

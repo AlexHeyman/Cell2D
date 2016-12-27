@@ -1,6 +1,7 @@
 package cell2D;
 
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.Map;
 import javafx.util.Pair;
 import org.newdawn.slick.Color;
@@ -13,10 +14,10 @@ class ColorMapFilter extends Filter {
     
     ColorMapFilter(String name, Map<Color,Color> colorMap) {
         super(name);
-        this.colorMap = colorMap;
+        this.colorMap = new HashMap(colorMap);
     }
     
-    Map<Color,Color> getColorMap() {
+    final Map<Color,Color> getColorMap() {
         return colorMap;
     }
     

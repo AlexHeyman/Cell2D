@@ -126,11 +126,11 @@ public abstract class Hitbox {
     public final void setSurfaceSolid(Direction direction, boolean solid) {
         if (solid) {
             if (solidSurfaces.add(direction) && roles[2] && state != null) {
-                state.addSolidHitbox(this, direction);
+                state.addSolidSurface(this, direction);
             }
         } else {
             if (solidSurfaces.remove(direction) && roles[2] && state != null) {
-                state.removeSolidHitbox(this, direction);
+                state.removeSolidSurface(this, direction);
             }
         }
     }
@@ -138,12 +138,12 @@ public abstract class Hitbox {
     public final void setSolid(boolean solid) {
         if (solid) {
             if (roles[2] && state != null) {
-                state.completeSolidHitbox(this);
+                state.completeSolidSurfaces(this);
             }
             solidSurfaces = EnumSet.allOf(Direction.class);
         } else {
             if (roles[2] && state != null) {
-                state.removeSolidHitbox(this);
+                state.removeAllSolidSurfaces(this);
             }
             solidSurfaces.clear();
         }
@@ -234,7 +234,7 @@ public abstract class Hitbox {
     
     final void addAsSolidHitbox() {
         if (state != null) {
-            state.addSolidHitbox(this);
+            state.addAllSolidSurfaces(this);
         }
         roles[2] = true;
         numRoles++;
@@ -242,7 +242,7 @@ public abstract class Hitbox {
     
     final void removeAsSolidHitbox() {
         if (state != null) {
-            state.removeSolidHitbox(this);
+            state.removeAllSolidSurfaces(this);
         }
         roles[2] = false;
         numRoles--;
@@ -254,16 +254,16 @@ public abstract class Hitbox {
         }
     }
     
-    final void addAsCollisionHitbox(boolean hasCollision) {
-        if (state != null && hasCollision) {
+    final void addAsCollisionHitbox(CollisionMode collisionMode) {
+        if (state != null && collisionMode != CollisionMode.NONE) {
             state.addCollisionHitbox(this);
         }
         roles[3] = true;
         numRoles++;
     }
     
-    final void removeAsCollisionHitbox(boolean hasCollision) {
-        if (state != null && hasCollision) {
+    final void removeAsCollisionHitbox(CollisionMode collisionMode) {
+        if (state != null && collisionMode != CollisionMode.NONE) {
             state.removeCollisionHitbox(this);
         }
         roles[3] = false;
@@ -537,7 +537,7 @@ public abstract class Hitbox {
     }
     
     public static final boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
-        if (hitbox1.state != null && hitbox1.state == hitbox2.state
+        if (hitbox1 != hitbox2 && hitbox1.state != null && hitbox1.state == hitbox2.state
                 && hitbox1.getLeftEdge() < hitbox2.getRightEdge()
                 && hitbox1.getRightEdge() > hitbox2.getLeftEdge()
                 && hitbox1.getTopEdge() < hitbox2.getBottomEdge()
@@ -553,6 +553,39 @@ public abstract class Hitbox {
             if (hitbox2 instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)hitbox2).components.values()) {
                     if (overlap(hitbox1, component)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            return true;
+        }
+        return false;
+    }
+    
+    public final boolean isCollidingWith(Hitbox solidHitbox) {
+        return isCollidingWith(this, solidHitbox);
+    }
+    
+    public static final boolean isCollidingWith(Hitbox overlapHitbox, Hitbox solidHitbox) {
+        if (overlapHitbox.getObject() != solidHitbox.getObject()
+                && overlapHitbox.state != null && overlapHitbox.state == solidHitbox.state
+                && overlapHitbox.getLeftEdge() < solidHitbox.getRightEdge()
+                && overlapHitbox.getRightEdge() > solidHitbox.getLeftEdge()
+                && overlapHitbox.getTopEdge() < solidHitbox.getBottomEdge()
+                && overlapHitbox.getBottomEdge() > solidHitbox.getTopEdge()) {
+            if (overlapHitbox instanceof CompositeHitbox) {
+                for (Hitbox component : ((CompositeHitbox)overlapHitbox).components.values()) {
+                    if (isCollidingWith(component, solidHitbox)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            if (solidHitbox instanceof CompositeHitbox) {
+                for (Hitbox component : ((CompositeHitbox)solidHitbox).components.values()) {
+                    if (isCollidingWith(overlapHitbox, component)) {
                         return true;
                     }
                 }

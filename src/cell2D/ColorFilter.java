@@ -12,10 +12,10 @@ class ColorFilter extends Filter {
     
     ColorFilter(String name, Color color) {
         super(name);
-        this.color = color;
+        this.color = new Color(color);
     }
     
-    Color getColor() {
+    final Color getColor() {
         return color;
     }
     

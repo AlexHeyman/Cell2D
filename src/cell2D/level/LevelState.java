@@ -86,7 +86,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     private final Set<LevelObject> levelObjects = new HashSet<>();
     private int objectIterators = 0;
     private final Queue<ObjectChangeData> objectChanges = new LinkedList<>();
-    private boolean changingObjects = false;
+    private boolean updatingObjectList = false;
     private final SortedSet<ThinkerObject> thinkerObjects = new TreeSet<>(movementPriorityComparator);
     private int thinkerObjectIterators = 0;
     private final Queue<ThinkerObjectChangeData> thinkerObjectChanges = new LinkedList<>();
@@ -116,7 +116,8 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         
         private Set<Hitbox> locatorHitboxes;
         private final Set<Hitbox> overlapHitboxes = new HashSet<>();
-        private final Map<Direction,Set<Hitbox>> solidHitboxes = new EnumMap<>(Direction.class);
+        private final Set<Hitbox> solidHitboxes = new HashSet<>();
+        private final Map<Direction,Set<Hitbox>> solidSurfaces = new EnumMap<>(Direction.class);
         private final Set<Hitbox> collisionHitboxes = new HashSet<>();
         
         private Cell() {
@@ -131,11 +132,11 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             }
         }
         
-        private Set<Hitbox> getSolidHitboxes(Direction direction) {
-            Set<Hitbox> hitboxes = solidHitboxes.get(direction);
+        private Set<Hitbox> getSolidSurfaces(Direction direction) {
+            Set<Hitbox> hitboxes = solidSurfaces.get(direction);
             if (hitboxes == null) {
                 hitboxes = new HashSet<>();
-                solidHitboxes.put(direction, hitboxes);
+                solidSurfaces.put(direction, hitboxes);
             }
             return hitboxes;
         }
@@ -312,8 +313,9 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                         cell.overlapHitboxes.remove(hitbox);
                     }
                     if (hitbox.roles[2]) {
+                        cell.solidHitboxes.remove(hitbox);
                         for (Direction direction : hitbox.solidSurfaces) {
-                            cell.getSolidHitboxes(direction).remove(hitbox);
+                            cell.getSolidSurfaces(direction).remove(hitbox);
                         }
                     }
                     if (hitbox.roles[3]) {
@@ -332,8 +334,9 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                     cell.overlapHitboxes.add(hitbox);
                 }
                 if (hitbox.roles[2]) {
+                    cell.solidHitboxes.add(hitbox);
                     for (Direction direction : hitbox.solidSurfaces) {
-                        cell.getSolidHitboxes(direction).add(hitbox);
+                        cell.getSolidSurfaces(direction).add(hitbox);
                     }
                 }
                 if (hitbox.roles[3]) {
@@ -398,35 +401,21 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
-    final void addSolidHitbox(Hitbox hitbox, Direction direction) {
+    private void addSolidHitbox(Hitbox hitbox) {
         if (hitbox.numCellRoles == 0) {
             updateCellRange(hitbox);
         }
         hitbox.numCellRoles++;
         Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
-            iterator.next().getSolidHitboxes(direction).add(hitbox);
+            iterator.next().solidHitboxes.add(hitbox);
         }
     }
     
-    final void addSolidHitbox(Hitbox hitbox) {
-        if (hitbox.numCellRoles == 0) {
-            updateCellRange(hitbox);
-        }
-        hitbox.numCellRoles += hitbox.solidSurfaces.size();
+    private void removeSolidHitbox(Hitbox hitbox) {
         Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Direction direction : hitbox.solidSurfaces) {
-                cell.getSolidHitboxes(direction).add(hitbox);
-            }
-        }
-    }
-    
-    final void removeSolidHitbox(Hitbox hitbox, Direction direction) {
-        Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
-        while (iterator.hasNext()) {
-            iterator.next().getSolidHitboxes(direction).remove(hitbox);
+            iterator.next().solidHitboxes.remove(hitbox);
         }
         hitbox.numCellRoles--;
         if (hitbox.numCellRoles == 0) {
@@ -434,31 +423,67 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
-    final void removeSolidHitbox(Hitbox hitbox) {
+    final void addSolidSurface(Hitbox hitbox, Direction direction) {
+        if (hitbox.solidSurfaces.size() == 1) {
+            addSolidHitbox(hitbox);
+        }
+        hitbox.numCellRoles++;
         Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Direction direction : hitbox.solidSurfaces) {
-                cell.getSolidHitboxes(direction).remove(hitbox);
-            }
-        }
-        hitbox.numCellRoles -= hitbox.solidSurfaces.size();
-        if (hitbox.numCellRoles == 0) {
-            hitbox.cellRange = null;
+            iterator.next().getSolidSurfaces(direction).add(hitbox);
         }
     }
     
-    final void completeSolidHitbox(Hitbox hitbox) {
-        Set<Direction> directionsToAdd = EnumSet.complementOf(hitbox.solidSurfaces);
-        if (hitbox.numCellRoles == 0) {
-            updateCellRange(hitbox);
+    final void removeSolidSurface(Hitbox hitbox, Direction direction) {
+        Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
+        while (iterator.hasNext()) {
+            iterator.next().getSolidSurfaces(direction).remove(hitbox);
         }
+        hitbox.numCellRoles--;
+        if (hitbox.solidSurfaces.isEmpty()) {
+            removeSolidHitbox(hitbox);
+        }
+    }
+    
+    final void addAllSolidSurfaces(Hitbox hitbox) {
+        if (!hitbox.solidSurfaces.isEmpty()) {
+            addSolidHitbox(hitbox);
+            hitbox.numCellRoles += hitbox.solidSurfaces.size();
+            Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
+            while (iterator.hasNext()) {
+                Cell cell = iterator.next();
+                for (Direction direction : hitbox.solidSurfaces) {
+                    cell.getSolidSurfaces(direction).add(hitbox);
+                }
+            }
+        }
+    }
+    
+    final void removeAllSolidSurfaces(Hitbox hitbox) {
+        if (!hitbox.solidSurfaces.isEmpty()) {
+            Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
+            while (iterator.hasNext()) {
+                Cell cell = iterator.next();
+                for (Direction direction : hitbox.solidSurfaces) {
+                    cell.getSolidSurfaces(direction).remove(hitbox);
+                }
+            }
+            hitbox.numCellRoles -= hitbox.solidSurfaces.size();
+            removeSolidHitbox(hitbox);
+        }
+    }
+    
+    final void completeSolidSurfaces(Hitbox hitbox) {
+        if (hitbox.solidSurfaces.isEmpty()) {
+            addSolidHitbox(hitbox);
+        }
+        Set<Direction> directionsToAdd = EnumSet.complementOf(hitbox.solidSurfaces);
         hitbox.numCellRoles += directionsToAdd.size();
         Iterator<Cell> iterator = new CellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
             for (Direction direction : directionsToAdd) {
-                cell.getSolidHitboxes(direction).add(hitbox);
+                cell.getSolidSurfaces(direction).add(hitbox);
             }
         }
     }
@@ -483,6 +508,20 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         if (hitbox.numCellRoles == 0) {
             hitbox.cellRange = null;
         }
+    }
+    
+    @Override
+    public final void addThinkerActions(CellGame game, LevelThinker thinker) {
+        if (stepState == 2) {
+            thinker.afterMovement(game, this);
+        } else if (stepState == 1) {
+            thinker.beforeMovement(game, this);
+        }
+    }
+    
+    @Override
+    public final void updateThinkerListActions(CellGame game) {
+        updateObjectList();
     }
     
     private class ObjectIterator implements SafeIterator<LevelObject> {
@@ -534,10 +573,14 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             if (!finished) {
                 finished = true;
                 objectIterators--;
-                changeObjects();
+                updateObjectList();
             }
         }
         
+    }
+    
+    public final boolean iteratingThroughObjects() {
+        return objectIterators > 0;
     }
     
     public final SafeIterator<LevelObject> objectIterator() {
@@ -591,17 +634,18 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         ObjectChangeData data = new ObjectChangeData(object, newState);
         if (object.state != null) {
             object.state.objectChanges.add(data);
-            object.state.changeObjects();
+            object.state.updateObjectList();
         }
         if (newState != null) {
             newState.objectChanges.add(data);
-            newState.changeObjects();
+            newState.updateObjectList();
         }
     }
     
-    private void changeObjects() {
-        if (objectIterators == 0 && !changingObjects) {
-            changingObjects = true;
+    private void updateObjectList() {
+        if (objectIterators == 0 && thinkerObjectIterators == 0
+                && !iteratingThroughThinkers() && !updatingObjectList) {
+            updatingObjectList = true;
             while (!objectChanges.isEmpty()) {
                 ObjectChangeData data = objectChanges.remove();
                 if (!data.used) {
@@ -614,7 +658,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                     }
                 }
             }
-            changingObjects = false;
+            updatingObjectList = false;
         }
     }
     
@@ -667,10 +711,14 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             if (!finished) {
                 finished = true;
                 thinkerObjectIterators--;
-                changeThinkerObjects();
+                updateThinkerObjectList();
             }
         }
         
+    }
+    
+    public final boolean iteratingThroughThinkerObjects() {
+        return thinkerObjectIterators > 0;
     }
     
     public final SafeIterator<ThinkerObject> thinkerObjectIterator() {
@@ -703,20 +751,20 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     
     final void addThinkerObject(ThinkerObject object) {
         thinkerObjectChanges.add(new ThinkerObjectChangeData(object, true));
-        changeThinkerObjects();
+        updateThinkerObjectList();
     }
     
     final void removeThinkerObject(ThinkerObject object) {
         thinkerObjectChanges.add(new ThinkerObjectChangeData(object, false));
-        changeThinkerObjects();
+        updateThinkerObjectList();
     }
     
     final void changeThinkerObjectMovementPriority(ThinkerObject object, int movementPriority) {
         thinkerObjectChanges.add(new ThinkerObjectChangeData(object, movementPriority));
-        changeThinkerObjects();
+        updateThinkerObjectList();
     }
     
-    private void changeThinkerObjects() {
+    private void updateThinkerObjectList() {
         if (thinkerObjectIterators == 0) {
             while (!thinkerObjectChanges.isEmpty()) {
                 ThinkerObjectChangeData data = thinkerObjectChanges.remove();
@@ -737,6 +785,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                     }
                 }
             }
+            updateObjectList();
         }
     }
     
@@ -745,28 +794,30 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     }
     
     public final <T extends LevelObject> T overlappingObject(LevelObject object, Class<T> cls) {
-        Hitbox objectHitbox = object.getOverlapHitbox();
-        if (object.getGameState() == this && objectHitbox != null) {
-            List<Hitbox> scanned = new ArrayList<>();
-            Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Hitbox overlapHitbox : cell.overlapHitboxes) {
-                    if (!overlapHitbox.scanned) {
-                        if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
-                                && Hitbox.overlap(objectHitbox, overlapHitbox)) {
-                            for (Hitbox hitbox : scanned) {
-                                hitbox.scanned = false;
+        if (object.getGameState() == this) {
+            Hitbox objectHitbox = object.getOverlapHitbox();
+            if (objectHitbox != null) {
+                List<Hitbox> scanned = new ArrayList<>();
+                Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
+                while (iterator.hasNext()) {
+                    Cell cell = iterator.next();
+                    for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+                        if (!overlapHitbox.scanned) {
+                            if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
+                                    && Hitbox.overlap(objectHitbox, overlapHitbox)) {
+                                for (Hitbox hitbox : scanned) {
+                                    hitbox.scanned = false;
+                                }
+                                return cls.cast(overlapHitbox.getObject());
                             }
-                            return cls.cast(overlapHitbox.getObject());
+                            overlapHitbox.scanned = true;
+                            scanned.add(overlapHitbox);
                         }
-                        overlapHitbox.scanned = true;
-                        scanned.add(overlapHitbox);
                     }
                 }
-            }
-            for (Hitbox hitbox : scanned) {
-                hitbox.scanned = false;
+                for (Hitbox hitbox : scanned) {
+                    hitbox.scanned = false;
+                }
             }
         }
         return null;
@@ -774,46 +825,79 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     
     public final <T extends LevelObject> List<T> overlappingObjects(LevelObject object, Class<T> cls) {
         List<T> overlapping = new ArrayList<>();
-        Hitbox objectHitbox = object.getOverlapHitbox();
-        if (object.getGameState() == this && objectHitbox != null) {
-            List<Hitbox> scanned = new ArrayList<>();
-            Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Hitbox overlapHitbox : cell.overlapHitboxes) {
-                    if (!overlapHitbox.scanned) {
-                        if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
-                                && Hitbox.overlap(objectHitbox, overlapHitbox)) {
-                            overlapping.add(cls.cast(overlapHitbox.getObject()));
+        if (object.getGameState() == this) {
+            Hitbox objectHitbox = object.getOverlapHitbox();
+            if (objectHitbox != null) {
+                List<Hitbox> scanned = new ArrayList<>();
+                Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
+                while (iterator.hasNext()) {
+                    Cell cell = iterator.next();
+                    for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+                        if (!overlapHitbox.scanned) {
+                            if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
+                                    && Hitbox.overlap(objectHitbox, overlapHitbox)) {
+                                overlapping.add(cls.cast(overlapHitbox.getObject()));
+                            }
                             overlapHitbox.scanned = true;
                             scanned.add(overlapHitbox);
                         }
                     }
                 }
-            }
-            for (Hitbox hitbox : scanned) {
-                hitbox.scanned = false;
+                for (Hitbox hitbox : scanned) {
+                    hitbox.scanned = false;
+                }
             }
         }
         return overlapping;
     }
     
-    public final void moveObject(ThinkerObject object, LevelVector change) {
+    public final void doMovement(ThinkerObject object, LevelVector change) {
         if (object.getGameState() == this) {
             move(object, change.getX(), change.getY());
         }
     }
     
-    public final void moveObject(ThinkerObject object, double dx, double dy) {
+    public final void doMovement(ThinkerObject object, double dx, double dy) {
         if (object.getGameState() == this) {
             move(object, dx, dy);
         }
     }
     
     final void move(ThinkerObject object, double dx, double dy) {
-        if (object.hasCollision() && object.getCollisionHitbox() != null) {
-            object.setPosition(object.getX() + dx, object.getY() + dy);
-        } else {
+        object.justCollidedWith.clear();
+        if (object.getCollisionHitbox() != null) {
+            if (object.getCollisionMode() == CollisionMode.CONTINUOUS) {
+                if (dx != 0 || dy != 0) {
+                    object.setPosition(object.getX() + dx, object.getY() + dy);
+                }
+                return;
+            } else if (object.getCollisionMode() == CollisionMode.DISCRETE) {
+                if (dx != 0 || dy != 0) {
+                    object.setPosition(object.getX() + dx, object.getY() + dy);
+                }
+                Hitbox objectHitbox = object.getCollisionHitbox();
+                List<Hitbox> scanned = new ArrayList<>();
+                List<Hitbox> potentiallyColliding = new ArrayList<>();
+                Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(objectHitbox));
+                while (iterator.hasNext()) {
+                    Cell cell = iterator.next();
+                    for (Hitbox solidHitbox : cell.solidHitboxes) {
+                        if (!solidHitbox.scanned) {
+                            if (Hitbox.isCollidingWith(objectHitbox, solidHitbox)) {
+                                potentiallyColliding.add(solidHitbox);
+                            }
+                            solidHitbox.scanned = true;
+                            scanned.add(solidHitbox);
+                        }
+                    }
+                }
+                for (Hitbox hitbox : scanned) {
+                    hitbox.scanned = false;
+                }
+                return;
+            }
+        }
+        if (dx != 0 || dy != 0) {
             object.setPosition(object.getX() + dx, object.getY() + dy);
         }
     }
@@ -833,9 +917,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 double objectTimeFactor = object.getEffectiveTimeFactor();
                 double dx = objectTimeFactor*(object.getVelocityX() + object.getDisplacementX());
                 double dy = objectTimeFactor*(object.getVelocityY() + object.getDisplacementY());
-                if (dx != 0 || dy != 0) {
-                    move(object, dx, dy);
-                }
+                move(object, dx, dy);
                 object.setDisplacement(0, 0);
             }
             stepState = 2;
@@ -844,15 +926,6 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 iterator.next().afterMovement(game, this);
             }
             stepState = 0;
-        }
-    }
-    
-    @Override
-    public final void addThinkerActions(CellGame game, LevelThinker thinker) {
-        if (stepState == 2) {
-            thinker.afterMovement(game, this);
-        } else if (stepState == 1) {
-            thinker.beforeMovement(game, this);
         }
     }
     
