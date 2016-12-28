@@ -2,8 +2,10 @@ package cell2D.level;
 
 import cell2D.CellGame;
 import cell2D.TimedEvent;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ThinkerObject extends AnimatedObject {
@@ -48,7 +50,7 @@ public abstract class ThinkerObject extends AnimatedObject {
     int newMovementPriority = 0;
     private CollisionMode collisionMode = CollisionMode.NONE;
     private Hitbox collisionHitbox;
-    Map<LevelObject,Direction> justCollidedWith = new HashMap<>();
+    Map<LevelObject,Set<CollisionType>> collisions = new HashMap<>();
     private final LevelVector velocity = new LevelVector();
     private final LevelVector displacement = new LevelVector();
     
@@ -84,7 +86,7 @@ public abstract class ThinkerObject extends AnimatedObject {
         if (collisionMode != CollisionMode.NONE && collisionHitbox != null) {
             state.removeCollisionHitbox(collisionHitbox);
         }
-        justCollidedWith.clear();
+        collisions.clear();
     }
     
     @Override
@@ -223,12 +225,22 @@ public abstract class ThinkerObject extends AnimatedObject {
         }
     }
     
-    public boolean shouldCollide(LevelObject object) {
+    public boolean checkCollision(LevelObject object, CollisionType collisionType) {
         return true;
     }
     
-    public final Map<LevelObject,Direction> getJustCollidedWith() {
-        return new HashMap<>(justCollidedWith);
+    final void addCollision(LevelObject object, CollisionType collisionType) {
+        Set<CollisionType> collisionsWithObject = collisions.get(object);
+        if (collisionsWithObject == null) {
+            collisionsWithObject = EnumSet.of(collisionType);
+            collisions.put(object, collisionsWithObject);
+        } else {
+            collisionsWithObject.add(collisionType);
+        }
+    }
+    
+    public final Map<LevelObject,Set<CollisionType>> getCollisions() {
+        return new HashMap<>(collisions);
     }
     
     public final LevelVector getVelocity() {

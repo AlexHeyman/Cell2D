@@ -564,20 +564,20 @@ public abstract class Hitbox {
         return false;
     }
     
-    public final boolean isCollidingWith(Hitbox solidHitbox) {
-        return isCollidingWith(this, solidHitbox);
+    public final boolean intersects(Hitbox solidHitbox) {
+        return intersect(this, solidHitbox);
     }
     
-    public static final boolean isCollidingWith(Hitbox overlapHitbox, Hitbox solidHitbox) {
-        if (overlapHitbox.getObject() != solidHitbox.getObject()
-                && overlapHitbox.state != null && overlapHitbox.state == solidHitbox.state
-                && overlapHitbox.getLeftEdge() < solidHitbox.getRightEdge()
-                && overlapHitbox.getRightEdge() > solidHitbox.getLeftEdge()
-                && overlapHitbox.getTopEdge() < solidHitbox.getBottomEdge()
-                && overlapHitbox.getBottomEdge() > solidHitbox.getTopEdge()) {
-            if (overlapHitbox instanceof CompositeHitbox) {
-                for (Hitbox component : ((CompositeHitbox)overlapHitbox).components.values()) {
-                    if (isCollidingWith(component, solidHitbox)) {
+    public static final boolean intersect(Hitbox collisionHitbox, Hitbox solidHitbox) {
+        if (collisionHitbox.getObject() != solidHitbox.getObject()
+                && collisionHitbox.state != null && collisionHitbox.state == solidHitbox.state
+                && collisionHitbox.getLeftEdge() < solidHitbox.getRightEdge()
+                && collisionHitbox.getRightEdge() > solidHitbox.getLeftEdge()
+                && collisionHitbox.getTopEdge() < solidHitbox.getBottomEdge()
+                && collisionHitbox.getBottomEdge() > solidHitbox.getTopEdge()) {
+            if (collisionHitbox instanceof CompositeHitbox) {
+                for (Hitbox component : ((CompositeHitbox)collisionHitbox).components.values()) {
+                    if (intersect(component, solidHitbox)) {
                         return true;
                     }
                 }
@@ -585,7 +585,7 @@ public abstract class Hitbox {
             }
             if (solidHitbox instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)solidHitbox).components.values()) {
-                    if (isCollidingWith(overlapHitbox, component)) {
+                    if (intersect(collisionHitbox, component)) {
                         return true;
                     }
                 }

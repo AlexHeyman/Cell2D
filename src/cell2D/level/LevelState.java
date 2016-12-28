@@ -864,7 +864,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     }
     
     final void move(ThinkerObject object, double dx, double dy) {
-        object.justCollidedWith.clear();
+        object.collisions.clear();
         if (object.getCollisionHitbox() != null) {
             if (object.getCollisionMode() == CollisionMode.CONTINUOUS) {
                 if (dx != 0 || dy != 0) {
@@ -877,14 +877,14 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 }
                 Hitbox objectHitbox = object.getCollisionHitbox();
                 List<Hitbox> scanned = new ArrayList<>();
-                List<Hitbox> potentiallyColliding = new ArrayList<>();
+                List<LevelObject> intersecting = new ArrayList<>();
                 Iterator<Cell> iterator = new CellRangeIterator(getCellRangeExclusive(objectHitbox));
                 while (iterator.hasNext()) {
                     Cell cell = iterator.next();
                     for (Hitbox solidHitbox : cell.solidHitboxes) {
                         if (!solidHitbox.scanned) {
-                            if (Hitbox.isCollidingWith(objectHitbox, solidHitbox)) {
-                                potentiallyColliding.add(solidHitbox);
+                            if (Hitbox.intersect(objectHitbox, solidHitbox)) {
+                                intersecting.add(solidHitbox.getObject());
                             }
                             solidHitbox.scanned = true;
                             scanned.add(solidHitbox);
@@ -893,6 +893,11 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 }
                 for (Hitbox hitbox : scanned) {
                     hitbox.scanned = false;
+                }
+                for (LevelObject levelObject : intersecting) {
+                    if (object.checkCollision(levelObject, CollisionType.INTERSECTING)) {
+                        object.addCollision(levelObject, CollisionType.INTERSECTING);
+                    }
                 }
                 return;
             }
