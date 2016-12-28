@@ -564,11 +564,11 @@ public abstract class Hitbox {
         return false;
     }
     
-    public final boolean intersects(Hitbox solidHitbox) {
-        return intersect(this, solidHitbox);
+    public final boolean intersectsSolidHitbox(Hitbox solidHitbox) {
+        return intersectsSolidHitbox(this, solidHitbox);
     }
     
-    public static final boolean intersect(Hitbox collisionHitbox, Hitbox solidHitbox) {
+    public static final boolean intersectsSolidHitbox(Hitbox collisionHitbox, Hitbox solidHitbox) {
         if (collisionHitbox.getObject() != solidHitbox.getObject()
                 && collisionHitbox.state != null && collisionHitbox.state == solidHitbox.state
                 && collisionHitbox.getLeftEdge() < solidHitbox.getRightEdge()
@@ -577,7 +577,7 @@ public abstract class Hitbox {
                 && collisionHitbox.getBottomEdge() > solidHitbox.getTopEdge()) {
             if (collisionHitbox instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)collisionHitbox).components.values()) {
-                    if (intersect(component, solidHitbox)) {
+                    if (intersectsSolidHitbox(component, solidHitbox)) {
                         return true;
                     }
                 }
@@ -585,7 +585,7 @@ public abstract class Hitbox {
             }
             if (solidHitbox instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)solidHitbox).components.values()) {
-                    if (intersect(collisionHitbox, component)) {
+                    if (intersectsSolidHitbox(collisionHitbox, component)) {
                         return true;
                     }
                 }

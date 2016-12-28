@@ -2,8 +2,10 @@ package cell2D.level;
 
 import cell2D.CellGame;
 import cell2D.TimedEvent;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -211,6 +213,18 @@ public abstract class ThinkerObject extends AnimatedObject {
             }
         }
         return false;
+    }
+    
+    public final <T extends LevelObject> boolean isIntersectingSolidObject(Class<T> cls) {
+        return (state == null ? false : state.isIntersectingSolidObject(this, cls));
+    }
+    
+    public final <T extends LevelObject> T intersectingSolidObject(Class<T> cls) {
+        return (state == null ? null : state.intersectingSolidObject(this, cls));
+    }
+    
+    public final <T extends LevelObject> List<T> intersectingSolidObjects(Class<T> cls) {
+        return (state == null ? new ArrayList<>() : state.intersectingSolidObjects(this, cls));
     }
     
     public final void doMovement(LevelVector change) {
