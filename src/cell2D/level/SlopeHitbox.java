@@ -4,21 +4,28 @@ public class SlopeHitbox extends Hitbox {
     
     private final LevelVector relDifference, absDifference;
     private double left, right, top, bottom;
+    private SlopeType slopeType;
+    private boolean presentAbove, presentBelow;
     
-    public SlopeHitbox(LevelVector relPosition, LevelVector relDifference) {
+    public SlopeHitbox(LevelVector relPosition, LevelVector relDifference,
+            SlopeType slopeType, boolean presentAbove, boolean presentBelow) {
         super(relPosition);
         this.relDifference = new LevelVector(relDifference);
         absDifference = new LevelVector();
+        this.slopeType = slopeType;
+        this.presentAbove = presentAbove;
+        this.presentBelow = presentBelow;
         updateData();
     }
     
-    public SlopeHitbox(double relX, double relY, double relDX, double relDY) {
-        this(new LevelVector(relX, relY), new LevelVector(relDX, relDY));
+    public SlopeHitbox(double relX, double relY, double relDX, double relDY,
+            SlopeType slopeType, boolean presentAbove, boolean presentBelow) {
+        this(new LevelVector(relX, relY), new LevelVector(relDX, relDY), slopeType, presentAbove, presentBelow);
     }
     
     @Override
     public Hitbox getCopy() {
-        return new SlopeHitbox(new LevelVector(), relDifference);
+        return new SlopeHitbox(new LevelVector(), relDifference, slopeType, presentAbove, presentBelow);
     }
     
     private void updateData() {
@@ -81,6 +88,30 @@ public class SlopeHitbox extends Hitbox {
     
     public final double getY2() {
         return getAbsY() + absDifference.getY();
+    }
+    
+    public final SlopeType getSlopeType() {
+        return slopeType;
+    }
+    
+    public final void setSlopeType(SlopeType slopeType) {
+        this.slopeType = slopeType;
+    }
+    
+    public final boolean getPresentAbove() {
+        return presentAbove;
+    }
+    
+    public final void setPresentAbove(boolean presentAbove) {
+        this.presentAbove = presentAbove;
+    }
+    
+    public final boolean getPresentBelow() {
+        return presentBelow;
+    }
+    
+    public final void setPresentBelow(boolean presentBelow) {
+        this.presentBelow = presentBelow;
     }
     
     @Override
