@@ -81,7 +81,6 @@ public class PolygonHitbox extends Hitbox {
             right = 0;
             top = 0;
             bottom = 0;
-            center.clear();
         } else {
             double sumX = 0;
             double sumY = 0;
@@ -103,7 +102,6 @@ public class PolygonHitbox extends Hitbox {
                     comparing = true;
                 }
             }
-            center.setCoordinates(sumX/vertices.size(), sumY/vertices.size());
         }
         updateBoundaries();
     }

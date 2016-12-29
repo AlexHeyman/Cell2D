@@ -43,7 +43,6 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absLeft = relLeft;
             }
-            center.setX((absLeft + absRight)/2);
             updateBoundaries();
             return true;
         }
@@ -66,7 +65,6 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absRight = relRight;
             }
-            center.setX((absLeft + absRight)/2);
             updateBoundaries();
             return true;
         }
@@ -89,7 +87,6 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absTop = relTop;
             }
-            center.setY((absTop + absBottom)/2);
             updateBoundaries();
             return true;
         }
@@ -112,7 +109,6 @@ public class RectangleHitbox extends Hitbox {
             } else {
                 absBottom = relBottom;
             }
-            center.setY((absTop + absBottom)/2);
             updateBoundaries();
             return true;
         }
@@ -160,7 +156,6 @@ public class RectangleHitbox extends Hitbox {
             absLeft = relLeft;
             absRight = relRight;
         }
-        center.setX((absLeft + absRight)/2);
         updateBoundaries();
     }
     
@@ -173,7 +168,6 @@ public class RectangleHitbox extends Hitbox {
             absTop = relTop;
             absBottom = relBottom;
         }
-        center.setY((absTop + absBottom)/2);
         updateBoundaries();
     }
     

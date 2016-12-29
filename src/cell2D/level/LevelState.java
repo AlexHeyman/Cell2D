@@ -1090,8 +1090,8 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 int vy2 = y1 + viewport.roundY2;
                 g.setWorldClip(vx1, vy1, vx2 - vx1, vy2 - vy1);
                 if (viewport.camera != null && viewport.camera.state == this) {
-                    double cx = viewport.camera.getCenterX();
-                    double cy = viewport.camera.getCenterY();
+                    double cx = viewport.camera.getX();
+                    double cy = viewport.camera.getY();
                     for (LevelLayer layer : levelLayers.headMap(0).values()) {
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }

@@ -25,7 +25,6 @@ public abstract class Hitbox {
     int drawPriority = 0;
     int numCellRoles = 0;
     private final LevelVector relPosition, absPosition;
-    final LevelVector center = new LevelVector();
     private boolean relXFlip = false;
     private boolean absXFlip = false;
     private boolean relYFlip = false;
@@ -351,18 +350,6 @@ public abstract class Hitbox {
         }
     }
     
-    public final LevelVector getCenter() {
-        return LevelVector.add(absPosition, center);
-    }
-    
-    public final double getCenterX() {
-        return absPosition.getX() + center.getX();
-    }
-    
-    public final double getCenterY() {
-        return absPosition.getY() + center.getY();
-    }
-    
     public final boolean getRelXFlip() {
         return relXFlip;
     }
@@ -532,6 +519,14 @@ public abstract class Hitbox {
     
     public abstract double getBottomEdge();
     
+    public final double distanceTo(Hitbox hitbox) {
+        return LevelVector.distanceBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
+    }
+    
+    public final double angleTo(Hitbox hitbox) {
+        return LevelVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
+    }
+    
     public final boolean overlaps(Hitbox hitbox) {
         return overlap(this, hitbox);
     }
@@ -549,16 +544,18 @@ public abstract class Hitbox {
                     }
                 }
                 return false;
-            }
-            if (hitbox2 instanceof CompositeHitbox) {
+            } else if (hitbox2 instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)hitbox2).components.values()) {
                     if (overlap(hitbox1, component)) {
                         return true;
                     }
                 }
                 return false;
+            } else if (hitbox1 instanceof CircleHitbox) {
+                if (hitbox2 instanceof CircleHitbox) {
+                    
+                }
             }
-            
             return true;
         }
         return false;
@@ -582,8 +579,7 @@ public abstract class Hitbox {
                     }
                 }
                 return false;
-            }
-            if (solidHitbox instanceof CompositeHitbox) {
+            } else if (solidHitbox instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)solidHitbox).components.values()) {
                     if (intersectsSolidHitbox(collisionHitbox, component)) {
                         return true;

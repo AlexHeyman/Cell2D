@@ -23,7 +23,6 @@ public class LineHitbox extends Hitbox {
     
     private void updateData() {
         absDifference.copy(relDifference).relativeTo(this);
-        center.copy(absDifference).scale(0.5);
         left = Math.min(absDifference.getX(), 0);
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);

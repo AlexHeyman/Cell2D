@@ -154,14 +154,6 @@ public abstract class LevelObject {
         locatorHitbox.setRelY(y);
     }
     
-    public final double getCenterX() {
-        return locatorHitbox.getCenterX();
-    }
-    
-    public final double getCenterY() {
-        return locatorHitbox.getCenterY();
-    }
-    
     public final boolean getXFlip() {
         return locatorHitbox.getRelXFlip();
     }
@@ -220,6 +212,14 @@ public abstract class LevelObject {
     
     public final double getBottomEdge() {
         return locatorHitbox.getBottomEdge();
+    }
+    
+    public final double distanceTo(LevelObject object) {
+        return locatorHitbox.distanceTo(object.locatorHitbox);
+    }
+    
+    public final double angleTo(LevelObject object) {
+        return locatorHitbox.angleTo(object.locatorHitbox);
     }
     
     public final Hitbox getOverlapHitbox() {

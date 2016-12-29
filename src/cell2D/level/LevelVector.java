@@ -135,7 +135,7 @@ public class LevelVector {
         return setLength(length*scaleFactor);
     }
     
-    private double modAngle(double angle) {
+    private static double modAngle(double angle) {
         angle %= 360;
         if (angle < 0) {
             angle += 360;
@@ -207,6 +207,24 @@ public class LevelVector {
     
     public final LevelVector relativeTo(LevelObject object) {
         return relativeTo(object.getLocatorHitbox());
+    }
+    
+    public final double distanceTo(LevelVector position) {
+        return distanceBetween(x, y, position.x, position.y);
+    }
+    
+    public static final double distanceBetween(double x1, double y1, double x2, double y2) {
+        double xDist = x2 - x1;
+        double yDist = y2 - y1;
+        return Math.sqrt(xDist*xDist + yDist*yDist);
+    }
+    
+    public final double angleTo(LevelVector position) {
+        return angleBetween(x, y, position.x, position.y);
+    }
+    
+    public static final double angleBetween(double x1, double y1, double x2, double y2) {
+        return modAngle(Math.toDegrees(Math.atan2(y1 - y2, x2 - x1)));
     }
     
 }

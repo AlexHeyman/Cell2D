@@ -38,7 +38,6 @@ public class CompositeHitbox extends Hitbox {
             right = 0;
             top = 0;
             bottom = 0;
-            center.clear();
         } else {
             boolean compare = false;
             double newLeft = 0;
@@ -65,7 +64,6 @@ public class CompositeHitbox extends Hitbox {
             right = newRight - x;
             top = newTop - y;
             bottom = newBottom - y;
-            center.setCoordinates((left + right)/2, (top + bottom)/2);
         }
         updateBoundaries();
     }
@@ -92,7 +90,6 @@ public class CompositeHitbox extends Hitbox {
                 right = Math.max(right, hitbox.getRightEdge() - x);
                 top = Math.min(top, hitbox.getTopEdge() - y);
                 bottom = Math.max(bottom, hitbox.getBottomEdge() - y);
-                center.setCoordinates((left + right)/2, (top + bottom)/2);
             } else {
                 removeChild(oldHitbox);
                 updateShape();
