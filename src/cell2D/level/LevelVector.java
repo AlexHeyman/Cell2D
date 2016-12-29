@@ -193,12 +193,20 @@ public class LevelVector {
         return new LevelVector(first.x - second.x, first.y - second.y);
     }
     
-    public final double dotProduct(LevelVector vector) {
+    public final double dot(LevelVector vector) {
         return x*vector.x + y*vector.y;
     }
     
-    public static final double dotProduct(LevelVector first, LevelVector second) {
+    public static final double dot(LevelVector first, LevelVector second) {
         return first.x*second.x + first.y*second.y;
+    }
+    
+    public final double cross(LevelVector vector) {
+        return x*vector.y - y*vector.x;
+    }
+    
+    public static final double cross(LevelVector first, LevelVector second) {
+        return first.x*second.y - first.y*second.x;
     }
     
     public final LevelVector relativeTo(Hitbox hitbox) {
