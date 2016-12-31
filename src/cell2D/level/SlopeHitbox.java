@@ -3,6 +3,9 @@ package cell2D.level;
 public class SlopeHitbox extends Hitbox {
     
     private final LevelVector relDifference, absDifference;
+    private double slopeAngle, slopeAngleX, slopeAngleY;
+    private Double slope;
+    private boolean isSloping;
     private double left, right, top, bottom;
     private SlopeType slopeType;
     private boolean presentAbove, presentBelow;
@@ -30,6 +33,19 @@ public class SlopeHitbox extends Hitbox {
     
     private void updateData() {
         absDifference.copy(relDifference).flip(getAbsXFlip(), getAbsYFlip());
+        slopeAngle = absDifference.getAngle() % 180;
+        if (slopeAngle > 90) {
+            slopeAngle -= 180;
+        }
+        if (absDifference.getX() < 0) {
+            slopeAngleX = -absDifference.getAngleX();
+            slopeAngleY = -absDifference.getAngleY();
+        } else {
+            slopeAngleX = absDifference.getAngleX();
+            slopeAngleY = absDifference.getAngleY();
+        }
+        slope = (absDifference.getX() == 0 ? null : absDifference.getY()/absDifference.getX());
+        isSloping = absDifference.getX() != 0 && absDifference.getY() != 0;
         left = Math.min(absDifference.getX(), 0);
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
@@ -87,6 +103,26 @@ public class SlopeHitbox extends Hitbox {
     
     public final double getY2() {
         return getAbsY() + absDifference.getY();
+    }
+    
+    public final double getSlopeAngle() {
+        return slopeAngle;
+    }
+    
+    public final double getSlopeAngleX() {
+        return slopeAngleX;
+    }
+    
+    public final double getSlopeAngleY() {
+        return slopeAngleY;
+    }
+    
+    public final Double getSlope() {
+        return slope;
+    }
+    
+    public final boolean isSloping() {
+        return isSloping;
     }
     
     public final SlopeType getSlopeType() {

@@ -633,7 +633,16 @@ public abstract class Hitbox {
         double y1 = rectangle.getTopEdge();
         double x2 = rectangle.getRightEdge();
         double y2 = rectangle.getBottomEdge();
-        return center.getX() > x1 && center.getX() < x2 && center.getY() > y1 && center.getY() < y2;
+        if (center.getX() > x1 && center.getX() < x2 && center.getY() > y1 && center.getY() < y2) {
+            return true;
+        }
+        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
+        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
+        LevelVector topLeft = new LevelVector(x1, y1);
+        return lineSegmentIntersectsCircle(topLeft, horizontalDiff, center, radius)
+                || lineSegmentIntersectsCircle(new LevelVector(x1, y2), horizontalDiff, center, radius)
+                || lineSegmentIntersectsCircle(topLeft, verticalDiff, center, radius)
+                || lineSegmentIntersectsCircle(new LevelVector(x2, y1), verticalDiff, center, radius);
     }
     
     public final boolean overlaps(Hitbox hitbox) {
@@ -671,6 +680,8 @@ public abstract class Hitbox {
                     return polygonIntersectsCircle((PolygonHitbox)hitbox2, hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius());
                 } else if (hitbox2 instanceof RectangleHitbox) {
                     return rectangleIntersectsCircle((RectangleHitbox)hitbox2, hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius());
+                } else if (hitbox2 instanceof SlopeHitbox) {
+                    return true;
                 }
             }
             return true;

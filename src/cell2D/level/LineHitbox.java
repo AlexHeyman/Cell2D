@@ -74,6 +74,14 @@ public class LineHitbox extends Hitbox {
         return absDifference.getY();
     }
     
+    public final double getX2() {
+        return getAbsX() + absDifference.getX();
+    }
+    
+    public final double getY2() {
+        return getAbsY() + absDifference.getY();
+    }
+    
     public final double getLength() {
         return relDifference.getLength();
     }
@@ -88,12 +96,16 @@ public class LineHitbox extends Hitbox {
         updateData();
     }
     
-    public final double getX2() {
-        return getAbsX() + absDifference.getX();
+    public final double getLineAngle() {
+        return absDifference.getAngle();
     }
     
-    public final double getY2() {
-        return getAbsY() + absDifference.getY();
+    public final double getLineAngleX() {
+        return absDifference.getAngleX();
+    }
+    
+    public final double getLineAngleY() {
+        return absDifference.getAngleY();
     }
     
     @Override
