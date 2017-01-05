@@ -626,10 +626,10 @@ public abstract class CellGame {
     final void addState(CellGameState state) {
         int id = state.getID();
         if (id < 0 && negativeIDsOffLimits) {
-            throw new RuntimeException("Attempted to add an Ironclad game state with negative ID " + id);
+            throw new RuntimeException("Attempted to add a game state with negative ID " + id);
         }
         if (states.get(id) != null) {
-            throw new RuntimeException("Attempted to add multiple Ironclad game states with ID " + id);
+            throw new RuntimeException("Attempted to add multiple game states with ID " + id);
         }
         states.put(id, state);
         game.addState(new State(state));
@@ -803,7 +803,7 @@ public abstract class CellGame {
     
     public final void setUpdateFPS(int updateFPS) {
         if (updateFPS <= 0) {
-            throw new RuntimeException("Attempted to run an Ironclad game at a non-positive FPS");
+            throw new RuntimeException("Attempted to run a game at a non-positive FPS");
         }
         this.updateFPS = updateFPS;
         msPerStep = 1000/((double)updateFPS);
@@ -815,7 +815,7 @@ public abstract class CellGame {
     
     public final void setScreenWidth(int screenWidth) {
         if (screenWidth <= 0) {
-            throw new RuntimeException("Attempted to give an Ironclad game a non-positive screen width");
+            throw new RuntimeException("Attempted to give a game a non-positive screen width");
         }
         this.screenWidth = screenWidth;
         updateScreen = true;
@@ -827,7 +827,7 @@ public abstract class CellGame {
     
     public final void setScreenHeight(int screenHeight) {
         if (screenHeight <= 0) {
-            throw new RuntimeException("Attempted to give an Ironclad game a non-positive screen height");
+            throw new RuntimeException("Attempted to give a game a non-positive screen height");
         }
         this.screenHeight = screenHeight;
         updateScreen = true;
@@ -839,7 +839,7 @@ public abstract class CellGame {
     
     public final void setScaleFactor(double scaleFactor) {
         if (scaleFactor <= 0) {
-            throw new RuntimeException("Attempted to give an Ironclad game a non-positive scale factor");
+            throw new RuntimeException("Attempted to give a game a non-positive scale factor");
         }
         this.scaleFactor = scaleFactor;
         updateScreen = true;

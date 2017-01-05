@@ -235,4 +235,26 @@ public class LevelVector {
         return modAngle(Math.toDegrees(Math.atan2(y1 - y2, x2 - x1)));
     }
     
+    public static final boolean lineSegmentsIntersect(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
+        //Credit to Gareth Rees of StackOverflow for the algorithm.
+        LevelVector start2MinusStart1 = LevelVector.sub(start2, start1);
+        if (diff1.cross(diff2) == 0) {
+            if (start2MinusStart1.cross(diff1) == 0) {
+                double diff1Dot = diff1.dot(diff1);
+                double t0 = start2MinusStart1.dot(diff1)/diff1Dot;
+                double diff2DotDiff1 = diff2.dot(diff1);
+                double t1 = diff2DotDiff1/diff1Dot;
+                if (diff2DotDiff1 < 0) {
+                    return t1 > 0 || t0 < 1;
+                }
+                return t0 > 0 || t1 < 1;
+            }
+            return false;
+        }
+        double diff1CrossDiff2 = diff1.cross(diff2);
+        double t = start2MinusStart1.cross(diff2)/diff1CrossDiff2;
+        double u = start2MinusStart1.cross(diff1)/diff1CrossDiff2;
+        return t > 0 && t < 1 && u > 0 && u < 1;
+    }
+    
 }

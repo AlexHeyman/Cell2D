@@ -121,6 +121,32 @@ public class SlopeHitbox extends Hitbox {
         return slope;
     }
     
+    public final Double getSlopeX(double y) {
+        if (absDifference.getY() == 0) {
+            return null;
+        }
+        y -= getAbsY();
+        if (y <= top) {
+            return (absDifference.getY() < 0 ? getX2() : getAbsX());
+        } else if (y >= bottom) {
+            return (absDifference.getY() < 0 ? getAbsX() : getX2());
+        }
+        return getAbsX() + y/slope;
+    }
+    
+    public final Double getSlopeY(double x) {
+        if (absDifference.getX() == 0) {
+            return null;
+        }
+        x -= getAbsX();
+        if (x <= left) {
+            return (absDifference.getX() < 0 ? getY2() : getAbsY());
+        } else if (x >= right) {
+            return (absDifference.getX() < 0 ? getAbsY() : getY2());
+        }
+        return getAbsY() + x*slope;
+    }
+    
     public final boolean isSloping() {
         return isSloping;
     }

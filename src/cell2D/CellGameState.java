@@ -43,7 +43,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     public CellGameState(CellGame game, int id) {
         if (game == null) {
-            throw new RuntimeException("Attempted to create an Ironclad game state with no game");
+            throw new RuntimeException("Attempted to create a game state with no game");
         }
         this.game = game;
         this.id = id;
