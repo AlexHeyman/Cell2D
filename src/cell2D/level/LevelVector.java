@@ -235,8 +235,9 @@ public class LevelVector {
         return modAngle(Math.toDegrees(Math.atan2(y1 - y2, x2 - x1)));
     }
     
+    //Credit to Gareth Rees of StackOverflow for the line segment intersection algorithm.
+    
     public static final boolean lineSegmentsIntersect(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
-        //Credit to Gareth Rees of StackOverflow for the algorithm.
         LevelVector start2MinusStart1 = LevelVector.sub(start2, start1);
         if (diff1.cross(diff2) == 0) {
             if (start2MinusStart1.cross(diff1) == 0) {
@@ -255,6 +256,20 @@ public class LevelVector {
         double t = start2MinusStart1.cross(diff2)/diff1CrossDiff2;
         double u = start2MinusStart1.cross(diff1)/diff1CrossDiff2;
         return t > 0 && t < 1 && u > 0 && u < 1;
+    }
+    
+    public static final LevelVector lineSegmentsIntersectionPoint(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
+        if (diff1.cross(diff2) == 0) {
+            return null;
+        }
+        LevelVector start2MinusStart1 = LevelVector.sub(start2, start1);
+        double diff1CrossDiff2 = diff1.cross(diff2);
+        double t = start2MinusStart1.cross(diff2)/diff1CrossDiff2;
+        double u = start2MinusStart1.cross(diff1)/diff1CrossDiff2;
+        if (t > 0 && t < 1 && u > 0 && u < 1) {
+            return LevelVector.add(start1, new LevelVector(diff1).scale(t));
+        }
+        return null;
     }
     
 }
