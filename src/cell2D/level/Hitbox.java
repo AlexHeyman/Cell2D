@@ -628,7 +628,8 @@ public abstract class Hitbox {
     }
     
     public static final boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
-        if (hitbox1 != hitbox2 && hitbox1.state != null && hitbox1.state == hitbox2.state
+        if (hitbox1 != hitbox2
+                && (hitbox1.state == hitbox2.state || hitbox1.state == null || hitbox2.state == null)
                 && hitbox1.getLeftEdge() < hitbox2.getRightEdge()
                 && hitbox1.getRightEdge() > hitbox2.getLeftEdge()
                 && hitbox1.getTopEdge() < hitbox2.getBottomEdge()
