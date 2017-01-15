@@ -45,12 +45,16 @@ public class SlopeHitbox extends Hitbox {
             slopeAngleY = absDifference.getAngleY();
         }
         slope = (absDifference.getX() == 0 ? null : absDifference.getY()/absDifference.getX());
-        isSloping = absDifference.getX() != 0 && absDifference.getY() != 0;
+        updateSloping();
         left = Math.min(absDifference.getX(), 0);
         right = Math.max(absDifference.getX(), 0);
         top = Math.min(absDifference.getY(), 0);
         bottom = Math.max(absDifference.getY(), 0);
         updateBoundaries();
+    }
+    
+    private void updateSloping() {
+        isSloping = absDifference.getX() != 0 && absDifference.getY() != 0 && !(presentAbove && presentBelow);
     }
     
     public final LevelVector getRelDifference() {
@@ -95,6 +99,10 @@ public class SlopeHitbox extends Hitbox {
     
     public final double getAbsDY() {
         return absDifference.getY();
+    }
+    
+    public final LevelVector getPosition2() {
+        return new LevelVector(getAbsX() + absDifference.getX(), getAbsY() + absDifference.getY());
     }
     
     public final double getX2() {
@@ -165,6 +173,7 @@ public class SlopeHitbox extends Hitbox {
     
     public final void setPresentAbove(boolean presentAbove) {
         this.presentAbove = presentAbove;
+        updateSloping();
     }
     
     public final boolean getPresentBelow() {
@@ -173,6 +182,7 @@ public class SlopeHitbox extends Hitbox {
     
     public final void setPresentBelow(boolean presentBelow) {
         this.presentBelow = presentBelow;
+        updateSloping();
     }
     
     @Override

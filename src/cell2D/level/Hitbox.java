@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import javafx.util.Pair;
 import org.newdawn.slick.util.FastTrig;
 
 public abstract class Hitbox {
@@ -527,7 +528,7 @@ public abstract class Hitbox {
         return LevelVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
-    private static boolean lineSegmentIntersectsCircle(LevelVector start, LevelVector diff, LevelVector center, double radius) {
+    private static boolean circleIntersectsLineSegment(LevelVector center, double radius, LevelVector start, LevelVector diff) {
         //Credit to bobobobo of StackOverflow for the algorithm.
         LevelVector f = LevelVector.sub(start, center);
         double a = diff.dot(diff);
@@ -543,8 +544,157 @@ public abstract class Hitbox {
         return (t1 > 0 && t1 < 1) || (t2 > 0 && t2 < 1);
     }
     
-    private static boolean pointInsidePolygon(LevelVector point, double startX, LevelVector[] vertices, LevelVector[] diffs) {
-        //Credit to Mecki of StackOverflow for the algorithm.
+    private static boolean circleIntersectsPolygon(LevelVector center, double radius, PolygonHitbox polygon) {
+        int numVertices = polygon.getNumVertices();
+        if (numVertices == 0) {
+            return center.distanceTo(polygon.getAbsPosition()) < radius;
+        } else if (numVertices == 1) {
+            return center.distanceTo(polygon.getAbsVertex(0)) < radius;
+        }
+        LevelVector firstVertex = polygon.getAbsVertex(0);
+        if (numVertices == 2) {
+            return circleIntersectsLineSegment(center, radius, firstVertex, polygon.getAbsVertex(1).sub(firstVertex));
+        }
+        LevelVector[] vertices = new LevelVector[numVertices];
+        vertices[0] = firstVertex;
+        LevelVector[] diffs = new LevelVector[numVertices];
+        for (int i = 0; i < numVertices - 1; i++) {
+            vertices[i + 1] = polygon.getAbsVertex(i + 1);
+            diffs[i] = vertices[i + 1].sub(vertices[i]);
+            if (circleIntersectsLineSegment(center, radius, vertices[i], diffs[i])) {
+                return true;
+            }
+        }
+        diffs[numVertices - 1] = vertices[0].sub(vertices[numVertices - 1]);
+        if (circleIntersectsLineSegment(center, radius, vertices[numVertices - 1], diffs[numVertices - 1])) {
+            return true;
+        }
+        return pointIntersectsPolygon(center, polygon.getLeftEdge() - 1, vertices, diffs);
+    }
+    
+    private static boolean circleIntersectsRectangle(LevelVector center, double radius, double x1, double y1, double x2, double y2) {
+        if (center.getX() > x1 && center.getX() < x2 && center.getY() > y1 && center.getY() < y2) {
+            return true;
+        }
+        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
+        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
+        LevelVector topLeft = new LevelVector(x1, y1);
+        return circleIntersectsLineSegment(center, radius, topLeft, horizontalDiff)
+                || circleIntersectsLineSegment(center, radius, new LevelVector(x1, y2), horizontalDiff)
+                || circleIntersectsLineSegment(center, radius, topLeft, verticalDiff)
+                || circleIntersectsLineSegment(center, radius, new LevelVector(x2, y1), verticalDiff);
+    }
+    
+    private static boolean circleIntersectsSlope(LevelVector center, double radius, SlopeHitbox slope) {
+        if (!slope.isSloping()) {
+            return circleIntersectsRectangle(center, radius, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
+        }
+        LevelVector[] vertices = new LevelVector[3];
+        LevelVector[] diffs = new LevelVector[3];
+        vertices[0] = slope.getAbsPosition();
+        diffs[0] = slope.getAbsDifference();
+        if (circleIntersectsLineSegment(center, radius, vertices[0], diffs[0])) {
+            return true;
+        } else if (!slope.getPresentAbove() && !slope.getPresentBelow()) {
+            return false;
+        }
+        vertices[1] = slope.getPosition2();
+        diffs[1] = new LevelVector(-slope.getAbsDX(), 0);
+        if (circleIntersectsLineSegment(center, radius, vertices[1], diffs[1])) {
+            return true;
+        }
+        vertices[2] = LevelVector.add(vertices[1], diffs[1]);
+        diffs[2] = new LevelVector(0, -slope.getAbsDY());
+        if (circleIntersectsLineSegment(center, radius, vertices[2], diffs[2])) {
+            return true;
+        }
+        return pointIntersectsPolygon(center, slope.getLeftEdge() - 1, vertices, diffs);
+    }
+    
+    private static boolean lineSegmentIntersectsPoint(LevelVector start, LevelVector diff, LevelVector point) {
+        LevelVector relPoint = LevelVector.sub(point, start);
+        if (diff.getX() == 0) {
+            return relPoint.getX() == 0 && Math.signum(relPoint.getY()) == Math.signum(diff.getY()) && Math.abs(relPoint.getY()) < Math.abs(diff.getY());
+        }
+        return LevelVector.cross(relPoint, diff) == 0 && Math.signum(relPoint.getX()) == Math.signum(diff.getX()) && Math.abs(relPoint.getX()) < Math.abs(diff.getX());
+    }
+    
+    private static boolean lineSegmentIntersectsPolygon(LevelVector start, LevelVector diff, PolygonHitbox polygon) {
+        int numVertices = polygon.getNumVertices();
+        if (numVertices == 0) {
+            return lineSegmentIntersectsPoint(start, diff, polygon.getAbsPosition());
+        } else if (numVertices == 1) {
+            return lineSegmentIntersectsPoint(start, diff, polygon.getAbsVertex(0));
+        }
+        LevelVector firstVertex = polygon.getAbsVertex(0);
+        if (numVertices == 2) {
+            return LevelVector.lineSegmentsIntersect(start, diff, firstVertex, polygon.getAbsVertex(1).sub(firstVertex));
+        }
+        LevelVector[] vertices = new LevelVector[numVertices];
+        vertices[0] = firstVertex;
+        LevelVector[] diffs = new LevelVector[numVertices];
+        for (int i = 0; i < numVertices - 1; i++) {
+            vertices[i + 1] = polygon.getAbsVertex(i + 1);
+            diffs[i] = vertices[i + 1].sub(vertices[i]);
+            if (LevelVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
+                return true;
+            }
+        }
+        diffs[numVertices - 1] = vertices[0].sub(vertices[numVertices - 1]);
+        if (LevelVector.lineSegmentsIntersect(start, diff, vertices[numVertices - 1], diffs[numVertices - 1])) {
+            return true;
+        }
+        return pointIntersectsPolygon(start, polygon.getLeftEdge() - 1, vertices, diffs);
+    }
+    
+    private static boolean lineSegmentIntersectsRectangle(LevelVector start, LevelVector diff, double x1, double y1, double x2, double y2) {
+        if (start.getX() > x1 && start.getX() < x2 && start.getY() > y1 && start.getY() < y2) {
+            return true;
+        }
+        double lineX2 = start.getX() + diff.getX();
+        double lineY2 = start.getY() + diff.getY();
+        if (lineX2 > x1 && lineX2 < x2 && lineY2 > y1 && lineY2 < y2) {
+            return true;
+        }
+        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
+        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
+        LevelVector topLeft = new LevelVector(x1, y1);
+        return LevelVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
+                || LevelVector.lineSegmentsIntersect(start, diff, new LevelVector(x1, y2), horizontalDiff)
+                || LevelVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
+                || LevelVector.lineSegmentsIntersect(start, diff, new LevelVector(x2, y1), verticalDiff);
+    }
+    
+    private static boolean lineSegmentIntersectsSlope(LevelVector start, LevelVector diff, SlopeHitbox slope) {
+        if (!slope.isSloping()) {
+            return lineSegmentIntersectsRectangle(start, diff, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
+        }
+        LevelVector[] vertices = new LevelVector[3];
+        LevelVector[] diffs = new LevelVector[3];
+        vertices[0] = slope.getAbsPosition();
+        diffs[0] = slope.getAbsDifference();
+        if (LevelVector.lineSegmentsIntersect(start, diff, vertices[0], diffs[0])) {
+            return true;
+        } else if (!slope.getPresentAbove() && !slope.getPresentBelow()) {
+            return false;
+        }
+        vertices[1] = slope.getPosition2();
+        diffs[1] = new LevelVector(-slope.getAbsDX(), 0);
+        if (LevelVector.lineSegmentsIntersect(start, diff, vertices[1], diffs[1])) {
+            return true;
+        }
+        vertices[2] = LevelVector.add(vertices[1], diffs[1]);
+        diffs[2] = new LevelVector(0, -slope.getAbsDY());
+        if (LevelVector.lineSegmentsIntersect(start, diff, vertices[2], diffs[2])) {
+            return true;
+        }
+        return pointIntersectsPolygon(start, slope.getLeftEdge() - 1, vertices, diffs);
+    }
+    
+    //Credit to Mecki of StackOverflow for the point-polygon intersection algorithm.
+    
+    private static boolean pointIntersectsPolygon(LevelVector point, double startX, LevelVector[] vertices, LevelVector[] diffs) {
+        
         LevelVector start = new LevelVector(startX, point.getY());
         LevelVector diff = new LevelVector(point.getX() - startX, 0);
         boolean intersects = false;
@@ -556,8 +706,7 @@ public abstract class Hitbox {
         return intersects;
     }
     
-    private static boolean pointInsidePolygon(LevelVector point, PolygonHitbox polygon) {
-        //Credit to Mecki of StackOverflow for the algorithm.
+    private static boolean pointIntersectsPolygon(LevelVector point, PolygonHitbox polygon) {
         double startX = polygon.getLeftEdge() - 1;
         LevelVector start = new LevelVector(startX, point.getY());
         LevelVector diff = new LevelVector(point.getX() - startX, 0);
@@ -578,49 +727,16 @@ public abstract class Hitbox {
         return intersects;
     }
     
-    private static boolean polygonIntersectsCircle(PolygonHitbox polygon, LevelVector center, double radius) {
-        int numVertices = polygon.getNumVertices();
-        if (numVertices == 0) {
-            return center.distanceTo(polygon.getAbsPosition()) < radius;
-        } else if (numVertices == 1) {
-            return center.distanceTo(polygon.getAbsVertex(0)) < radius;
-        }
-        LevelVector firstVertex = polygon.getAbsVertex(0);
-        if (numVertices == 2) {
-            return lineSegmentIntersectsCircle(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), center, radius);
-        }
-        LevelVector[] vertices = new LevelVector[numVertices];
-        vertices[0] = firstVertex;
-        LevelVector[] diffs = new LevelVector[numVertices];
-        for (int i = 0; i < numVertices - 1; i++) {
-            vertices[i + 1] = polygon.getAbsVertex(i + 1);
-            diffs[i] = vertices[i + 1].sub(vertices[i]);
-            if (lineSegmentIntersectsCircle(vertices[i], diffs[i], center, radius)) {
-                return true;
-            }
-        }
-        diffs[numVertices - 1] = vertices[0].sub(vertices[numVertices - 1]);
-        if (lineSegmentIntersectsCircle(vertices[numVertices - 1], diffs[numVertices - 1], center, radius)) {
+    private static boolean pointIntersectsSlope(LevelVector point, SlopeHitbox slope) {
+        if (!slope.isSloping()) {
             return true;
+        } else if (!slope.getPresentAbove() && !slope.getPresentBelow()) {
+            return lineSegmentIntersectsPoint(slope.getAbsPosition(), slope.getAbsDifference(), point);
         }
-        return pointInsidePolygon(center, polygon.getLeftEdge() - 1, vertices, diffs);
-    }
-    
-    private static boolean rectangleIntersectsCircle(RectangleHitbox rectangle, LevelVector center, double radius) {
-        double x1 = rectangle.getLeftEdge();
-        double y1 = rectangle.getTopEdge();
-        double x2 = rectangle.getRightEdge();
-        double y2 = rectangle.getBottomEdge();
-        if (center.getX() > x1 && center.getX() < x2 && center.getY() > y1 && center.getY() < y2) {
-            return true;
-        }
-        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
-        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
-        LevelVector topLeft = new LevelVector(x1, y1);
-        return lineSegmentIntersectsCircle(topLeft, horizontalDiff, center, radius)
-                || lineSegmentIntersectsCircle(new LevelVector(x1, y2), horizontalDiff, center, radius)
-                || lineSegmentIntersectsCircle(topLeft, verticalDiff, center, radius)
-                || lineSegmentIntersectsCircle(new LevelVector(x2, y1), verticalDiff, center, radius);
+        LevelVector[] vertices = {slope.getAbsPosition(), slope.getPosition2(), null};
+        LevelVector[] diffs = {slope.getAbsDifference(), new LevelVector(-slope.getAbsDX(), 0), new LevelVector(0, -slope.getAbsDY())};
+        vertices[2] = LevelVector.add(vertices[1], diffs[1]);
+        return pointIntersectsPolygon(point, slope.getLeftEdge() - 1, vertices, diffs);
     }
     
     public final boolean overlaps(Hitbox hitbox) {
@@ -650,15 +766,57 @@ public abstract class Hitbox {
                 return false;
             } else if (hitbox1 instanceof CircleHitbox) {
                 if (hitbox2 instanceof CircleHitbox) {
-                    return hitbox1.absPosition.distanceTo(hitbox2.absPosition) < ((CircleHitbox)hitbox1).getAbsRadius() + ((CircleHitbox)hitbox2).getAbsRadius();
+                    return hitbox1.distanceTo(hitbox2) < ((CircleHitbox)hitbox1).getAbsRadius() + ((CircleHitbox)hitbox2).getAbsRadius();
                 } else if (hitbox2 instanceof LineHitbox) {
-                    return lineSegmentIntersectsCircle(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius());
+                    return circleIntersectsLineSegment(hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius(), hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference());
                 } else if (hitbox2 instanceof PointHitbox) {
-                    return hitbox1.absPosition.distanceTo(hitbox2.absPosition) < ((CircleHitbox)hitbox1).getAbsRadius();
+                    return hitbox1.distanceTo(hitbox2) < ((CircleHitbox)hitbox1).getAbsRadius();
                 } else if (hitbox2 instanceof PolygonHitbox) {
-                    return polygonIntersectsCircle((PolygonHitbox)hitbox2, hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius());
+                    return circleIntersectsPolygon(hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius(), (PolygonHitbox)hitbox2);
                 } else if (hitbox2 instanceof RectangleHitbox) {
-                    return rectangleIntersectsCircle((RectangleHitbox)hitbox2, hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius());
+                    return circleIntersectsRectangle(hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius(), hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
+                } else if (hitbox2 instanceof SlopeHitbox) {
+                    return circleIntersectsSlope(hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius(), (SlopeHitbox)hitbox2);
+                }
+            } else if (hitbox1 instanceof LineHitbox) {
+                if (hitbox2 instanceof CircleHitbox) {
+                    return circleIntersectsLineSegment(hitbox2.absPosition, ((CircleHitbox)hitbox2).getAbsRadius(), hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference());
+                } else if (hitbox2 instanceof LineHitbox) {
+                    return LevelVector.lineSegmentsIntersect(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference());
+                } else if (hitbox2 instanceof PointHitbox) {
+                    return lineSegmentIntersectsPoint(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition);
+                } else if (hitbox2 instanceof PolygonHitbox) {
+                    return lineSegmentIntersectsPolygon(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), (PolygonHitbox)hitbox2);
+                } else if (hitbox2 instanceof RectangleHitbox) {
+                    return lineSegmentIntersectsRectangle(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
+                } else if (hitbox2 instanceof SlopeHitbox) {
+                    return lineSegmentIntersectsSlope(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), (SlopeHitbox)hitbox2);
+                }
+            } else if (hitbox1 instanceof PointHitbox) {
+                if (hitbox2 instanceof CircleHitbox) {
+                    return hitbox1.distanceTo(hitbox2) < ((CircleHitbox)hitbox2).getAbsRadius();
+                } else if (hitbox2 instanceof LineHitbox) {
+                    return lineSegmentIntersectsPoint(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), hitbox1.absPosition);
+                } else if (hitbox2 instanceof PointHitbox) {
+                    return true;
+                } else if (hitbox2 instanceof PolygonHitbox) {
+                    return pointIntersectsPolygon(hitbox1.absPosition, (PolygonHitbox)hitbox2);
+                } else if (hitbox2 instanceof RectangleHitbox) {
+                    return true;
+                } else if (hitbox2 instanceof SlopeHitbox) {
+                    return pointIntersectsSlope(hitbox1.absPosition, (SlopeHitbox)hitbox2);
+                }
+            } else if (hitbox1 instanceof PolygonHitbox) {
+                if (hitbox2 instanceof CircleHitbox) {
+                    return circleIntersectsPolygon(hitbox2.absPosition, ((CircleHitbox)hitbox2).getAbsRadius(), (PolygonHitbox)hitbox1);
+                } else if (hitbox2 instanceof LineHitbox) {
+                    return lineSegmentIntersectsPolygon(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), (PolygonHitbox)hitbox1);
+                } else if (hitbox2 instanceof PointHitbox) {
+                    return pointIntersectsPolygon(hitbox2.absPosition, (PolygonHitbox)hitbox1);
+                } else if (hitbox2 instanceof PolygonHitbox) {
+                    return true;
+                } else if (hitbox2 instanceof RectangleHitbox) {
+                    return true;
                 } else if (hitbox2 instanceof SlopeHitbox) {
                     return true;
                 }

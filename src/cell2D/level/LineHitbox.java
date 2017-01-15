@@ -74,6 +74,10 @@ public class LineHitbox extends Hitbox {
         return absDifference.getY();
     }
     
+    public final LevelVector getPosition2() {
+        return new LevelVector(getAbsX() + absDifference.getX(), getAbsY() + absDifference.getY());
+    }
+    
     public final double getX2() {
         return getAbsX() + absDifference.getX();
     }
