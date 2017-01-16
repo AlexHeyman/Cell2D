@@ -31,7 +31,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     private final T thisState;
     private CellGame game;
     private int id;
-    boolean isActive = false;
+    boolean active = false;
     private double timeFactor = 1;
     private boolean performingStepActions = false;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
@@ -63,7 +63,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     }
     
     public final boolean isActive() {
-        return isActive;
+        return active;
     }
     
     public final double getTimeFactor() {

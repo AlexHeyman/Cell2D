@@ -583,14 +583,14 @@ public abstract class CellGame {
         
         @Override
         public final void enter(GameContainer container, StateBasedGame game) {
-            state.isActive = true;
+            state.active = true;
             state.enteredActions(CellGame.this);
         }
         
         @Override
         public final void leave(GameContainer container, StateBasedGame game) {
             state.leftActions(CellGame.this);
-            state.isActive = false;
+            state.active = false;
         }
         
     }
@@ -845,7 +845,7 @@ public abstract class CellGame {
         updateScreen = true;
     }
     
-    public final boolean getFullscreen() {
+    public final boolean isFullscreen() {
         return fullscreen;
     }
     

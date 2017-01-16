@@ -4,7 +4,7 @@ public class AnimationInstance {
     
     public static final AnimationInstance BLANK = new AnimationInstance();
     
-    private final boolean isBlank;
+    private final boolean blank;
     CellGameState state = null;
     private double timeFactor = -1;
     private final Animation animation;
@@ -15,7 +15,7 @@ public class AnimationInstance {
     private Sprite currentSprite;
     
     public AnimationInstance(Animation animation) {
-        isBlank = false;
+        blank = false;
         this.animation = animation;
         level = animation.getLevel();
         indices = new int[level];
@@ -25,7 +25,7 @@ public class AnimationInstance {
     }
     
     private AnimationInstance() {
-        isBlank = true;
+        blank = true;
         this.animation = Animation.BLANK;
         level = 1;
         indices = new int[1];
@@ -74,7 +74,7 @@ public class AnimationInstance {
     }
     
     public final void setTimeFactor(double timeFactor) {
-        if (isBlank) {
+        if (blank) {
             return;
         }
         this.timeFactor = timeFactor;
@@ -121,7 +121,7 @@ public class AnimationInstance {
     }
     
     public final void setIndex(int level, int index, boolean resetLowerIndices) {
-        if (!isBlank && level >= 0 && level < indices.length) {
+        if (!blank && level >= 0 && level < indices.length) {
             Animatable frame = animation;
             for (int i = indices.length - 1; i > level; i++) {
                 frame = frame.getFrame(indices[i]);
@@ -140,7 +140,7 @@ public class AnimationInstance {
     }
     
     public final void setSpeed(int level, double speed) {
-        if (isBlank) {
+        if (blank) {
             return;
         }
         if (level >= 0 && level < speeds.length) {
@@ -149,7 +149,7 @@ public class AnimationInstance {
     }
     
     final void update() {
-        if (isBlank) {
+        if (blank) {
             return;
         }
         double time = getEffectiveTimeFactor();

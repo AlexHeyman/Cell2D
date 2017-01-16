@@ -17,8 +17,8 @@ public class Sprite implements Animatable {
     
     public static final Sprite BLANK = new Sprite(true, null, null, null, null, null, null, 0, 0);
     
-    private final boolean isBlank;
-    boolean isLoaded;
+    private final boolean blank;
+    boolean loaded;
     private final Sprite recolorOf;
     private final Filter recolorFilter;
     private final SpriteSheet spriteSheet;
@@ -34,10 +34,10 @@ public class Sprite implements Animatable {
     private int right = 0;
     private int bottom = 0;
     
-    Sprite(boolean isBlank, Sprite recolorOf, Filter recolorFilter, SpriteSheet spriteSheet,
+    Sprite(boolean blank, Sprite recolorOf, Filter recolorFilter, SpriteSheet spriteSheet,
             String path, Color transColor, Set<Filter> filters, int centerX, int centerY) {
-        this.isBlank = isBlank;
-        isLoaded = isBlank;
+        this.blank = blank;
+        loaded = blank;
         this.recolorOf = recolorOf;
         this.recolorFilter = recolorFilter;
         this.spriteSheet = spriteSheet;
@@ -53,12 +53,12 @@ public class Sprite implements Animatable {
     }
     
     public final boolean isLoaded() {
-        return isLoaded;
+        return loaded;
     }
     
     public final boolean load() throws SlickException {
-        if (!isBlank && !isLoaded) {
-            isLoaded = true;
+        if (!blank && !loaded) {
+            loaded = true;
             if (spriteSheet == null) {
                 Pair<Image,BufferedImage> pair;
                 if (recolorOf == null) {
@@ -102,8 +102,8 @@ public class Sprite implements Animatable {
     }
     
     public final boolean unload() {
-        if (!isBlank && isLoaded) {
-            isLoaded = false;
+        if (!blank && loaded) {
+            loaded = false;
             if (spriteSheet == null) {
                 clear();
             } else {
@@ -178,7 +178,7 @@ public class Sprite implements Animatable {
     }
     
     public void draw(Graphics g, int x, int y, boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (isBlank || !isLoaded || alpha <= 0) {
+        if (blank || !loaded || alpha <= 0) {
             return;
         }
         draw(g, x, y, 0, width, 0, height, 1, xFlip, yFlip, 0, (float)alpha, filter);
@@ -186,7 +186,7 @@ public class Sprite implements Animatable {
     
     public void draw(Graphics g, int x, int y, boolean xFlip,
             boolean yFlip, double angle, double alpha, String filter) {
-        if (isBlank || !isLoaded || alpha <= 0) {
+        if (blank || !loaded || alpha <= 0) {
             return;
         }
         draw(g, x, y, 0, width, 0, height, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
@@ -194,7 +194,7 @@ public class Sprite implements Animatable {
     
     public void draw(Graphics g, int x, int y, double scale,
             boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (isBlank || !isLoaded || scale <= 0 || alpha <= 0) {
+        if (blank || !loaded || scale <= 0 || alpha <= 0) {
             return;
         }
         draw(g, x, y, 0, width, 0, height, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
@@ -202,7 +202,7 @@ public class Sprite implements Animatable {
     
     public void draw(Graphics g, int x, int y, int left, int right, int top,
             int bottom, boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (isBlank || !isLoaded || right <= left || bottom <= top || alpha <= 0) {
+        if (blank || !loaded || right <= left || bottom <= top || alpha <= 0) {
             return;
         }
         if (xFlip) {
@@ -220,7 +220,7 @@ public class Sprite implements Animatable {
     
     public void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             boolean xFlip, boolean yFlip, double angle, double alpha, String filter) {
-        if (isBlank || !isLoaded || right <= left || bottom <= top || alpha <= 0) {
+        if (blank || !loaded || right <= left || bottom <= top || alpha <= 0) {
             return;
         }
         if (xFlip) {
@@ -240,7 +240,7 @@ public class Sprite implements Animatable {
     
     public void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             double scale, boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (isBlank || !isLoaded || right <= left || bottom <= top || scale <= 0 || alpha <= 0) {
+        if (blank || !loaded || right <= left || bottom <= top || scale <= 0 || alpha <= 0) {
             return;
         }
         if (xFlip) {

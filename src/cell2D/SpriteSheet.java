@@ -11,7 +11,7 @@ import org.newdawn.slick.SlickException;
 
 public class SpriteSheet {
     
-    private boolean isLoaded = false;
+    private boolean loaded = false;
     private final SpriteSheet recolorOf;
     private final Filter recolorFilter;
     private final String path;
@@ -56,12 +56,12 @@ public class SpriteSheet {
     }
     
     public final boolean isLoaded() {
-        return isLoaded;
+        return loaded;
     }
     
     public final boolean load() throws SlickException {
-        if (!isLoaded) {
-            isLoaded = true;
+        if (!loaded) {
+            loaded = true;
             Pair<Image,BufferedImage> pair;
             if (recolorOf == null) {
                 pair = CellGame.getTransparentImage(path, transColor);
@@ -71,7 +71,7 @@ public class SpriteSheet {
             }
             bufferedImage = pair.getValue();
             for (Sprite sprite : spriteList) {
-                sprite.isLoaded = true;
+                sprite.loaded = true;
             }
             loadFilter("", pair.getKey());
             for (Filter filter : filters) {
@@ -93,11 +93,11 @@ public class SpriteSheet {
     }
     
     public final boolean unload() {
-        if (isLoaded) {
-            isLoaded = false;
+        if (loaded) {
+            loaded = false;
             bufferedImage = null;
             for (Sprite sprite : spriteList) {
-                sprite.isLoaded = false;
+                sprite.loaded = false;
                 sprite.clear();
             }
             return true;
@@ -111,9 +111,9 @@ public class SpriteSheet {
                 return;
             }
         }
-        isLoaded = false;
+        loaded = false;
         for (Sprite sprite : spriteList) {
-            sprite.isLoaded = false;
+            sprite.loaded = false;
             sprite.clear();
         }
     }

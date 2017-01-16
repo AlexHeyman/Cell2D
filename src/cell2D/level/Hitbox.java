@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import javafx.util.Pair;
 import org.newdawn.slick.util.FastTrig;
 
 public abstract class Hitbox {
@@ -595,7 +594,7 @@ public abstract class Hitbox {
         diffs[0] = slope.getAbsDifference();
         if (circleIntersectsLineSegment(center, radius, vertices[0], diffs[0])) {
             return true;
-        } else if (!slope.getPresentAbove() && !slope.getPresentBelow()) {
+        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return false;
         }
         vertices[1] = slope.getPosition2();
@@ -675,7 +674,7 @@ public abstract class Hitbox {
         diffs[0] = slope.getAbsDifference();
         if (LevelVector.lineSegmentsIntersect(start, diff, vertices[0], diffs[0])) {
             return true;
-        } else if (!slope.getPresentAbove() && !slope.getPresentBelow()) {
+        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return false;
         }
         vertices[1] = slope.getPosition2();
@@ -730,7 +729,7 @@ public abstract class Hitbox {
     private static boolean pointIntersectsSlope(LevelVector point, SlopeHitbox slope) {
         if (!slope.isSloping()) {
             return true;
-        } else if (!slope.getPresentAbove() && !slope.getPresentBelow()) {
+        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return lineSegmentIntersectsPoint(slope.getAbsPosition(), slope.getAbsDifference(), point);
         }
         LevelVector[] vertices = {slope.getAbsPosition(), slope.getPosition2(), null};

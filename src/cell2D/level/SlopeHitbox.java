@@ -167,7 +167,7 @@ public class SlopeHitbox extends Hitbox {
         this.slopeType = slopeType;
     }
     
-    public final boolean getPresentAbove() {
+    public final boolean isPresentAbove() {
         return presentAbove;
     }
     
@@ -176,7 +176,7 @@ public class SlopeHitbox extends Hitbox {
         updateSloping();
     }
     
-    public final boolean getPresentBelow() {
+    public final boolean isPresentBelow() {
         return presentBelow;
     }
     
