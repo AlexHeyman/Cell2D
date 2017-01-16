@@ -693,7 +693,6 @@ public abstract class Hitbox {
     //Credit to Mecki of StackOverflow for the point-polygon intersection algorithm.
     
     private static boolean pointIntersectsPolygon(LevelVector point, double startX, LevelVector[] vertices, LevelVector[] diffs) {
-        
         LevelVector start = new LevelVector(startX, point.getY());
         LevelVector diff = new LevelVector(point.getX() - startX, 0);
         boolean intersects = false;
@@ -726,6 +725,11 @@ public abstract class Hitbox {
         return intersects;
     }
     
+    private static boolean pointIntersectsRectangle(LevelVector point, double x1, double y1, double x2, double y2) {
+        return point.getX() > x1 && point.getX() < x2
+                && point.getY() > y1 && point.getY() < y2;
+    }
+    
     private static boolean pointIntersectsSlope(LevelVector point, SlopeHitbox slope) {
         if (!slope.isSloping()) {
             return true;
@@ -745,10 +749,10 @@ public abstract class Hitbox {
     public static final boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
         if (hitbox1 != hitbox2
                 && (hitbox1.state == hitbox2.state || hitbox1.state == null || hitbox2.state == null)
-                && hitbox1.getLeftEdge() < hitbox2.getRightEdge()
-                && hitbox1.getRightEdge() > hitbox2.getLeftEdge()
-                && hitbox1.getTopEdge() < hitbox2.getBottomEdge()
-                && hitbox1.getBottomEdge() > hitbox2.getTopEdge()) {
+                && hitbox1.getLeftEdge() <= hitbox2.getRightEdge()
+                && hitbox1.getRightEdge() >= hitbox2.getLeftEdge()
+                && hitbox1.getTopEdge() <= hitbox2.getBottomEdge()
+                && hitbox1.getBottomEdge() >= hitbox2.getTopEdge()) {
             if (hitbox1 instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)hitbox1).components.values()) {
                     if (overlap(component, hitbox2)) {
@@ -801,7 +805,7 @@ public abstract class Hitbox {
                 } else if (hitbox2 instanceof PolygonHitbox) {
                     return pointIntersectsPolygon(hitbox1.absPosition, (PolygonHitbox)hitbox2);
                 } else if (hitbox2 instanceof RectangleHitbox) {
-                    return true;
+                    return pointIntersectsRectangle(hitbox1.absPosition, hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
                 } else if (hitbox2 instanceof SlopeHitbox) {
                     return pointIntersectsSlope(hitbox1.absPosition, (SlopeHitbox)hitbox2);
                 }
@@ -820,7 +824,6 @@ public abstract class Hitbox {
                     return true;
                 }
             }
-            return true;
         }
         return false;
     }
@@ -832,10 +835,10 @@ public abstract class Hitbox {
     public static final boolean intersectsSolidHitbox(Hitbox collisionHitbox, Hitbox solidHitbox) {
         if (collisionHitbox.getObject() != solidHitbox.getObject()
                 && collisionHitbox.state != null && collisionHitbox.state == solidHitbox.state
-                && collisionHitbox.getLeftEdge() < solidHitbox.getRightEdge()
-                && collisionHitbox.getRightEdge() > solidHitbox.getLeftEdge()
-                && collisionHitbox.getTopEdge() < solidHitbox.getBottomEdge()
-                && collisionHitbox.getBottomEdge() > solidHitbox.getTopEdge()) {
+                && collisionHitbox.getLeftEdge() <= solidHitbox.getRightEdge()
+                && collisionHitbox.getRightEdge() >= solidHitbox.getLeftEdge()
+                && collisionHitbox.getTopEdge() <= solidHitbox.getBottomEdge()
+                && collisionHitbox.getBottomEdge() >= solidHitbox.getTopEdge()) {
             if (collisionHitbox instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)collisionHitbox).components.values()) {
                     if (intersectsSolidHitbox(component, solidHitbox)) {
@@ -851,7 +854,6 @@ public abstract class Hitbox {
                 }
                 return false;
             }
-            return true;
         }
         return false;
     }
