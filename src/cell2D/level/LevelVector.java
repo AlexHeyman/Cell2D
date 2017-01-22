@@ -235,9 +235,46 @@ public class LevelVector {
         return modAngle(Math.toDegrees(Math.atan2(y1 - y2, x2 - x1)));
     }
     
+    private static boolean segBoxesMeet(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
+        double minX1, maxX1, minX2, maxX2;
+        if (diff1.getX() > 0) {
+            minX1 = start1.getX();
+            maxX1 = minX1 + diff1.getX();
+        } else {
+            maxX1 = start1.getX();
+            minX1 = maxX1 + diff1.getX();
+        }
+        if (diff2.getX() > 0) {
+            minX2 = start2.getX();
+            maxX2 = minX2 + diff2.getX();
+        } else {
+            maxX2 = start2.getX();
+            minX2 = maxX2 + diff2.getX();
+        }
+        if (minX2 >= maxX1 || minX1 >= maxX2) {
+            return false;
+        }
+        double minY1, maxY1, minY2, maxY2;
+        if (diff1.getY() > 0) {
+            minY1 = start1.getY();
+            maxY1 = minY1 + diff1.getY();
+        } else {
+            maxY1 = start1.getY();
+            minY1 = maxY1 + diff1.getY();
+        }
+        if (diff2.getY() > 0) {
+            minY2 = start2.getY();
+            maxY2 = minY2 + diff2.getY();
+        } else {
+            maxY2 = start2.getY();
+            minY2 = maxY2 + diff2.getY();
+        }
+        return minY2 < maxY1 && minY1 < maxY2;
+    }
+    
     //Credit to Gareth Rees of StackOverflow for the line segment intersection algorithm.
     
-    public static final boolean lineSegmentsIntersect(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
+    static final boolean directSegsIntersect(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
         LevelVector start2MinusStart1 = LevelVector.sub(start2, start1);
         if (diff1.cross(diff2) == 0) {
             if (start2MinusStart1.cross(diff1) == 0) {
@@ -258,8 +295,12 @@ public class LevelVector {
         return t > 0 && t < 1 && u > 0 && u < 1;
     }
     
+    public static final boolean lineSegmentsIntersect(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
+        return segBoxesMeet(start1, diff1, start2, diff2) && directSegsIntersect(start1, diff1, start2, diff2);
+    }
+    
     public static final LevelVector lineSegmentsIntersectionPoint(LevelVector start1, LevelVector diff1, LevelVector start2, LevelVector diff2) {
-        if (diff1.cross(diff2) == 0) {
+        if (!segBoxesMeet(start1, diff1, start2, diff2) || diff1.cross(diff2) == 0) {
             return null;
         }
         LevelVector start2MinusStart1 = LevelVector.sub(start2, start1);
