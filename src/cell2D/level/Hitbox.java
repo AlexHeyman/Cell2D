@@ -904,6 +904,89 @@ public abstract class Hitbox {
                 || pointIntersectsPolygon(firstVertex, slope.getLeftEdge() - 1, slopeVertices, slopeDiffs);
     }
     
+    private static boolean rectanglesIntersect(double x1_1, double y1_1, double x2_1, double y2_1, double x1_2, double y1_2, double x2_2, double y2_2) {
+        return x2_1 > x1_2 && x1_1 < x2_2 && y2_1 > y1_2 && y1_1 < y2_2;
+    }
+    
+    private static boolean rectangleIntersectsSlope(double x1, double y1, double x2, double y2, SlopeHitbox slope) {
+        if (!slope.isSloping()) {
+            return rectanglesIntersect(x1, y1, x2, y2, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
+        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
+            return lineSegmentIntersectsRectangle(slope.getAbsPosition(), slope.getAbsDifference(), x1, y1, x2, y2);
+        }
+        LevelVector[] vertices = new LevelVector[3];
+        vertices[0] = slope.getAbsPosition();
+        if (pointIntersectsRectangle(vertices[0], x1, y1, x2, y2)) {
+            return true;
+        }
+        LevelVector[] diffs = new LevelVector[3];
+        diffs[0] = slope.getAbsDifference();
+        vertices[1] = slope.getPosition2();
+        if (pointIntersectsRectangle(vertices[1], x1, y1, x2, y2)) {
+            return true;
+        }
+        diffs[1] = new LevelVector(-slope.getAbsDX(), 0);
+        vertices[2] = LevelVector.add(vertices[1], diffs[1]);
+        if (pointIntersectsRectangle(vertices[2], x1, y1, x2, y2)) {
+            return true;
+        }
+        diffs[2] = new LevelVector(0, -slope.getAbsDY());
+        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
+        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
+        LevelVector topLeft = new LevelVector(x1, y1);
+        LevelVector bottomLeft = new LevelVector(x1, y2);
+        LevelVector topRight = new LevelVector(x2, y1);
+        for (int i = 0; i < 3; i++) {
+            if (LevelVector.lineSegmentsIntersect(topLeft, horizontalDiff, vertices[i], diffs[i])
+                    || LevelVector.lineSegmentsIntersect(bottomLeft, horizontalDiff, vertices[i], diffs[i])
+                    || LevelVector.lineSegmentsIntersect(topLeft, verticalDiff, vertices[i], diffs[i])
+                    || LevelVector.lineSegmentsIntersect(topRight, verticalDiff, vertices[i], diffs[i])) {
+                return true;
+            }
+        }
+        return pointIntersectsPolygon(new LevelVector(x1, y1), slope.getLeftEdge() - 1, vertices, diffs);
+    }
+    
+    private static boolean slopesIntersect(SlopeHitbox slope1, SlopeHitbox slope2) {
+        if (!slope1.isSloping()) {
+            return rectangleIntersectsSlope(slope1.getLeftEdge(), slope1.getTopEdge(), slope1.getRightEdge(), slope1.getBottomEdge(), slope2);
+        } else if (!slope2.isSloping()) {
+            return rectangleIntersectsSlope(slope2.getLeftEdge(), slope2.getTopEdge(), slope2.getRightEdge(), slope2.getBottomEdge(), slope1);
+        } else if (!slope1.isPresentAbove() && !slope1.isPresentBelow()) {
+            return lineSegmentIntersectsSlope(slope1.getAbsPosition(), slope1.getAbsDifference(), slope2);
+        } else if (!slope2.isPresentAbove() && !slope2.isPresentBelow()) {
+            return lineSegmentIntersectsSlope(slope2.getAbsPosition(), slope2.getAbsDifference(), slope1);
+        }
+        LevelVector[] vertices1 = {slope1.getAbsPosition(), slope1.getPosition2(), null};
+        LevelVector[] diffs1 = {slope1.getAbsDifference(), new LevelVector(-slope1.getAbsDX(), 0), new LevelVector(0, -slope1.getAbsDY())};
+        vertices1[2] = LevelVector.add(vertices1[1], diffs1[1]);
+        LevelVector[] vertices2 = new LevelVector[3];
+        vertices2[0] = slope2.getAbsPosition();
+        LevelVector[] diffs2 = new LevelVector[3];
+        diffs2[0] = slope2.getAbsDifference();
+        for (int i = 0; i < 3; i++) {
+            if (LevelVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[0], diffs2[0])) {
+                return true;
+            }
+        }
+        vertices2[1] = slope2.getPosition2();
+        diffs2[1] = new LevelVector(-slope2.getAbsDX(), 0);
+        for (int i = 0; i < 3; i++) {
+            if (LevelVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[1], diffs2[1])) {
+                return true;
+            }
+        }
+        vertices2[2] = LevelVector.add(vertices2[1], diffs2[1]);
+        diffs2[2] = new LevelVector(0, -slope2.getAbsDY());
+        for (int i = 0; i < 3; i++) {
+            if (LevelVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[2], diffs2[2])) {
+                return true;
+            }
+        }
+        return pointIntersectsPolygon(vertices1[0], slope2.getLeftEdge() - 1, vertices2, diffs2)
+                || pointIntersectsPolygon(vertices2[0], slope1.getLeftEdge() - 1, vertices1, diffs1);
+    }
+    
     public final boolean overlaps(Hitbox hitbox) {
         return overlap(this, hitbox);
     }
@@ -985,6 +1068,35 @@ public abstract class Hitbox {
                 } else if (hitbox2 instanceof SlopeHitbox) {
                     return polygonIntersectsSlope((PolygonHitbox)hitbox1, (SlopeHitbox)hitbox2);
                 }
+            } else if (hitbox1 instanceof RectangleHitbox) {
+                if (hitbox2 instanceof CircleHitbox) {
+                    return circleIntersectsRectangle(hitbox2.absPosition, ((CircleHitbox)hitbox2).getAbsRadius(), hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
+                } else if (hitbox2 instanceof LineHitbox) {
+                    return lineSegmentIntersectsRectangle(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
+                } else if (hitbox2 instanceof PointHitbox) {
+                    return pointIntersectsRectangle(hitbox2.absPosition, hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
+                } else if (hitbox2 instanceof PolygonHitbox) {
+                    return polygonIntersectsRectangle((PolygonHitbox)hitbox2, hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
+                } else if (hitbox2 instanceof RectangleHitbox) {
+                    return rectanglesIntersect(hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge(),
+                            hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
+                } else if (hitbox2 instanceof SlopeHitbox) {
+                    return rectangleIntersectsSlope(hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge(), (SlopeHitbox)hitbox2);
+                }
+            } else if (hitbox1 instanceof SlopeHitbox) {
+                if (hitbox2 instanceof CircleHitbox) {
+                    return circleIntersectsSlope(hitbox2.absPosition, ((CircleHitbox)hitbox2).getAbsRadius(), (SlopeHitbox)hitbox1);
+                } else if (hitbox2 instanceof LineHitbox) {
+                    return lineSegmentIntersectsSlope(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), (SlopeHitbox)hitbox1);
+                } else if (hitbox2 instanceof PointHitbox) {
+                    return pointIntersectsSlope(hitbox2.absPosition, (SlopeHitbox)hitbox1);
+                } else if (hitbox2 instanceof PolygonHitbox) {
+                    return polygonIntersectsSlope((PolygonHitbox)hitbox2, (SlopeHitbox)hitbox1);
+                } else if (hitbox2 instanceof RectangleHitbox) {
+                    return rectangleIntersectsSlope(hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge(), (SlopeHitbox)hitbox1);
+                } else if (hitbox2 instanceof SlopeHitbox) {
+                    return slopesIntersect((SlopeHitbox)hitbox1, (SlopeHitbox)hitbox2);
+                }
             }
         }
         return false;
@@ -1015,6 +1127,37 @@ public abstract class Hitbox {
                     }
                 }
                 return false;
+            } else if (collisionHitbox instanceof CircleHitbox) {
+                if (solidHitbox instanceof SlopeHitbox) {
+                    return circleIntersectsSlope(collisionHitbox.absPosition, ((CircleHitbox)collisionHitbox).getAbsRadius(), (SlopeHitbox)solidHitbox);
+                }
+                return circleIntersectsRectangle(collisionHitbox.absPosition, ((CircleHitbox)collisionHitbox).getAbsRadius(), solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge());
+            } else if (collisionHitbox instanceof LineHitbox) {
+                if (solidHitbox instanceof SlopeHitbox) {
+                    return lineSegmentIntersectsSlope(collisionHitbox.absPosition, ((LineHitbox)collisionHitbox).getAbsDifference(), (SlopeHitbox)solidHitbox);
+                }
+                return lineSegmentIntersectsRectangle(collisionHitbox.absPosition, ((LineHitbox)collisionHitbox).getAbsDifference(), solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge());
+            } else if (collisionHitbox instanceof PointHitbox) {
+                if (solidHitbox instanceof SlopeHitbox) {
+                    return pointIntersectsSlope(collisionHitbox.absPosition, (SlopeHitbox)solidHitbox);
+                }
+                return pointIntersectsRectangle(collisionHitbox.absPosition, solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge());
+            } else if (collisionHitbox instanceof PolygonHitbox) {
+                if (solidHitbox instanceof SlopeHitbox) {
+                    return polygonIntersectsSlope((PolygonHitbox)collisionHitbox, (SlopeHitbox)solidHitbox);
+                }
+                return polygonIntersectsRectangle((PolygonHitbox)collisionHitbox, solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge());
+            } else if (collisionHitbox instanceof RectangleHitbox) {
+                if (solidHitbox instanceof SlopeHitbox) {
+                    return rectangleIntersectsSlope(collisionHitbox.getLeftEdge(), collisionHitbox.getTopEdge(), collisionHitbox.getRightEdge(), collisionHitbox.getBottomEdge(), (SlopeHitbox)solidHitbox);
+                }
+                return rectanglesIntersect(collisionHitbox.getLeftEdge(), collisionHitbox.getTopEdge(), collisionHitbox.getRightEdge(), collisionHitbox.getBottomEdge(),
+                        solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge());
+            } else if (collisionHitbox instanceof SlopeHitbox) {
+                if (solidHitbox instanceof SlopeHitbox) {
+                    return slopesIntersect((SlopeHitbox)collisionHitbox, (SlopeHitbox)solidHitbox);
+                }
+                return rectangleIntersectsSlope(solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge(), (SlopeHitbox)collisionHitbox);
             }
         }
         return false;
