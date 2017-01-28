@@ -56,8 +56,8 @@ public abstract class ThinkerObject extends AnimatedObject {
     private final LevelVector velocity = new LevelVector();
     private final LevelVector displacement = new LevelVector();
     
-    public ThinkerObject(Hitbox locatorHitbox, int drawPriority) {
-        super(locatorHitbox, drawPriority);
+    public ThinkerObject(Hitbox locatorHitbox) {
+        super(locatorHitbox);
         id = getNextID();
     }
     
@@ -313,12 +313,16 @@ public abstract class ThinkerObject extends AnimatedObject {
         this.displacement.copy(displacement);
     }
     
-    public final void changeDisplacement(LevelVector change) {
-        this.displacement.add(change);
-    }
-    
     public final void setDisplacement(double displacementX, double displacementY) {
         displacement.setCoordinates(displacementX, displacementY);
+    }
+    
+    public final void setDisplacementMegnitude(double magnitude) {
+        displacement.setLength(magnitude);
+    }
+    
+    public final void changeDisplacement(LevelVector change) {
+        displacement.add(change);
     }
     
     public final void changeDisplacement(double changeX, double changeY) {

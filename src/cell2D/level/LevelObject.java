@@ -13,16 +13,15 @@ public abstract class LevelObject {
     private Hitbox locatorHitbox = null;
     private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
-    private int drawPriority;
+    private int drawPriority = 0;
     private Sprite sprite = null;
     private double alpha = 1;
     private String filter = null;
     
-    public LevelObject(Hitbox locatorHitbox, int drawPriority) {
+    public LevelObject(Hitbox locatorHitbox) {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a level object with an invalid locator hitbox");
         }
-        this.drawPriority = drawPriority;
     }
     
     public final void copyProperties(LevelObject object) {
@@ -166,6 +165,10 @@ public abstract class LevelObject {
         locatorHitbox.setRelXFlip(xFlip);
     }
     
+    public final void flipX() {
+        locatorHitbox.relFlipX();
+    }
+    
     public final boolean getYFlip() {
         return locatorHitbox.getRelYFlip();
     }
@@ -176,6 +179,10 @@ public abstract class LevelObject {
     
     public final void setYFlip(boolean yFlip) {
         locatorHitbox.setRelYFlip(yFlip);
+    }
+    
+    public final void flipY() {
+        locatorHitbox.relFlipY();
     }
     
     public final double getAngle() {
