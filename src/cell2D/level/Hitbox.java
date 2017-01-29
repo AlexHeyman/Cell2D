@@ -627,10 +627,10 @@ public abstract class Hitbox {
     }
     
     private static boolean circleIntersectsSlope(LevelVector center, double radius, SlopeHitbox slope) {
-        if (!slope.isSloping()) {
-            return circleIntersectsRectangle(center, radius, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
-        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
+        if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return circleIntersectsLineSegment(center, radius, slope.getAbsPosition(), slope.getAbsDifference());
+        } else if (!slope.isSloping()) {
+            return circleIntersectsRectangle(center, radius, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
         LevelVector vertex1 = slope.getAbsPosition();
         if (center.distanceTo(vertex1) < radius) {
@@ -706,13 +706,13 @@ public abstract class Hitbox {
     }
     
     private static boolean lineSegmentIntersectsSlope(LevelVector start, LevelVector diff, SlopeHitbox slope) {
-        if (!slope.isSloping()) {
+        if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
+            return LevelVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference());
+        } else if (!slope.isSloping()) {
             return lineSegmentIntersectsRectangle(start, diff, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
         if (LevelVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference())) {
             return true;
-        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
-            return false;
         }
         LevelVector vertex2 = slope.getPosition2();
         LevelVector diff2 = new LevelVector(-slope.getAbsDX(), 0);
@@ -786,11 +786,11 @@ public abstract class Hitbox {
     }
     
     private static boolean pointIntersectsSlope(LevelVector point, SlopeHitbox slope) {
-        if (!slope.isSloping()) {
-            return true;
-        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
+        if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return lineSegmentIntersectsPoint(slope.getAbsPosition(), slope.getAbsDifference(), point);
-        }
+        } else if (!slope.isSloping()) {
+            return true;
+        } 
         return pointIntersectsRightSlope(point, slope);
     }
     
@@ -895,10 +895,10 @@ public abstract class Hitbox {
     }
     
     private static boolean polygonIntersectsSlope(PolygonHitbox polygon, SlopeHitbox slope) {
-        if (!slope.isSloping()) {
-            return polygonIntersectsRectangle(polygon, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
-        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
+        if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return lineSegmentIntersectsPolygon(slope.getAbsPosition(), slope.getAbsDifference(), polygon);
+        } else if (!slope.isSloping()) {
+            return polygonIntersectsRectangle(polygon, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
@@ -951,10 +951,10 @@ public abstract class Hitbox {
     }
     
     private static boolean rectangleIntersectsSlope(double x1, double y1, double x2, double y2, SlopeHitbox slope) {
-        if (!slope.isSloping()) {
-            return rectanglesIntersect(x1, y1, x2, y2, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
-        } else if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
+        if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return lineSegmentIntersectsRectangle(slope.getAbsPosition(), slope.getAbsDifference(), x1, y1, x2, y2);
+        } else if (!slope.isSloping()) {
+            return rectanglesIntersect(x1, y1, x2, y2, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
         LevelVector[] vertices = new LevelVector[3];
         vertices[0] = slope.getAbsPosition();
@@ -990,14 +990,14 @@ public abstract class Hitbox {
     }
     
     private static boolean slopesIntersect(SlopeHitbox slope1, SlopeHitbox slope2) {
-        if (!slope1.isSloping()) {
-            return rectangleIntersectsSlope(slope1.getLeftEdge(), slope1.getTopEdge(), slope1.getRightEdge(), slope1.getBottomEdge(), slope2);
-        } else if (!slope2.isSloping()) {
-            return rectangleIntersectsSlope(slope2.getLeftEdge(), slope2.getTopEdge(), slope2.getRightEdge(), slope2.getBottomEdge(), slope1);
-        } else if (!slope1.isPresentAbove() && !slope1.isPresentBelow()) {
+        if (!slope1.isPresentAbove() && !slope1.isPresentBelow()) {
             return lineSegmentIntersectsSlope(slope1.getAbsPosition(), slope1.getAbsDifference(), slope2);
         } else if (!slope2.isPresentAbove() && !slope2.isPresentBelow()) {
             return lineSegmentIntersectsSlope(slope2.getAbsPosition(), slope2.getAbsDifference(), slope1);
+        } else if (!slope1.isSloping()) {
+            return rectangleIntersectsSlope(slope1.getLeftEdge(), slope1.getTopEdge(), slope1.getRightEdge(), slope1.getBottomEdge(), slope2);
+        } else if (!slope2.isSloping()) {
+            return rectangleIntersectsSlope(slope2.getLeftEdge(), slope2.getTopEdge(), slope2.getRightEdge(), slope2.getBottomEdge(), slope1);
         }
         LevelVector[] vertices1 = {slope1.getAbsPosition(), slope1.getPosition2(), null};
         LevelVector[] diffs1 = {slope1.getAbsDifference(), new LevelVector(-slope1.getAbsDX(), 0), new LevelVector(0, -slope1.getAbsDY())};
