@@ -216,7 +216,7 @@ public abstract class ThinkerObject extends AnimatedObject {
     }
     
     public final <T extends LevelObject> boolean isIntersectingSolidObject(Class<T> cls) {
-        return (state == null ? false : state.isIntersectingSolidObject(this, cls));
+        return (state == null ? false : state.intersectingSolidObject(this, cls) != null);
     }
     
     public final <T extends LevelObject> T intersectingSolidObject(Class<T> cls) {
@@ -254,7 +254,11 @@ public abstract class ThinkerObject extends AnimatedObject {
     }
     
     public final Map<LevelObject,Set<CollisionType>> getCollisions() {
-        return new HashMap<>(collisions);
+        Map<LevelObject,Set<CollisionType>> collisionMap = new HashMap<>();
+        for (Map.Entry<LevelObject,Set<CollisionType>> entry : collisions.entrySet()) {
+            collisionMap.put(entry.getKey(), EnumSet.copyOf(entry.getValue()));
+        }
+        return collisionMap;
     }
     
     public final LevelVector getVelocity() {

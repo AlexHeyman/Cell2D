@@ -271,7 +271,7 @@ public abstract class LevelObject {
     }
     
     public final <T extends LevelObject> boolean isOverlapping(Class<T> cls) {
-        return (state == null ? false : state.isOverlapping(this, cls));
+        return (state == null ? false : state.overlappingObject(this, cls) != null);
     }
     
     public final <T extends LevelObject> T overlappingObject(Class<T> cls) {
