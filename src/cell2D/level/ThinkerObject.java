@@ -51,8 +51,9 @@ public abstract class ThinkerObject extends AnimatedObject {
     int movementPriority = 0;
     int newMovementPriority = 0;
     private CollisionMode collisionMode = CollisionMode.NONE;
-    private Hitbox collisionHitbox;
-    Map<LevelObject,Set<CollisionType>> collisions = new HashMap<>();
+    private Hitbox collisionHitbox = null;
+    private final Map<LevelObject,Set<CollisionType>> collisions = new HashMap<>();
+    private final Set<CollisionType> collisionTypes = EnumSet.noneOf(CollisionType.class);
     private final LevelVector velocity = new LevelVector();
     private final LevelVector displacement = new LevelVector();
     
@@ -88,7 +89,7 @@ public abstract class ThinkerObject extends AnimatedObject {
         if (collisionMode != CollisionMode.NONE && collisionHitbox != null) {
             state.removeCollisionHitbox(collisionHitbox);
         }
-        collisions.clear();
+        clearCollisions();
     }
     
     @Override
@@ -243,6 +244,11 @@ public abstract class ThinkerObject extends AnimatedObject {
         return true;
     }
     
+    final void clearCollisions() {
+        collisions.clear();
+        collisionTypes.clear();
+    }
+    
     final void addCollision(LevelObject object, CollisionType collisionType) {
         Set<CollisionType> collisionsWithObject = collisions.get(object);
         if (collisionsWithObject == null) {
@@ -251,6 +257,7 @@ public abstract class ThinkerObject extends AnimatedObject {
         } else {
             collisionsWithObject.add(collisionType);
         }
+        collisionTypes.add(collisionType);
     }
     
     public final Map<LevelObject,Set<CollisionType>> getCollisions() {
@@ -259,6 +266,18 @@ public abstract class ThinkerObject extends AnimatedObject {
             collisionMap.put(entry.getKey(), EnumSet.copyOf(entry.getValue()));
         }
         return collisionMap;
+    }
+    
+    public final Set<CollisionType> getCollisionTypes() {
+        return EnumSet.copyOf(collisionTypes);
+    }
+    
+    public final boolean collided() {
+        return !collisions.isEmpty();
+    }
+    
+    public final boolean collided(CollisionType collisionType) {
+        return collisionTypes.contains(collisionType);
     }
     
     public final LevelVector getVelocity() {

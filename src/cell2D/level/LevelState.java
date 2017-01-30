@@ -905,7 +905,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     }
     
     final void move(ThinkerObject object, double dx, double dy) {
-        object.collisions.clear();
+        object.clearCollisions();
         if (object.getCollisionHitbox() != null) {
             if (object.getCollisionMode() == CollisionMode.CONTINUOUS) {
                 if (dx != 0 || dy != 0) {
