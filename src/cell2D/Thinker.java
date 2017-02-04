@@ -158,7 +158,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     
     public final void setTimerValue(TimedEvent<T> timedEvent, int value) {
         if (timedEvent == null) {
-            throw new RuntimeException("Attempted to set the value of a timer with no timed event");
+            throw new RuntimeException("Attempted to set the value of a timer with no TimedEvent");
         }
         if (value < 0) {
             timers.remove(timedEvent);

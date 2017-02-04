@@ -7,7 +7,7 @@ public class CircleHitbox extends Hitbox {
     public CircleHitbox(LevelVector relPosition, double relRadius) {
         super(relPosition);
         if (!setRelRadius(relRadius)) {
-            throw new RuntimeException("Attempted to give a circle hitbox a negative radius");
+            throw new RuntimeException("Attempted to give a CircleHitbox a negative radius");
         }
     }
     

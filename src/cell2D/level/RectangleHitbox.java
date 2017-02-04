@@ -7,10 +7,10 @@ public class RectangleHitbox extends Hitbox {
     public RectangleHitbox(LevelVector relPosition, double relLeft, double relRight, double relTop, double relBottom) {
         super(relPosition);
         if (relLeft > relRight) {
-            throw new RuntimeException("Attempted to give a rectangle hitbox a negative width");
+            throw new RuntimeException("Attempted to give a RectangleHitbox a negative width");
         }
         if (relTop > relBottom) {
-            throw new RuntimeException("Attempted to give a rectangle hitbox a negative height");
+            throw new RuntimeException("Attempted to give a RectangleHitbox a negative height");
         }
         this.relLeft = relLeft;
         this.relRight = relRight;

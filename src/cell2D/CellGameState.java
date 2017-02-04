@@ -43,7 +43,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     public CellGameState(CellGame game, int id) {
         if (game == null) {
-            throw new RuntimeException("Attempted to create a game state with no game");
+            throw new RuntimeException("Attempted to create a CellGameState with no CellGame");
         }
         this.game = game;
         this.id = id;
@@ -72,7 +72,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     public final void setTimeFactor(double timeFactor) {
         if (timeFactor < 0) {
-            throw new RuntimeException("Attempted to give a game state a negative time factor");
+            throw new RuntimeException("Attempted to give a CellGameState a negative time factor");
         }
         this.timeFactor = timeFactor;
     }

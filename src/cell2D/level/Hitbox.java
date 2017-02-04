@@ -8,7 +8,7 @@ import org.newdawn.slick.util.FastTrig;
 
 public abstract class Hitbox {
     
-    static final int HITBOXES_PER_OBJECT = 4;
+    static final int HITBOXES_PER_OBJECT = 5;
     private static final AtomicLong idCounter = new AtomicLong(0);
     
     final long id;
@@ -124,11 +124,11 @@ public abstract class Hitbox {
     
     public final void setSurfaceSolid(Direction direction, boolean solid) {
         if (solid) {
-            if (solidSurfaces.add(direction) && roles[2] && state != null) {
+            if (solidSurfaces.add(direction) && roles[3] && state != null) {
                 state.addSolidSurface(this, direction);
             }
         } else {
-            if (solidSurfaces.remove(direction) && roles[2] && state != null) {
+            if (solidSurfaces.remove(direction) && roles[3] && state != null) {
                 state.removeSolidSurface(this, direction);
             }
         }
@@ -136,12 +136,12 @@ public abstract class Hitbox {
     
     public final void setSolid(boolean solid) {
         if (solid) {
-            if (roles[2] && state != null) {
+            if (roles[3] && state != null) {
                 state.completeSolidSurfaces(this);
             }
             solidSurfaces = EnumSet.allOf(Direction.class);
         } else {
-            if (roles[2] && state != null) {
+            if (roles[3] && state != null) {
                 state.removeAllSolidSurfaces(this);
             }
             solidSurfaces.clear();
@@ -209,11 +209,33 @@ public abstract class Hitbox {
         }
     }
     
+    final void addAsCenterHitbox() {
+        if (state != null) {
+            state.addCenterHitbox(this);
+        }
+        roles[1] = true;
+        numRoles++;
+    }
+    
+    final void removeAsCenterHitbox() {
+        if (state != null) {
+            state.removeCenterHitbox(this);
+        }
+        roles[1] = false;
+        numRoles--;
+        if (numRoles == 0) {
+            setObject(null);
+            if (parent != null) {
+                parent.removeChild(this);
+            }
+        }
+    }
+    
     final void addAsOverlapHitbox() {
         if (state != null) {
             state.addOverlapHitbox(this);
         }
-        roles[1] = true;
+        roles[2] = true;
         numRoles++;
     }
     
@@ -221,7 +243,7 @@ public abstract class Hitbox {
         if (state != null) {
             state.removeOverlapHitbox(this);
         }
-        roles[1] = false;
+        roles[2] = false;
         numRoles--;
         if (numRoles == 0) {
             setObject(null);
@@ -235,7 +257,7 @@ public abstract class Hitbox {
         if (state != null) {
             state.addAllSolidSurfaces(this);
         }
-        roles[2] = true;
+        roles[3] = true;
         numRoles++;
     }
     
@@ -243,7 +265,7 @@ public abstract class Hitbox {
         if (state != null) {
             state.removeAllSolidSurfaces(this);
         }
-        roles[2] = false;
+        roles[3] = false;
         numRoles--;
         if (numRoles == 0) {
             setObject(null);
@@ -257,7 +279,7 @@ public abstract class Hitbox {
         if (state != null && collisionMode != CollisionMode.NONE) {
             state.addCollisionHitbox(this);
         }
-        roles[3] = true;
+        roles[4] = true;
         numRoles++;
     }
     
@@ -265,7 +287,7 @@ public abstract class Hitbox {
         if (state != null && collisionMode != CollisionMode.NONE) {
             state.removeCollisionHitbox(this);
         }
-        roles[3] = false;
+        roles[4] = false;
         numRoles--;
         if (numRoles == 0) {
             setObject(null);
@@ -607,30 +629,36 @@ public abstract class Hitbox {
         return pointIntersectsPolygon(center, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     
-    private static boolean circleIntersectsRectangle(LevelVector center, double radius, double x1, double y1, double x2, double y2) {
-        if (center.getX() > x1 && center.getX() < x2 && center.getY() > y1 && center.getY() < y2) {
+    private static boolean circleIntersectsOrthogonalLine(double cu, double cv, double radius, double u1, double u2, double v) {
+        v -= cv;
+        if (Math.abs(v) < radius) {
+            double rangeRadius = Math.sqrt(radius*radius - v*v);
+            return u1 < cu + rangeRadius && u2 > cu - rangeRadius;
+        }
+        return false;
+    }
+    
+    private static boolean circleIntersectsRectangle(double cx, double cy, double radius, double x1, double y1, double x2, double y2) {
+        if (cx > x1 && cx < x2 && cy > y1 && cy < y2) {
             return true;
         }
-        if (LevelVector.distanceBetween(center.getX(), center.getY(), x1, y1) < radius
-                || LevelVector.distanceBetween(center.getX(), center.getY(), x2, y1) < radius
-                || LevelVector.distanceBetween(center.getX(), center.getY(), x1, y2) < radius
-                || LevelVector.distanceBetween(center.getX(), center.getY(), x2, y2) < radius) {
+        if (LevelVector.distanceBetween(cx, cy, x1, y1) < radius
+                || LevelVector.distanceBetween(cx, cy, x2, y1) < radius
+                || LevelVector.distanceBetween(cx, cy, x1, y2) < radius
+                || LevelVector.distanceBetween(cx, cy, x2, y2) < radius) {
             return true;
         }
-        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
-        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
-        LevelVector topLeft = new LevelVector(x1, y1);
-        return circleEdgeIntersectsSeg(center, radius, topLeft, horizontalDiff)
-                || circleEdgeIntersectsSeg(center, radius, new LevelVector(x1, y2), horizontalDiff)
-                || circleEdgeIntersectsSeg(center, radius, topLeft, verticalDiff)
-                || circleEdgeIntersectsSeg(center, radius, new LevelVector(x2, y1), verticalDiff);
+        return circleIntersectsOrthogonalLine(cx, cy, radius, x1, x2, y1)
+                || circleIntersectsOrthogonalLine(cx, cy, radius, x1, x2, y2)
+                || circleIntersectsOrthogonalLine(cy, cx, radius, y1, y2, x1)
+                || circleIntersectsOrthogonalLine(cy, cx, radius, y1, y2, x2);
     }
     
     private static boolean circleIntersectsSlope(LevelVector center, double radius, SlopeHitbox slope) {
         if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return circleIntersectsLineSegment(center, radius, slope.getAbsPosition(), slope.getAbsDifference());
         } else if (!slope.isSloping()) {
-            return circleIntersectsRectangle(center, radius, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
+            return circleIntersectsRectangle(center.getX(), center.getY(), radius, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
         LevelVector vertex1 = slope.getAbsPosition();
         if (center.distanceTo(vertex1) < radius) {
@@ -1064,7 +1092,7 @@ public abstract class Hitbox {
                 } else if (hitbox2 instanceof PolygonHitbox) {
                     return circleIntersectsPolygon(hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius(), (PolygonHitbox)hitbox2);
                 } else if (hitbox2 instanceof RectangleHitbox) {
-                    return circleIntersectsRectangle(hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius(), hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
+                    return circleIntersectsRectangle(hitbox1.getAbsX(), hitbox1.getAbsY(), ((CircleHitbox)hitbox1).getAbsRadius(), hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
                 } else if (hitbox2 instanceof SlopeHitbox) {
                     return circleIntersectsSlope(hitbox1.absPosition, ((CircleHitbox)hitbox1).getAbsRadius(), (SlopeHitbox)hitbox2);
                 }
@@ -1112,7 +1140,7 @@ public abstract class Hitbox {
                 }
             } else if (hitbox1 instanceof RectangleHitbox) {
                 if (hitbox2 instanceof CircleHitbox) {
-                    return circleIntersectsRectangle(hitbox2.absPosition, ((CircleHitbox)hitbox2).getAbsRadius(), hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
+                    return circleIntersectsRectangle(hitbox2.getAbsX(), hitbox2.getAbsY(), ((CircleHitbox)hitbox2).getAbsRadius(), hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
                 } else if (hitbox2 instanceof LineHitbox) {
                     return lineSegmentIntersectsRectangle(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
                 } else if (hitbox2 instanceof PointHitbox) {
@@ -1173,7 +1201,7 @@ public abstract class Hitbox {
                 if (solidHitbox instanceof SlopeHitbox) {
                     return circleIntersectsSlope(collisionHitbox.absPosition, ((CircleHitbox)collisionHitbox).getAbsRadius(), (SlopeHitbox)solidHitbox);
                 }
-                return circleIntersectsRectangle(collisionHitbox.absPosition, ((CircleHitbox)collisionHitbox).getAbsRadius(), solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge());
+                return circleIntersectsRectangle(collisionHitbox.getAbsX(), collisionHitbox.getAbsY(), ((CircleHitbox)collisionHitbox).getAbsRadius(), solidHitbox.getLeftEdge(), solidHitbox.getTopEdge(), solidHitbox.getRightEdge(), solidHitbox.getBottomEdge());
             } else if (collisionHitbox instanceof LineHitbox) {
                 if (solidHitbox instanceof SlopeHitbox) {
                     return lineSegmentIntersectsSlope(collisionHitbox.absPosition, ((LineHitbox)collisionHitbox).getAbsDifference(), (SlopeHitbox)solidHitbox);

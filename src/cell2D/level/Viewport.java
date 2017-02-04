@@ -105,7 +105,7 @@ public class Viewport extends LevelThinker {
     
     public final void setLeftEdge(double x) {
         if (x > x2) {
-            throw new RuntimeException("Attempted to give a viewport a negative width");
+            throw new RuntimeException("Attempted to give a Viewport a negative width");
         }
         x1 = x;
         roundX1 = (int)Math.round(x1);
@@ -114,7 +114,7 @@ public class Viewport extends LevelThinker {
     
     public final void setRightEdge(double x) {
         if (x < x1) {
-            throw new RuntimeException("Attempted to give a viewport a negative width");
+            throw new RuntimeException("Attempted to give a Viewport a negative width");
         }
         x2 = x;
         roundX2 = (int)Math.round(x2);
@@ -123,7 +123,7 @@ public class Viewport extends LevelThinker {
     
     public final void setTopEdge(double y) {
         if (y > y2) {
-            throw new RuntimeException("Attempted to give a viewport a negative height");
+            throw new RuntimeException("Attempted to give a Viewport a negative height");
         }
         y1 = y;
         roundY1 = (int)Math.round(y1);
@@ -132,7 +132,7 @@ public class Viewport extends LevelThinker {
     
     public final void setBottomEdge(double y) {
         if (y < y1) {
-            throw new RuntimeException("Attempted to give a viewport a negative height");
+            throw new RuntimeException("Attempted to give a Viewport a negative height");
         }
         y2 = y;
         roundY2 = (int)Math.round(y2);

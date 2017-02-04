@@ -107,7 +107,7 @@ public abstract class CellGame {
             String assetsPath, boolean autoLoadAssets, String loadingImagePath) throws SlickException {
         game = new Game(gamename);
         if (numCommands < 0) {
-            throw new RuntimeException("Attempted to create a game with a negative number of controls");
+            throw new RuntimeException("Attempted to create a CellGame with a negative number of controls");
         }
         commands = new Command[numCommands];
         commandStates = new CommandState[numCommands];
@@ -626,10 +626,10 @@ public abstract class CellGame {
     final void addState(CellGameState state) {
         int id = state.getID();
         if (id < 0 && negativeIDsOffLimits) {
-            throw new RuntimeException("Attempted to add a game state with negative ID " + id);
+            throw new RuntimeException("Attempted to add a CellGameState with negative ID " + id);
         }
         if (states.get(id) != null) {
-            throw new RuntimeException("Attempted to add multiple game states with ID " + id);
+            throw new RuntimeException("Attempted to add multiple CellGameStates with ID " + id);
         }
         states.put(id, state);
         game.addState(new State(state));
@@ -643,7 +643,7 @@ public abstract class CellGame {
     
     public final void enterState(int id, Transition leave, Transition enter) {
         if (id < 0 && negativeIDsOffLimits) {
-            throw new RuntimeException("Attempted to enter a game state with negative ID " + id);
+            throw new RuntimeException("Attempted to enter a CellGameState with negative ID " + id);
         }
         currentID = id;
         game.enterState(id, leave, enter);
@@ -803,7 +803,7 @@ public abstract class CellGame {
     
     public final void setUpdateFPS(int updateFPS) {
         if (updateFPS <= 0) {
-            throw new RuntimeException("Attempted to run a game at a non-positive FPS");
+            throw new RuntimeException("Attempted to run a CellGame at a non-positive FPS");
         }
         this.updateFPS = updateFPS;
         msPerStep = 1000/((double)updateFPS);
@@ -815,7 +815,7 @@ public abstract class CellGame {
     
     public final void setScreenWidth(int screenWidth) {
         if (screenWidth <= 0) {
-            throw new RuntimeException("Attempted to give a game a non-positive screen width");
+            throw new RuntimeException("Attempted to give a CellGame a non-positive screen width");
         }
         this.screenWidth = screenWidth;
         updateScreen = true;
@@ -827,7 +827,7 @@ public abstract class CellGame {
     
     public final void setScreenHeight(int screenHeight) {
         if (screenHeight <= 0) {
-            throw new RuntimeException("Attempted to give a game a non-positive screen height");
+            throw new RuntimeException("Attempted to give a CellGame a non-positive screen height");
         }
         this.screenHeight = screenHeight;
         updateScreen = true;
@@ -839,7 +839,7 @@ public abstract class CellGame {
     
     public final void setScaleFactor(double scaleFactor) {
         if (scaleFactor <= 0) {
-            throw new RuntimeException("Attempted to give a game a non-positive scale factor");
+            throw new RuntimeException("Attempted to give a CellGame a non-positive scale factor");
         }
         this.scaleFactor = scaleFactor;
         updateScreen = true;
@@ -868,49 +868,49 @@ public abstract class CellGame {
     
     public final void add(String name, Sprite sprite) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a sprite with a null name");
+            throw new RuntimeException("Attempted to add a Sprite with a null name");
         }
         if (name.equals("")) {
-            throw new RuntimeException("Attempted to add a sprite with the empty string as a name");
+            throw new RuntimeException("Attempted to add a Sprite with the empty string as a name");
         }
         if (sprites.put(name, sprite) != null) {
-            throw new RuntimeException("Attempted to add multiple sprites with the name " + name);
+            throw new RuntimeException("Attempted to add multiple Sprites with the name " + name);
         }
     }
     
     public final void add(String name, SpriteSheet spriteSheet) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a sprite sheet with a null name");
+            throw new RuntimeException("Attempted to add a SpriteSheet with a null name");
         }
         if (name.equals("")) {
-            throw new RuntimeException("Attempted to add a sprite sheet with the empty string as a name");
+            throw new RuntimeException("Attempted to add a SpriteSheet with the empty string as a name");
         }
         if (spriteSheets.put(name, spriteSheet) != null) {
-            throw new RuntimeException("Attempted to add multiple sprite sheets with the name " + name);
+            throw new RuntimeException("Attempted to add multiple SpriteSheets with the name " + name);
         }
     }
     
     public final void add(String name, Animation animation) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add an animation with a null name");
+            throw new RuntimeException("Attempted to add an Animation with a null name");
         }
         if (name.equals("")) {
-            throw new RuntimeException("Attempted to add an animation with the empty string as a name");
+            throw new RuntimeException("Attempted to add an Animation with the empty string as a name");
         }
         if (animations.put(name, animation) != null) {
-            throw new RuntimeException("Attempted to add multiple animations with the name " + name);
+            throw new RuntimeException("Attempted to add multiple Animations with the name " + name);
         }
     }
     
     public final void add(String name, Sound sound) throws SlickException {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a sound effect with a null name");
+            throw new RuntimeException("Attempted to add a Sound with a null name");
         }
         if (name.equals("")) {
-            throw new RuntimeException("Attempted to add a sound effect with the empty string as a name");
+            throw new RuntimeException("Attempted to add a Sound with the empty string as a name");
         }
         if (sounds.put(name, sound) != null) {
-            throw new RuntimeException("Attempted to add multiple sounds with the name " + name);
+            throw new RuntimeException("Attempted to add multiple Sounds with the name " + name);
         }
     }
     
@@ -1012,7 +1012,7 @@ public abstract class CellGame {
     
     public final Animation createAnimation(Animatable[] frames) {
         if (frames == null || frames.length == 0) {
-            throw new RuntimeException("Attempted to create an empty sprite animation");
+            throw new RuntimeException("Attempted to create an empty Animation");
         }
         for (int i = 0; i < frames.length; i++) {
             if (frames[i] == null) {
@@ -1026,13 +1026,13 @@ public abstract class CellGame {
     
     public final Animation createAnimation(Animatable[] frames, double[] frameDurations) {
         if (frames == null || frames.length == 0) {
-            throw new RuntimeException("Attempted to create an empty animation");
+            throw new RuntimeException("Attempted to create an empty Animation");
         }
         if (frameDurations == null) {
-            throw new RuntimeException("Attempted to create a animation with absent frame durations");
+            throw new RuntimeException("Attempted to create an Animation with absent frame durations");
         }
         if (frames.length != frameDurations.length) {
-            throw new RuntimeException("Attempted to create a animation with different numbers of frames and frame durations");
+            throw new RuntimeException("Attempted to create an Animation with different numbers of frames and frame durations");
         }
         for (int i = 0; i < frames.length; i++) {
             if (frames[i] == null) {
@@ -1045,7 +1045,7 @@ public abstract class CellGame {
     private Animatable[] spriteSheetToAnimation(SpriteSheet spriteSheet,
             int x1, int y1, int x2, int y2, boolean columns) {
         if (x2 < x1 || y2 < y1) {
-            throw new RuntimeException("Attempted to create a animation from a part of a sprite sheet defined by invalid coordinates");
+            throw new RuntimeException("Attempted to create an Animation from a part of a sprite sheet defined by invalid coordinates");
         }
         Animatable[] frames = new Animatable[(x2 - x1 + 1)*(y2 - y1 + 1)];
         int i = 0;
@@ -1086,7 +1086,7 @@ public abstract class CellGame {
             return sprite;
         }
         if (sprite.getSpriteSheet() != null) {
-            throw new RuntimeException("Attempted to individually recolor a sprite that is part of a sprite sheet. Try recoloring the sprite sheet itself instead.");
+            throw new RuntimeException("Attempted to individually recolor a Sprite that is part of a SpriteSheet. Try recoloring the SpriteSheet itself instead.");
         }
         Sprite recolor = sprite.getRecolor(new ColorMapFilter(null, colorMap));
         if (autoLoadAssets && sprite.isLoaded()) {
@@ -1104,7 +1104,7 @@ public abstract class CellGame {
             return sprite;
         }
         if (sprite.getSpriteSheet() != null) {
-            throw new RuntimeException("Attempted to individually recolor a sprite that is part of a sprite sheet. Try recoloring the sprite sheet itself instead.");
+            throw new RuntimeException("Attempted to individually recolor a Sprite that is part of a SpriteSheet. Try recoloring the SpriteSheet itself instead.");
         }
         Sprite recolor = sprite.getRecolor(new ColorFilter(null, newColor));
         if (autoLoadAssets && sprite.isLoaded()) {

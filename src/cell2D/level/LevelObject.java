@@ -11,6 +11,7 @@ public abstract class LevelObject {
     LevelState newState = null;
     private double timeFactor = -1;
     private Hitbox locatorHitbox = null;
+    private final Hitbox centerHitbox;
     private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
     private int drawPriority = 0;
@@ -19,16 +20,19 @@ public abstract class LevelObject {
     private String filter = null;
     
     public LevelObject(Hitbox locatorHitbox) {
+        centerHitbox = new PointHitbox(0, 0);
+        centerHitbox.addAsCenterHitbox();
         if (!setLocatorHitbox(locatorHitbox)) {
-            throw new RuntimeException("Attempted to create a level object with an invalid locator hitbox");
+            throw new RuntimeException("Attempted to create a LevelObject with an invalid locator hitbox");
         }
     }
     
-    public final void copyProperties(LevelObject object) {
-        setTimeFactor(object.timeFactor);
-        setXFlip(object.getXFlip());
-        setYFlip(object.getYFlip());
-        setAngle(object.getAngle());
+    public LevelObject(Hitbox locatorHitbox, LevelObject spawner) {
+        this(locatorHitbox);
+        setTimeFactor(spawner.timeFactor);
+        setXFlip(spawner.getXFlip());
+        setYFlip(spawner.getYFlip());
+        setAngle(spawner.getAngle());
     }
     
     public final LevelState getGameState() {
@@ -45,6 +49,7 @@ public abstract class LevelObject {
     
     void addCellData() {
         state.addLocatorHitbox(locatorHitbox);
+        state.addCenterHitbox(centerHitbox);
         if (overlapHitbox != null) {
             state.addOverlapHitbox(overlapHitbox);
         }
@@ -67,6 +72,7 @@ public abstract class LevelObject {
     void removeActions() {
         locatorHitbox.setGameState(null);
         state.removeLocatorHitbox(locatorHitbox);
+        state.removeCenterHitbox(centerHitbox);
         if (overlapHitbox != null) {
             state.removeOverlapHitbox(overlapHitbox);
         }
@@ -116,11 +122,13 @@ public abstract class LevelObject {
     }
     
     void removeNonLocatorHitboxes(Hitbox locatorHitbox) {
+        locatorHitbox.removeChild(centerHitbox);
         locatorHitbox.removeChild(overlapHitbox);
         locatorHitbox.removeChild(solidHitbox);
     }
     
     void addNonLocatorHitboxes(Hitbox locatorHitbox) {
+        locatorHitbox.addChild(centerHitbox);
         locatorHitbox.addChild(overlapHitbox);
         locatorHitbox.addChild(solidHitbox);
     }
@@ -221,12 +229,64 @@ public abstract class LevelObject {
         return locatorHitbox.getBottomEdge();
     }
     
+    public final LevelVector getCenterOffset() {
+        return centerHitbox.getRelPosition();
+    }
+    
+    public final double getCenterOffsetX() {
+        return centerHitbox.getRelX();
+    }
+    
+    public final double getCenterOffsetY() {
+        return centerHitbox.getRelY();
+    }
+    
+    public final void setCenterOffset(LevelVector offset) {
+        centerHitbox.setRelPosition(offset);
+    }
+    
+    public final void setCenterOffset(double x, double y) {
+        centerHitbox.setRelPosition(x, y);
+    }
+    
+    public final void setCenterOffsetX(double x) {
+        centerHitbox.setRelX(x);
+    }
+    
+    public final void setCenterOffsetY(double y) {
+        centerHitbox.setRelY(y);
+    }
+    
+    public final LevelVector getCenter() {
+        return centerHitbox.getAbsPosition();
+    }
+    
+    public final double getCenterX() {
+        return centerHitbox.getAbsX();
+    }
+    
+    public final double getCenterY() {
+        return centerHitbox.getAbsY();
+    }
+    
     public final double distanceTo(LevelObject object) {
-        return locatorHitbox.distanceTo(object.locatorHitbox);
+        return centerHitbox.distanceTo(object.centerHitbox);
     }
     
     public final double angleTo(LevelObject object) {
-        return locatorHitbox.angleTo(object.locatorHitbox);
+        return centerHitbox.angleTo(object.centerHitbox);
+    }
+    
+    public final <T extends LevelObject> boolean objectIsWithinRadius(Class<T> cls, double radius) {
+        return (state == null || radius < 0 ? false : state.objectWithinRadius(this, cls, radius) != null);
+    }
+    
+    public final <T extends LevelObject> T objectWithinRadius(Class<T> cls, double radius) {
+        return (state == null || radius < 0 ? null : state.objectWithinRadius(this, cls, radius));
+    }
+    
+    public final <T extends LevelObject> List<T> objectsWithinRadius(Class<T> cls, double radius) {
+        return (state == null || radius < 0 ? new ArrayList<>() : state.objectsWithinRadius(this, cls, radius));
     }
     
     public final Hitbox getOverlapHitbox() {
