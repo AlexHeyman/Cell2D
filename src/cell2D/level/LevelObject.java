@@ -43,8 +43,25 @@ public abstract class LevelObject {
         return newState;
     }
     
-    public final boolean addTo(LevelState levelState) {
-        return levelState.addObject(this);
+    public final void setGameState(LevelState state) {
+        if (this.state != null) {
+            this.state.removeObject(this);
+        }
+        if (state != null) {
+            state.addObject(this);
+        }
+    }
+    
+    public final boolean addTo(LevelState state) {
+        return state.addObject(this);
+    }
+    
+    public final boolean remove() {
+        return (state == null ? false : state.removeObject(this));
+    }
+    
+    void addActions() {
+        locatorHitbox.setGameState(state);
     }
     
     void addCellData() {
@@ -56,17 +73,6 @@ public abstract class LevelObject {
         if (solidHitbox != null) {
             state.addAllSolidSurfaces(solidHitbox);
         }
-    }
-    
-    void addActions() {
-        locatorHitbox.setGameState(state);
-    }
-    
-    public final boolean remove() {
-        if (newState != null) {
-            return newState.removeObject(this);
-        }
-        return false;
     }
     
     void removeActions() {

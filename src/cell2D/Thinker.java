@@ -55,24 +55,30 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         return newState;
     }
     
-    public final boolean addTo(T state) {
-        if (initialized) {
-            return state.addThinker(thisThinker);
+    public final void setGameState(T state) {
+        if (!initialized) {
+            return;
         }
-        return false;
+        if (this.state != null) {
+            this.state.removeThinker(thisThinker);
+        }
+        if (state != null) {
+            state.addThinker(thisThinker);
+        }
+    }
+    
+    public final boolean addTo(T state) {
+        return (initialized ? state.addThinker(thisThinker) : false);
+    }
+    
+    public final boolean remove() {
+        return (initialized ? (state == null ? false : state.removeThinker(thisThinker)) : false);
     }
     
     void addActions() {
         if (!upcomingStates.isEmpty()) {
             endState(state.getGame(), state, false);
         }
-    }
-    
-    public final boolean remove() {
-        if (initialized && state != null) {
-            return state.removeThinker(thisThinker);
-        }
-        return false;
     }
     
     public final double getTimeFactor() {
