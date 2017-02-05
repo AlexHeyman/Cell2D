@@ -62,29 +62,29 @@ public abstract class Hitbox {
         return parent;
     }
     
-    final boolean addChild(Hitbox hitbox) {
-        if (hitbox != null && hitbox != this
-                && hitbox.parent == null && hitbox.object == null) {
+    final boolean addChild(Hitbox child) {
+        if (child != null && child != this
+                && child.parent == null && child.object == null) {
             Hitbox ancestor = parent;
             while (ancestor != null) {
-                if (ancestor == hitbox) {
+                if (ancestor == child) {
                     return false;
                 }
                 ancestor = ancestor.parent;
             }
-            children.add(hitbox);
-            hitbox.parent = this;
-            hitbox.recursivelyUpdateData();
+            children.add(child);
+            child.parent = this;
+            child.recursivelyUpdateData();
             return true;
         }
         return false;
     }
     
-    final boolean removeChild(Hitbox hitbox) {
-        if (hitbox != null && hitbox.parent == this) {
-            children.remove(hitbox);
-            hitbox.parent = null;
-            hitbox.recursivelyUpdateData();
+    final boolean removeChild(Hitbox child) {
+        if (child != null && child.parent == this) {
+            children.remove(child);
+            child.parent = null;
+            child.recursivelyUpdateData();
             return true;
         }
         return false;

@@ -5,6 +5,7 @@ import cell2D.TimedEvent;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +57,8 @@ public abstract class ThinkerObject extends AnimatedObject {
     private final Set<CollisionType> collisionTypes = EnumSet.noneOf(CollisionType.class);
     private final LevelVector velocity = new LevelVector();
     private final LevelVector displacement = new LevelVector();
+    private ThinkerObject leader = null;
+    final Set<ThinkerObject> followers = new HashSet<>();
     
     public ThinkerObject(Hitbox locatorHitbox) {
         super(locatorHitbox);
@@ -392,6 +395,53 @@ public abstract class ThinkerObject extends AnimatedObject {
         if (displacement.getLength() > speed) {
             displacement.setLength(speed);
         }
+    }
+    
+    public final ThinkerObject getLeader() {
+        return leader;
+    }
+    
+    public final void setLeader(ThinkerObject leader) {
+        if (this.leader != null) {
+            this.leader.removeFollower(this);
+        }
+        if (leader != null) {
+            leader.addFollower(this);
+        }
+    }
+    
+    public final boolean addToLeader(ThinkerObject leader) {
+        return leader.addFollower(this);
+    }
+    
+    public final boolean removeFromLeader() {
+        return (leader == null ? false : leader.removeFollower(this));
+    }
+    
+    public final boolean addFollower(ThinkerObject follower) {
+        if (follower != null && follower != this
+                && follower.leader == null && follower.leader == null) {
+            ThinkerObject ancestor = leader;
+            while (ancestor != null) {
+                if (ancestor == follower) {
+                    return false;
+                }
+                ancestor = ancestor.leader;
+            }
+            followers.add(follower);
+            follower.leader = this;
+            return true;
+        }
+        return false;
+    }
+    
+    public final boolean removeFollower(ThinkerObject follower) {
+        if (follower != null && follower.leader == this) {
+            followers.remove(follower);
+            follower.leader = null;
+            return true;
+        }
+        return false;
     }
     
 }

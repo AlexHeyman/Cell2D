@@ -6,7 +6,7 @@ import cell2D.Thinker;
 public abstract class LevelThinker extends Thinker<LevelState,LevelThinker,LevelThinkerState> {
     
     @Override
-    public LevelThinker getThis() {
+    public final LevelThinker getThis() {
         return this;
     }
     

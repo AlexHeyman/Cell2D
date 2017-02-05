@@ -54,15 +54,21 @@ public class AnimationInstance {
         return state;
     }
     
+    public final void setGameState(CellGameState state) {
+        if (this.state != null) {
+            this.state.removeAnimInstance(this);
+        }
+        if (state != null) {
+            state.addAnimInstance(this);
+        }
+    }
+    
     public final boolean addTo(CellGameState state) {
         return state.addAnimInstance(this);
     }
     
     public final boolean remove() {
-        if (state != null) {
-            return state.removeAnimInstance(this);
-        }
-        return false;
+        return (state == null ? false : state.removeAnimInstance(this));
     }
     
     public final double getTimeFactor() {
