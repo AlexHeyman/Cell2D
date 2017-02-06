@@ -410,11 +410,11 @@ public abstract class ThinkerObject extends AnimatedObject {
         }
     }
     
-    public final boolean addToLeader(ThinkerObject leader) {
+    public final boolean addAsFollower(ThinkerObject leader) {
         return leader.addFollower(this);
     }
     
-    public final boolean removeFromLeader() {
+    public final boolean removeAsFollower() {
         return (leader == null ? false : leader.removeFollower(this));
     }
     
