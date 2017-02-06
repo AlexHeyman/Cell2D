@@ -443,4 +443,11 @@ public abstract class ThinkerObject extends AnimatedObject {
         return false;
     }
     
+    public final void clearFollowers() {
+        for (ThinkerObject follower : followers) {
+            follower.leader = null;
+        }
+        followers.clear();
+    }
+    
 }

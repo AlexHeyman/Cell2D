@@ -692,25 +692,12 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         return false;
     }
     
-    private void addActions(LevelObject object) {
-        levelObjects.add(object);
-        object.state = this;
-        object.addCellData();
-        object.addActions();
-    }
-    
     public final boolean removeObject(LevelObject object) {
         if (object.newState == this) {
             addObjectChangeData(object, null);
             return true;
         }
         return false;
-    }
-    
-    private void removeActions(LevelObject object) {
-        object.removeActions();
-        levelObjects.remove(object);
-        object.state = null;
     }
     
     private void addObjectChangeData(LevelObject object, LevelState newState) {
@@ -724,6 +711,19 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             newState.objectChanges.add(data);
             newState.updateObjectList();
         }
+    }
+    
+    private void addActions(LevelObject object) {
+        levelObjects.add(object);
+        object.state = this;
+        object.addCellData();
+        object.addActions();
+    }
+    
+    private void removeActions(LevelObject object) {
+        object.removeActions();
+        levelObjects.remove(object);
+        object.state = null;
     }
     
     private void updateObjectList() {

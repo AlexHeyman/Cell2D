@@ -263,30 +263,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
-    private void addActions(U thinker) {
-        thinkers.add(thinker);
-        thinker.state = thisState;
-        thinker.addActions();
-        thinker.addedActions(game, thisState);
-        addThinkerActions(game, thinker);
-        if (performingStepActions) {
-            thinker.doStep(game, thisState);
-        }
-    }
-    
     public final boolean removeThinker(U thinker) {
         if (initialized && thinker.newState == thisState) {
             addThinkerChangeData(thinker, null);
             return true;
         }
         return false;
-    }
-    
-    private void removeActions(U thinker) {
-        removeThinkerActions(game, thinker);
-        thinker.removedActions(game, thisState);
-        thinkers.remove(thinker);
-        thinker.state = null;
     }
     
     final void changeThinkerActionPriority(U thinker, int actionPriority) {
@@ -308,6 +290,28 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
             state.updateThinkerList();
         }
     }
+    
+    private void addActions(U thinker) {
+        thinkers.add(thinker);
+        thinker.state = thisState;
+        thinker.addActions();
+        thinker.addedActions(game, thisState);
+        addThinkerActions(game, thinker);
+        if (performingStepActions) {
+            thinker.doStep(game, thisState);
+        }
+    }
+    
+    public void addThinkerActions(CellGame game, U thinker) {}
+    
+    private void removeActions(U thinker) {
+        removeThinkerActions(game, thinker);
+        thinker.removedActions(game, thisState);
+        thinkers.remove(thinker);
+        thinker.state = null;
+    }
+    
+    public void removeThinkerActions(CellGame game, U thinker) {}
     
     private void updateThinkerList() {
         if (thinkerIterators == 0 && !updatingThinkerList) {
@@ -341,6 +345,8 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         }
     }
     
+    public void updateThinkerListActions(CellGame game) {}
+    
     final void doStep() {
         if (timeFactor > 0) {
             for (AnimationInstance instance : animInstances) {
@@ -359,12 +365,6 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         stepActions(game);
         performingStepActions = false;
     }
-    
-    public void addThinkerActions(CellGame game, U thinker) {}
-    
-    public void removeThinkerActions(CellGame game, U thinker) {}
-    
-    public void updateThinkerListActions(CellGame game) {}
     
     public void stepActions(CellGame game) {}
     
