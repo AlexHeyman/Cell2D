@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import org.newdawn.slick.util.FastTrig;
 
 public abstract class Hitbox {
     
@@ -474,7 +473,7 @@ public abstract class Hitbox {
         updateAbsYFlipActions();
     }
     
-    private double modAngle(double angle) {
+    private static double modAngle(double angle) {
         angle %= 360;
         if (angle < 0) {
             angle += 360;
@@ -497,8 +496,8 @@ public abstract class Hitbox {
     public final void setRelAngle(double relAngle) {
         this.relAngle = modAngle(relAngle);
         double radians = Math.toRadians(relAngle);
-        relAngleX = FastTrig.cos(radians);
-        relAngleY = -FastTrig.sin(radians);
+        relAngleX = Math.cos(radians);
+        relAngleY = -Math.sin(radians);
         updateAbsAngle();
         if (!children.isEmpty()) {
             for (Hitbox child : children) {
@@ -538,8 +537,8 @@ public abstract class Hitbox {
             absAngle = modAngle(parent.absAngle + angle);
         }
         double radians = Math.toRadians(absAngle);
-        absAngleX = FastTrig.cos(radians);
-        absAngleY = -FastTrig.sin(radians);
+        absAngleX = Math.cos(radians);
+        absAngleY = -Math.sin(radians);
     }
     
     void updateAbsAngleActions() {}
