@@ -283,29 +283,20 @@ public abstract class LevelObject {
         return centerHitbox.angleTo(object.centerHitbox);
     }
     
-    public final <T extends LevelObject> boolean objectIsWithinRadius(Class<T> cls, double radius) {
-        return (state == null || radius < 0 ? false : state.objectWithinRadius(this, cls, radius) != null);
+    public final <T extends LevelObject> boolean objectIsWithinRadius(double radius, Class<T> cls) {
+        return (state == null ? false : state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls) != null);
     }
     
-    public final <T extends LevelObject> T objectWithinRadius(Class<T> cls, double radius) {
-        return (state == null || radius < 0 ? null : state.objectWithinRadius(this, cls, radius));
+    public final <T extends LevelObject> T objectWithinRadius(double radius, Class<T> cls) {
+        return (state == null ? null : state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
-    public final <T extends LevelObject> List<T> objectsWithinRadius(Class<T> cls, double radius) {
-        return (state == null || radius < 0 ? new ArrayList<>() : state.objectsWithinRadius(this, cls, radius));
+    public final <T extends LevelObject> List<T> objectsWithinRadius(double radius, Class<T> cls) {
+        return (state == null ? new ArrayList<>() : state.objectsWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
     public final Hitbox getOverlapHitbox() {
         return overlapHitbox;
-    }
-    
-    public final boolean overlaps(LevelObject object) {
-        return overlap(this, object);
-    }
-    
-    public static final boolean overlap(LevelObject object1, LevelObject object2) {
-        return object1.overlapHitbox != null && object2.overlapHitbox != null
-                && Hitbox.overlap(object1.overlapHitbox, object2.overlapHitbox);
     }
     
     public final boolean setOverlapHitbox(Hitbox overlapHitbox) {
@@ -336,16 +327,25 @@ public abstract class LevelObject {
         return false;
     }
     
-    public final <T extends LevelObject> boolean isOverlapping(Class<T> cls) {
-        return (state == null ? false : state.overlappingObject(this, cls) != null);
+    public final boolean overlaps(LevelObject object) {
+        return overlap(this, object);
+    }
+    
+    public static final boolean overlap(LevelObject object1, LevelObject object2) {
+        return object1.overlapHitbox != null && object2.overlapHitbox != null
+                && Hitbox.overlap(object1.overlapHitbox, object2.overlapHitbox);
+    }
+    
+    public final <T extends LevelObject> boolean isOverlappingObject(Class<T> cls) {
+        return (state == null || overlapHitbox == null ? false : state.overlappingObject(overlapHitbox, cls) != null);
     }
     
     public final <T extends LevelObject> T overlappingObject(Class<T> cls) {
-        return (state == null ? null : state.overlappingObject(this, cls));
+        return (state == null || overlapHitbox == null ? null : state.overlappingObject(overlapHitbox, cls));
     }
     
     public final <T extends LevelObject> List<T> overlappingObjects(Class<T> cls) {
-        return (state == null ? new ArrayList<>() : state.overlappingObjects(this, cls));
+        return (state == null || overlapHitbox == null ? new ArrayList<>() : state.overlappingObjects(overlapHitbox, cls));
     }
     
     public final Hitbox getSolidHitbox() {

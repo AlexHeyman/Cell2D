@@ -62,15 +62,19 @@ public class LevelVector {
     }
     
     public final LevelVector flip() {
-        return flip(true, true);
+        x = -x;
+        y = -y;
+        return this;
     }
     
     public final LevelVector flipX() {
-        return flip(true, false);
+        x = -x;
+        return this;
     }
     
     public final LevelVector flipY() {
-        return flip(false, true);
+        y = -y;
+        return this;
     }
     
     public final LevelVector flip(boolean xFlip, boolean yFlip) {
