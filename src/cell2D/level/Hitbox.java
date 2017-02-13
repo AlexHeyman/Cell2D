@@ -641,12 +641,6 @@ public abstract class Hitbox {
         if (cx > x1 && cx < x2 && cy > y1 && cy < y2) {
             return true;
         }
-        if (LevelVector.distanceBetween(cx, cy, x1, y1) < radius
-                || LevelVector.distanceBetween(cx, cy, x2, y1) < radius
-                || LevelVector.distanceBetween(cx, cy, x1, y2) < radius
-                || LevelVector.distanceBetween(cx, cy, x2, y2) < radius) {
-            return true;
-        }
         return circleIntersectsOrthogonalLine(cx, cy, radius, x1, x2, y1)
                 || circleIntersectsOrthogonalLine(cx, cy, radius, x1, x2, y2)
                 || circleIntersectsOrthogonalLine(cy, cx, radius, y1, y2, x1)
@@ -1061,8 +1055,7 @@ public abstract class Hitbox {
     }
     
     public static final boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
-        if (hitbox1 != hitbox2
-                && (hitbox1.state == hitbox2.state || hitbox1.state == null || hitbox2.state == null)
+        if ((hitbox1.getObject() != hitbox2.getObject() || hitbox1.getObject() == null)
                 && hitbox1.getLeftEdge() <= hitbox2.getRightEdge()
                 && hitbox1.getRightEdge() >= hitbox2.getLeftEdge()
                 && hitbox1.getTopEdge() <= hitbox2.getBottomEdge()
@@ -1176,8 +1169,7 @@ public abstract class Hitbox {
     }
     
     public static final boolean intersectsSolidHitbox(Hitbox collisionHitbox, Hitbox solidHitbox) {
-        if (collisionHitbox.getObject() != solidHitbox.getObject()
-                && collisionHitbox.state != null && collisionHitbox.state == solidHitbox.state
+        if ((collisionHitbox.getObject() != solidHitbox.getObject() || collisionHitbox.getObject() == null)
                 && collisionHitbox.getLeftEdge() <= solidHitbox.getRightEdge()
                 && collisionHitbox.getRightEdge() >= solidHitbox.getLeftEdge()
                 && collisionHitbox.getTopEdge() <= solidHitbox.getBottomEdge()

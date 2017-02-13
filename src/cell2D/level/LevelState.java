@@ -338,9 +338,13 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     }
     
     public final void loadArea(LevelVector origin, Area area) {
+        loadArea(origin.getX(), origin.getY(), area);
+    }
+    
+    public final void loadArea(double originX, double originY, Area area) {
         for (LevelObject object : area.load(getGame(), this)) {
             if (object.state == null && object.newState == null) {
-                object.setPosition(object.getPosition().add(origin));
+                object.setPosition(object.getPosition().add(originX, originY));
                 object.newState = this;
                 objectChanges.add(new ObjectChangeData(object, this));  
             }
@@ -873,112 +877,62 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
-    final <T extends LevelObject> T overlappingObject(LevelObject object, Class<T> cls) {
-        Hitbox objectHitbox = object.getOverlapHitbox();
-        if (objectHitbox != null) {
-            List<Hitbox> scanned = new ArrayList<>();
-            Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Hitbox overlapHitbox : cell.overlapHitboxes) {
-                    if (!overlapHitbox.scanned) {
-                        if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
-                                && Hitbox.overlap(objectHitbox, overlapHitbox)) {
-                            for (Hitbox hitbox : scanned) {
-                                hitbox.scanned = false;
-                            }
-                            return cls.cast(overlapHitbox.getObject());
+    public final <T extends LevelObject> boolean objectIsWithinRectangle(double x1, double y1, double x2, double y2, Class<T> cls) {
+        return objectWithinRectangle(x1, y1, x2, y2, cls) != null;
+    }
+    
+    public final <T extends LevelObject> T objectWithinRectangle(double x1, double y1, double x2, double y2, Class<T> cls) {
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox centerHitbox : cell.centerHitboxes) {
+                if (!centerHitbox.scanned) {
+                    if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
+                            && centerHitbox.getAbsX() >= x1
+                            && centerHitbox.getAbsY() >= y1
+                            && centerHitbox.getAbsX() <= x2
+                            && centerHitbox.getAbsY() <= y2) {
+                        for (Hitbox hitbox : scanned) {
+                            hitbox.scanned = false;
                         }
-                        overlapHitbox.scanned = true;
-                        scanned.add(overlapHitbox);
+                        return cls.cast(centerHitbox.getObject());
                     }
+                    centerHitbox.scanned = true;
+                    scanned.add(centerHitbox);
                 }
             }
-            for (Hitbox hitbox : scanned) {
-                hitbox.scanned = false;
-            }
+        }
+        for (Hitbox hitbox : scanned) {
+            hitbox.scanned = false;
         }
         return null;
     }
     
-    final <T extends LevelObject> List<T> overlappingObjects(LevelObject object, Class<T> cls) {
-        List<T> overlapping = new ArrayList<>();
-        Hitbox objectHitbox = object.getOverlapHitbox();
-        if (objectHitbox != null) {
-            List<Hitbox> scanned = new ArrayList<>();
-            Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Hitbox overlapHitbox : cell.overlapHitboxes) {
-                    if (!overlapHitbox.scanned) {
-                        if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
-                                && Hitbox.overlap(objectHitbox, overlapHitbox)) {
-                            overlapping.add(cls.cast(overlapHitbox.getObject()));
-                        }
-                        overlapHitbox.scanned = true;
-                        scanned.add(overlapHitbox);
+    public final <T extends LevelObject> List<T> objectsWithinRectangle(double x1, double y1, double x2, double y2, Class<T> cls) {
+        List<T> within = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox centerHitbox : cell.centerHitboxes) {
+                if (!centerHitbox.scanned) {
+                    if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
+                            && centerHitbox.getAbsX() >= x1
+                            && centerHitbox.getAbsY() >= y1
+                            && centerHitbox.getAbsX() <= x2
+                            && centerHitbox.getAbsY() <= y2) {
+                        within.add(cls.cast(centerHitbox.getObject()));
                     }
+                    centerHitbox.scanned = true;
+                    scanned.add(centerHitbox);
                 }
             }
-            for (Hitbox hitbox : scanned) {
-                hitbox.scanned = false;
-            }
         }
-        return overlapping;
-    }
-    
-    final <T extends LevelObject> T intersectingSolidObject(ThinkerObject object, Class<T> cls) {
-        Hitbox objectHitbox = object.getCollisionHitbox();
-        if (objectHitbox != null) {
-            List<Hitbox> scanned = new ArrayList<>();
-            Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Hitbox solidHitbox : cell.solidHitboxes) {
-                    if (!solidHitbox.scanned) {
-                        if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
-                                && Hitbox.intersectsSolidHitbox(objectHitbox, solidHitbox)) {
-                            for (Hitbox hitbox : scanned) {
-                                hitbox.scanned = false;
-                            }
-                            return cls.cast(solidHitbox.getObject());
-                        }
-                        solidHitbox.scanned = true;
-                        scanned.add(solidHitbox);
-                    }
-                }
-            }
-            for (Hitbox hitbox : scanned) {
-                hitbox.scanned = false;
-            }
+        for (Hitbox hitbox : scanned) {
+            hitbox.scanned = false;
         }
-        return null;
-    }
-    
-    final <T extends LevelObject> List<T> intersectingSolidObjects(ThinkerObject object, Class<T> cls) {
-        List<T> intersecting = new ArrayList<>();
-        Hitbox objectHitbox = object.getCollisionHitbox();
-        if (objectHitbox != null) {
-            List<Hitbox> scanned = new ArrayList<>();
-            Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(object.getOverlapHitbox()));
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Hitbox solidHitbox : cell.solidHitboxes) {
-                    if (!solidHitbox.scanned) {
-                        if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
-                                && Hitbox.intersectsSolidHitbox(objectHitbox, solidHitbox)) {
-                            intersecting.add(cls.cast(solidHitbox.getObject()));
-                        }
-                        solidHitbox.scanned = true;
-                        scanned.add(solidHitbox);
-                    }
-                }
-            }
-            for (Hitbox hitbox : scanned) {
-                hitbox.scanned = false;
-            }
-        }
-        return intersecting;
+        return within;
     }
     
     private static boolean circleMeetsOrthogonalLine(double cu, double cv, double radius, double u1, double u2, double v) {
@@ -994,28 +948,34 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         if (cx >= x1 && cx <= x2 && cy >= y1 && cy <= y2) {
             return true;
         }
-        if (LevelVector.distanceBetween(cx, cy, x1, y1) <= radius
-                || LevelVector.distanceBetween(cx, cy, x2, y1) <= radius
-                || LevelVector.distanceBetween(cx, cy, x1, y2) <= radius
-                || LevelVector.distanceBetween(cx, cy, x2, y2) <= radius) {
-            return true;
-        }
         return circleMeetsOrthogonalLine(cx, cy, radius, x1, x2, y1)
                 || circleMeetsOrthogonalLine(cx, cy, radius, x1, x2, y2)
                 || circleMeetsOrthogonalLine(cy, cx, radius, y1, y2, x1)
                 || circleMeetsOrthogonalLine(cy, cx, radius, y1, y2, x2);
     }
     
-    final <T extends LevelObject> T objectWithinRadius(LevelObject object, Class<T> cls, double radius) {
+    public final <T extends LevelObject> boolean objectIsWithinCircle(LevelVector center, double radius, Class<T> cls) {
+        return objectWithinCircle(center.getX(), center.getY(), radius, cls) != null;
+    }
+    
+    public final <T extends LevelObject> boolean objectIsWithinCircle(double cx, double cy, double radius, Class<T> cls) {
+        return objectWithinCircle(cx, cy, radius, cls) != null;
+    }
+    
+    public final <T extends LevelObject> T objectWithinCircle(LevelVector center, double radius, Class<T> cls) {
+        return objectWithinCircle(center.getX(), center.getY(), radius, cls);
+    }
+    
+    public final <T extends LevelObject> T objectWithinCircle(double cx, double cy, double radius, Class<T> cls) {
         List<Hitbox> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(object.getCenterX() - radius, object.getCenterY() - radius, object.getCenterX() + radius, object.getCenterY() + radius));
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(cx - radius, cy - radius, cx + radius, cy + radius));
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
-            if (circleMeetsRectangle(object.getCenterX(), object.getCenterY(), radius, cell.left, cell.top, cell.right, cell.bottom)) {
+            if (circleMeetsRectangle(cx, cy, radius, cell.left, cell.top, cell.right, cell.bottom)) {
                 for (Hitbox centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
-                                && object.distanceTo(centerHitbox.getObject()) <= radius) {
+                                && LevelVector.distanceBetween(cx, cy, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
                             for (Hitbox hitbox : scanned) {
                                 hitbox.scanned = false;
                             }
@@ -1033,18 +993,22 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         return null;
     }
     
-    final <T extends LevelObject> List<T> objectsWithinRadius(LevelObject object, Class<T> cls, double radius) {
-        List<T> withinRadius = new ArrayList<>();
+    public final <T extends LevelObject> List<T> objectsWithinCircle(LevelVector center, double radius, Class<T> cls) {
+        return objectsWithinCircle(center.getX(), center.getY(), radius, cls);
+    }
+    
+    public final <T extends LevelObject> List<T> objectsWithinCircle(double cx, double cy, double radius, Class<T> cls) {
+        List<T> within = new ArrayList<>();
         List<Hitbox> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(object.getCenterX() - radius, object.getCenterY() - radius, object.getCenterX() + radius, object.getCenterY() + radius));
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(cx - radius, cy - radius, cx + radius, cy + radius));
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
-            if (circleMeetsRectangle(object.getCenterX(), object.getCenterY(), radius, cell.left, cell.top, cell.right, cell.bottom)) {
+            if (circleMeetsRectangle(cx, cy, radius, cell.left, cell.top, cell.right, cell.bottom)) {
                 for (Hitbox centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
-                                && object.distanceTo(centerHitbox.getObject()) <= radius) {
-                            withinRadius.add(cls.cast(centerHitbox.getObject()));
+                                && LevelVector.distanceBetween(cx, cy, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
+                            within.add(cls.cast(centerHitbox.getObject()));
                         }
                         centerHitbox.scanned = true;
                         scanned.add(centerHitbox);
@@ -1055,7 +1019,111 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         for (Hitbox hitbox : scanned) {
             hitbox.scanned = false;
         }
-        return withinRadius;
+        return within;
+    }
+    
+    public final <T extends LevelObject> boolean isOverlappingObject(Hitbox hitbox, Class<T> cls) {
+        return overlappingObject(hitbox, cls) != null;
+    }
+    
+    public final <T extends LevelObject> T overlappingObject(Hitbox hitbox, Class<T> cls) {
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+                if (!overlapHitbox.scanned) {
+                    if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
+                            && Hitbox.overlap(hitbox, overlapHitbox)) {
+                        for (Hitbox scannedHitbox : scanned) {
+                            scannedHitbox.scanned = false;
+                        }
+                        return cls.cast(overlapHitbox.getObject());
+                    }
+                    overlapHitbox.scanned = true;
+                    scanned.add(overlapHitbox);
+                }
+            }
+        }
+        for (Hitbox scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return null;
+    }
+    
+    public final <T extends LevelObject> List<T> overlappingObjects(Hitbox hitbox, Class<T> cls) {
+        List<T> overlapping = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+                if (!overlapHitbox.scanned) {
+                    if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
+                            && Hitbox.overlap(hitbox, overlapHitbox)) {
+                        overlapping.add(cls.cast(overlapHitbox.getObject()));
+                    }
+                    overlapHitbox.scanned = true;
+                    scanned.add(overlapHitbox);
+                }
+            }
+        }
+        for (Hitbox scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return overlapping;
+    }
+    
+    public final <T extends LevelObject> boolean isIntersectingSolidObject(Hitbox hitbox, Class<T> cls) {
+        return intersectingSolidObject(hitbox, cls) != null;
+    }
+    
+    public final <T extends LevelObject> T intersectingSolidObject(Hitbox hitbox, Class<T> cls) {
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox solidHitbox : cell.solidHitboxes) {
+                if (!solidHitbox.scanned) {
+                    if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
+                            && Hitbox.intersectsSolidHitbox(hitbox, solidHitbox)) {
+                        for (Hitbox scannedHitbox : scanned) {
+                            scannedHitbox.scanned = false;
+                        }
+                        return cls.cast(solidHitbox.getObject());
+                    }
+                    solidHitbox.scanned = true;
+                    scanned.add(solidHitbox);
+                }
+            }
+        }
+        for (Hitbox scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return null;
+    }
+    
+    public final <T extends LevelObject> List<T> intersectingSolidObjects(Hitbox hitbox, Class<T> cls) {
+        List<T> intersecting = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox solidHitbox : cell.solidHitboxes) {
+                if (!solidHitbox.scanned) {
+                    if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
+                            && Hitbox.intersectsSolidHitbox(hitbox, solidHitbox)) {
+                        intersecting.add(cls.cast(solidHitbox.getObject()));
+                    }
+                    solidHitbox.scanned = true;
+                    scanned.add(solidHitbox);
+                }
+            }
+        }
+        for (Hitbox scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return intersecting;
     }
     
     final void move(ThinkerObject object, double dx, double dy) {
@@ -1070,9 +1138,11 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 if (dx != 0 || dy != 0) {
                     object.setPosition(object.getX() + dx, object.getY() + dy);
                 }
-                for (LevelObject levelObject : intersectingSolidObjects(object, LevelObject.class)) {
-                    if (object.checkCollision(levelObject, CollisionType.INTERSECTING)) {
-                        object.addCollision(levelObject, CollisionType.INTERSECTING);
+                if (object.getCollisionHitbox() != null) {
+                    for (LevelObject levelObject : intersectingSolidObjects(object.getCollisionHitbox(), LevelObject.class)) {
+                        if (object.checkCollision(levelObject, CollisionType.INTERSECTING)) {
+                            object.addCollision(levelObject, CollisionType.INTERSECTING);
+                        }
                     }
                 }
                 return;

@@ -220,15 +220,15 @@ public abstract class ThinkerObject extends AnimatedObject {
     }
     
     public final <T extends LevelObject> boolean isIntersectingSolidObject(Class<T> cls) {
-        return (state == null ? false : state.intersectingSolidObject(this, cls) != null);
+        return (state == null || collisionHitbox == null ? false : state.intersectingSolidObject(collisionHitbox, cls) != null);
     }
     
     public final <T extends LevelObject> T intersectingSolidObject(Class<T> cls) {
-        return (state == null ? null : state.intersectingSolidObject(this, cls));
+        return (state == null || collisionHitbox == null ? null : state.intersectingSolidObject(collisionHitbox, cls));
     }
     
     public final <T extends LevelObject> List<T> intersectingSolidObjects(Class<T> cls) {
-        return (state == null ? new ArrayList<>() : state.intersectingSolidObjects(this, cls));
+        return (state == null || collisionHitbox == null ? new ArrayList<>() : state.intersectingSolidObjects(collisionHitbox, cls));
     }
     
     public final void doMovement(LevelVector change) {
