@@ -958,24 +958,24 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         return objectWithinCircle(center.getX(), center.getY(), radius, cls) != null;
     }
     
-    public final <T extends LevelObject> boolean objectIsWithinCircle(double cx, double cy, double radius, Class<T> cls) {
-        return objectWithinCircle(cx, cy, radius, cls) != null;
+    public final <T extends LevelObject> boolean objectIsWithinCircle(double centerX, double centerY, double radius, Class<T> cls) {
+        return objectWithinCircle(centerX, centerY, radius, cls) != null;
     }
     
     public final <T extends LevelObject> T objectWithinCircle(LevelVector center, double radius, Class<T> cls) {
         return objectWithinCircle(center.getX(), center.getY(), radius, cls);
     }
     
-    public final <T extends LevelObject> T objectWithinCircle(double cx, double cy, double radius, Class<T> cls) {
+    public final <T extends LevelObject> T objectWithinCircle(double centerX, double centerY, double radius, Class<T> cls) {
         List<Hitbox> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(cx - radius, cy - radius, cx + radius, cy + radius));
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
-            if (circleMeetsRectangle(cx, cy, radius, cell.left, cell.top, cell.right, cell.bottom)) {
+            if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
                 for (Hitbox centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
-                                && LevelVector.distanceBetween(cx, cy, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
+                                && LevelVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
                             for (Hitbox hitbox : scanned) {
                                 hitbox.scanned = false;
                             }
@@ -997,17 +997,17 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         return objectsWithinCircle(center.getX(), center.getY(), radius, cls);
     }
     
-    public final <T extends LevelObject> List<T> objectsWithinCircle(double cx, double cy, double radius, Class<T> cls) {
+    public final <T extends LevelObject> List<T> objectsWithinCircle(double centerX, double centerY, double radius, Class<T> cls) {
         List<T> within = new ArrayList<>();
         List<Hitbox> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(cx - radius, cy - radius, cx + radius, cy + radius));
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
-            if (circleMeetsRectangle(cx, cy, radius, cell.left, cell.top, cell.right, cell.bottom)) {
+            if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
                 for (Hitbox centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
-                                && LevelVector.distanceBetween(cx, cy, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
+                                && LevelVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
                             within.add(cls.cast(centerHitbox.getObject()));
                         }
                         centerHitbox.scanned = true;
