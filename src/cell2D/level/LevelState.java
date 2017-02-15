@@ -877,6 +877,25 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         }
     }
     
+    public final <T extends LevelObject> T nearestObject(LevelVector point, Class<T> cls) {
+        return nearestObject(point.getX(), point.getY(), cls);
+    }
+    
+    public final <T extends LevelObject> T nearestObject(double pointX, double pointY, Class<T> cls) {
+        T nearest = null;
+        double nearestDistance = -1;
+        for (LevelObject object : (ThinkerObject.class.isAssignableFrom(cls) ? thinkerObjects : levelObjects)) {
+            if (cls.isAssignableFrom(object.getClass())) {
+                double distance = LevelVector.distanceBetween(pointX, pointY, object.getX(), object.getY());
+                if (nearestDistance < 0 || distance < nearestDistance) {
+                    nearest = cls.cast(object);
+                    nearestDistance = distance;
+                }
+            }
+        }
+        return nearest;
+    }
+    
     public final <T extends LevelObject> boolean objectIsWithinRectangle(double x1, double y1, double x2, double y2, Class<T> cls) {
         return objectWithinRectangle(x1, y1, x2, y2, cls) != null;
     }
@@ -933,6 +952,42 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             hitbox.scanned = false;
         }
         return within;
+    }
+    
+    public final <T extends LevelObject> T nearestObjectWithinRectangle(LevelVector point, double x1, double y1, double x2, double y2, Class<T> cls) {
+        return nearestObjectWithinRectangle(point.getX(), point.getY(), x1, y1, x2, y2, cls);
+    }
+    
+    public final <T extends LevelObject> T nearestObjectWithinRectangle(double pointX, double pointY, double x1, double y1, double x2, double y2, Class<T> cls) {
+        T nearest = null;
+        double nearestDistance = -1;
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox centerHitbox : cell.centerHitboxes) {
+                if (!centerHitbox.scanned) {
+                    LevelObject object = centerHitbox.getObject();
+                    if (cls.isAssignableFrom(object.getClass())
+                            && centerHitbox.getAbsX() >= x1
+                            && centerHitbox.getAbsY() >= y1
+                            && centerHitbox.getAbsX() <= x2
+                            && centerHitbox.getAbsY() <= y2) {
+                        double distance = LevelVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
+                        if (nearestDistance < 0 || distance < nearestDistance) {
+                            nearest = cls.cast(object);
+                            nearestDistance = distance;
+                        }
+                    }
+                    centerHitbox.scanned = true;
+                    scanned.add(centerHitbox);
+                }
+            }
+        }
+        for (Hitbox hitbox : scanned) {
+            hitbox.scanned = false;
+        }
+        return nearest;
     }
     
     private static boolean circleMeetsOrthogonalLine(double cu, double cv, double radius, double u1, double u2, double v) {
@@ -1022,6 +1077,41 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         return within;
     }
     
+    public final <T extends LevelObject> T nearestObjectWithinCircle(LevelVector point, LevelVector center, double radius, Class<T> cls) {
+        return nearestObjectWithinCircle(point.getX(), point.getY(), center.getX(), center.getY(), radius, cls);
+    }
+    
+    public final <T extends LevelObject> T nearestObjectWithinCircle(double pointX, double pointY, double centerX, double centerY, double radius, Class<T> cls) {
+        T nearest = null;
+        double nearestDistance = -1;
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
+                for (Hitbox centerHitbox : cell.centerHitboxes) {
+                    if (!centerHitbox.scanned) {
+                        LevelObject object = centerHitbox.getObject();
+                        if (cls.isAssignableFrom(object.getClass())
+                                && LevelVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
+                            double distance = LevelVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
+                            if (nearestDistance < 0 || distance < nearestDistance) {
+                                nearest = cls.cast(object);
+                                nearestDistance = distance;
+                            }
+                        }
+                        centerHitbox.scanned = true;
+                        scanned.add(centerHitbox);
+                    }
+                }
+            }
+        }
+        for (Hitbox hitbox : scanned) {
+            hitbox.scanned = false;
+        }
+        return nearest;
+    }
+    
     public final <T extends LevelObject> boolean isOverlappingObject(Hitbox hitbox, Class<T> cls) {
         return overlappingObject(hitbox, cls) != null;
     }
@@ -1074,6 +1164,39 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         return overlapping;
     }
     
+    public final <T extends LevelObject> T nearestOverlappingObject(LevelVector point, Hitbox hitbox, Class<T> cls) {
+        return nearestOverlappingObject(point.getX(), point.getY(), hitbox, cls);
+    }
+    
+    public final <T extends LevelObject> T nearestOverlappingObject(double pointX, double pointY, Hitbox hitbox, Class<T> cls) {
+        T nearest = null;
+        double nearestDistance = -1;
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+                if (!overlapHitbox.scanned) {
+                    LevelObject object = overlapHitbox.getObject();
+                    if (cls.isAssignableFrom(object.getClass())
+                            && Hitbox.overlap(hitbox, overlapHitbox)) {
+                        double distance = LevelVector.distanceBetween(pointX, pointY, overlapHitbox.getAbsX(), overlapHitbox.getAbsY());
+                        if (nearestDistance < 0 || distance < nearestDistance) {
+                            nearest = cls.cast(object);
+                            nearestDistance = distance;
+                        }
+                    }
+                    overlapHitbox.scanned = true;
+                    scanned.add(overlapHitbox);
+                }
+            }
+        }
+        for (Hitbox scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return nearest;
+    }
+    
     public final <T extends LevelObject> boolean isIntersectingSolidObject(Hitbox hitbox, Class<T> cls) {
         return intersectingSolidObject(hitbox, cls) != null;
     }
@@ -1124,6 +1247,39 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             scannedHitbox.scanned = false;
         }
         return intersecting;
+    }
+    
+    public final <T extends LevelObject> T nearestIntersectingSolidObject(LevelVector point, Hitbox hitbox, Class<T> cls) {
+        return nearestIntersectingSolidObject(point.getX(), point.getY(), hitbox, cls);
+    }
+    
+    public final <T extends LevelObject> T nearestIntersectingSolidObject(double pointX, double pointY, Hitbox hitbox, Class<T> cls) {
+        T nearest = null;
+        double nearestDistance = -1;
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            for (Hitbox solidHitbox : cell.solidHitboxes) {
+                if (!solidHitbox.scanned) {
+                    LevelObject object = solidHitbox.getObject();
+                    if (cls.isAssignableFrom(object.getClass())
+                            && Hitbox.intersectsSolidHitbox(hitbox, solidHitbox)) {
+                        double distance = LevelVector.distanceBetween(pointX, pointY, solidHitbox.getAbsX(), solidHitbox.getAbsY());
+                        if (nearestDistance < 0 || distance < nearestDistance) {
+                            nearest = cls.cast(object);
+                            nearestDistance = distance;
+                        }
+                    }
+                    solidHitbox.scanned = true;
+                    scanned.add(solidHitbox);
+                }
+            }
+        }
+        for (Hitbox scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return nearest;
     }
     
     final void move(ThinkerObject object, double dx, double dy) {

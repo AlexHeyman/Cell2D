@@ -283,6 +283,22 @@ public abstract class LevelObject {
         return centerHitbox.angleTo(object.centerHitbox);
     }
     
+    public final <T extends LevelObject> T nearestObject(Class<T> cls) {
+        return (state == null ? null : state.nearestObject(centerHitbox.getAbsX(), centerHitbox.getAbsY(), cls));
+    }
+    
+    public final <T extends LevelObject> T nearestObjectWithinRectangle(double x1, double y1, double x2, double y2, Class<T> cls) {
+        return (state == null ? null : state.nearestObjectWithinRectangle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), x1, y1, x2, y2, cls));
+    }
+    
+    public final <T extends LevelObject> T nearestObjectWithinCircle(LevelVector center, double radius, Class<T> cls) {
+        return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), center.getX(), center.getY(), radius, cls));
+    }
+    
+    public final <T extends LevelObject> T nearestObjectWithinCircle(double centerX, double centerY, double radius, Class<T> cls) {
+        return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerX, centerY, radius, cls));
+    }
+    
     public final <T extends LevelObject> boolean objectIsWithinRadius(double radius, Class<T> cls) {
         return (state == null ? false : state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls) != null);
     }
@@ -293,6 +309,10 @@ public abstract class LevelObject {
     
     public final <T extends LevelObject> List<T> objectsWithinRadius(double radius, Class<T> cls) {
         return (state == null ? new ArrayList<>() : state.objectsWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
+    }
+    
+    public final <T extends LevelObject> T nearestObjectWithinRadius(double radius, Class<T> cls) {
+        return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
     public final Hitbox getOverlapHitbox() {
@@ -346,6 +366,10 @@ public abstract class LevelObject {
     
     public final <T extends LevelObject> List<T> overlappingObjects(Class<T> cls) {
         return (state == null || overlapHitbox == null ? new ArrayList<>() : state.overlappingObjects(overlapHitbox, cls));
+    }
+    
+    public final <T extends LevelObject> T nearestOverlappingObject(Class<T> cls) {
+        return (state == null || overlapHitbox == null ? null : state.nearestOverlappingObject(centerHitbox.getAbsX(), centerHitbox.getAbsY(), overlapHitbox, cls));
     }
     
     public final Hitbox getSolidHitbox() {
