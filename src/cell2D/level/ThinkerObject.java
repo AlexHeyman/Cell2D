@@ -231,10 +231,6 @@ public abstract class ThinkerObject extends AnimatedObject {
         return (state == null || collisionHitbox == null ? new ArrayList<>() : state.intersectingSolidObjects(collisionHitbox, cls));
     }
     
-    public final <T extends LevelObject> T nearestIntersectingSolidObject(Class<T> cls) {
-        return (state == null || collisionHitbox == null ? null : state.nearestIntersectingSolidObject(getCenterX(), getCenterY(), collisionHitbox, cls));
-    }
-    
     public final void doMovement(LevelVector change) {
         doMovement(change.getX(), change.getY());
     }
