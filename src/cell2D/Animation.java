@@ -41,16 +41,12 @@ public class Animation implements Animatable {
     }
     
     private boolean checkCompatibility(Animatable frame1, Animatable frame2) {
-        int level1 = frame1.getLevel();
-        int level2 = frame2.getLevel();
-        if (level1 == 0 && level2 == 0) {
+        if (frame1.getLevel() == 0 && frame2.getLevel() == 0) {
             return true;
-        }
-        int length1 = frame1.getLength();
-        if (level1 != level2 || length1 != frame2.getLength()) {
+        } else if (frame1.getLevel() != frame2.getLevel() || frame1.getLength() != frame2.getLength()) {
             return false;
         }
-        for (int i = 0; i < length1; i++) {
+        for (int i = 0; i < frame1.getLength(); i++) {
             if (!checkCompatibility(frame1.getFrame(i), frame2.getFrame(i))) {
                 return false;
             }
