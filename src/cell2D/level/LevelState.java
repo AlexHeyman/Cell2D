@@ -904,8 +904,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox centerHitbox : cell.centerHitboxes) {
+            for (Hitbox centerHitbox : iterator.next().centerHitboxes) {
                 if (!centerHitbox.scanned) {
                     if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
                             && centerHitbox.getAbsX() >= x1
@@ -933,8 +932,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox centerHitbox : cell.centerHitboxes) {
+            for (Hitbox centerHitbox : iterator.next().centerHitboxes) {
                 if (!centerHitbox.scanned) {
                     if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
                             && centerHitbox.getAbsX() >= x1
@@ -964,8 +962,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox centerHitbox : cell.centerHitboxes) {
+            for (Hitbox centerHitbox : iterator.next().centerHitboxes) {
                 if (!centerHitbox.scanned) {
                     LevelObject object = centerHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
@@ -1120,8 +1117,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+            for (Hitbox overlapHitbox : iterator.next().overlapHitboxes) {
                 if (!overlapHitbox.scanned) {
                     if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
                             && Hitbox.overlap(hitbox, overlapHitbox)) {
@@ -1146,8 +1142,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+            for (Hitbox overlapHitbox : iterator.next().overlapHitboxes) {
                 if (!overlapHitbox.scanned) {
                     if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
                             && Hitbox.overlap(hitbox, overlapHitbox)) {
@@ -1174,8 +1169,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox overlapHitbox : cell.overlapHitboxes) {
+            for (Hitbox overlapHitbox : iterator.next().overlapHitboxes) {
                 if (!overlapHitbox.scanned) {
                     LevelObject object = overlapHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
@@ -1205,8 +1199,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox solidHitbox : cell.solidHitboxes) {
+            for (Hitbox solidHitbox : iterator.next().solidHitboxes) {
                 if (!solidHitbox.scanned) {
                     if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
                             && Hitbox.intersectsSolidHitbox(hitbox, solidHitbox)) {
@@ -1231,8 +1224,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox solidHitbox : cell.solidHitboxes) {
+            for (Hitbox solidHitbox : iterator.next().solidHitboxes) {
                 if (!solidHitbox.scanned) {
                     if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
                             && Hitbox.intersectsSolidHitbox(hitbox, solidHitbox)) {
@@ -1259,8 +1251,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Hitbox solidHitbox : cell.solidHitboxes) {
+            for (Hitbox solidHitbox : iterator.next().solidHitboxes) {
                 if (!solidHitbox.scanned) {
                     LevelObject object = solidHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
@@ -1280,60 +1271,6 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
             scannedHitbox.scanned = false;
         }
         return nearest;
-    }
-    
-    final void move(ThinkerObject object, double dx, double dy) {
-        object.clearCollisions();
-        if (object.getCollisionHitbox() != null) {
-            if (object.getCollisionMode() == CollisionMode.CONTINUOUS) {
-                if (dx != 0 || dy != 0) {
-                    object.setPosition(object.getX() + dx, object.getY() + dy);
-                }
-                return;
-            } else if (object.getCollisionMode() == CollisionMode.DISCRETE) {
-                if (dx != 0 || dy != 0) {
-                    object.setPosition(object.getX() + dx, object.getY() + dy);
-                }
-                if (object.getCollisionHitbox() != null) {
-                    for (LevelObject levelObject : intersectingSolidObjects(object.getCollisionHitbox(), LevelObject.class)) {
-                        if (object.checkCollision(levelObject, CollisionType.INTERSECTING)) {
-                            object.addCollision(levelObject, CollisionType.INTERSECTING);
-                        }
-                    }
-                }
-                return;
-            }
-        }
-        if (dx != 0 || dy != 0) {
-            object.setPosition(object.getX() + dx, object.getY() + dy);
-        }
-    }
-    
-    @Override
-    public final void stepActions(CellGame game) {
-        double timeFactor = getTimeFactor();
-        if (timeFactor > 0) {
-            stepState = 1;
-            Iterator<LevelThinker> iterator = thinkerIterator();
-            while (iterator.hasNext()) {
-                iterator.next().beforeMovement(game, this);
-            }
-            Iterator<ThinkerObject> thinkerObjectIterator = thinkerObjectIterator();
-            while (thinkerObjectIterator.hasNext()) {
-                ThinkerObject object = thinkerObjectIterator.next();
-                double objectTimeFactor = object.getEffectiveTimeFactor();
-                double dx = objectTimeFactor*(object.getVelocityX() + object.getDisplacementX());
-                double dy = objectTimeFactor*(object.getVelocityY() + object.getDisplacementY());
-                move(object, dx, dy);
-                object.setDisplacement(0, 0);
-            }
-            stepState = 2;
-            iterator = thinkerIterator();
-            while (iterator.hasNext()) {
-                iterator.next().afterMovement(game, this);
-            }
-            stepState = 0;
-        }
     }
     
     public final LevelLayer getLayer(int id) {
@@ -1426,6 +1363,60 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         viewports.clear();
     }
     
+    final void move(ThinkerObject object, double dx, double dy) {
+        object.clearCollisions();
+        if (object.getCollisionHitbox() != null) {
+            if (object.getCollisionMode() == CollisionMode.CONTINUOUS) {
+                if (dx != 0 || dy != 0) {
+                    object.setPosition(object.getX() + dx, object.getY() + dy);
+                }
+                return;
+            } else if (object.getCollisionMode() == CollisionMode.DISCRETE) {
+                if (dx != 0 || dy != 0) {
+                    object.setPosition(object.getX() + dx, object.getY() + dy);
+                }
+                if (object.getCollisionHitbox() != null) {
+                    for (LevelObject levelObject : intersectingSolidObjects(object.getCollisionHitbox(), LevelObject.class)) {
+                        if (object.checkCollision(levelObject, CollisionType.INTERSECTING)) {
+                            object.addCollision(levelObject, CollisionType.INTERSECTING);
+                        }
+                    }
+                }
+                return;
+            }
+        }
+        if (dx != 0 || dy != 0) {
+            object.setPosition(object.getX() + dx, object.getY() + dy);
+        }
+    }
+    
+    @Override
+    public final void stepActions(CellGame game) {
+        double timeFactor = getTimeFactor();
+        if (timeFactor > 0) {
+            stepState = 1;
+            Iterator<LevelThinker> iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().beforeMovement(game, this);
+            }
+            Iterator<ThinkerObject> thinkerObjectIterator = thinkerObjectIterator();
+            while (thinkerObjectIterator.hasNext()) {
+                ThinkerObject object = thinkerObjectIterator.next();
+                double objectTimeFactor = object.getEffectiveTimeFactor();
+                double dx = objectTimeFactor*(object.getVelocityX() + object.getDisplacementX());
+                double dy = objectTimeFactor*(object.getVelocityY() + object.getDisplacementY());
+                move(object, dx, dy);
+                object.setDisplacement(0, 0);
+            }
+            stepState = 2;
+            iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().afterMovement(game, this);
+            }
+            stepState = 0;
+        }
+    }
+    
     private void draw(Graphics g, Hitbox locatorHitbox,
             int left, int right, int top, int bottom, int xOffset, int yOffset) {
         if (locatorHitbox.getLeftEdge() < right
@@ -1448,9 +1439,9 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 int vx2 = x1 + viewport.roundX2;
                 int vy2 = y1 + viewport.roundY2;
                 g.setWorldClip(vx1, vy1, vx2 - vx1, vy2 - vy1);
-                if (viewport.camera != null && viewport.camera.state == this) {
-                    double cx = viewport.camera.getCenterX();
-                    double cy = viewport.camera.getCenterY();
+                if (viewport.getCamera() != null && viewport.getCamera().state == this) {
+                    double cx = viewport.getCamera().getCenterX();
+                    double cy = viewport.getCamera().getCenterY();
                     for (LevelLayer layer : levelLayers.headMap(0).values()) {
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
@@ -1549,8 +1540,8 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                 }
-                if (viewport.hud != null && viewport.hud.getGameState() == this) {
-                    viewport.hud.renderActions(game, this, g, vx1, vy1, vx2, vy2);
+                if (viewport.getHUD() != null && viewport.getHUD().getGameState() == this) {
+                    viewport.getHUD().renderActions(game, this, g, vx1, vy1, vx2, vy2);
                 }
                 g.clearWorldClip();
             }

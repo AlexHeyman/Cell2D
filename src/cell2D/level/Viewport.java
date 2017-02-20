@@ -4,27 +4,23 @@ import cell2D.CellGame;
 
 public class Viewport extends LevelThinker {
     
-    LevelObject camera = null;
-    HUD hud;
+    private LevelObject camera = null;
+    private HUD hud;
     private double x1, y1, x2, y2;
     int roundX1, roundY1, roundX2, roundY2, left, right, top, bottom;
     
-    public Viewport(HUD hud, double x1, double y1, double x2, double y2) {
-        this.hud = hud;
-        if (x1 > x2) {
-            this.x1 = x2;
-            this.x2 = x1;
-        } else {
-            this.x1 = x1;
-            this.x2 = x2;
+    public Viewport(HUD hud, double left, double right, double top, double bottom) {
+        if (left > right) {
+            throw new RuntimeException("Attempted to give a Viewport a negative width");
         }
-        if (y1 > y2) {
-            this.y1 = y2;
-            this.y2 = y1;
-        } else {
-            this.y1 = y1;
-            this.y2 = y2;
+        if (top > bottom) {
+            throw new RuntimeException("Attempted to give a Viewport a negative height");
         }
+        this.hud = (hud == null || hud.getGameState() == null ? hud : null);
+        x1 = left;
+        y1 = top;
+        x2 = right;
+        y2 = bottom;
         roundX1 = (int)Math.round(x1);
         roundY1 = (int)Math.round(y1);
         roundX2 = (int)Math.round(x2);
@@ -70,16 +66,15 @@ public class Viewport extends LevelThinker {
     }
     
     public final boolean setHUD(HUD hud) {
-        LevelState state = getGameState();
-        if (state == null) {
+        if (getGameState() == null) {
             if (hud == null || hud.getGameState() == null) {
                 this.hud = hud;
                 return true;
             }
             return false;
-        } else if (hud == null || state.addThinker(hud)) {
+        } else if (hud == null || getGameState().addThinker(hud)) {
             if (this.hud != null) {
-                state.removeThinker(this.hud);
+                getGameState().removeThinker(this.hud);
             }
             this.hud = hud;
             return true;
@@ -87,56 +82,72 @@ public class Viewport extends LevelThinker {
         return false;
     }
     
-    public final double getLeftEdge() {
+    public final double getScreenLeft() {
         return x1;
     }
     
-    public final double getRightEdge() {
+    public final double getScreenRight() {
         return x2;
     }
     
-    public final double getTopEdge() {
+    public final double getScreenTop() {
         return y1;
     }
     
-    public final double getBottomEdge() {
+    public final double getScreenBottom() {
         return y2;
     }
     
-    public final void setLeftEdge(double x) {
-        if (x > x2) {
+    public final void setScreenLeft(double left) {
+        if (left > x2) {
             throw new RuntimeException("Attempted to give a Viewport a negative width");
         }
-        x1 = x;
+        x1 = left;
         roundX1 = (int)Math.round(x1);
         updateXData();
     }
     
-    public final void setRightEdge(double x) {
-        if (x < x1) {
+    public final void setScreenRight(double right) {
+        if (right < x1) {
             throw new RuntimeException("Attempted to give a Viewport a negative width");
         }
-        x2 = x;
+        x2 = right;
         roundX2 = (int)Math.round(x2);
         updateXData();
     }
     
-    public final void setTopEdge(double y) {
-        if (y > y2) {
+    public final void setScreenTop(double top) {
+        if (top > y2) {
             throw new RuntimeException("Attempted to give a Viewport a negative height");
         }
-        y1 = y;
+        y1 = top;
         roundY1 = (int)Math.round(y1);
         updateYData();
     }
     
-    public final void setBottomEdge(double y) {
-        if (y < y1) {
+    public final void setScreenBottom(double bottom) {
+        if (bottom < y1) {
             throw new RuntimeException("Attempted to give a Viewport a negative height");
         }
-        y2 = y;
+        y2 = bottom;
         roundY2 = (int)Math.round(y2);
         updateYData();
+    }
+    
+    public final int getLeftEdge() {
+        return (int)Math.round(camera.getCenterX()) + left;
+    }
+    
+    public final int getRightEdge() {
+        return (int)Math.round(camera.getCenterX()) + right;
+    }
+    
+    public final int getTopEdge() {
+        return (int)Math.round(camera.getCenterY()) + top;
+    }
+    
+    public final int getBottomEdge() {
+        return (int)Math.round(camera.getCenterY()) + bottom;
     }
     
 }
