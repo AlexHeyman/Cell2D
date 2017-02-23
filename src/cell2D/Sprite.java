@@ -13,7 +13,7 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Vector2f;
 
-public class Sprite implements Animatable {
+public class Sprite implements Animatable, Drawable {
     
     public static final Sprite BLANK = new Sprite(true, null, null, null, null, null, null, 0, 0);
     
@@ -28,14 +28,14 @@ public class Sprite implements Animatable {
     private final Map<String,Pair<Image[],BufferedImage>> images = new HashMap<>();
     private Image[] defaultImages = null;
     private BufferedImage bufferedImage = null;
-    private final int centerX, centerY;
+    private final int originX, originY;
     private int width = 0;
     private int height = 0;
     private int right = 0;
     private int bottom = 0;
     
     Sprite(boolean blank, Sprite recolorOf, Filter recolorFilter, SpriteSheet spriteSheet,
-            String path, Color transColor, Set<Filter> filters, int centerX, int centerY) {
+            String path, Color transColor, Set<Filter> filters, int originX, int originY) {
         this.blank = blank;
         loaded = blank;
         this.recolorOf = recolorOf;
@@ -44,12 +44,12 @@ public class Sprite implements Animatable {
         this.path = path;
         this.transColor = transColor;
         this.filters = filters;
-        this.centerX = centerX;
-        this.centerY = centerY;
+        this.originX = originX;
+        this.originY = originY;
     }
     
     final Sprite getRecolor(Filter recolorFilter) {
-        return new Sprite(false, this, recolorFilter, null, null, null, filters, centerX, centerY);
+        return new Sprite(false, this, recolorFilter, null, null, null, filters, originX, originY);
     }
     
     public final boolean isLoaded() {
@@ -84,19 +84,19 @@ public class Sprite implements Animatable {
     final void loadFilter(String filterName, Image image, BufferedImage bufferedImage) {
         Image[] imageArray = new Image[4];
         imageArray[0] = image;
-        imageArray[0].setCenterOfRotation(centerX, centerY);
+        imageArray[0].setCenterOfRotation(originX, originY);
         imageArray[1] = image.getFlippedCopy(true, false);
-        imageArray[1].setCenterOfRotation(right, centerY);
+        imageArray[1].setCenterOfRotation(right, originY);
         imageArray[2] = image.getFlippedCopy(false, true);
-        imageArray[2].setCenterOfRotation(centerX, bottom);
+        imageArray[2].setCenterOfRotation(originX, bottom);
         imageArray[3] = image.getFlippedCopy(true, true);
         imageArray[3].setCenterOfRotation(right, bottom);
         if (filterName.equals("")) {
             defaultImages = imageArray;
             width = image.getWidth();
             height = image.getHeight();
-            right = width - centerX;
-            bottom = height - centerY;
+            right = width - originX;
+            bottom = height - originY;
         }
         images.put(filterName, new Pair<>(imageArray, bufferedImage));
     }
@@ -169,93 +169,82 @@ public class Sprite implements Animatable {
         return height;
     }
     
-    public final int getCenterX() {
-        return centerX;
+    public final int getOriginX() {
+        return originX;
     }
     
-    public final int getCenterY() {
-        return centerY;
+    public final int getOriginY() {
+        return originY;
     }
     
-    public void draw(Graphics g, int x, int y, boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (blank || !loaded || alpha <= 0) {
-            return;
+    @Override
+    public final void draw(Graphics g, int x, int y) {
+        if (!blank && loaded) {
+            draw(g, x, y, 0, width, 0, height, 1, false, false, 0, 1, null);
         }
-        draw(g, x, y, 0, width, 0, height, 1, xFlip, yFlip, 0, (float)alpha, filter);
     }
     
-    public void draw(Graphics g, int x, int y, boolean xFlip,
+    @Override
+    public final void draw(Graphics g, int x, int y, boolean xFlip,
             boolean yFlip, double angle, double alpha, String filter) {
-        if (blank || !loaded || alpha <= 0) {
-            return;
+        if (!blank && loaded && alpha > 0) {
+            draw(g, x, y, 0, width, 0, height, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
         }
-        draw(g, x, y, 0, width, 0, height, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
     }
     
-    public void draw(Graphics g, int x, int y, double scale,
+    @Override
+    public final void draw(Graphics g, int x, int y, double scale,
             boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (blank || !loaded || scale <= 0 || alpha <= 0) {
-            return;
+        if (!blank && loaded && scale > 0 && alpha > 0) {
+            draw(g, x, y, 0, width, 0, height, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
-        draw(g, x, y, 0, width, 0, height, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
     }
     
-    public void draw(Graphics g, int x, int y, int left, int right, int top,
-            int bottom, boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (blank || !loaded || right <= left || bottom <= top || alpha <= 0) {
-            return;
+    @Override
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom) {
+        if (!blank && loaded && right > left && bottom > top) {
+            draw(g, x + left, y + top, left, right, top, bottom, 1, false, false, 0, 1, null);
         }
-        if (xFlip) {
-            int temp = left;
-            left = width - right;
-            right = width - temp;
-        }
-        if (yFlip) {
-            int temp = bottom;
-            bottom = height - top;
-            top = height - temp;
-        }
-        draw(g, x + left, y + top, left, right, top, bottom, 1, xFlip, yFlip, 0, (float)alpha, filter);
     }
     
-    public void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+    @Override
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             boolean xFlip, boolean yFlip, double angle, double alpha, String filter) {
-        if (blank || !loaded || right <= left || bottom <= top || alpha <= 0) {
-            return;
+        if (!blank && loaded && right > left && bottom > top && alpha > 0) {
+            if (xFlip) {
+                int temp = left;
+                left = width - right;
+                right = width - temp;
+            }
+            if (yFlip) {
+                int temp = bottom;
+                bottom = height - top;
+                top = height - temp;
+            }
+            Vector2f vector = new Vector2f(left, top).sub(angle);
+            draw(g, x + Math.round(vector.getX()), y + Math.round(vector.getY()),
+                    left, right, top, bottom, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
         }
-        if (xFlip) {
-            int temp = left;
-            left = width - right;
-            right = width - temp;
-        }
-        if (yFlip) {
-            int temp = bottom;
-            bottom = height - top;
-            top = height - temp;
-        }
-        Vector2f vector = new Vector2f(left, top).sub(angle);
-        draw(g, x + Math.round(vector.getX()), y + Math.round(vector.getY()),
-                left, right, top, bottom, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
     }
     
-    public void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+    @Override
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             double scale, boolean xFlip, boolean yFlip, double alpha, String filter) {
-        if (blank || !loaded || right <= left || bottom <= top || scale <= 0 || alpha <= 0) {
-            return;
+        if (!blank && loaded && right > left && bottom > top && scale > 0 && alpha > 0) {
+            if (xFlip) {
+                int temp = left;
+                left = width - right;
+                right = width - temp;
+            }
+            if (yFlip) {
+                int temp = bottom;
+                bottom = height - top;
+                top = height - temp;
+            }
+            y += Math.round(top*scale);
+            draw(g, (int)(x + Math.round(left*scale)), (int)(y + Math.round(top*scale)),
+                    left, right, top, bottom, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
-        if (xFlip) {
-            int temp = left;
-            left = width - right;
-            right = width - temp;
-        }
-        if (yFlip) {
-            int temp = bottom;
-            bottom = height - top;
-            top = height - temp;
-        }
-        y += Math.round(top*scale);
-        draw(g, (int)(x + Math.round(left*scale)), (int)(y + Math.round(top*scale)),
-                left, right, top, bottom, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
     }
     
     private void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
@@ -266,13 +255,13 @@ public class Sprite implements Animatable {
             index += 1;
             xOffset = -this.right;
         } else {
-            xOffset = -centerX;
+            xOffset = -originX;
         }
         if (yFlip) {
             index += 2;
             yOffset = -this.bottom;
         } else {
-            yOffset = -centerY;
+            yOffset = -originY;
         }
         x += Math.round(xOffset*scale);
         y += Math.round(yOffset*scale);

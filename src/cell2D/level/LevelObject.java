@@ -1,5 +1,8 @@
 package cell2D.level;
 
+import cell2D.Animation;
+import cell2D.AnimationInstance;
+import cell2D.Drawable;
 import cell2D.Sprite;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +18,8 @@ public abstract class LevelObject {
     private Hitbox overlapHitbox = null;
     private Hitbox solidHitbox = null;
     private int drawPriority = 0;
-    private Sprite sprite = null;
+    private Drawable appearance = Sprite.BLANK;
+    private AnimationInstance animInstance = AnimationInstance.BLANK;
     private double alpha = 1;
     private String filter = null;
     
@@ -62,6 +66,7 @@ public abstract class LevelObject {
     
     void addActions() {
         locatorHitbox.setGameState(state);
+        state.addAnimInstance(animInstance);
     }
     
     void addCellData() {
@@ -85,6 +90,7 @@ public abstract class LevelObject {
         if (solidHitbox != null) {
             state.removeAllSolidSurfaces(solidHitbox);
         }
+        state.removeAnimInstance(animInstance);
     }
     
     public final double getTimeFactor() {
@@ -100,7 +106,9 @@ public abstract class LevelObject {
         setTimeFactorActions(timeFactor);
     }
     
-    void setTimeFactorActions(double timeFactor) {}
+    void setTimeFactorActions(double timeFactor) {
+        animInstance.setTimeFactor(timeFactor);
+    }
     
     public final Hitbox getLocatorHitbox() {
         return locatorHitbox;
@@ -435,12 +443,44 @@ public abstract class LevelObject {
         locatorHitbox.changeDrawPriority(drawPriority);
     }
     
-    public final Sprite getSprite() {
-        return sprite;
+    public final Drawable getAppearance() {
+        return appearance;
     }
     
-    public final void setSprite(Sprite sprite) {
-        this.sprite = sprite;
+    public final void setAppearance(Drawable appearance) {
+        this.appearance = appearance;
+        if (animInstance != AnimationInstance.BLANK) {
+            if (state != null) {
+                state.removeAnimInstance(animInstance);
+            }
+            animInstance.setTimeFactor(-1);
+            animInstance = AnimationInstance.BLANK;
+        }
+    }
+    
+    public final AnimationInstance getAnimInstance() {
+        return animInstance;
+    }
+    
+    public final Animation getAnimation() {
+        return animInstance.getAnimation();
+    }
+    
+    public final AnimationInstance setAnimInstance(Animation animation) {
+        if (animInstance != AnimationInstance.BLANK) {
+            if (state != null) {
+                state.removeAnimInstance(animInstance);
+            }
+            animInstance.setTimeFactor(-1);
+        }
+        if (animation == Animation.BLANK) {
+            animInstance = AnimationInstance.BLANK;
+        } else {
+            animInstance = new AnimationInstance(animation);
+            animInstance.setTimeFactor(timeFactor);
+        }
+        appearance = animInstance;
+        return animInstance;
     }
     
     public final double getAlpha() {
@@ -463,7 +503,7 @@ public abstract class LevelObject {
     }
     
     public void draw(Graphics g, int x, int y) {
-        sprite.draw(g, x, y, getXFlip(), getYFlip(), getAngle(), alpha, filter);
+        appearance.draw(g, x, y, getXFlip(), getYFlip(), getAngle(), alpha, filter);
     }
     
 }

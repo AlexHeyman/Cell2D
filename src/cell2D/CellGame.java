@@ -938,17 +938,17 @@ public abstract class CellGame {
         }
     }
     
-    public final Sprite createSprite(String path, int centerX, int centerY, List<String> filters) throws SlickException {
-        return createSprite(path, centerX, centerY, null, filters);
+    public final Sprite createSprite(String path, int originX, int originY, List<String> filters) throws SlickException {
+        return createSprite(path, originX, originY, null, filters);
     }
     
-    public final Sprite createSprite(String path, int centerX, int centerY,
+    public final Sprite createSprite(String path, int originX, int originY,
             int transR, int transG, int transB, List<String> filters) throws SlickException {
-        return createSprite(path, centerX, centerY,  new Color(transR, transG, transB), filters);
+        return createSprite(path, originX, originY,  new Color(transR, transG, transB), filters);
     }
     
-    public final Sprite createSprite(String path, int centerX,
-            int centerY, Color transColor, List<String> filters) throws SlickException {
+    public final Sprite createSprite(String path, int originX,
+            int originY, Color transColor, List<String> filters) throws SlickException {
         Set<Filter> filterSet = new HashSet<>();
         if (filters != null) {
             for (String name : filters) {
@@ -958,7 +958,7 @@ public abstract class CellGame {
                 }
             }
         }
-        Sprite sprite = new Sprite(false, null, null, null, getSubFolderPath("graphics") + path, transColor, filterSet, centerX, centerY);
+        Sprite sprite = new Sprite(false, null, null, null, getSubFolderPath("graphics") + path, transColor, filterSet, originX, originY);
         if (autoLoadAssets) {
             sprite.load();
         }
@@ -970,19 +970,19 @@ public abstract class CellGame {
     }
     
     public final SpriteSheet createSpriteSheet(String path, int width, int height, int spriteWidth,
-            int spriteHeight, int spriteSpacing, int centerX, int centerY, String[] filters) throws SlickException {
-        return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, centerX, centerY, null, filters);
+            int spriteHeight, int spriteSpacing, int originX, int originY, String[] filters) throws SlickException {
+        return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, null, filters);
     }
     
     public final SpriteSheet createSpriteSheet(String path, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int centerX,
-            int centerY, int transR, int transG, int transB, String[] filters) throws SlickException {
-        return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, centerX, centerY, new Color(transR, transG, transB), filters);
+            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
+            int originY, int transR, int transG, int transB, String[] filters) throws SlickException {
+        return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, new Color(transR, transG, transB), filters);
     }
     
     public final SpriteSheet createSpriteSheet(String path, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int centerX,
-            int centerY, Color transColor, String[] filters) throws SlickException {
+            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
+            int originY, Color transColor, String[] filters) throws SlickException {
         Set<Filter> filterSet = new HashSet<>();
         if (filters != null) {
             for (String name : filters) {
@@ -993,7 +993,7 @@ public abstract class CellGame {
             }
         }
         SpriteSheet spriteSheet = new SpriteSheet(null, null, getSubFolderPath("graphics") + path,
-                transColor, filterSet, width, height, spriteWidth, spriteHeight, spriteSpacing, centerX, centerY);
+                transColor, filterSet, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY);
         if (autoLoadAssets) {
             spriteSheet.load();
         }

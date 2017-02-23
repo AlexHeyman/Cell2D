@@ -18,7 +18,7 @@ public class SpriteSheet {
     private final Color transColor;
     private final Set<Filter> filters;
     private BufferedImage bufferedImage = null;
-    private final int spriteWidth, spriteHeight, spriteSpacing, centerX, centerY;
+    private final int spriteWidth, spriteHeight, spriteSpacing, originX, originY;
     private int width = 0;
     private int height = 0;
     private final Sprite[][] sprites;
@@ -26,7 +26,7 @@ public class SpriteSheet {
     
     SpriteSheet(SpriteSheet recolorOf, Filter recolorFilter, String path,
             Color transColor, Set<Filter> filters, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int centerX, int centerY) {
+            int spriteWidth, int spriteHeight, int spriteSpacing, int originX, int originY) {
         this.recolorOf = recolorOf;
         this.recolorFilter = recolorFilter;
         this.path = path;
@@ -37,14 +37,14 @@ public class SpriteSheet {
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
         this.spriteSpacing = spriteSpacing;
-        this.centerX = centerX;
-        this.centerY = centerY;
+        this.originX = originX;
+        this.originY = originY;
         sprites = new Sprite[width][height];
         spriteList = new Sprite[width*height];
         int i = 0;
         for (int x = 0; x < sprites.length; x++) {
             for (int y = 0; y < sprites[x].length; y++) {
-                spriteList[i] = new Sprite(false, null, null, this, null, null, null, centerX, centerY);
+                spriteList[i] = new Sprite(false, null, null, this, null, null, null, originX, originY);
                 sprites[x][y] = spriteList[i];
                 i++;
             }
@@ -52,7 +52,7 @@ public class SpriteSheet {
     }
     
     final SpriteSheet getRecolor(Filter recolorFilter) {
-        return new SpriteSheet(this, recolorFilter, null, null, filters, width, height, spriteWidth, spriteHeight, spriteSpacing, centerX, centerY);
+        return new SpriteSheet(this, recolorFilter, null, null, filters, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY);
     }
     
     public final boolean isLoaded() {
@@ -134,12 +134,12 @@ public class SpriteSheet {
         return height;
     }
     
-    public final int getCenterX() {
-        return centerX;
+    public final int getOriginX() {
+        return originX;
     }
     
-    public final int getCenterY() {
-        return centerY;
+    public final int getOriginY() {
+        return originY;
     }
     
     public Sprite getSprite(int x, int y) {

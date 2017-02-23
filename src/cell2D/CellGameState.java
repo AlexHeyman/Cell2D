@@ -89,7 +89,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
-    public final AnimationInstance addAnimation(Animation animation) {
+    public final AnimationInstance addAnimInstance(Animation animation) {
         if (animation == Animation.BLANK) {
             return AnimationInstance.BLANK;
         }
@@ -141,7 +141,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
-    public final AnimationInstance setAnimation(int id, Animation animation) {
+    public final AnimationInstance setAnimInstance(int id, Animation animation) {
         if (animation == Animation.BLANK) {
             AnimationInstance oldInstance = IDInstances.remove(id);
             if (oldInstance != null) {

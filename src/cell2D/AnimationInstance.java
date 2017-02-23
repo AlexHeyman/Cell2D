@@ -1,6 +1,8 @@
 package cell2D;
 
-public class AnimationInstance {
+import org.newdawn.slick.Graphics;
+
+public class AnimationInstance implements Drawable {
     
     public static final AnimationInstance BLANK = new AnimationInstance();
     
@@ -80,10 +82,9 @@ public class AnimationInstance {
     }
     
     public final void setTimeFactor(double timeFactor) {
-        if (blank) {
-            return;
+        if (!blank) {
+            this.timeFactor = timeFactor;
         }
-        this.timeFactor = timeFactor;
     }
     
     public final Animation getAnimation() {
@@ -145,11 +146,12 @@ public class AnimationInstance {
         return (level >= 0 && level < speeds.length ? speeds[level] : 0);
     }
     
+    public final void setSpeed(double speed) {
+        setSpeed(indices.length - 1, speed);
+    }
+    
     public final void setSpeed(int level, double speed) {
-        if (blank) {
-            return;
-        }
-        if (level >= 0 && level < speeds.length) {
+        if (!blank && level >= 0 && level < speeds.length) {
             speeds[level] = speed;
         }
     }
@@ -195,6 +197,36 @@ public class AnimationInstance {
         if (spriteChanged) {
             updateCurrentSprite();
         }
+    }
+    
+    @Override
+    public final void draw(Graphics g, int x, int y) {
+        currentSprite.draw(g, x, y);
+    }
+    
+    @Override
+    public final void draw(Graphics g, int x, int y, boolean xFlip, boolean yFlip, double angle, double alpha, String filter) {
+        currentSprite.draw(g, x, y, xFlip, yFlip, angle, alpha, filter);
+    }
+    
+    @Override
+    public final void draw(Graphics g, int x, int y, double scale, boolean xFlip, boolean yFlip, double alpha, String filter) {
+        currentSprite.draw(g, x, y, scale, xFlip, yFlip, alpha, filter);
+    }
+    
+    @Override
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom) {
+        currentSprite.draw(g, x, y, left, right, top, bottom);
+    }
+    
+    @Override
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom, boolean xFlip, boolean yFlip, double angle, double alpha, String filter) {
+        currentSprite.draw(g, x, y, left, right, top, bottom, xFlip, yFlip, angle, alpha, filter);
+    }
+    
+    @Override
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom, double scale, boolean xFlip, boolean yFlip, double alpha, String filter) {
+        currentSprite.draw(g, x, y, left, right, top, bottom, scale, xFlip, yFlip, alpha, filter);
     }
     
 }

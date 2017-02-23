@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class ThinkerObject extends AnimatedObject {
+public abstract class ThinkerObject extends LevelObject {
     
     private static final AtomicLong idCounter = new AtomicLong(0);
     
