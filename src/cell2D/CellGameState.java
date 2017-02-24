@@ -116,10 +116,6 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return (instance == null ? AnimationInstance.BLANK : instance);
     }
     
-    public final Animation getAnimation(int id) {
-        return getAnimInstance(id).getAnimation();
-    }
-    
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
             AnimationInstance oldInstance = IDInstances.remove(id);
@@ -141,22 +137,31 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
-    public final AnimationInstance setAnimInstance(int id, Animation animation) {
-        if (animation == Animation.BLANK) {
-            AnimationInstance oldInstance = IDInstances.remove(id);
+    public final Animation getAnimation(int id) {
+        AnimationInstance instance = IDInstances.get(id);
+        return (instance == null ? Animation.BLANK : instance.getAnimation());
+    }
+    
+    public final AnimationInstance setAnimation(int id, Animation animation) {
+        AnimationInstance instance = getAnimInstance(id);
+        if (instance.getAnimation() != animation) {
+            if (animation == Animation.BLANK) {
+                AnimationInstance oldInstance = IDInstances.remove(id);
+                if (oldInstance != null) {
+                    animInstances.remove(oldInstance);
+                    oldInstance.state = null;
+                }
+                return AnimationInstance.BLANK;
+            }
+            instance = new AnimationInstance(animation);
+            AnimationInstance oldInstance = IDInstances.put(id, instance);
             if (oldInstance != null) {
+                animInstances.remove(oldInstance);
                 oldInstance.state = null;
             }
-            return AnimationInstance.BLANK;
+            animInstances.add(instance);
+            instance.state = this;
         }
-        AnimationInstance instance = new AnimationInstance(animation);
-        AnimationInstance oldInstance = IDInstances.put(id, instance);
-        if (oldInstance != null) {
-            animInstances.remove(oldInstance);
-            oldInstance.state = null;
-        }
-        animInstances.add(instance);
-        instance.state = this;
         return instance;
     }
     

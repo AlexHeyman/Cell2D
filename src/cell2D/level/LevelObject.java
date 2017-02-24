@@ -5,7 +5,9 @@ import cell2D.AnimationInstance;
 import cell2D.Drawable;
 import cell2D.Sprite;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.newdawn.slick.Graphics;
 
 public abstract class LevelObject {
@@ -19,7 +21,7 @@ public abstract class LevelObject {
     private Hitbox solidHitbox = null;
     private int drawPriority = 0;
     private Drawable appearance = Sprite.BLANK;
-    private AnimationInstance animInstance = AnimationInstance.BLANK;
+    private final Map<Integer,AnimationInstance> animInstances = new HashMap<>();
     private double alpha = 1;
     private String filter = null;
     
@@ -66,7 +68,11 @@ public abstract class LevelObject {
     
     void addActions() {
         locatorHitbox.setGameState(state);
-        state.addAnimInstance(animInstance);
+        if (!animInstances.isEmpty()) {
+            for (AnimationInstance instance : animInstances.values()) {
+                state.addAnimInstance(instance);
+            }
+        }
     }
     
     void addCellData() {
@@ -90,7 +96,11 @@ public abstract class LevelObject {
         if (solidHitbox != null) {
             state.removeAllSolidSurfaces(solidHitbox);
         }
-        state.removeAnimInstance(animInstance);
+        if (!animInstances.isEmpty()) {
+            for (AnimationInstance instance : animInstances.values()) {
+                state.removeAnimInstance(instance);
+            }
+        }
     }
     
     public final double getTimeFactor() {
@@ -107,7 +117,11 @@ public abstract class LevelObject {
     }
     
     void setTimeFactorActions(double timeFactor) {
-        animInstance.setTimeFactor(timeFactor);
+        if (!animInstances.isEmpty()) {
+            for (AnimationInstance instance : animInstances.values()) {
+                instance.setTimeFactor(timeFactor);
+            }
+        }
     }
     
     public final Hitbox getLocatorHitbox() {
@@ -449,38 +463,81 @@ public abstract class LevelObject {
     
     public final void setAppearance(Drawable appearance) {
         this.appearance = appearance;
-        if (animInstance != AnimationInstance.BLANK) {
-            if (state != null) {
-                state.removeAnimInstance(animInstance);
+    }
+    
+    public final AnimationInstance getAnimInstance(int id) {
+        AnimationInstance instance = animInstances.get(id);
+        return (instance == null ? AnimationInstance.BLANK : instance);
+    }
+    
+    public final boolean setAnimInstance(int id, AnimationInstance instance) {
+        if (instance == AnimationInstance.BLANK) {
+            AnimationInstance oldInstance = animInstances.remove(id);
+            if (oldInstance != null && state != null) {
+                state.removeAnimInstance(oldInstance);
             }
-            animInstance.setTimeFactor(-1);
-            animInstance = AnimationInstance.BLANK;
+            return true;
         }
-    }
-    
-    public final AnimationInstance getAnimInstance() {
-        return animInstance;
-    }
-    
-    public final Animation getAnimation() {
-        return animInstance.getAnimation();
-    }
-    
-    public final AnimationInstance setAnimInstance(Animation animation) {
-        if (animInstance != AnimationInstance.BLANK) {
+        if (instance.getGameState() == null) {
+            AnimationInstance oldInstance = animInstances.put(id, instance);
             if (state != null) {
-                state.removeAnimInstance(animInstance);
+                if (oldInstance != null) {
+                    state.removeAnimInstance(oldInstance);
+                }
+                state.addAnimInstance(instance);
             }
-            animInstance.setTimeFactor(-1);
+            return true;
         }
-        if (animation == Animation.BLANK) {
-            animInstance = AnimationInstance.BLANK;
-        } else {
-            animInstance = new AnimationInstance(animation);
-            animInstance.setTimeFactor(timeFactor);
+        return false;
+    }
+    
+    public final boolean setAnimInstance(AnimationInstance instance) {
+        if (setAnimInstance(0, instance)) {
+            appearance = instance;
+            return true;
         }
-        appearance = animInstance;
-        return animInstance;
+        return false;
+    }
+    
+    public final Animation getAnimation(int id) {
+        return getAnimInstance(id).getAnimation();
+    }
+    
+    public final AnimationInstance setAnimation(int id, Animation animation) {
+        AnimationInstance instance = getAnimInstance(id);
+        if (instance.getAnimation() != animation) {
+            if (animation == Animation.BLANK) {
+                AnimationInstance oldInstance = animInstances.remove(id);
+                if (oldInstance != null && state != null) {
+                    state.removeAnimInstance(oldInstance);
+                }
+                return AnimationInstance.BLANK;
+            }
+            instance = new AnimationInstance(animation);
+            AnimationInstance oldInstance = animInstances.put(id, instance);
+            if (state != null) {
+                if (oldInstance != null) {
+                    state.removeAnimInstance(oldInstance);
+                }
+                state.addAnimInstance(instance);
+            }
+        }
+        return instance;
+    }
+    
+    public final AnimationInstance setAnimation(Animation animation) {
+        AnimationInstance instance = setAnimation(0, animation);
+        appearance = instance;
+        return instance;
+    }
+    
+    public final void clearAnimInstances() {
+        if (state != null) {
+            for (AnimationInstance instance : animInstances.values()) {
+                state.removeAnimInstance(instance);
+            }
+        }
+        animInstances.clear();
     }
     
     public final double getAlpha() {
