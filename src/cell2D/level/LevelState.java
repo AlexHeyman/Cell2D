@@ -1191,6 +1191,31 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         return nearest;
     }
     
+    public final <T extends LevelObject> List<T> boundingBoxesMeet(Hitbox hitbox, Class<T> cls) {
+        List<T> meeting = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            for (Hitbox overlapHitbox : iterator.next().overlapHitboxes) {
+                if (!overlapHitbox.scanned) {
+                    if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
+                            && hitbox.getLeftEdge() <= overlapHitbox.getRightEdge()
+                            && hitbox.getRightEdge() >= overlapHitbox.getLeftEdge()
+                            && hitbox.getTopEdge() <= overlapHitbox.getBottomEdge()
+                            && hitbox.getBottomEdge() >= overlapHitbox.getTopEdge()) {
+                        meeting.add(cls.cast(overlapHitbox.getObject()));
+                    }
+                    overlapHitbox.scanned = true;
+                    scanned.add(overlapHitbox);
+                }
+            }
+        }
+        for (Hitbox scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return meeting;
+    }
+    
     public final <T extends LevelObject> boolean isIntersectingSolidObject(Hitbox hitbox, Class<T> cls) {
         return intersectingSolidObject(hitbox, cls) != null;
     }

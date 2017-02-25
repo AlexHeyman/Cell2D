@@ -398,6 +398,10 @@ public abstract class LevelObject {
         return (state == null || overlapHitbox == null ? new ArrayList<>() : state.overlappingObjects(overlapHitbox, cls));
     }
     
+    public final <T extends LevelObject> List<T> boundingBoxesMeet(Class<T> cls) {
+        return (state == null || overlapHitbox == null ? new ArrayList<>() : state.boundingBoxesMeet(overlapHitbox, cls));
+    }
+    
     public final Hitbox getSolidHitbox() {
         return solidHitbox;
     }
