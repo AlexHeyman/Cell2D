@@ -16,7 +16,7 @@ public class Viewport extends LevelThinker {
         if (top > bottom) {
             throw new RuntimeException("Attempted to give a Viewport a negative height");
         }
-        this.hud = (hud == null || hud.getGameState() == null ? hud : null);
+        this.hud = (hud == null || hud.getNewGameState() == null ? hud : null);
         x1 = left;
         y1 = top;
         x2 = right;
@@ -66,15 +66,15 @@ public class Viewport extends LevelThinker {
     }
     
     public final boolean setHUD(HUD hud) {
-        if (getGameState() == null) {
-            if (hud == null || hud.getGameState() == null) {
+        if (getNewGameState() == null) {
+            if (hud == null || hud.getNewGameState() == null) {
                 this.hud = hud;
                 return true;
             }
             return false;
-        } else if (hud == null || getGameState().addThinker(hud)) {
+        } else if (hud == null || getNewGameState().addThinker(hud)) {
             if (this.hud != null) {
-                getGameState().removeThinker(this.hud);
+                getNewGameState().removeThinker(this.hud);
             }
             this.hud = hud;
             return true;
@@ -148,6 +148,16 @@ public class Viewport extends LevelThinker {
     
     public final int getBottomEdge() {
         return (int)Math.round(camera.getCenterY()) + bottom;
+    }
+    
+    public final boolean rectangleIsVisible(double x1, double y1, double x2, double y2) {
+        if (camera != null && camera.newState == getNewGameState()) {
+            double centerX = Math.round(camera.getCenterX());
+            double centerY = Math.round(camera.getCenterY());
+            return Math.round(x1) < centerX + right && Math.round(x2) > centerX + left
+                    && Math.round(y1) < centerY + bottom && Math.round(y2) > centerY + top;
+        }
+        return false;
     }
     
 }

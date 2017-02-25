@@ -559,6 +559,14 @@ public abstract class LevelObject {
         this.filter = filter;
     }
     
+    public final boolean isVisible() {
+        return (state == null ? false : state.rectangleIsVisible(getLeftEdge(), getTopEdge(), getRightEdge(), getBottomEdge()));
+    }
+    
+    public final boolean isVisible(Viewport viewport) {
+        return viewport.rectangleIsVisible(getLeftEdge(), getTopEdge(), getRightEdge(), getBottomEdge());
+    }
+    
     public void draw(Graphics g, int x, int y) {
         appearance.draw(g, x, y, getXFlip(), getYFlip(), getAngle(), alpha, filter);
     }

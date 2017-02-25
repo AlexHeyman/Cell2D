@@ -1363,6 +1363,24 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
         viewports.clear();
     }
     
+    public final boolean rectangleIsVisible(double x1, double y1, double x2, double y2) {
+        x1 = Math.round(x1);
+        y1 = Math.round(y1);
+        x2 = Math.round(x2);
+        y2 = Math.round(y2);
+        for (Viewport viewport : viewports.values()) {
+            if (viewport.getCamera() != null && viewport.getCamera().newState == this) {
+                double centerX = Math.round(viewport.getCamera().getCenterX());
+                double centerY = Math.round(viewport.getCamera().getCenterY());
+                if (x1 < centerX + viewport.right && x2 > centerX + viewport.left
+                        && y1 < centerY + viewport.bottom && y2 > centerY + viewport.top) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     final void move(ThinkerObject object, double dx, double dy) {
         object.clearCollisions();
         if (object.getCollisionHitbox() != null) {
@@ -1439,7 +1457,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
                 int vx2 = x1 + viewport.roundX2;
                 int vy2 = y1 + viewport.roundY2;
                 g.setWorldClip(vx1, vy1, vx2 - vx1, vy2 - vy1);
-                if (viewport.getCamera() != null && viewport.getCamera().state == this) {
+                if (viewport.getCamera() != null && viewport.getCamera().newState == this) {
                     double cx = viewport.getCamera().getCenterX();
                     double cy = viewport.getCamera().getCenterY();
                     for (LevelLayer layer : levelLayers.headMap(0).values()) {
