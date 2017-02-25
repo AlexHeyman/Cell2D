@@ -203,6 +203,10 @@ public class Sprite implements Animatable, Drawable {
     @Override
     public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom) {
         if (!blank && loaded && right > left && bottom > top) {
+            left += originX;
+            right += originX;
+            top += originY;
+            bottom += originY;
             draw(g, x + left, y + top, left, right, top, bottom, 1, false, false, 0, 1, null);
         }
     }
@@ -213,14 +217,18 @@ public class Sprite implements Animatable, Drawable {
         if (!blank && loaded && right > left && bottom > top && alpha > 0) {
             if (xFlip) {
                 int temp = left;
-                left = width - right;
-                right = width - temp;
+                left = -right;
+                right = -temp;
             }
             if (yFlip) {
                 int temp = bottom;
-                bottom = height - top;
-                top = height - temp;
+                bottom = -top;
+                top = -temp;
             }
+            left += originX;
+            right += originX;
+            top += originY;
+            bottom += originY;
             Vector2f vector = new Vector2f(left, top).sub(angle);
             draw(g, x + Math.round(vector.getX()), y + Math.round(vector.getY()),
                     left, right, top, bottom, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
@@ -233,15 +241,18 @@ public class Sprite implements Animatable, Drawable {
         if (!blank && loaded && right > left && bottom > top && scale > 0 && alpha > 0) {
             if (xFlip) {
                 int temp = left;
-                left = width - right;
-                right = width - temp;
+                left = -right;
+                right = -temp;
             }
             if (yFlip) {
                 int temp = bottom;
-                bottom = height - top;
-                top = height - temp;
+                bottom = -top;
+                top = -temp;
             }
-            y += Math.round(top*scale);
+            left += originX;
+            right += originX;
+            top += originY;
+            bottom += originY;
             draw(g, (int)(x + Math.round(left*scale)), (int)(y + Math.round(top*scale)),
                     left, right, top, bottom, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
