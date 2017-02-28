@@ -55,22 +55,22 @@ public class Animation implements Animatable {
     }
     
     @Override
-    public int getLevel() {
+    public final int getLevel() {
         return level;
     }
     
     @Override
-    public int getLength() {
+    public final int getLength() {
         return frames.length;
     }
     
     @Override
-    public Animatable getFrame(int index) {
+    public final Animatable getFrame(int index) {
         return (index >= 0 && index < frames.length ? frames[index] : Sprite.BLANK);
     }
     
     @Override
-    public boolean framesAreCompatible(int index1, int index2) {
+    public final boolean framesAreCompatible(int index1, int index2) {
         if (index1 < 0 || index1 >= frames.length
                 || index2 < 0 || index2 >= frames.length) {
             return false;
@@ -82,7 +82,7 @@ public class Animation implements Animatable {
     }
     
     @Override
-    public double getFrameDuration(int index) {
+    public final double getFrameDuration(int index) {
         return (index >= 0 && index < frameDurations.length ? frameDurations[index] : 0);
     }
     

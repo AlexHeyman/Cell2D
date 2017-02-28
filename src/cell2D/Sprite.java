@@ -125,27 +125,27 @@ public class Sprite implements Animatable, Drawable {
     }
     
     @Override
-    public int getLevel() {
+    public final int getLevel() {
         return 0;
     }
     
     @Override
-    public int getLength() {
+    public final int getLength() {
         return 1;
     }
     
     @Override
-    public Animatable getFrame(int index) {
+    public final Animatable getFrame(int index) {
         return (index == 0 ? this : BLANK);
     }
     
     @Override
-    public boolean framesAreCompatible(int index1, int index2) {
+    public final boolean framesAreCompatible(int index1, int index2) {
         return (index1 == 0 && index2 == 0);
     }
     
     @Override
-    public double getFrameDuration(int index) {
+    public final double getFrameDuration(int index) {
         return 0;
     }
     
