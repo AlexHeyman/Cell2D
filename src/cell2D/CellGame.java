@@ -80,7 +80,6 @@ public abstract class CellGame {
     private int screenYOffset = 0;
     private boolean fullscreen;
     private boolean updateScreen = true;
-    private Path assetsPath;
     private boolean autoLoadAssets;
     private boolean assetsInitialized = false;
     private Image loadingImage = null;
@@ -103,8 +102,8 @@ public abstract class CellGame {
     private double msFading = 0;
     
     public CellGame(String gamename, int numCommands, int updateFPS,
-            int screenWidth, int screenHeight, double scaleFactor, boolean fullscreen,
-            String assetsPath, boolean autoLoadAssets, String loadingImagePath) throws SlickException {
+            int screenWidth, int screenHeight, double scaleFactor,
+            boolean fullscreen, boolean autoLoadAssets, String loadingImagePath) throws SlickException {
         game = new Game(gamename);
         if (numCommands < 0) {
             throw new RuntimeException("Attempted to create a CellGame with a negative number of controls");
@@ -128,10 +127,9 @@ public abstract class CellGame {
         this.screenHeight = screenHeight;
         setScaleFactor(scaleFactor);
         this.fullscreen = fullscreen;
-        this.assetsPath = Paths.get(assetsPath);
         this.autoLoadAssets = autoLoadAssets;
         if (loadingImagePath != null) {
-            loadingImage = new Image(getSubFolderPath("graphics") + loadingImagePath);
+            loadingImage = new Image(loadingImagePath);
         }
     }
     
@@ -275,10 +273,6 @@ public abstract class CellGame {
         }
         graphics.flush();
         return new Pair<>(image, newImage);
-    }
-    
-    private String getSubFolderPath(String subFolder) {
-        return assetsPath.toString() + File.separator + subFolder + File.separator;
     }
     
     private void updateScreen(GameContainer container) throws SlickException {
@@ -854,10 +848,6 @@ public abstract class CellGame {
         updateScreen = true;
     }
     
-    public final String getAssetsPath() {
-        return assetsPath.toString();
-    }
-    
     public final boolean getAutoLoadAssets() {
         return autoLoadAssets;
     }
@@ -958,7 +948,7 @@ public abstract class CellGame {
                 }
             }
         }
-        Sprite sprite = new Sprite(false, null, null, null, getSubFolderPath("graphics") + path, transColor, filterSet, originX, originY);
+        Sprite sprite = new Sprite(false, null, null, null, path, transColor, filterSet, originX, originY);
         if (autoLoadAssets) {
             sprite.load();
         }
@@ -992,8 +982,8 @@ public abstract class CellGame {
                 }
             }
         }
-        SpriteSheet spriteSheet = new SpriteSheet(null, null, getSubFolderPath("graphics") + path,
-                transColor, filterSet, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY);
+        SpriteSheet spriteSheet = new SpriteSheet(null, null, path, transColor, filterSet,
+                width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY);
         if (autoLoadAssets) {
             spriteSheet.load();
         }
@@ -1134,7 +1124,7 @@ public abstract class CellGame {
     }
     
     public final Sound createSound(String path) throws SlickException {
-        Sound sound = new Sound(getSubFolderPath("sounds") + path);
+        Sound sound = new Sound(path);
         if (autoLoadAssets) {
             sound.load();
         }
@@ -1182,7 +1172,7 @@ public abstract class CellGame {
         if (name.equals("")) {
             throw new RuntimeException("Attempted to create a music track with the empty string as a name");
         }
-        Music music = new Music(getSubFolderPath("music") + path);
+        Music music = new Music(path);
         if (musics.put(name, music) != null) {
             throw new RuntimeException("Attempted to create multiple music tracks with the name " + name);
         }
