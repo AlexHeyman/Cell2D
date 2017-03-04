@@ -1473,7 +1473,7 @@ public class LevelState extends CellGameState<LevelState,LevelThinker,LevelThink
     }
     
     @Override
-    public final void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {
+    public void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {
         g.clearWorldClip();
         for (Viewport viewport : viewports.values()) {
             if (viewport.roundX1 != viewport.roundX2 && viewport.roundY1 != viewport.roundY2) {
