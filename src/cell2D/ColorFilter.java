@@ -1,9 +1,7 @@
 package cell2D;
 
 import java.awt.image.BufferedImage;
-import javafx.util.Pair;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
 class ColorFilter extends Filter {
@@ -20,7 +18,7 @@ class ColorFilter extends Filter {
     }
     
     @Override
-    final Pair<Image,BufferedImage> getFilteredImage(BufferedImage bufferedImage) throws SlickException {
+    final GameImage getFilteredImage(BufferedImage bufferedImage) throws SlickException {
         return CellGame.getRecoloredImage(bufferedImage, color);
     }
     

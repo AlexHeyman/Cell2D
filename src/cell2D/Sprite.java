@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javafx.util.Pair;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -17,6 +16,18 @@ public class Sprite implements Animatable, Drawable {
     
     public static final Sprite BLANK = new Sprite(true, null, null, null, null, null, null, 0, 0);
     
+    private static class InternalImage {
+        
+        private final Image[] imageArray;
+        private final BufferedImage bufferedImage;
+
+        private InternalImage(Image[] imageArray, BufferedImage bufferedImage) {
+            this.imageArray = imageArray;
+            this.bufferedImage = bufferedImage;
+        }
+    
+    }
+    
     private final boolean blank;
     boolean loaded;
     private final Sprite recolorOf;
@@ -25,7 +36,7 @@ public class Sprite implements Animatable, Drawable {
     private final String path;
     private final Color transColor;
     private final Set<Filter> filters;
-    private final Map<String,Pair<Image[],BufferedImage>> images = new HashMap<>();
+    private final Map<String,InternalImage> images = new HashMap<>();
     private Image[] defaultImages = null;
     private BufferedImage bufferedImage = null;
     private final int originX, originY;
@@ -60,18 +71,18 @@ public class Sprite implements Animatable, Drawable {
         if (!blank && !loaded) {
             loaded = true;
             if (spriteSheet == null) {
-                Pair<Image,BufferedImage> pair;
+                GameImage gameImage;
                 if (recolorOf == null) {
-                    pair = CellGame.getTransparentImage(path, transColor);
+                    gameImage = CellGame.getTransparentImage(path, transColor);
                 } else {
                     recolorOf.load();
-                    pair = recolorFilter.getFilteredImage(recolorOf.bufferedImage);
+                    gameImage = recolorFilter.getFilteredImage(recolorOf.bufferedImage);
                 }
-                bufferedImage = pair.getValue();
-                loadFilter("", pair.getKey(), bufferedImage);
+                bufferedImage = gameImage.getBufferedImage();
+                loadFilter("", gameImage.getImage(), bufferedImage);
                 for (Filter filter : filters) {
-                    Pair<Image,BufferedImage> filteredPair = filter.getFilteredImage(bufferedImage);
-                    loadFilter(filter.getName(), filteredPair.getKey(), filteredPair.getValue());
+                    GameImage filteredImage = filter.getFilteredImage(bufferedImage);
+                    loadFilter(filter.getName(), filteredImage.getImage(), filteredImage.getBufferedImage());
                 }
             } else {
                 spriteSheet.load();
@@ -98,7 +109,7 @@ public class Sprite implements Animatable, Drawable {
             right = width - originX;
             bottom = height - originY;
         }
-        images.put(filterName, new Pair<>(imageArray, bufferedImage));
+        images.put(filterName, new InternalImage(imageArray, bufferedImage));
     }
     
     public final boolean unload() {
@@ -276,20 +287,20 @@ public class Sprite implements Animatable, Drawable {
         }
         x += Math.round(xOffset*scale);
         y += Math.round(yOffset*scale);
-        Image[] imageArray;
+        Image image;
         if (filter == null) {
-            imageArray = defaultImages;
+            image = defaultImages[index];
         } else {
-            Pair<Image[],BufferedImage> pair = images.get(filter);
-            if (pair == null) {
-                imageArray = defaultImages;
+            InternalImage internalImage = images.get(filter);
+            if (internalImage == null) {
+                image = defaultImages[index];
             } else {
-                imageArray = pair.getKey();
+                image = internalImage.imageArray[index];
             }
         }
-        imageArray[index].setRotation(-angle);
-        imageArray[index].setAlpha(alpha);
-        g.drawImage(imageArray[index], x, y, x + (right - left)*scale, y + (bottom - top)*scale, left, top, right, bottom);
+        image.setRotation(-angle);
+        image.setAlpha(alpha);
+        g.drawImage(image, x, y, x + (right - left)*scale, y + (bottom - top)*scale, left, top, right, bottom);
     }
     
 }

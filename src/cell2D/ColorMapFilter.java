@@ -3,9 +3,7 @@ package cell2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.util.Pair;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
 class ColorMapFilter extends Filter {
@@ -22,7 +20,7 @@ class ColorMapFilter extends Filter {
     }
     
     @Override
-    final Pair<Image,BufferedImage> getFilteredImage(BufferedImage bufferedImage) throws SlickException {
+    final GameImage getFilteredImage(BufferedImage bufferedImage) throws SlickException {
         return CellGame.getRecoloredImage(bufferedImage, colorMap);
     }
     

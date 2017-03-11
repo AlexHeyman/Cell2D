@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javafx.util.Pair;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
@@ -62,21 +61,21 @@ public class SpriteSheet {
     public final boolean load() throws SlickException {
         if (!loaded) {
             loaded = true;
-            Pair<Image,BufferedImage> pair;
+            GameImage gameImage;
             if (recolorOf == null) {
-                pair = CellGame.getTransparentImage(path, transColor);
+                gameImage = CellGame.getTransparentImage(path, transColor);
             } else {
                 recolorOf.load();
-                pair = recolorFilter.getFilteredImage(recolorOf.bufferedImage);
+                gameImage = recolorFilter.getFilteredImage(recolorOf.bufferedImage);
             }
-            bufferedImage = pair.getValue();
+            bufferedImage = gameImage.getBufferedImage();
             for (Sprite sprite : spriteList) {
                 sprite.loaded = true;
             }
-            loadFilter("", pair.getKey());
+            loadFilter("", gameImage.getImage());
             for (Filter filter : filters) {
-                Pair<Image,BufferedImage> filteredPair = filter.getFilteredImage(bufferedImage);
-                loadFilter(filter.getName(), filteredPair.getKey());
+                GameImage filteredImage = filter.getFilteredImage(bufferedImage);
+                loadFilter(filter.getName(), filteredImage.getImage());
             }
             return true;
         }

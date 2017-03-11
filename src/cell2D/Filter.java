@@ -1,8 +1,6 @@
 package cell2D;
 
 import java.awt.image.BufferedImage;
-import javafx.util.Pair;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
 abstract class Filter {
@@ -17,6 +15,6 @@ abstract class Filter {
         return name;
     }
     
-    abstract Pair<Image,BufferedImage> getFilteredImage(BufferedImage bufferedImage) throws SlickException;
+    abstract GameImage getFilteredImage(BufferedImage bufferedImage) throws SlickException;
     
 }

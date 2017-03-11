@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import javafx.util.Pair;
 import javax.imageio.ImageIO;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -147,7 +146,7 @@ public abstract class CellGame {
         return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, (color >> 24) & 0xFF);
     }
     
-    static final Pair<Image,BufferedImage> getTransparentImage(String path, Color transColor) throws SlickException {
+    static final GameImage getTransparentImage(String path, Color transColor) throws SlickException {
         BufferedImage bufferedImage;
         try {
             bufferedImage = ImageIO.read(new File(path));
@@ -189,11 +188,10 @@ public abstract class CellGame {
             graphics.flush();
         }
         image.setFilter(Image.FILTER_NEAREST);
-        return new Pair<>(image, bufferedImage);
+        return new GameImage(image, bufferedImage);
     }
     
-    static final Pair<Image,BufferedImage> getRecoloredImage(
-            BufferedImage bufferedImage, Map<Color,Color> colorMap) throws SlickException {
+    static final GameImage getRecoloredImage(BufferedImage bufferedImage, Map<Color,Color> colorMap) throws SlickException {
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -243,11 +241,10 @@ public abstract class CellGame {
             }
         }
         graphics.flush();
-        return new Pair<>(image, newImage);
+        return new GameImage(image, newImage);
     }
     
-    static final Pair<Image,BufferedImage> getRecoloredImage(
-            BufferedImage bufferedImage, Color newColor) throws SlickException {
+    static final GameImage getRecoloredImage(BufferedImage bufferedImage, Color newColor) throws SlickException {
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -270,7 +267,7 @@ public abstract class CellGame {
             }
         }
         graphics.flush();
-        return new Pair<>(image, newImage);
+        return new GameImage(image, newImage);
     }
     
     private void updateScreen(GameContainer container) throws SlickException {
