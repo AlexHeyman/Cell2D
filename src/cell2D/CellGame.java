@@ -65,7 +65,7 @@ public abstract class CellGame {
     private String typingString = null;
     private int maxTypingStringLength = 0;
     private String typedString = null;
-    private int updateFPS;
+    private int fps;
     private double msPerStep;
     private double msToRun;
     private final DisplayMode[] displayModes;
@@ -98,7 +98,7 @@ public abstract class CellGame {
     private double fadeDuration = 0;
     private double msFading = 0;
     
-    public CellGame(String gamename, int numCommands, int updateFPS,
+    public CellGame(String gamename, int numCommands, int fps,
             int screenWidth, int screenHeight, double scaleFactor,
             boolean fullscreen, boolean autoLoadAssets, String loadingImagePath) throws SlickException {
         game = new Game(gamename);
@@ -113,7 +113,7 @@ public abstract class CellGame {
             commandStates[i] = CommandState.NOTHELD;
             commandChanges[i] = CommandState.NOTHELD;
         }
-        setUpdateFPS(updateFPS);
+        setFPS(fps);
         msToRun = 0;
         try {
             displayModes = Display.getAvailableDisplayModes();
@@ -130,10 +130,15 @@ public abstract class CellGame {
         }
     }
     
+    public static final void loadLibraries(String path) {
+        System.setProperty("java.library.path", path);
+        System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
+    }
+    
     public static final void startGame(CellGame game) throws SlickException {
         AppGameContainer container = new AppGameContainer(game.game);
         game.updateScreen(container);
-        container.setTargetFrameRate(game.getUpdateFPS());
+        container.setTargetFrameRate(game.getFPS());
         container.setShowFPS(false);
         container.start();
     }
@@ -786,16 +791,16 @@ public abstract class CellGame {
         }
     }
     
-    public final int getUpdateFPS() {
-        return updateFPS;
+    public final int getFPS() {
+        return fps;
     }
     
-    public final void setUpdateFPS(int updateFPS) {
-        if (updateFPS <= 0) {
+    public final void setFPS(int fps) {
+        if (fps <= 0) {
             throw new RuntimeException("Attempted to run a CellGame at a non-positive FPS");
         }
-        this.updateFPS = updateFPS;
-        msPerStep = 1000/((double)updateFPS);
+        this.fps = fps;
+        msPerStep = 1000/((double)fps);
     }
     
     public final int getScreenWidth() {
