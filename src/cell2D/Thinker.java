@@ -175,14 +175,14 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     
     public void timeUnitActions(CellGame game, T state) {}
     
-    final void doStep(CellGame game, T state) {
+    final void doFrame(CellGame game, T state) {
         if (thinkerState != null) {
-            thinkerState.stepActions(game, state);
+            thinkerState.frameActions(game, state);
         }
-        stepActions(game, state);
+        frameActions(game, state);
     }
     
-    public void stepActions(CellGame game, T state) {}
+    public void frameActions(CellGame game, T state) {}
     
     public void addedActions(CellGame game, T state) {}
     

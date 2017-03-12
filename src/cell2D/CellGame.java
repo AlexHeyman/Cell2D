@@ -66,7 +66,7 @@ public abstract class CellGame {
     private int maxTypingStringLength = 0;
     private String typedString = null;
     private int fps;
-    private double msPerStep;
+    private double msPerFrame;
     private double msToRun;
     private final DisplayMode[] displayModes;
     private int screenWidth;
@@ -367,7 +367,7 @@ public abstract class CellGame {
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
             if (loadingScreenRenderedOnce) {
                 if (assetsInitialized) {
-                    double timeElapsed = Math.min(delta, msPerStep);
+                    double timeElapsed = Math.min(delta, msPerFrame);
                     msToRun += timeElapsed;
                     if (currentMusic.music != null && !musicPaused) {
                         if (musicFadeType != 0) {
@@ -386,7 +386,7 @@ public abstract class CellGame {
                             stopMusic();
                         }
                     }
-                    if (msToRun >= msPerStep) {
+                    if (msToRun >= msPerFrame) {
                         for (int i = 0; i < commandChanges.length; i++) {
                             commandStates[i] = commandChanges[i];
                             if (commandChanges[i] == CommandState.PRESSED
@@ -401,8 +401,8 @@ public abstract class CellGame {
                         adjustedMouseY = Math.min(Math.max((int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
                         mouseWheel = newMouseWheel;
                         newMouseWheel = 0;
-                        CellGame.this.getCurrentState().doStep();
-                        msToRun -= msPerStep;
+                        CellGame.this.getCurrentState().doFrame();
+                        msToRun -= msPerFrame;
                         if (closeRequested) {
                             container.exit();
                         } else if (updateScreen) {
@@ -800,7 +800,7 @@ public abstract class CellGame {
             throw new RuntimeException("Attempted to run a CellGame at a non-positive FPS");
         }
         this.fps = fps;
-        msPerStep = 1000/((double)fps);
+        msPerFrame = 1000/((double)fps);
     }
     
     public final int getScreenWidth() {

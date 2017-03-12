@@ -33,7 +33,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     private int id;
     boolean active = false;
     private double timeFactor = 1;
-    private boolean performingStepActions = false;
+    private boolean performingFrameActions = false;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
     private final SortedSet<U> thinkers = new TreeSet<>(actionPriorityComparator);
@@ -302,8 +302,8 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         thinker.addActions();
         thinker.addedActions(game, thisState);
         addThinkerActions(game, thinker);
-        if (performingStepActions) {
-            thinker.doStep(game, thisState);
+        if (performingFrameActions) {
+            thinker.doFrame(game, thisState);
         }
     }
     
@@ -352,7 +352,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     public void updateThinkerListActions(CellGame game) {}
     
-    final void doStep() {
+    final void doFrame() {
         if (timeFactor > 0) {
             for (AnimationInstance instance : animInstances) {
                 instance.update();
@@ -362,16 +362,16 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
                 iterator.next().update(game);
             }
         }
-        performingStepActions = true;
+        performingFrameActions = true;
         Iterator<U> iterator = thinkerIterator();
         while (iterator.hasNext()) {
-            iterator.next().doStep(game, thisState);
+            iterator.next().doFrame(game, thisState);
         }
-        stepActions(game);
-        performingStepActions = false;
+        frameActions(game);
+        performingFrameActions = false;
     }
     
-    public void stepActions(CellGame game) {}
+    public void frameActions(CellGame game) {}
     
     public void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {}
     

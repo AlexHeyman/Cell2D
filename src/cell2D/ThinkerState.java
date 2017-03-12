@@ -12,6 +12,6 @@ public abstract class ThinkerState<T extends CellGameState<T,U,V>, U extends Thi
     
     public void timeUnitActions(CellGame game, T state) {}
     
-    public void stepActions(CellGame game, T state) {}
+    public void frameActions(CellGame game, T state) {}
     
 }
