@@ -130,7 +130,7 @@ public abstract class CellGame {
         }
     }
     
-    public static final void loadLibraries(String path) {
+    public static final void loadNatives(String path) {
         System.setProperty("java.library.path", path);
         System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
     }
