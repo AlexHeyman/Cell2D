@@ -48,8 +48,9 @@ public abstract class CellGame {
     private boolean closeRequested = false;
     private final StateBasedGame game;
     private final Map<Integer,CellGameState> states = new HashMap<>();
-    private int currentID = -2;
+    private CellGameState currentState = null;
     private boolean negativeIDsOffLimits = false;
+    private boolean initialized = false;
     private InputProvider provider = null;
     private Input input = null;
     private int commandToBind = -1;
@@ -78,7 +79,6 @@ public abstract class CellGame {
     private boolean fullscreen;
     private boolean updateScreen = true;
     private boolean autoLoadAssets;
-    private boolean assetsInitialized = false;
     private Image loadingImage = null;
     private boolean loadingScreenRenderedOnce = false;
     private final Map<String,Filter> filters = new HashMap<>();
@@ -346,18 +346,15 @@ public abstract class CellGame {
     }
     
     private class Game extends StateBasedGame implements InputProviderListener {
-
+        
         private Game(String name) {
             super(name);
         }
-
+        
         @Override
         public final void initStatesList(GameContainer container) throws SlickException {
-            new LoadingState(-2);
+            new LoadingState();
             negativeIDsOffLimits = true;
-            initStates();
-            currentID = -2;
-            enterState(-2);
         }
         
         @Override
@@ -366,7 +363,7 @@ public abstract class CellGame {
         @Override
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
             if (loadingScreenRenderedOnce) {
-                if (assetsInitialized) {
+                if (initialized) {
                     double timeElapsed = Math.min(delta, msPerFrame);
                     msToRun += timeElapsed;
                     if (currentMusic.music != null && !musicPaused) {
@@ -415,10 +412,8 @@ public abstract class CellGame {
                     input = new Input(container.getScreenHeight());
                     newMouseX = input.getMouseX();
                     newMouseY = input.getMouseY();
-                    initAssets();
-                    assetsInitialized = true;
                     initActions();
-                    CellGame.this.enterState(0);
+                    initialized = true;
                 }
             }
         }
@@ -432,7 +427,7 @@ public abstract class CellGame {
         
         @Override
         public final void postRenderState(GameContainer container, Graphics g) throws SlickException {
-            if (assetsInitialized) {
+            if (initialized) {
                 renderActions(g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
             }
             g.clearWorldClip();
@@ -591,8 +586,8 @@ public abstract class CellGame {
     
     private class LoadingState extends cell2D.BasicGameState {
         
-        private LoadingState(int id) {
-            super(CellGame.this, id);
+        private LoadingState() {
+            super(CellGame.this, -2);
         }
         
         @Override
@@ -606,15 +601,15 @@ public abstract class CellGame {
     }
     
     public final CellGameState getState(int id) {
-        return (id < 0 && negativeIDsOffLimits ? null : states.get(id));
+        return (id < 0 ? null : states.get(id));
     }
     
     public final CellGameState getCurrentState() {
-        return getState(currentID);
+        return currentState;
     }
     
     public final int getCurrentStateID() {
-        return currentID;
+        return currentState.getID();
     }
     
     final void addState(CellGameState state) {
@@ -626,8 +621,6 @@ public abstract class CellGame {
         game.addState(new State(state));
     }
     
-    public abstract void initStates() throws SlickException;
-    
     public final void enterState(int id) {
         enterState(id, null, null);
     }
@@ -636,13 +629,11 @@ public abstract class CellGame {
         if (id < 0 && negativeIDsOffLimits) {
             throw new RuntimeException("Attempted to enter a CellGameState with negative ID " + id);
         }
-        currentID = id;
+        currentState = states.get(id);
         game.enterState(id, leave, enter);
     }
     
-    public void initAssets() throws SlickException {}
-    
-    public void initActions() throws SlickException {}
+    public abstract void initActions() throws SlickException;
     
     public void renderActions(Graphics g, int x1, int y1, int x2, int y2) {}
     
