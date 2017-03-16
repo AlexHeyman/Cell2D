@@ -433,7 +433,7 @@ public abstract class CellGame {
         @Override
         public final void postRenderState(GameContainer container, Graphics g) throws SlickException {
             if (assetsInitialized) {
-                renderActions(container, g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
+                renderActions(g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
             }
             g.clearWorldClip();
         }
@@ -622,9 +622,6 @@ public abstract class CellGame {
         if (id < 0 && negativeIDsOffLimits) {
             throw new RuntimeException("Attempted to add a CellGameState with negative ID " + id);
         }
-        if (states.get(id) != null) {
-            throw new RuntimeException("Attempted to add multiple CellGameStates with ID " + id);
-        }
         states.put(id, state);
         game.addState(new State(state));
     }
@@ -647,7 +644,7 @@ public abstract class CellGame {
     
     public void initActions() throws SlickException {}
     
-    public void renderActions(GameContainer container, Graphics g, int x1, int y1, int x2, int y2) {}
+    public void renderActions(Graphics g, int x1, int y1, int x2, int y2) {}
     
     private void finishBindingToCommand(Control control) {
         bindControl(commandToBind, control);
