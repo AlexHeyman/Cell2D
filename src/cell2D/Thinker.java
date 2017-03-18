@@ -44,7 +44,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     private static long getNextID() {
         return idCounter.getAndIncrement();
     }
-
+    
     public abstract U getThis();
     
     public final T getGameState() {
@@ -150,8 +150,8 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
     }
     
-    public final void changeThinkerState(V newState) {
-        upcomingStates.add(newState);
+    public final void changeThinkerState(V thinkerState) {
+        upcomingStates.add(thinkerState);
         if (state != null && !changingState) {
             endState(state.getGame(), state, false);
         }
