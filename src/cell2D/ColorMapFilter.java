@@ -6,17 +6,16 @@ import java.util.Map;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.SlickException;
 
-class ColorMapFilter extends Filter {
+public class ColorMapFilter extends Filter {
     
     private final Map<Color,Color> colorMap;
     
-    ColorMapFilter(String name, Map<Color,Color> colorMap) {
-        super(name);
+    public ColorMapFilter(Map<Color,Color> colorMap) {
         this.colorMap = new HashMap(colorMap);
     }
     
-    final Map<Color,Color> getColorMap() {
-        return colorMap;
+    public final Map<Color,Color> getColorMap() {
+        return new HashMap<>(colorMap);
     }
     
     @Override

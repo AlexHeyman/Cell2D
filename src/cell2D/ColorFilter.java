@@ -4,16 +4,19 @@ import java.awt.image.BufferedImage;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.SlickException;
 
-class ColorFilter extends Filter {
+public class ColorFilter extends Filter {
     
     private final Color color;
     
-    ColorFilter(String name, Color color) {
-        super(name);
-        this.color = new Color(color);
+    public ColorFilter(Color color) {
+        this.color = color;
     }
     
-    final Color getColor() {
+    public ColorFilter(int colorR, int colorG, int colorB) {
+        this(new Color(colorR, colorG, colorB));
+    }
+    
+    public final Color getColor() {
         return color;
     }
     

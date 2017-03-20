@@ -1,8 +1,8 @@
 package cell2D;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
@@ -23,9 +23,42 @@ public class SpriteSheet {
     private final Sprite[][] sprites;
     private final Sprite[] spriteList;
     
-    SpriteSheet(SpriteSheet recolorOf, Filter recolorFilter, String path,
+    public SpriteSheet(String path, int width, int height, int spriteWidth,
+            int spriteHeight, int spriteSpacing, int originX, int originY, Set<Filter> filters, boolean load) throws SlickException {
+        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, null, (filters == null ? null : new HashSet<>(filters)), load);
+    }
+    
+    public SpriteSheet(String path, int width, int height,
+            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
+            int originY, Color transColor, Set<Filter> filters, boolean load) throws SlickException {
+        this(null, null, path, transColor, (filters == null ? null : new HashSet<>(filters)), width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, load);
+    }
+    
+    public SpriteSheet(String path, int width, int height,
+            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
+            int originY, int transR, int transG, int transB, Set<Filter> filters, boolean load) throws SlickException {
+        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, new Color(transR, transG, transB), (filters == null ? null : new HashSet<>(filters)), load);
+    }
+    
+    public SpriteSheet(SpriteSheet spriteSheet, Filter filter) throws SlickException {
+        this(spriteSheet, filter, null, null, spriteSheet.filters, spriteSheet.width, spriteSheet.height, spriteSheet.spriteWidth, spriteSheet.spriteHeight, spriteSheet.spriteSpacing, spriteSheet.originX, spriteSheet.originY, spriteSheet.isLoaded());
+    }
+    
+    public SpriteSheet(SpriteSheet spriteSheet, Map<Color,Color> colorMap) throws SlickException {
+        this(spriteSheet, new ColorMapFilter(colorMap));
+    }
+    
+    public SpriteSheet(SpriteSheet spriteSheet, Color color) throws SlickException {
+        this(spriteSheet, new ColorFilter(color));
+    }
+    
+    public SpriteSheet(SpriteSheet spriteSheet, int colorR, int colorG, int colorB) throws SlickException {
+        this(spriteSheet, new ColorFilter(colorR, colorG, colorB));
+    }
+    
+    private SpriteSheet(SpriteSheet recolorOf, Filter recolorFilter, String path,
             Color transColor, Set<Filter> filters, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int originX, int originY) {
+            int spriteWidth, int spriteHeight, int spriteSpacing, int originX, int originY, boolean load) throws SlickException {
         this.recolorOf = recolorOf;
         this.recolorFilter = recolorFilter;
         this.path = path;
@@ -43,15 +76,14 @@ public class SpriteSheet {
         int i = 0;
         for (int x = 0; x < sprites.length; x++) {
             for (int y = 0; y < sprites[x].length; y++) {
-                spriteList[i] = new Sprite(false, null, null, this, null, null, null, originX, originY);
+                spriteList[i] = new Sprite(this);
                 sprites[x][y] = spriteList[i];
                 i++;
             }
         }
-    }
-    
-    final SpriteSheet getRecolor(Filter recolorFilter) {
-        return new SpriteSheet(this, recolorFilter, null, null, filters, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY);
+        if (load) {
+            load();
+        }
     }
     
     public final boolean isLoaded() {
@@ -72,21 +104,23 @@ public class SpriteSheet {
             for (Sprite sprite : spriteList) {
                 sprite.loaded = true;
             }
-            loadFilter("", gameImage.getImage());
-            for (Filter filter : filters) {
-                GameImage filteredImage = filter.getFilteredImage(bufferedImage);
-                loadFilter(filter.getName(), filteredImage.getImage());
+            loadFilter(null, gameImage.getImage());
+            if (filters != null) {
+                for (Filter filter : filters) {
+                    GameImage filteredImage = filter.getFilteredImage(bufferedImage);
+                    loadFilter(filter, filteredImage.getImage());
+                }
             }
             return true;
         }
         return false;
     }
     
-    private void loadFilter(String filterName, Image image) {
+    private void loadFilter(Filter filter, Image image) {
         org.newdawn.slick.SpriteSheet spriteSheet = new org.newdawn.slick.SpriteSheet(image, spriteWidth, spriteHeight, spriteSpacing);
         for (int x = 0; x < sprites.length; x++) {
             for (int y = 0; y < sprites[x].length; y++) {
-                sprites[x][y].loadFilter(filterName, spriteSheet.getSubImage(x, y), null);
+                sprites[x][y].loadFilter(filter, spriteSheet.getSubImage(x, y), null);
             }
         }
     }
@@ -117,12 +151,8 @@ public class SpriteSheet {
         }
     }
     
-    public final List<String> getFilters() {
-        ArrayList<String> list = new ArrayList<>(filters.size());
-        for (Filter filter : filters) {
-            list.add(filter.getName());
-        }
-        return list;
+    public final Set<Filter> getFilters() {
+        return new HashSet<>(filters);
     }
     
     public final int getWidth() {

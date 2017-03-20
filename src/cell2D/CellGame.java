@@ -6,10 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import javax.imageio.ImageIO;
@@ -78,7 +76,6 @@ public abstract class CellGame {
     private int screenYOffset = 0;
     private boolean fullscreen;
     private boolean updateScreen = true;
-    private boolean autoLoadAssets;
     private Image loadingImage = null;
     private boolean loadingScreenRenderedOnce = false;
     private final Map<String,Filter> filters = new HashMap<>();
@@ -100,7 +97,7 @@ public abstract class CellGame {
     
     public CellGame(String gamename, int numCommands, int fps,
             int screenWidth, int screenHeight, double scaleFactor,
-            boolean fullscreen, boolean autoLoadAssets, String loadingImagePath) throws SlickException {
+            boolean fullscreen, String loadingImagePath) throws SlickException {
         game = new Game(gamename);
         if (numCommands < 0) {
             throw new RuntimeException("Attempted to create a CellGame with a negative number of controls");
@@ -124,7 +121,6 @@ public abstract class CellGame {
         this.screenHeight = screenHeight;
         setScaleFactor(scaleFactor);
         this.fullscreen = fullscreen;
-        this.autoLoadAssets = autoLoadAssets;
         if (loadingImagePath != null) {
             loadingImage = new Image(loadingImagePath);
         }
@@ -370,16 +366,16 @@ public abstract class CellGame {
                         if (musicFadeType != 0) {
                             msFading = Math.min(msFading + timeElapsed, fadeDuration);
                             if (msFading == fadeDuration) {
-                                currentMusic.music.setVolume((float)fadeEndVolume);
+                                currentMusic.music.setVolume(fadeEndVolume);
                                 if (musicFadeType == 2) {
                                     currentMusic.music.stop();
                                 }
                                 musicFadeType = 0;
                             } else {
-                                currentMusic.music.setVolume((float)(fadeStartVolume + (msFading/fadeDuration)*(fadeEndVolume - fadeStartVolume)));
+                                currentMusic.music.setVolume(fadeStartVolume + (msFading/fadeDuration)*(fadeEndVolume - fadeStartVolume));
                             }
                         }
-                        if (!currentMusic.music.playing()) {
+                        if (!currentMusic.music.isPlaying()) {
                             stopMusic();
                         }
                     }
@@ -836,20 +832,18 @@ public abstract class CellGame {
         updateScreen = true;
     }
     
-    public final boolean getAutoLoadAssets() {
-        return autoLoadAssets;
-    }
-    
-    public final void setAutoLoadAssets(boolean autoLoadAssets) {
-        this.autoLoadAssets = autoLoadAssets;
+    public final void add(String name, Filter filter) {
+        if (name == null) {
+            throw new RuntimeException("Attempted to add a Filter with a null name");
+        }
+        if (filters.put(name, filter) != null) {
+            throw new RuntimeException("Attempted to add multiple Filters with the name " + name);
+        }
     }
     
     public final void add(String name, Sprite sprite) {
         if (name == null) {
             throw new RuntimeException("Attempted to add a Sprite with a null name");
-        }
-        if (name.equals("")) {
-            throw new RuntimeException("Attempted to add a Sprite with the empty string as a name");
         }
         if (sprites.put(name, sprite) != null) {
             throw new RuntimeException("Attempted to add multiple Sprites with the name " + name);
@@ -860,9 +854,6 @@ public abstract class CellGame {
         if (name == null) {
             throw new RuntimeException("Attempted to add a SpriteSheet with a null name");
         }
-        if (name.equals("")) {
-            throw new RuntimeException("Attempted to add a SpriteSheet with the empty string as a name");
-        }
         if (spriteSheets.put(name, spriteSheet) != null) {
             throw new RuntimeException("Attempted to add multiple SpriteSheets with the name " + name);
         }
@@ -871,9 +862,6 @@ public abstract class CellGame {
     public final void add(String name, Animation animation) {
         if (name == null) {
             throw new RuntimeException("Attempted to add an Animation with a null name");
-        }
-        if (name.equals("")) {
-            throw new RuntimeException("Attempted to add an Animation with the empty string as a name");
         }
         if (animations.put(name, animation) != null) {
             throw new RuntimeException("Attempted to add multiple Animations with the name " + name);
@@ -884,324 +872,53 @@ public abstract class CellGame {
         if (name == null) {
             throw new RuntimeException("Attempted to add a Sound with a null name");
         }
-        if (name.equals("")) {
-            throw new RuntimeException("Attempted to add a Sound with the empty string as a name");
-        }
         if (sounds.put(name, sound) != null) {
             throw new RuntimeException("Attempted to add multiple Sounds with the name " + name);
         }
     }
     
-    public final void createFilter(String name, Map<Color,Color> colorMap) {
-        createFilter(name, new ColorMapFilter(name, colorMap));
-    }
-    
-    public final void createFilter(String name, int colorR, int colorG, int colorB) {
-        createFilter(name, new ColorFilter(name, new Color(colorR, colorG, colorB)));
-    }
-    
-    public final void createFilter(String name, Color color) {
-        createFilter(name, new ColorFilter(name, color));
-    }
-    
-    private void createFilter(String name, Filter filter) {
+    public final void add(String name, Music music) throws SlickException {
         if (name == null) {
-            throw new RuntimeException("Attempted to create a filter with a null name");
+            throw new RuntimeException("Attempted to add a music track with a null name");
         }
-        if (name.equals("")) {
-            throw new RuntimeException("Attempted to create a filter with the empty string as a name");
-        }
-        if (filters.put(name, filter) != null) {
-            throw new RuntimeException("Attempted to add multiple filters with the name " + name);
+        if (musics.put(name, music) != null) {
+            throw new RuntimeException("Attempted to add multiple music tracks with the name " + name);
         }
     }
     
-    public final Sprite createSprite(String path, int originX, int originY, List<String> filters) throws SlickException {
-        return createSprite(path, originX, originY, null, filters);
-    }
-    
-    public final Sprite createSprite(String path, int originX, int originY,
-            int transR, int transG, int transB, List<String> filters) throws SlickException {
-        return createSprite(path, originX, originY,  new Color(transR, transG, transB), filters);
-    }
-    
-    public final Sprite createSprite(String path, int originX,
-            int originY, Color transColor, List<String> filters) throws SlickException {
-        Set<Filter> filterSet = new HashSet<>();
-        if (filters != null) {
-            for (String name : filters) {
-                Filter filter = this.filters.get(name);
-                if (filter != null) {
-                    filterSet.add(filter);
-                }
-            }
-        }
-        Sprite sprite = new Sprite(false, null, null, null, path, transColor, filterSet, originX, originY);
-        if (autoLoadAssets) {
-            sprite.load();
-        }
-        return sprite;
+    public final Filter getFilter(String name) {
+        return filters.get(name);
     }
     
     public final Sprite getSprite(String name) {
         return sprites.get(name);
     }
     
-    public final SpriteSheet createSpriteSheet(String path, int width, int height, int spriteWidth,
-            int spriteHeight, int spriteSpacing, int originX, int originY, String[] filters) throws SlickException {
-        return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, null, filters);
-    }
-    
-    public final SpriteSheet createSpriteSheet(String path, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
-            int originY, int transR, int transG, int transB, String[] filters) throws SlickException {
-        return createSpriteSheet(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, new Color(transR, transG, transB), filters);
-    }
-    
-    public final SpriteSheet createSpriteSheet(String path, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
-            int originY, Color transColor, String[] filters) throws SlickException {
-        Set<Filter> filterSet = new HashSet<>();
-        if (filters != null) {
-            for (String name : filters) {
-                Filter filter = this.filters.get(name);
-                if (filter != null) {
-                    filterSet.add(filter);
-                }
-            }
-        }
-        SpriteSheet spriteSheet = new SpriteSheet(null, null, path, transColor, filterSet,
-                width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY);
-        if (autoLoadAssets) {
-            spriteSheet.load();
-        }
-        return spriteSheet;
-    }
-    
     public final SpriteSheet getSpriteSheet(String name) {
         return spriteSheets.get(name);
-    }
-    
-    public final Animation createAnimation(Animatable frame) {
-        Animatable[] frames = new Sprite[1];
-        frames[0] = frame;
-        return createAnimation(frames);
-    }
-    
-    public final Animation createAnimation(Animatable[] frames) {
-        if (frames == null || frames.length == 0) {
-            throw new RuntimeException("Attempted to create an empty Animation");
-        }
-        for (int i = 0; i < frames.length; i++) {
-            if (frames[i] == null) {
-                frames[i] = Sprite.BLANK;
-            }
-        }
-        double[] frameDurations = new double[frames.length];
-        Arrays.fill(frameDurations, 1);
-        return new Animation(frames, frameDurations);
-    }
-    
-    public final Animation createAnimation(Animatable[] frames, double[] frameDurations) {
-        if (frames == null || frames.length == 0) {
-            throw new RuntimeException("Attempted to create an empty Animation");
-        }
-        if (frameDurations == null) {
-            throw new RuntimeException("Attempted to create an Animation with absent frame durations");
-        }
-        if (frames.length != frameDurations.length) {
-            throw new RuntimeException("Attempted to create an Animation with different numbers of frames and frame durations");
-        }
-        for (int i = 0; i < frames.length; i++) {
-            if (frames[i] == null) {
-                frames[i] = Sprite.BLANK;
-            }
-        }
-        return new Animation(frames, frameDurations);
-    }
-    
-    private Animatable[] spriteSheetToAnimation(SpriteSheet spriteSheet,
-            int x1, int y1, int x2, int y2, boolean columns) {
-        if (x2 < x1 || y2 < y1) {
-            throw new RuntimeException("Attempted to create an Animation from a part of a sprite sheet defined by invalid coordinates");
-        }
-        Animatable[] frames = new Animatable[(x2 - x1 + 1)*(y2 - y1 + 1)];
-        int i = 0;
-        if (columns) {
-            for (int x = x1; x <= x2; x++) {
-                for (int y = y1; y <= y2; y++) {
-                    frames[i] = spriteSheet.getSprite(x, y);
-                    i++;
-                }
-            }
-        } else {
-            for (int y = y1; y <= y2; y++) {
-                for (int x = x1; x <= x2; x++) {
-                    frames[i] = spriteSheet.getSprite(x, y);
-                    i++;
-                }
-            }
-        }
-        return frames;
-    }
-    
-    public final Animation createAnimation(SpriteSheet spriteSheet,
-            int x1, int y1, int x2, int y2, boolean columns) {
-        return createAnimation(spriteSheetToAnimation(spriteSheet, x1, y1, x2, y2, columns));
-    }
-    
-    public final Animation createAnimation(SpriteSheet spriteSheet,
-            int x1, int y1, int x2, int y2, boolean columns, double[] frameDurations) {
-        return createAnimation(spriteSheetToAnimation(spriteSheet, x1, y1, x2, y2, columns), frameDurations);
     }
     
     public final Animation getAnimation(String name) {
         return animations.get(name);
     }
     
-    public final Sprite createRecolor(Sprite sprite, Map<Color,Color> colorMap) throws SlickException {
-        if (sprite == Sprite.BLANK) {
-            return sprite;
-        }
-        if (sprite.getSpriteSheet() != null) {
-            throw new RuntimeException("Attempted to individually recolor a Sprite that is part of a SpriteSheet. Try recoloring the SpriteSheet itself instead.");
-        }
-        Sprite recolor = sprite.getRecolor(new ColorMapFilter(null, colorMap));
-        if (autoLoadAssets && sprite.isLoaded()) {
-            recolor.load();
-        }
-        return recolor;
-    }
-    
-    public final Sprite createRecolor(Sprite sprite, int colorR, int colorG, int colorB) throws SlickException {
-        return createRecolor(sprite, new Color(colorR, colorG, colorB));
-    }
-    
-    public final Sprite createRecolor(Sprite sprite, Color newColor) throws SlickException {
-        if (sprite == Sprite.BLANK) {
-            return sprite;
-        }
-        if (sprite.getSpriteSheet() != null) {
-            throw new RuntimeException("Attempted to individually recolor a Sprite that is part of a SpriteSheet. Try recoloring the SpriteSheet itself instead.");
-        }
-        Sprite recolor = sprite.getRecolor(new ColorFilter(null, newColor));
-        if (autoLoadAssets && sprite.isLoaded()) {
-            recolor.load();
-        }
-        return recolor;
-    }
-    
-    public final SpriteSheet createRecolor(SpriteSheet spriteSheet, Map<Color,Color> colorMap) throws SlickException {
-        SpriteSheet recolor = spriteSheet.getRecolor(new ColorMapFilter(null, colorMap));
-        if (autoLoadAssets && spriteSheet.isLoaded()) {
-            recolor.load();
-        }
-        return recolor;
-    }
-    
-    public final SpriteSheet createRecolor(SpriteSheet spriteSheet, int colorR, int colorG, int colorB) throws SlickException {
-        return createRecolor(spriteSheet, new Color(colorR, colorG, colorB));
-    }
-    
-    public final SpriteSheet createRecolor(SpriteSheet spriteSheet, Color newColor) throws SlickException {
-        SpriteSheet recolor = spriteSheet.getRecolor(new ColorFilter(null, newColor));
-        if (autoLoadAssets && spriteSheet.isLoaded()) {
-            recolor.load();
-        }
-        return recolor;
-    }
-    
-    public final Sound createSound(String path) throws SlickException {
-        Sound sound = new Sound(path);
-        if (autoLoadAssets) {
-            sound.load();
-        }
-        return sound;
-    }
-    
     public final Sound getSound(String name) {
         return sounds.get(name);
     }
     
-    private class Music {
-        
-        private boolean isLoaded = false;
-        private final String path;
-        private org.newdawn.slick.Music music = null;
-        
-        private Music(String path) {
-            this.path = path;
-        }
-        
-        private boolean load() throws SlickException {
-            if (!isLoaded) {
-                isLoaded = true;
-                music = new org.newdawn.slick.Music(path);
-                return true;
-            }
-            return false;
-        }
-        
-        private boolean unload() {
-            if (isLoaded) {
-                isLoaded = false;
-                music = null;
-                return true;
-            }
-            return false;
-        }
-        
-    }
-    
-    public final void createMusic(String name, String path) throws SlickException {
-        if (name == null) {
-            throw new RuntimeException("Attempted to create a music track with a null name");
-        }
-        if (name.equals("")) {
-            throw new RuntimeException("Attempted to create a music track with the empty string as a name");
-        }
-        Music music = new Music(path);
-        if (musics.put(name, music) != null) {
-            throw new RuntimeException("Attempted to create multiple music tracks with the name " + name);
-        }
-        if (autoLoadAssets) {
-            music.load();
-        }
-    }
-    
-    public final boolean isMusicLoaded(String name) {
-        Music music = musics.get(name);
-        return (music == null ? false : music.isLoaded);
-    }
-    
-    public final boolean loadMusic(String name) throws SlickException {
-        Music music = musics.get(name);
-        if (music != null) {
-            return music.load();
-        }
-        return false;
-    }
-    
-    public final boolean unloadMusic(String name) {
-        Music music = musics.get(name);
-        if (music != null) {
-            return music.unload();
-        }
-        return false;
+    public final Music getMusic(String name) {
+        return musics.get(name);
     }
     
     private class MusicInstance {
         
-        private final String name;
-        private final org.newdawn.slick.Music music;
+        private final Music music;
         private final double pitch;
         private double volume;
         private final boolean loop;
         
-        private MusicInstance(String name, double pitch, double volume, boolean loop) {
-            this.name = name;
-            Music musicData = musics.get(name);
-            this.music = (musicData == null ? null : musicData.music);
+        private MusicInstance(Music music, double pitch, double volume, boolean loop) {
+            this.music = music;
             this.pitch = pitch;
             this.volume = volume;
             this.loop = loop;
@@ -1209,13 +926,13 @@ public abstract class CellGame {
         
     }
     
-    public final String getCurrentMusic() {
-        return currentMusic.name;
+    public final Music getCurrentMusic() {
+        return currentMusic.music;
     }
     
-    public final String getMusic(int priority) {
+    public final Music getMusic(int priority) {
         MusicInstance instance = musicStack.get(priority);
-        return (instance == null ? null : instance.name);
+        return (instance == null ? null : instance.music);
     }
     
     private void changeMusic(MusicInstance instance) {
@@ -1225,9 +942,9 @@ public abstract class CellGame {
             }
             if (instance.music != null) {
                 if (instance.loop) {
-                    instance.music.loop((float)instance.pitch, (float)instance.volume);
+                    instance.music.loop(instance.pitch, instance.volume);
                 } else {
-                    instance.music.play((float)instance.pitch, (float)instance.volume);
+                    instance.music.play(instance.pitch, instance.volume);
                 }
             }
         }
@@ -1236,24 +953,24 @@ public abstract class CellGame {
         musicFadeType = 0;
     }
     
-    private void startMusic(String name, double pitch, double volume, boolean loop) {
-        if (name == null) {
+    private void startMusic(Music music, double pitch, double volume, boolean loop) {
+        if (music == null) {
             stopMusic();
             return;
         }
         if (musicFadeType == 2 && !musicStack.isEmpty() && !stackOverridden) {
             musicStack.remove(musicStack.lastKey());
         }
-        changeMusic(new MusicInstance(name, pitch, volume, loop));
+        changeMusic(new MusicInstance(music, pitch, volume, loop));
         stackOverridden = true;
     }
     
-    private void addMusicToStack(int priority, String name, double pitch, double volume, boolean loop) {
-        if (name == null) {
+    private void addMusicToStack(int priority, Music music, double pitch, double volume, boolean loop) {
+        if (music == null) {
             stopMusic(priority);
             return;
         }
-        MusicInstance instance = new MusicInstance(name, pitch, volume, loop);
+        MusicInstance instance = new MusicInstance(music, pitch, volume, loop);
         if ((musicStack.isEmpty() || priority >= musicStack.lastKey()) && !stackOverridden) {
             if (musicFadeType == 2 && !musicStack.isEmpty() && priority > musicStack.lastKey()) {
                 musicStack.remove(musicStack.lastKey());
@@ -1263,36 +980,36 @@ public abstract class CellGame {
         musicStack.put(priority, instance);
     }
     
-    public final void playMusic(String name) {
-        startMusic(name, 1, 1, false);
+    public final void playMusic(Music music) {
+        startMusic(music, 1, 1, false);
     }
     
-    public final void playMusic(String name, double pitch, double volume) {
-        startMusic(name, pitch, volume, false);
+    public final void playMusic(Music music, double pitch, double volume) {
+        startMusic(music, pitch, volume, false);
     }
     
-    public final void playMusic(int priority, String name) {
-        addMusicToStack(priority, name, 1, 1, false);
+    public final void playMusic(int priority, Music music) {
+        addMusicToStack(priority, music, 1, 1, false);
     }
     
-    public final void playMusic(int priority, String name, double pitch, double volume) {
-        addMusicToStack(priority, name, pitch, volume, false);
+    public final void playMusic(int priority, Music music, double pitch, double volume) {
+        addMusicToStack(priority, music, pitch, volume, false);
     }
     
-    public final void loopMusic(String name) {
-        startMusic(name, 1, 1, true);
+    public final void loopMusic(Music music) {
+        startMusic(music, 1, 1, true);
     }
     
-    public final void loopMusic(String name, double pitch, double volume) {
-        startMusic(name, pitch, volume, true);
+    public final void loopMusic(Music music, double pitch, double volume) {
+        startMusic(music, pitch, volume, true);
     }
     
-    public final void loopMusic(int priority, String name) {
-        addMusicToStack(priority, name, 1, 1, true);
+    public final void loopMusic(int priority, Music music) {
+        addMusicToStack(priority, music, 1, 1, true);
     }
     
-    public final void loopMusic(int priority, String name, double pitch, double volume) {
-        addMusicToStack(priority, name, pitch, volume, true);
+    public final void loopMusic(int priority, Music music, double pitch, double volume) {
+        addMusicToStack(priority, music, pitch, volume, true);
     }
     
     public final void stopMusic() {
@@ -1312,8 +1029,8 @@ public abstract class CellGame {
         stackOverridden = false;
     }
     
-    public final void stopMusic(String name) {
-        if (currentMusic.name != null && currentMusic.name.equals(name)) {
+    public final void stopMusic(Music music) {
+        if (currentMusic.music != null && currentMusic.music == music) {
             stopMusic();
         }
     }
@@ -1329,12 +1046,12 @@ public abstract class CellGame {
         }
     }
     
-    public final void stopMusic(int priority, String name) {
+    public final void stopMusic(int priority, Music music) {
         if (musicStack.isEmpty()) {
             return;
         }
         MusicInstance instance = musicStack.get(priority);
-        if (instance != null && instance.name != null && instance.name.equals(name)) {
+        if (instance != null && instance.music != null && instance.music == music) {
             if (priority == musicStack.lastKey() && !stackOverridden) {
                 stopMusic();
             } else {
@@ -1348,7 +1065,7 @@ public abstract class CellGame {
     }
     
     public final void pauseMusic() {
-        if (currentMusic.name != null && !musicPaused) {
+        if (currentMusic.music != null && !musicPaused) {
             if (currentMusic.music != null) {
                 musicPosition = currentMusic.music.getPosition();
                 currentMusic.music.stop();
@@ -1358,12 +1075,12 @@ public abstract class CellGame {
     }
     
     public final void resumeMusic() {
-        if (currentMusic.name != null && musicPaused) {
+        if (currentMusic.music != null && musicPaused) {
             if (currentMusic.music != null) {
                 if (currentMusic.loop) {
-                    currentMusic.music.loop((float)currentMusic.pitch, currentMusic.music.getVolume());
+                    currentMusic.music.loop(currentMusic.pitch, currentMusic.music.getVolume());
                 } else {
-                    currentMusic.music.play((float)currentMusic.pitch, currentMusic.music.getVolume());
+                    currentMusic.music.play(currentMusic.pitch, currentMusic.music.getVolume());
                 }
                 currentMusic.music.setPosition(musicPosition);
             }
@@ -1377,7 +1094,7 @@ public abstract class CellGame {
     
     public final void setMusicPosition(double position) {
         if (currentMusic.music != null) {
-            currentMusic.music.setPosition((float)position);
+            currentMusic.music.setPosition(position);
         }
     }
     
@@ -1386,17 +1103,17 @@ public abstract class CellGame {
     }
     
     public final void setMusicVolume(double volume) {
-        if (currentMusic.name != null) {
+        if (currentMusic.music != null) {
             currentMusic.volume = volume;
             if (currentMusic.music != null) {
-                currentMusic.music.setVolume((float)volume);
+                currentMusic.music.setVolume(volume);
                 musicFadeType = 0;
             }
         }
     }
     
     public final void fadeMusicVolume(double volume, double duration) {
-        if (currentMusic.name != null) {
+        if (currentMusic.music != null) {
             if (currentMusic.music != null) {
                 musicFadeType = 1;
                 fadeStartVolume = currentMusic.music.getVolume();
@@ -1409,7 +1126,7 @@ public abstract class CellGame {
     }
     
     public final void fadeMusicOut(double duration) {
-        if (currentMusic.name != null) {
+        if (currentMusic.music != null) {
             if (currentMusic.music == null) {
                 stopMusic();
             } else {

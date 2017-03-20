@@ -1,9 +1,8 @@
 package cell2D;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.newdawn.slick.Color;
@@ -14,19 +13,7 @@ import org.newdawn.slick.geom.Vector2f;
 
 public class Sprite implements Animatable, Drawable {
     
-    public static final Sprite BLANK = new Sprite(true, null, null, null, null, null, null, 0, 0);
-    
-    private static class InternalImage {
-        
-        private final Image[] imageArray;
-        private final BufferedImage bufferedImage;
-
-        private InternalImage(Image[] imageArray, BufferedImage bufferedImage) {
-            this.imageArray = imageArray;
-            this.bufferedImage = bufferedImage;
-        }
-    
-    }
+    public static final Sprite BLANK = new Sprite();
     
     private final boolean blank;
     boolean loaded;
@@ -36,7 +23,7 @@ public class Sprite implements Animatable, Drawable {
     private final String path;
     private final Color transColor;
     private final Set<Filter> filters;
-    private final Map<String,InternalImage> images = new HashMap<>();
+    private final HashMap<Filter,Image[]> images = new HashMap<>();
     private Image[] defaultImages = null;
     private BufferedImage bufferedImage = null;
     private final int originX, originY;
@@ -45,22 +32,84 @@ public class Sprite implements Animatable, Drawable {
     private int right = 0;
     private int bottom = 0;
     
-    Sprite(boolean blank, Sprite recolorOf, Filter recolorFilter, SpriteSheet spriteSheet,
-            String path, Color transColor, Set<Filter> filters, int originX, int originY) {
-        this.blank = blank;
-        loaded = blank;
-        this.recolorOf = recolorOf;
-        this.recolorFilter = recolorFilter;
-        this.spriteSheet = spriteSheet;
-        this.path = path;
-        this.transColor = transColor;
-        this.filters = filters;
-        this.originX = originX;
-        this.originY = originY;
+    private Sprite() {
+        blank = true;
+        loaded = true;
+        recolorOf = null;
+        recolorFilter = null;
+        spriteSheet = null;
+        path = null;
+        transColor = null;
+        filters = null;
+        originX = 0;
+        originY = 0;
     }
     
-    final Sprite getRecolor(Filter recolorFilter) {
-        return new Sprite(false, this, recolorFilter, null, null, null, filters, originX, originY);
+    Sprite(SpriteSheet spriteSheet) {
+        blank = false;
+        loaded = false;
+        recolorOf = null;
+        recolorFilter = null;
+        this.spriteSheet = spriteSheet;
+        path = null;
+        transColor = null;
+        filters = null;
+        this.originX = spriteSheet.getOriginX();
+        this.originY = spriteSheet.getOriginY();
+    }
+    
+    public Sprite(String path, int originX, int originY, Set<Filter> filters, boolean load) throws SlickException {
+        this(path, originX, originY, null, filters, load);
+    }
+    
+    public Sprite(String path, int originX, int originY,
+            Color transColor, Set<Filter> filters, boolean load) throws SlickException {
+        blank = false;
+        loaded = false;
+        recolorOf = null;
+        recolorFilter = null;
+        spriteSheet = null;
+        this.path = path;
+        this.transColor = transColor;
+        this.filters = (filters == null ? null : new HashSet<>(filters));
+        this.originX = originX;
+        this.originY = originY;
+        if (load) {
+            load();
+        }
+    }
+    
+    public Sprite(String path, int originX, int originY,
+            int transR, int transG, int transB, Set<Filter> filters, boolean load) throws SlickException {
+        this(path, originX, originY,  new Color(transR, transG, transB), filters, load);
+    }
+    
+    public Sprite(Sprite sprite, Filter filter) throws SlickException {
+        blank = false;
+        loaded = false;
+        recolorOf = sprite;
+        recolorFilter = filter;
+        spriteSheet = null;
+        this.path = null;
+        this.transColor = null;
+        this.filters = sprite.filters;
+        this.originX = sprite.originX;
+        this.originY = sprite.originY;
+        if (sprite.isLoaded()) {
+            load();
+        }
+    }
+    
+    public Sprite(Sprite sprite, Map<Color,Color> colorMap) throws SlickException {
+        this(sprite, new ColorMapFilter(colorMap));
+    }
+    
+    public Sprite(Sprite sprite, Color color) throws SlickException {
+        this(sprite, new ColorFilter(color));
+    }
+    
+    public Sprite(Sprite sprite, int colorR, int colorG, int colorB) throws SlickException {
+        this(sprite, new ColorFilter(colorR, colorG, colorB));
     }
     
     public final boolean isLoaded() {
@@ -68,31 +117,35 @@ public class Sprite implements Animatable, Drawable {
     }
     
     public final boolean load() throws SlickException {
-        if (!blank && !loaded) {
-            loaded = true;
-            if (spriteSheet == null) {
-                GameImage gameImage;
-                if (recolorOf == null) {
-                    gameImage = CellGame.getTransparentImage(path, transColor);
-                } else {
-                    recolorOf.load();
-                    gameImage = recolorFilter.getFilteredImage(recolorOf.bufferedImage);
-                }
-                bufferedImage = gameImage.getBufferedImage();
-                loadFilter("", gameImage.getImage(), bufferedImage);
+        if (blank) {
+            return true;
+        } else if (loaded) {
+            return false;
+        }
+        loaded = true;
+        if (spriteSheet == null) {
+            GameImage gameImage;
+            if (recolorOf == null) {
+                gameImage = CellGame.getTransparentImage(path, transColor);
+            } else {
+                recolorOf.load();
+                gameImage = recolorFilter.getFilteredImage(recolorOf.bufferedImage);
+            }
+            bufferedImage = gameImage.getBufferedImage();
+            loadFilter(null, gameImage.getImage(), bufferedImage);
+            if (filters != null) {
                 for (Filter filter : filters) {
                     GameImage filteredImage = filter.getFilteredImage(bufferedImage);
-                    loadFilter(filter.getName(), filteredImage.getImage(), filteredImage.getBufferedImage());
+                    loadFilter(filter, filteredImage.getImage(), filteredImage.getBufferedImage());   
                 }
-            } else {
-                spriteSheet.load();
             }
-            return true;
+        } else {
+            spriteSheet.load();
         }
-        return false;
+        return true;
     }
     
-    final void loadFilter(String filterName, Image image, BufferedImage bufferedImage) {
+    final void loadFilter(Filter filter, Image image, BufferedImage bufferedImage) {
         Image[] imageArray = new Image[4];
         imageArray[0] = image;
         imageArray[0].setCenterOfRotation(originX, originY);
@@ -102,27 +155,29 @@ public class Sprite implements Animatable, Drawable {
         imageArray[2].setCenterOfRotation(originX, bottom);
         imageArray[3] = image.getFlippedCopy(true, true);
         imageArray[3].setCenterOfRotation(right, bottom);
-        if (filterName.equals("")) {
+        if (filter == null) {
             defaultImages = imageArray;
             width = image.getWidth();
             height = image.getHeight();
             right = width - originX;
             bottom = height - originY;
         }
-        images.put(filterName, new InternalImage(imageArray, bufferedImage));
+        images.put(filter, imageArray);
     }
     
     public final boolean unload() {
-        if (!blank && loaded) {
-            loaded = false;
-            if (spriteSheet == null) {
-                clear();
-            } else {
-                spriteSheet.tryUnload();
-            }
+        if (blank) {
             return true;
+        } else if (loaded) {
+            return false;
         }
-        return false;
+        loaded = false;
+        if (spriteSheet == null) {
+            clear();
+        } else {
+            spriteSheet.tryUnload();
+        }
+        return true;
     }
     
     final void clear() {
@@ -164,12 +219,8 @@ public class Sprite implements Animatable, Drawable {
         return spriteSheet;
     }
     
-    public final List<String> getFilters() {
-        ArrayList<String> list = new ArrayList<>(filters.size());
-        for (Filter filter : filters) {
-            list.add(filter.getName());
-        }
-        return list;
+    public final Set<Filter> getFilters() {
+        return (filters == null ? new HashSet<>() : new HashSet<>(filters));
     }
     
     public final int getWidth() {
@@ -197,7 +248,7 @@ public class Sprite implements Animatable, Drawable {
     
     @Override
     public final void draw(Graphics g, int x, int y, boolean xFlip,
-            boolean yFlip, double angle, double alpha, String filter) {
+            boolean yFlip, double angle, double alpha, Filter filter) {
         if (!blank && loaded && alpha > 0) {
             draw(g, x, y, 0, width, 0, height, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
         }
@@ -205,7 +256,7 @@ public class Sprite implements Animatable, Drawable {
     
     @Override
     public final void draw(Graphics g, int x, int y, double scale,
-            boolean xFlip, boolean yFlip, double alpha, String filter) {
+            boolean xFlip, boolean yFlip, double alpha, Filter filter) {
         if (!blank && loaded && scale > 0 && alpha > 0) {
             draw(g, x, y, 0, width, 0, height, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
@@ -224,7 +275,7 @@ public class Sprite implements Animatable, Drawable {
     
     @Override
     public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
-            boolean xFlip, boolean yFlip, double angle, double alpha, String filter) {
+            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
         if (!blank && loaded && right > left && bottom > top && alpha > 0) {
             if (xFlip) {
                 int temp = left;
@@ -248,7 +299,7 @@ public class Sprite implements Animatable, Drawable {
     
     @Override
     public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
-            double scale, boolean xFlip, boolean yFlip, double alpha, String filter) {
+            double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter) {
         if (!blank && loaded && right > left && bottom > top && scale > 0 && alpha > 0) {
             if (xFlip) {
                 int temp = left;
@@ -270,7 +321,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     private void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
-            float scale, boolean xFlip, boolean yFlip, float angle, float alpha, String filter) {
+            float scale, boolean xFlip, boolean yFlip, float angle, float alpha, Filter filter) {
         int index = 0;
         float xOffset, yOffset;
         if (xFlip) {
@@ -291,12 +342,8 @@ public class Sprite implements Animatable, Drawable {
         if (filter == null) {
             image = defaultImages[index];
         } else {
-            InternalImage internalImage = images.get(filter);
-            if (internalImage == null) {
-                image = defaultImages[index];
-            } else {
-                image = internalImage.imageArray[index];
-            }
+            Image[] imageArray = images.get(filter);
+            image = (imageArray == null ? defaultImages[index] : imageArray[index]);
         }
         image.setRotation(-angle);
         image.setAlpha(alpha);

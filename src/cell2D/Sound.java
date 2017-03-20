@@ -8,8 +8,11 @@ public class Sound {
     private final String path;
     private org.newdawn.slick.Sound sound = null;
     
-    Sound(String path) {
+    public Sound(String path, boolean load) throws SlickException {
         this.path = path;
+        if (load) {
+            load();
+        }
     }
     
     public final boolean isLoaded() {
