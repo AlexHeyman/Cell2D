@@ -196,7 +196,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     @Override
-    public final int getLength() {
+    public final int getNumFrames() {
         return 1;
     }
     
@@ -206,13 +206,13 @@ public class Sprite implements Animatable, Drawable {
     }
     
     @Override
-    public final boolean framesAreCompatible(int index1, int index2) {
-        return (index1 == 0 && index2 == 0);
+    public final double getFrameDuration(int index) {
+        return 0;
     }
     
     @Override
-    public final double getFrameDuration(int index) {
-        return 0;
+    public final boolean framesAreCompatible(int index1, int index2) {
+        return index1 == 0 && index2 == 0;
     }
     
     public final SpriteSheet getSpriteSheet() {

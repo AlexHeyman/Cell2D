@@ -86,7 +86,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     }
     
     public final double getEffectiveTimeFactor() {
-        return (timeFactor < 0 ? (state == null ? 0 : state.getTimeFactor()) : timeFactor);
+        return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
     }
     
     public final void setTimeFactor(double timeFactor) {
