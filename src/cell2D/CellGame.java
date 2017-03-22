@@ -110,12 +110,6 @@ public abstract class CellGame {
     private boolean updateScreen = true;
     private Image loadingImage = null;
     private boolean loadingScreenRenderedOnce = false;
-    private final Map<String,Filter> filters = new HashMap<>();
-    private final Map<String,Sprite> sprites = new HashMap<>();
-    private final Map<String,SpriteSheet> spriteSheets = new HashMap<>();
-    private final Map<String,Animation> animations = new HashMap<>();
-    private final Map<String,Sound> sounds = new HashMap<>();
-    private final Map<String,Music> musics = new HashMap<>();
     private MusicInstance currentMusic = new MusicInstance(null, 0, 0, false);
     private final SortedMap<Integer,MusicInstance> musicStack = new TreeMap<>();
     private boolean stackOverridden = false;
@@ -734,14 +728,11 @@ public abstract class CellGame {
     /**
      * Actions for this CellGame to take when initializing itself before
      * entering its first state. This should include creating at least one
-     * CellGameState for it, loading assets and adding them to it, binding
-     * default controls to its commands, etc. enterState() must be called
-     * during this method to tell the CellGame which CellGameState to start
-     * out in, or the game will crash.
-     * @throws SlickException If an action that involves Slick2D's features goes
-     * wrong
+     * CellGameState for it, binding default controls to its commands, etc.
+     * enterState() must be called during this method to tell the CellGame which
+     * CellGameState to start out in, or the game will crash.
      */
-    public abstract void initActions() throws SlickException;
+    public abstract void initActions();
     
     /**
      * Actions for this CellGame to take each frame after its current
@@ -1116,165 +1107,6 @@ public abstract class CellGame {
     public final void setFullscreen(boolean fullscreen) {
         this.fullscreen = fullscreen;
         updateScreen = true;
-    }
-    
-    /**
-     * Adds the specified Filter to this CellGame's list of Filters under the
-     * specified name. This method will throw an Exception if a Filter has
-     * already been added under that name.
-     * @param name The name under which the specified Filter is to be added
-     * @param filter The Filter to be added to the list of Filters
-     */
-    public final void add(String name, Filter filter) {
-        if (name == null) {
-            throw new RuntimeException("Attempted to add a Filter with a null name");
-        }
-        if (filters.put(name, filter) != null) {
-            throw new RuntimeException("Attempted to add multiple Filters with the name " + name);
-        }
-    }
-    
-    /**
-     * Adds the specified Sprite to this CellGame's list of Sprites under the
-     * specified name. This method will throw an Exception if a Sprite has
-     * already been added under that name.
-     * @param name The name under which the specified Sprite is to be added
-     * @param sprite The Sprite to be added to the list of Sprites
-     */
-    public final void add(String name, Sprite sprite) {
-        if (name == null) {
-            throw new RuntimeException("Attempted to add a Sprite with a null name");
-        }
-        if (sprites.put(name, sprite) != null) {
-            throw new RuntimeException("Attempted to add multiple Sprites with the name " + name);
-        }
-    }
-    
-    /**
-     * Adds the specified SpriteSheet to this CellGame's list of SpriteSheets
-     * under the specified name. This method will throw an Exception if a
-     * SpriteSheet has already been added under that name.
-     * @param name The name under which the specified SpriteSheet is to be added
-     * @param spriteSheet The SpriteSheet to be added to the list of
-     * SpriteSheets
-     */
-    public final void add(String name, SpriteSheet spriteSheet) {
-        if (name == null) {
-            throw new RuntimeException("Attempted to add a SpriteSheet with a null name");
-        }
-        if (spriteSheets.put(name, spriteSheet) != null) {
-            throw new RuntimeException("Attempted to add multiple SpriteSheets with the name " + name);
-        }
-    }
-    
-    /**
-     * Adds the specified Animation to this CellGame's list of Animations under
-     * the specified name. This method will throw an Exception if an Animation
-     * has already been added under that name.
-     * @param name The name under which the specified Animation is to be added
-     * @param animation The Animation to be added to the list of Animations
-     */
-    public final void add(String name, Animation animation) {
-        if (name == null) {
-            throw new RuntimeException("Attempted to add an Animation with a null name");
-        }
-        if (animations.put(name, animation) != null) {
-            throw new RuntimeException("Attempted to add multiple Animations with the name " + name);
-        }
-    }
-    
-    /**
-     * Adds the specified Sound to this CellGame's list of Sounds under the
-     * specified name. This method will throw an Exception if a Sound has
-     * already been added under that name.
-     * @param name The name under which the specified Sound is to be added
-     * @param sound The Sound to be added to the list of Sounds
-     */
-    public final void add(String name, Sound sound) {
-        if (name == null) {
-            throw new RuntimeException("Attempted to add a Sound with a null name");
-        }
-        if (sounds.put(name, sound) != null) {
-            throw new RuntimeException("Attempted to add multiple Sounds with the name " + name);
-        }
-    }
-    
-    /**
-     * Adds the specified Music track to this CellGame's list of Music tracks
-     * under the specified name. This method will throw an Exception if a Music
-     * track has already been added under that name.
-     * @param name The name under which the specified Music track is to be added
-     * @param music The Music track to be added to the list of Music tracks
-     */
-    public final void add(String name, Music music) {
-        if (name == null) {
-            throw new RuntimeException("Attempted to add a music track with a null name");
-        }
-        if (musics.put(name, music) != null) {
-            throw new RuntimeException("Attempted to add multiple music tracks with the name " + name);
-        }
-    }
-    
-    /**
-     * Returns the Filter in this CellGame's list of Filters under the specified
-     * name, or null if there is none.
-     * @param name The name of the Filter to return
-     * @return The Filter in the list of Filters under the specified name
-     */
-    public final Filter getFilter(String name) {
-        return filters.get(name);
-    }
-    
-    /**
-     * Returns the Sprite in this CellGame's list of Sprites under the specified
-     * name, or null if there is none.
-     * @param name The name of the Sprite to return
-     * @return The Sprite in the list of Sprites under the specified name
-     */
-    public final Sprite getSprite(String name) {
-        return sprites.get(name);
-    }
-    
-    /**
-     * Returns the SpriteSheet in this CellGame's list of SpriteSheets under the
-     * specified name, or null if there is none.
-     * @param name The name of the SpriteSheet to return
-     * @return The SpriteSheet in the list of SpriteSheets under the specified
-     * name
-     */
-    public final SpriteSheet getSpriteSheet(String name) {
-        return spriteSheets.get(name);
-    }
-    
-    /**
-     * Returns the Animation in this CellGame's list of Animations under the
-     * specified name, or null if there is none.
-     * @param name The name of the Animation to return
-     * @return The Animation in the list of Animations under the specified name
-     */
-    public final Animation getAnimation(String name) {
-        return animations.get(name);
-    }
-    
-    /**
-     * Returns the Sound in this CellGame's list of Sounds under the specified
-     * name, or null if there is none.
-     * @param name The name of the Sound to return
-     * @return The Sound in the list of Sounds under the specified name
-     */
-    public final Sound getSound(String name) {
-        return sounds.get(name);
-    }
-    
-    /**
-     * Returns the Music track in this CellGame's list of Music tracks under the
-     * specified name, or null if there is none.
-     * @param name The name of the Music track to return
-     * @return The Music track in the list of Music tracks under the specified
-     * name
-     */
-    public final Music getMusic(String name) {
-        return musics.get(name);
     }
     
     private class MusicInstance {
