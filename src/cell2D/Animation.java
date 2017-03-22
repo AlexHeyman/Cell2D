@@ -21,7 +21,7 @@ import java.util.Arrays;
  * Once created, Animations are static and immutable, with all movement through
  * time happening in AnimationInstances.
  * 
- * All of this class' constructors treat a null Animatable as equivalent to
+ * All of Animation's constructors treat a null Animatable as equivalent to
  * Sprite.BLANK, and thus no frame of an Animation may be null.
  * @author Andrew Heyman
  */

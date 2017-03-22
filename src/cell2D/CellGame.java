@@ -34,6 +34,39 @@ import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.Transition;
 
+/**
+ * A CellGame is a game made with Cell2D. A certain number of times per second,
+ * a CellGame executes a frame, in which it processes input, updates the logic
+ * of the game, and renders visuals.
+ * 
+ * A CellGame has one or more CellGameStates, each with a non-negative integer
+ * ID that is unique within the CellGame. A CellGame is in exactly one of these
+ * CellGameStates at any given time, and can transition between them. Each
+ * CellGameState has its own actions to perform every frame, but it only
+ * performs these actions while the CellGame is in that state and it is active.
+ * If a CellGameState is created with an ID that another CellGameState of the
+ * same CellGame already has, the old CellGameState is replaced and can no
+ * longer be entered.
+ * 
+ * A CellGame renders visuals on a rectangular grid of pixels called its screen.
+ * Points on the screen have x-coordinates that increase from left to right, as
+ * well as y-coordinates that increase from top to bottom. The dimensions of the
+ * screen are not necessarily the same as the dimensions of the CellGame's
+ * program window, as the screen may be scaled to different apparent sizes using
+ * the CellGame's scale factor. A CellGame may be displayed in windowed or
+ * fullscreen mode.
+ * 
+ * A CellGame processes input in the form of a fixed number of binary commands,
+ * numbered from 0 to getNumCommands() - 1 inclusive, as well as the position of
+ * the mouse cursor on the screen and the movement of the mouse wheel. Slick2D
+ * objects called Controls, which represent keys, mouse buttons, controller
+ * buttons, etc. may be bound to at most one command at a time so that when they
+ * are pressed, held, and released, so too are the commands to which they are
+ * bound. A CellGame also allows for the temporary processing of input as
+ * assignments of Controls to specific commands, or as the typing of text to
+ * a specific String.
+ * @author Andrew Heyman
+ */
 public abstract class CellGame {
     
     private static enum CommandState {
@@ -59,11 +92,10 @@ public abstract class CellGame {
     private int newMouseX = 0;
     private int adjustedMouseY = 0;
     private int newMouseY = 0;
-    private int mouseWheel = 0;
-    private int newMouseWheel = 0;
+    private int mouseWheelChange = 0;
+    private int newMouseWheelChange = 0;
     private String typingString = null;
     private int maxTypingStringLength = 0;
-    private String typedString = null;
     private int fps;
     private double msPerFrame;
     private double msToRun;
@@ -95,6 +127,24 @@ public abstract class CellGame {
     private double fadeDuration = 0;
     private double msFading = 0;
     
+    /**
+     * Creates a new CellGame.
+     * @param gamename The name of this CellGame as seen on its program window
+     * @param numCommands The total number of input commands that this CellGame
+     * needs to keep track of
+     * @param fps The number of frames that this CellGame will execute every
+     * second
+     * @param screenWidth The initial width of this CellGame's screen in pixels
+     * @param screenHeight The initial height of this CellGame's screen in
+     * pixels
+     * @param scaleFactor The initial factor by which the screen should be
+     * scaled to make the size of the program window
+     * @param fullscreen Whether this CellGame should start in fullscreen mode
+     * @param loadingImagePath The relative path to the image that this CellGame
+     * will display while loading. If this is null, no loading image will be
+     * displayed.
+     * @throws SlickException If the loading image itself fails to load
+     */
     public CellGame(String gamename, int numCommands, int fps,
             int screenWidth, int screenHeight, double scaleFactor,
             boolean fullscreen, String loadingImagePath) throws SlickException {
@@ -126,11 +176,25 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Loads the native libraries that are necessary for LWJGL 2, and thus
+     * Slick2D, and thus Cell2D, to run. This method should be called exactly
+     * once before any CellGames are created.
+     * @param path The relative path to the folder containing the native
+     * libraries
+     */
     public static final void loadNatives(String path) {
         System.setProperty("java.library.path", path);
         System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
     }
     
+    /**
+     * Starts a CellGame. This method will not finish until the started CellGame
+     * is closed.
+     * @param game The CellGame to be started
+     * @throws SlickException If something goes wrong with Slick2D's
+     * initialization of the game
+     */
     public static final void startGame(CellGame game) throws SlickException {
         AppGameContainer container = new AppGameContainer(game.game);
         game.updateScreen(container);
@@ -337,6 +401,10 @@ public abstract class CellGame {
         screenYOffset = 0;
     }
     
+    /**
+     * Instructs this CellGame to close itself the next time it finishes a game
+     * logic update.
+     */
     public final void close() {
         closeRequested = true;
     }
@@ -392,8 +460,8 @@ public abstract class CellGame {
                         }
                         adjustedMouseX = Math.min(Math.max((int)(newMouseX/effectiveScaleFactor) - screenXOffset, 0), screenWidth - 1);
                         adjustedMouseY = Math.min(Math.max((int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
-                        mouseWheel = newMouseWheel;
-                        newMouseWheel = 0;
+                        mouseWheelChange = newMouseWheelChange;
+                        newMouseWheelChange = 0;
                         CellGame.this.getCurrentState().doFrame();
                         msToRun -= msPerFrame;
                         if (closeRequested) {
@@ -437,14 +505,14 @@ public abstract class CellGame {
         
         @Override
         public final void mouseWheelMoved(int delta) {
-            newMouseWheel += delta;
+            newMouseWheelChange += delta;
         }
         
         @Override
         public final void keyPressed(int key, char c) {
             if (typingString != null) {
                 if (key == Input.KEY_ESCAPE) {
-                    cancelTypingToString();
+                    cancelTypingString();
                 } else if (key == Input.KEY_BACK) {
                     if (typingString.length() > 0) {
                         char toDelete = typingString.charAt(typingString.length() - 1);
@@ -456,55 +524,55 @@ public abstract class CellGame {
                     typingString = "";
                     CellGame.this.getCurrentState().stringDeleted(s);
                 } else if (key == Input.KEY_ENTER) {
-                    finishTypingToString();
+                    finishTypingString();
                 } else if (c != '\u0000' && typingString.length() < maxTypingStringLength) {
                     typingString += c;
                     CellGame.this.getCurrentState().charTyped(c);
                 }
             } else if (commandToBind >= 0) {
-                finishBindingToCommand(new KeyControl(key));
+                finishBindToCommand(new KeyControl(key));
             }
         }
         
         @Override
         public final void mouseClicked(int button, int x, int y, int clickCount) {
             if (commandToBind >= 0) {
-                finishBindingToCommand(new MouseButtonControl(button));
+                finishBindToCommand(new MouseButtonControl(button));
             }
         }
         
         @Override
         public final void controllerUpPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.UP));
+                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.UP));
             }
         }
         
         @Override
         public final void controllerDownPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.DOWN));
+                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.DOWN));
             }
         }
         
         @Override
         public final void controllerLeftPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.LEFT));
+                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.LEFT));
             }
         }
         
         @Override
         public final void controllerRightPressed(int controller) {
             if (commandToBind >= 0) {
-                finishBindingToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.RIGHT));
+                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.RIGHT));
             }
         }
         
         @Override
         public final void controllerButtonPressed(int controller, int button) {
             if (commandToBind >= 0) {
-                finishBindingToCommand(new ControllerButtonControl(controller, button));
+                finishBindToCommand(new ControllerButtonControl(controller, button));
             }
         }
         
@@ -596,14 +664,29 @@ public abstract class CellGame {
         
     }
     
+    /**
+     * Returns this CellGame's CellGameState with the specified ID, or null if
+     * there is none.
+     * @param id The ID of the CellGameState to return
+     * @return The CellGameState with the specified ID
+     */
     public final CellGameState getState(int id) {
         return (id < 0 ? null : states.get(id));
     }
     
+    /**
+     * Returns the CellGameState that this CellGame is currently in - in other
+     * words, this CellGame's only active CellGameState.
+     * @return The CellGameState that this CellGame is currently in
+     */
     public final CellGameState getCurrentState() {
         return currentState;
     }
     
+    /**
+     * Returns the ID of this CellGame's current CellGameState.
+     * @return The ID of this CellGame's current CellGameState
+     */
     public final int getCurrentStateID() {
         return currentState.getID();
     }
@@ -617,120 +700,271 @@ public abstract class CellGame {
         game.addState(new State(state));
     }
     
+    /**
+     * Instructs this CellGame to enter its CellGameState with the specified ID
+     * the next time it finishes a game logic update. If this CellGame has no
+     * CellGameState with the specified ID, this method will do nothing.
+     * @param id The ID of the CellGameState to enter
+     */
     public final void enterState(int id) {
         enterState(id, null, null);
     }
     
+    /**
+     * Instructs this CellGame to enter its CellGameState with the specified ID,
+     * using the specified Transitions when leaving the current CellGameState
+     * and entering the new one, the next time it finishes a game logic update.
+     * If this CellGame has no CellGameState with the specified ID, this method
+     * will do nothing.
+     * @param id The ID of the CellGameState to enter
+     * @param leave The Transition to use when leaving the current CellGameState
+     * @param enter The Transition to use when entering the new CellGameState
+     */
     public final void enterState(int id, Transition leave, Transition enter) {
         if (id < 0 && negativeIDsOffLimits) {
-            throw new RuntimeException("Attempted to enter a CellGameState with negative ID " + id);
+            return;
         }
-        currentState = states.get(id);
-        game.enterState(id, leave, enter);
+        CellGameState state = states.get(id);
+        if (state != null) {
+            currentState = state;
+            game.enterState(id, leave, enter);
+        }
     }
     
+    /**
+     * Actions for this CellGame to take when initializing itself before
+     * entering its first state. This should include creating at least one
+     * CellGameState for it, loading assets and adding them to it, binding
+     * default controls to its commands, etc. enterState() must be called
+     * during this method to tell the CellGame which CellGameState to start
+     * out in, or the game will crash.
+     * @throws SlickException If an action that involves Slick2D's features goes
+     * wrong
+     */
     public abstract void initActions() throws SlickException;
     
+    /**
+     * Actions for this CellGame to take each frame after its current
+     * CellGameState has finished rendering.
+     * @param g The Graphics context to which this CellGame is rendering itself
+     * this frame
+     * @param x1 The x-coordinate in pixels of the left edge of the CellGame's
+     * screen on the Graphics context
+     * @param y1 The y-coordinate in pixels of the top edge of the CellGame's
+     * screen on the Graphics context
+     * @param x2 The x-coordinate in pixels of the right edge of the CellGame's
+     * screen on the Graphics context
+     * @param y2 The y-coordinate in pixels of the bottom edge of the CellGame's
+     * screen on the Graphics context
+     */
     public void renderActions(Graphics g, int x1, int y1, int x2, int y2) {}
     
-    private void finishBindingToCommand(Control control) {
-        bindControl(commandToBind, control);
-        commandToBind = -1;
+    /**
+     * Returns how many commands this CellGame has.
+     * @return How many commands this CellGame has
+     */
+    public final int getNumCommands() {
+        return commands.length;
     }
     
-    public final List<Control> getControlsFor(int commandNum) {
-        if (commandNum < 0 || commandNum >= commands.length) {
-            throw new RuntimeException("Attempted to get the controls for nonexistent command number " + commandNum);
+    /**
+     * Returns all of the Controls that are currently bound to the specified
+     * command.
+     * @param command The number of the command whose controls are to be
+     * returned
+     * @return The Controls that are currently bound to the specified command
+     */
+    public final List<Control> getControlsFor(int command) {
+        if (command < 0 || command >= commands.length) {
+            throw new RuntimeException("Attempted to get the controls for nonexistent command number " + command);
         }
-        return (provider == null ? new ArrayList<>() : provider.getControlsFor(commands[commandNum]));
+        return (provider == null ? new ArrayList<>() : provider.getControlsFor(commands[command]));
     }
     
-    public final void bindControl(int commandNum, Control control) {
-        if (commandNum < 0 || commandNum >= commands.length) {
-            throw new RuntimeException("Attempted to bind nonexistent command number " + commandNum);
+    /**
+     * Binds the specified control to the specified command.
+     * @param command The command to bind the specified control to
+     * @param control The control to bind to the specified command
+     */
+    public final void bindControl(int command, Control control) {
+        if (command < 0 || command >= commands.length) {
+            throw new RuntimeException("Attempted to bind nonexistent command number " + command);
         }
         if (provider != null) {
-            provider.bindCommand(control, commands[commandNum]);
+            provider.bindCommand(control, commands[command]);
         }
     }
     
+    /**
+     * Unbinds the specified control from its command, if it is bound to one.
+     * @param control The control to be unbound
+     */
     public final void unbindControl(Control control) {
         if (provider != null) {
             provider.unbindCommand(control);
         }
     }
     
-    public final void clearControls(int commandNum) {
-        if (commandNum < 0 || commandNum >= commands.length) {
-            throw new RuntimeException("Attempted to clear nonexistent command number " + commandNum);
+    /**
+     * Unbinds all of the specified command's controls from it.
+     * @param command The number of the command whose controls are to be unbound
+     */
+    public final void clearControls(int command) {
+        if (command < 0 || command >= commands.length) {
+            throw new RuntimeException("Attempted to clear nonexistent command number " + command);
         }
         if (provider != null) {
-            provider.clearCommand(commands[commandNum]);
+            provider.clearCommand(commands[command]);
         }
     }
     
+    /**
+     * Returns the number of the command to which this CellGame has been
+     * instructed to bind the next valid control pressed, or -1 if there is
+     * none.
+     * @return The number of the command to which this CellGame has been
+     * instructed to bind the next valid control pressed
+     */
     public final int getBindingCommand() {
         return commandToBind;
     }
     
-    public final void waitToBindToCommand(int commandNum) {
-        if (commandNum < 0 || commandNum >= commands.length) {
-            throw new RuntimeException("Attempted to begin waiting to bind nonexistent command number " + commandNum);
+    /**
+     * Instructs this CellGame to bind the next valid control pressed to the
+     * specified command. This method will throw an Exception if the CellGame is
+     * already being used to type a string.
+     * @param command The number of the command to which the next valid control
+     * pressed should be bound
+     */
+    public final void waitToBindToCommand(int command) {
+        if (command < 0 || command >= commands.length) {
+            throw new RuntimeException("Attempted to begin waiting to bind to nonexistent command number " + command);
         }
         if (typingString != null) {
-            throw new RuntimeException("Attempted to begin waiting to bind command number " + commandNum + " while already typing to a String");
+            throw new RuntimeException("Attempted to begin waiting to bind to command number " + command + " while already typing to a String");
         }
-        commandToBind = commandNum;
+        commandToBind = command;
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
         }
     }
     
+    private void finishBindToCommand(Control control) {
+        bindControl(commandToBind, control);
+        commandToBind = -1;
+    }
+    
+    /**
+     * Cancels this CellGame's instruction to bind the next valid control
+     * pressed to a specified command, if it has been instructed to do so.
+     */
     public final void cancelBindToCommand() {
         commandToBind = -1;
     }
     
-    public final boolean commandPressed(int commandNum) {
-        return commandStates[commandNum] == CommandState.PRESSED
-                || commandStates[commandNum] == CommandState.TAPPED
-                || commandStates[commandNum] == CommandState.UNTAPPED;
+    /**
+     * Returns whether the specified command was pressed this frame; that is,
+     * whether it transitioned from not being held to being held.
+     * @param command The command to examine
+     * @return Whether the specified command was pressed this frame
+     */
+    public final boolean commandPressed(int command) {
+        return commandStates[command] == CommandState.PRESSED
+                || commandStates[command] == CommandState.TAPPED
+                || commandStates[command] == CommandState.UNTAPPED;
     }
     
-    public final boolean commandHeld(int commandNum) {
-        return commandStates[commandNum] == CommandState.PRESSED
-                || commandStates[commandNum] == CommandState.HELD
-                || commandStates[commandNum] == CommandState.TAPPED;
+    /**
+     * Returns whether the specified command is being held this frame.
+     * @param command The command to examine
+     * @return Whether the specified command is being held this frame
+     */
+    public final boolean commandHeld(int command) {
+        return commandStates[command] == CommandState.PRESSED
+                || commandStates[command] == CommandState.HELD
+                || commandStates[command] == CommandState.TAPPED;
     }
     
-    public final boolean commandReleased(int commandNum) {
-        return commandStates[commandNum] == CommandState.RELEASED
-                || commandStates[commandNum] == CommandState.TAPPED
-                || commandStates[commandNum] == CommandState.UNTAPPED;
+    /**
+     * Returns whether the specified command was released this frame; that is,
+     * whether it transitioned from being held to not being held.
+     * @param command The command to examine
+     * @return Whether the specified command was released this frame
+     */
+    public final boolean commandReleased(int command) {
+        return commandStates[command] == CommandState.RELEASED
+                || commandStates[command] == CommandState.TAPPED
+                || commandStates[command] == CommandState.UNTAPPED;
     }
     
+    /**
+     * Returns the x-coordinate in pixels of the mouse cursor on this CellGame's
+     * screen.
+     * @return The x-coordinate in pixels of the mouse cursor on this CellGame's
+     * screen
+     */
     public final int getMouseX() {
         return adjustedMouseX;
     }
     
+    /**
+     * Returns the y-coordinate in pixels of the mouse cursor on this CellGame's
+     * screen.
+     * @return The y-coordinate in pixels of the mouse cursor on this CellGame's
+     * screen
+     */
     public final int getMouseY() {
         return adjustedMouseY;
     }
     
-    public final int getMouseWheelMoved() {
-        return mouseWheel;
+    /**
+     * Returns the change in the position of the mouse wheel since last frame.
+     * This value will be positive if the mouse wheel is being rotated up,
+     * negative if it is being rotated down, and zero if it is not being
+     * rotated.
+     * @return The change in the position of the mouse wheel since last frame
+     */
+    public final int getMouseWheelChange() {
+        return mouseWheelChange;
     }
     
+    /**
+     * Returns the String that this CellGame is currently being used to type,
+     * or null if there is none.
+     * @return The String that this CellGame is currently being used to type
+     */
     public final String getTypingString() {
         return typingString;
     }
     
-    public final String getTypedString() {
-        String s = typedString;
-        typedString = null;
-        return s;
+    /**
+     * Instructs this CellGame to interpret all inputs as typing a String with a
+     * specified maximum length until further notice. While typing, the
+     * Backspace key deletes individual characters, the Delete key resets the
+     * String to the empty string, the Escape key calls cancelTypingString(),
+     * and the Enter key calls finishTypingString(). This method will throw an
+     * Exception if this CellGame has already been instructed to bind the next
+     * control pressed to a specified command.
+     * @param maxLength The maximum length in characters of the String to be
+     * typed
+     */
+    public final void beginTypingString(int maxLength) {
+        beginTypingString("", maxLength);
     }
     
-    public final void beginTypingToString(String initialString, int maxLength) {
+    /**
+     * Instructs this CellGame to interpret all inputs as typing a String with a
+     * specified initial value and maximum length until further notice. While
+     * typing, the Backspace key deletes individual characters, the Delete key
+     * resets the String to the empty string, the Escape key calls
+     * cancelTypingString(), and the Enter key calls finishTypingString(). This
+     * method will throw an Exception if this CellGame has already been
+     * instructed to bind the next control pressed to a specified command.
+     * @param initialString The initial value of the String to be typed
+     * @param maxLength The maximum length in characters of the String to be
+     * typed
+     */
+    public final void beginTypingString(String initialString, int maxLength) {
         if (maxLength <= 0) {
             throw new RuntimeException("Attempted to begin typing to a String with non-positive maximum length " + maxLength);
         }
@@ -745,52 +979,75 @@ public abstract class CellGame {
         }
         typingString = initialString;
         maxTypingStringLength = maxLength;
-        typedString = null;
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
         }
         getCurrentState().stringBegan(initialString);
     }
     
-    public final void beginTypingToString(int maxLength) {
-        beginTypingToString("", maxLength);
-    }
-    
-    public final void finishTypingToString() {
-        if (typingString != null) {
-            typedString = typingString;
-            typingString = null;
-            maxTypingStringLength = 0;
-            getCurrentState().stringTyped(typedString);
-        }
-    }
-    
-    public final void cancelTypingToString() {
+    /**
+     * Instructs this CellGame to stop interpreting inputs as typing a String,
+     * if it was doing so, and consider the String finished. This will call the
+     * stringTyped() method of this CellGame's current CellGameState.
+     */
+    public final void finishTypingString() {
         if (typingString != null) {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            typedString = null;
+            getCurrentState().stringTyped(s);
+        }
+    }
+    
+    /**
+     * Instructs this CellGame to stop interpreting inputs as typing a String,
+     * if it was doing so, and consider the typing canceled. This will call the
+     * stringCanceled() method of this CellGame's current CellGameState.
+     */
+    public final void cancelTypingString() {
+        if (typingString != null) {
+            String s = typingString;
+            typingString = null;
+            maxTypingStringLength = 0;
             getCurrentState().stringCanceled(s);
         }
     }
     
+    /**
+     * Returns the number of frames that this CellGame executes per second.
+     * @return The number of frames that this CellGame executes per second
+     */
     public final int getFPS() {
         return fps;
     }
     
+    /**
+     * Sets the number of frames that this CellGame executes per second to the
+     * specified value.
+     * @param fps The value to which the number of frames per second will be set
+     */
     public final void setFPS(int fps) {
         if (fps <= 0) {
             throw new RuntimeException("Attempted to run a CellGame at a non-positive FPS");
         }
         this.fps = fps;
         msPerFrame = 1000/((double)fps);
+        game.getContainer().setTargetFrameRate(fps);
     }
     
+    /**
+     * Returns the width in pixels of this CellGame's screen.
+     * @return The width in pixels of this CellGame's screen.
+     */
     public final int getScreenWidth() {
         return screenWidth;
     }
     
+    /**
+     * Sets the width in pixels of this CellGame's screen to the specified
+     * value.
+     * @param screenWidth The value to which the screen width will be set
+     */
     public final void setScreenWidth(int screenWidth) {
         if (screenWidth <= 0) {
             throw new RuntimeException("Attempted to give a CellGame a non-positive screen width");
@@ -799,10 +1056,19 @@ public abstract class CellGame {
         updateScreen = true;
     }
     
+    /**
+     * Returns the height in pixels of this CellGame's screen.
+     * @return The height in pixels of this CellGame's screen
+     */
     public final int getScreenHeight() {
         return screenHeight;
     }
     
+    /**
+     * Sets the height in pixels of this CellGame's screen to the specified
+     * value.
+     * @param screenHeight The value to which the screen height will be set
+     */
     public final void setScreenHeight(int screenHeight) {
         if (screenHeight <= 0) {
             throw new RuntimeException("Attempted to give a CellGame a non-positive screen height");
@@ -811,10 +1077,20 @@ public abstract class CellGame {
         updateScreen = true;
     }
     
+    /**
+     * Returns the factor by which this CellGame's screen is scaled to make the
+     * size of the program window.
+     * @return This CellGame's screen scale factor
+     */
     public final double getScaleFactor() {
         return scaleFactor;
     }
     
+    /**
+     * Sets the factor by which this CellGame's screen is scaled to make the
+     * size of the program window to the specified value.
+     * @param scaleFactor The value to which the scale factor will be set
+     */
     public final void setScaleFactor(double scaleFactor) {
         if (scaleFactor <= 0) {
             throw new RuntimeException("Attempted to give a CellGame a non-positive scale factor");
@@ -823,15 +1099,30 @@ public abstract class CellGame {
         updateScreen = true;
     }
     
+    /**
+     * Returns whether this CellGame is in fullscreen mode.
+     * @return Whether this CellGame is in fullscreen mode
+     */
     public final boolean isFullscreen() {
         return fullscreen;
     }
     
+    /**
+     * Sets whether this CellGame is in fullscreen mode.
+     * @param fullscreen Whether this CellGame should be in fullscreen mode
+     */
     public final void setFullscreen(boolean fullscreen) {
         this.fullscreen = fullscreen;
         updateScreen = true;
     }
     
+    /**
+     * Adds the specified Filter to this CellGame's list of Filters under the
+     * specified name. This method will throw an Exception if a Filter has
+     * already been added under that name.
+     * @param name The name under which the specified Filter is to be added
+     * @param filter The Filter to be added to the list of Filters
+     */
     public final void add(String name, Filter filter) {
         if (name == null) {
             throw new RuntimeException("Attempted to add a Filter with a null name");
@@ -841,6 +1132,13 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Adds the specified Sprite to this CellGame's list of Sprites under the
+     * specified name. This method will throw an Exception if a Sprite has
+     * already been added under that name.
+     * @param name The name under which the specified Sprite is to be added
+     * @param sprite The Sprite to be added to the list of Sprites
+     */
     public final void add(String name, Sprite sprite) {
         if (name == null) {
             throw new RuntimeException("Attempted to add a Sprite with a null name");
@@ -850,6 +1148,14 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Adds the specified SpriteSheet to this CellGame's list of SpriteSheets
+     * under the specified name. This method will throw an Exception if a
+     * SpriteSheet has already been added under that name.
+     * @param name The name under which the specified SpriteSheet is to be added
+     * @param spriteSheet The SpriteSheet to be added to the list of
+     * SpriteSheets
+     */
     public final void add(String name, SpriteSheet spriteSheet) {
         if (name == null) {
             throw new RuntimeException("Attempted to add a SpriteSheet with a null name");
@@ -859,6 +1165,13 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Adds the specified Animation to this CellGame's list of Animations under
+     * the specified name. This method will throw an Exception if an Animation
+     * has already been added under that name.
+     * @param name The name under which the specified Animation is to be added
+     * @param animation The Animation to be added to the list of Animations
+     */
     public final void add(String name, Animation animation) {
         if (name == null) {
             throw new RuntimeException("Attempted to add an Animation with a null name");
@@ -868,7 +1181,14 @@ public abstract class CellGame {
         }
     }
     
-    public final void add(String name, Sound sound) throws SlickException {
+    /**
+     * Adds the specified Sound to this CellGame's list of Sounds under the
+     * specified name. This method will throw an Exception if a Sound has
+     * already been added under that name.
+     * @param name The name under which the specified Sound is to be added
+     * @param sound The Sound to be added to the list of Sounds
+     */
+    public final void add(String name, Sound sound) {
         if (name == null) {
             throw new RuntimeException("Attempted to add a Sound with a null name");
         }
@@ -877,7 +1197,14 @@ public abstract class CellGame {
         }
     }
     
-    public final void add(String name, Music music) throws SlickException {
+    /**
+     * Adds the specified Music track to this CellGame's list of Music tracks
+     * under the specified name. This method will throw an Exception if a Music
+     * track has already been added under that name.
+     * @param name The name under which the specified Music track is to be added
+     * @param music The Music track to be added to the list of Music tracks
+     */
+    public final void add(String name, Music music) {
         if (name == null) {
             throw new RuntimeException("Attempted to add a music track with a null name");
         }
@@ -886,26 +1213,64 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Returns the Filter in this CellGame's list of Filters under the specified
+     * name, or null if there is none.
+     * @param name The name of the Filter to return
+     * @return The Filter in the list of Filters under the specified name
+     */
     public final Filter getFilter(String name) {
         return filters.get(name);
     }
     
+    /**
+     * Returns the Sprite in this CellGame's list of Sprites under the specified
+     * name, or null if there is none.
+     * @param name The name of the Sprite to return
+     * @return The Sprite in the list of Sprites under the specified name
+     */
     public final Sprite getSprite(String name) {
         return sprites.get(name);
     }
     
+    /**
+     * Returns the SpriteSheet in this CellGame's list of SpriteSheets under the
+     * specified name, or null if there is none.
+     * @param name The name of the SpriteSheet to return
+     * @return The SpriteSheet in the list of SpriteSheets under the specified
+     * name
+     */
     public final SpriteSheet getSpriteSheet(String name) {
         return spriteSheets.get(name);
     }
     
+    /**
+     * Returns the Animation in this CellGame's list of Animations under the
+     * specified name, or null if there is none.
+     * @param name The name of the Animation to return
+     * @return The Animation in the list of Animations under the specified name
+     */
     public final Animation getAnimation(String name) {
         return animations.get(name);
     }
     
+    /**
+     * Returns the Sound in this CellGame's list of Sounds under the specified
+     * name, or null if there is none.
+     * @param name The name of the Sound to return
+     * @return The Sound in the list of Sounds under the specified name
+     */
     public final Sound getSound(String name) {
         return sounds.get(name);
     }
     
+    /**
+     * Returns the Music track in this CellGame's list of Music tracks under the
+     * specified name, or null if there is none.
+     * @param name The name of the Music track to return
+     * @return The Music track in the list of Music tracks under the specified
+     * name
+     */
     public final Music getMusic(String name) {
         return musics.get(name);
     }
@@ -926,10 +1291,22 @@ public abstract class CellGame {
         
     }
     
+    /**
+     * Returns the Music track that this CellGame is currently playing, or null
+     * if there is none.
+     * @return The Music track that this CellGame is currently playing
+     */
     public final Music getCurrentMusic() {
         return currentMusic.music;
     }
     
+    /**
+     * Returns the Music track in this CellGame's music stack at the specified
+     * priority, or null if there is none.
+     * @param priority The priority in the music stack of the Music track to
+     * return
+     * @return The Music track in the music stack at the specified priority
+     */
     public final Music getMusic(int priority) {
         MusicInstance instance = musicStack.get(priority);
         return (instance == null ? null : instance.music);
@@ -980,38 +1357,104 @@ public abstract class CellGame {
         musicStack.put(priority, instance);
     }
     
+    /**
+     * Plays the specified Music track once. The track will be treated as having
+     * a higher priority than any of those in the music stack.
+     * @param music The Music track to play
+     */
     public final void playMusic(Music music) {
         startMusic(music, 1, 1, false);
     }
     
+    /**
+     * Plays the specified Music track once at the specified pitch and volume.
+     * The track will be treated as having a higher priority than any of those
+     * in the music stack.
+     * @param music The Music track to play
+     * @param pitch The pitch at which to play the specified Music track, with 1
+     * representing no pitch change
+     * @param volume The volume at which to play the specified Music track, with
+     * 1 representing no volume change
+     */
     public final void playMusic(Music music, double pitch, double volume) {
         startMusic(music, pitch, volume, false);
     }
     
+    /**
+     * Plays the specified Music track once in this CellGame's music stack at
+     * the specified priority.
+     * @param priority The priority at which to play the specified Music track
+     * @param music The Music track to play
+     */
     public final void playMusic(int priority, Music music) {
         addMusicToStack(priority, music, 1, 1, false);
     }
     
+    /**
+     * Plays the specified Music track once in this CellGame's music stack at
+     * the specified priority, pitch, and volume.
+     * @param priority The priority at which to play the specified Music track
+     * @param music The Music track to play
+     * @param pitch The pitch at which to play the specified Music track, with 1
+     * representing no pitch change
+     * @param volume The volume at which to play the specified Music track, with
+     * 1 representing no volume change
+     */
     public final void playMusic(int priority, Music music, double pitch, double volume) {
         addMusicToStack(priority, music, pitch, volume, false);
     }
     
+    /**
+     * Plays the specified Music track indefinitely. The track will be treated
+     * as having a higher priority than any of those in the music stack.
+     * @param music The Music track to loop
+     */
     public final void loopMusic(Music music) {
         startMusic(music, 1, 1, true);
     }
     
+    /**
+     * Plays the specified Music track indefinitely at the specified pitch and
+     * volume. The track will be treated as having a higher priority than any of
+     * those in the music stack.
+     * @param music The Music track to loop
+     * @param pitch The pitch at which to play the specified Music track, with 1
+     * representing no pitch change
+     * @param volume The volume at which to play the specified Music track, with
+     * 1 representing no volume change
+     */
     public final void loopMusic(Music music, double pitch, double volume) {
         startMusic(music, pitch, volume, true);
     }
     
+    /**
+     * Plays the specified Music track indefinitely in this CellGame's music
+     * stack at the specified priority.
+     * @param priority The priority at which to play the specified Music track
+     * @param music The Music track to loop
+     */
     public final void loopMusic(int priority, Music music) {
         addMusicToStack(priority, music, 1, 1, true);
     }
     
+    /**
+     * Plays the specified Music track indefinitely in this CellGame's music
+     * stack at the specified priority, pitch, and volume.
+     * @param priority The priority at which to play the specified Music track
+     * @param music The Music track to loop
+     * @param pitch The pitch at which to play the specified Music track, with 1
+     * representing no pitch change
+     * @param volume The volume at which to play the specified Music track, with
+     * 1 representing no volume change
+     */
     public final void loopMusic(int priority, Music music, double pitch, double volume) {
         addMusicToStack(priority, music, pitch, volume, true);
     }
     
+    /**
+     * Stops the Music track that this CellGame is currently playing, if there
+     * is one.
+     */
     public final void stopMusic() {
         if (musicStack.isEmpty()) {
             changeMusic(new MusicInstance(null, 0, 0, false));
@@ -1029,12 +1472,22 @@ public abstract class CellGame {
         stackOverridden = false;
     }
     
+    /**
+     * Stops the specified Music track if this CellGame is currently playing it.
+     * @param music The Music track to be stopped
+     */
     public final void stopMusic(Music music) {
         if (currentMusic.music != null && currentMusic.music == music) {
             stopMusic();
         }
     }
     
+    /**
+     * Stops the Music track in this CellGame's music stack at the specified
+     * priority, if there is one.
+     * @param priority The priority in the music stack of the Music track to be
+     * stopped
+     */
     public final void stopMusic(int priority) {
         if (musicStack.isEmpty()) {
             return;
@@ -1046,6 +1499,12 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Stops the specified Music track in this CellGame's music stack at the
+     * specified priority if it is currently playing there.
+     * @param priority The priority of the Music track to be stopped
+     * @param music The Music track to be stopped
+     */
     public final void stopMusic(int priority, Music music) {
         if (musicStack.isEmpty()) {
             return;
@@ -1060,12 +1519,19 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Returns whether this CellGame's music is paused.
+     * @return Whether this CellGame's music is paused
+     */
     public final boolean musicIsPaused() {
         return musicPaused;
     }
     
+    /**
+     * Pauses this CellGame's music if it is not already paused.
+     */
     public final void pauseMusic() {
-        if (currentMusic.music != null && !musicPaused) {
+        if (!musicPaused) {
             if (currentMusic.music != null) {
                 musicPosition = currentMusic.music.getPosition();
                 currentMusic.music.stop();
@@ -1074,8 +1540,11 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Resumes this CellGame's music if it is paused.
+     */
     public final void resumeMusic() {
-        if (currentMusic.music != null && musicPaused) {
+        if (musicPaused) {
             if (currentMusic.music != null) {
                 if (currentMusic.loop) {
                     currentMusic.music.loop(currentMusic.pitch, currentMusic.music.getVolume());
@@ -1088,20 +1557,42 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Returns the music player's position in seconds in the currently playing
+     * Music track, or 0 if no Music track is currently playing.
+     * @return The music player's position in seconds in the currently playing
+     * Music track
+     */
     public final double getMusicPosition() {
         return (currentMusic.music == null ? 0 : currentMusic.music.getPosition());
     }
     
+    /**
+     * Sets the music player's position in seconds in the currently playing
+     * Music track, if there is one.
+     * @param position The music player's new position in seconds
+     */
     public final void setMusicPosition(double position) {
         if (currentMusic.music != null) {
             currentMusic.music.setPosition(position);
         }
     }
     
+    /**
+     * Returns the volume of the currently playing Music track, with 1
+     * representing no volume change, or 0 if there is no Music track playing.
+     * @return The volume of the currently playing Music track
+     */
     public final double getMusicVolume() {
         return (currentMusic.music == null ? 0 : currentMusic.music.getVolume());
     }
     
+    /**
+     * Sets the volume of the currently playing Music track, with 1 representing
+     * no volume change, if a Music track is currently playing. This will
+     * cancel any active volume fades.
+     * @param volume The volume of the currently playing Music track
+     */
     public final void setMusicVolume(double volume) {
         if (currentMusic.music != null) {
             currentMusic.volume = volume;
@@ -1112,6 +1603,13 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Instructs the music player to gradually fade the volume of the currently
+     * playing Music track to the specified volume over the specified duration,
+     * if a Music track is currently playing.
+     * @param volume The eventual volume of the Music track
+     * @param duration The duration in seconds of the fade
+     */
     public final void fadeMusicVolume(double volume, double duration) {
         if (currentMusic.music != null) {
             if (currentMusic.music != null) {
@@ -1125,6 +1623,12 @@ public abstract class CellGame {
         }
     }
     
+    /**
+     * Instructs the music player to gradually fade the volume of the currently
+     * playing music track to 0 over the specified duration, stopping the Music
+     * track once it is silent, if a Music track is currently playing.
+     * @param duration The duration in seconds of the fade-out
+     */
     public final void fadeMusicOut(double duration) {
         if (currentMusic.music != null) {
             if (currentMusic.music == null) {

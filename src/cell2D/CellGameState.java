@@ -41,6 +41,13 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
     private boolean updatingThinkerList = false;
     
+    /**
+     * Creates a new CellGameState of the specified CellGame with the specified
+     * ID. CellGameStates automatically register themselves with their CellGames
+     * upon creation.
+     * @param game The CellGame to which this CellGameState belongs
+     * @param id This CellGameState's ID
+     */
     public CellGameState(CellGame game, int id) {
         if (game == null) {
             throw new RuntimeException("Attempted to create a CellGameState with no CellGame");
@@ -52,24 +59,53 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         initialized = true;
     }
     
+    /**
+     * A method which returns this CellGameState as a T, rather than as a
+     * CellGameState<T,U,V>. This must be implemented somewhere in the lineage
+     * of every subclass of CellGameState in order to get around Java's
+     * limitations with regard to generic types.
+     * @return This CellGameState as a T
+     */
     public abstract T getThis();
     
+    /**
+     * Returns the CellGame to which this CellGameState belongs.
+     * @return The CellGame to which this CellGameState belongs
+     */
     public final CellGame getGame() {
         return game;
     }
     
+    /**
+     * Returns this CellGameState's ID.
+     * @return This CellGameState's ID
+     */
     public final int getID() {
         return id;
     }
     
+    /**
+     * Returns whether this CellGameState is active - that is, whether its
+     * CellGame is currently in this state.
+     * @return Whether this CellGameState is active
+     */
     public final boolean isActive() {
         return active;
     }
     
+    /**
+     * Returns this CellGameState's time factor; that is, how many time units it
+     * experiences every frame.
+     * @return This CellGameState's time factor
+     */
     public final double getTimeFactor() {
         return timeFactor;
     }
     
+    /**
+     * Sets this CellGameState's time factor to the specified value.
+     * @param timeFactor The value to which the time factor will be set
+     */
     public final void setTimeFactor(double timeFactor) {
         if (timeFactor < 0) {
             throw new RuntimeException("Attempted to give a CellGameState a negative time factor");
@@ -77,6 +113,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         this.timeFactor = timeFactor;
     }
     
+    /**
+     * Adds the specified AnimationInstance to this CellGameState if it is not
+     * already assigned to a CellGameState.
+     * @param instance The AnimationInstance to add
+     * @return Whether the addition was successful
+     */
     public final boolean addAnimInstance(AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
             return true;
@@ -89,6 +131,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
+    /**
+     * Adds a new AnimationInstance of the specified Animation to this
+     * CellGameState.
+     * @param animation The Animation to add a new AnimationInstance of
+     * @return The new AnimationInstance
+     */
     public final AnimationInstance addAnimInstance(Animation animation) {
         if (animation == Animation.BLANK) {
             return AnimationInstance.BLANK;
@@ -99,6 +147,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return instance;
     }
     
+    /**
+     * Removes the specified AnimationInstance from this CellGameState if it
+     * is currently assigned to this CellGameState.
+     * @param instance The AnimationInstance to remove
+     * @return Whether the removal was successful
+     */
     public final boolean removeAnimInstance(AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
             return true;
@@ -111,6 +165,13 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
+    /**
+     * Returns the AnimationInstance that is assigned to this CellGameState with
+     * the specified ID.
+     * @param id The ID of the AnimationInstance to be returned
+     * @return The AnimationInstance that is assigned to this CellGameState with
+     * the specified ID
+     */
     public final AnimationInstance getAnimInstance(int id) {
         AnimationInstance instance = IDInstances.get(id);
         return (instance == null ? AnimationInstance.BLANK : instance);
