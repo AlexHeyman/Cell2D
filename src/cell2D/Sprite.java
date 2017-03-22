@@ -126,7 +126,7 @@ public class Sprite implements Animatable, Drawable {
         if (spriteSheet == null) {
             GameImage gameImage;
             if (recolorOf == null) {
-                gameImage = CellGame.getTransparentImage(path, transColor);
+                gameImage = Assets.getTransparentImage(path, transColor);
             } else {
                 recolorOf.load();
                 gameImage = recolorFilter.getFilteredImage(recolorOf.bufferedImage);

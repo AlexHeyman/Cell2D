@@ -20,7 +20,7 @@ public class ColorMapFilter extends Filter {
     
     @Override
     final GameImage getFilteredImage(BufferedImage bufferedImage) throws SlickException {
-        return CellGame.getRecoloredImage(bufferedImage, colorMap);
+        return Assets.getRecoloredImage(bufferedImage, colorMap);
     }
     
 }

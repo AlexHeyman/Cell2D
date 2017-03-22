@@ -1,8 +1,6 @@
 package cell2D;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,12 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import javax.imageio.ImageIO;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -72,9 +68,6 @@ public abstract class CellGame {
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
     }
-    
-    private static final Color transparent = new Color(0, 0, 0, 0);
-    private static final int transparentInt = colorToInt(transparent);
     
     private boolean closeRequested = false;
     private final StateBasedGame game;
@@ -195,138 +188,6 @@ public abstract class CellGame {
         container.setTargetFrameRate(game.getFPS());
         container.setShowFPS(false);
         container.start();
-    }
-    
-    private static int colorToInt(Color color) {
-        return (color.getAlphaByte() << 24) | (color.getRedByte() << 16) | (color.getGreenByte() << 8) | color.getBlueByte();
-    }
-    
-    private static Color intToColor(int color) {
-        return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, (color >> 24) & 0xFF);
-    }
-    
-    static final GameImage getTransparentImage(String path, Color transColor) throws SlickException {
-        BufferedImage bufferedImage;
-        try {
-            bufferedImage = ImageIO.read(new File(path));
-        } catch (IOException e) {
-            throw new RuntimeException(e.toString());
-        }
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        if (bufferedImage.getType() != BufferedImage.TYPE_4BYTE_ABGR) {
-            BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-            java.awt.Graphics bufferedGraphics = newImage.getGraphics();
-            bufferedGraphics.drawImage(bufferedImage, 0, 0, null);
-            bufferedGraphics.dispose();
-            bufferedImage = newImage;
-        }
-        Image image;
-        if (transColor == null) {
-            image = new Image(path);
-        } else {
-            image = new Image(width, height);
-            Graphics graphics = image.getGraphics();
-            Color color;
-            int transR = transColor.getRedByte();
-            int transG = transColor.getGreenByte();
-            int transB = transColor.getBlueByte();
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    color = intToColor(bufferedImage.getRGB(x, y));
-                    if (color.getRedByte() == transR
-                            && color.getGreenByte() == transG
-                            && color.getBlueByte() == transB) {
-                        color = transparent;
-                        bufferedImage.setRGB(x, y, transparentInt);
-                    }
-                    graphics.setColor(color);
-                    graphics.fillRect(x, y, 1, 1);
-                }
-            }
-            graphics.flush();
-        }
-        image.setFilter(Image.FILTER_NEAREST);
-        return new GameImage(image, bufferedImage);
-    }
-    
-    static final GameImage getRecoloredImage(BufferedImage bufferedImage, Map<Color,Color> colorMap) throws SlickException {
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-        java.awt.Graphics bufferedGraphics = newImage.getGraphics();
-        bufferedGraphics.drawImage(bufferedImage, 0, 0, null);
-        bufferedGraphics.dispose();
-        Image image = new Image(width, height);
-        image.setFilter(Image.FILTER_NEAREST);
-        Graphics graphics = image.getGraphics();
-        int size = colorMap.size();
-        int[] oldR = new int[size];
-        int[] oldG = new int[size];
-        int[] oldB = new int[size];
-        int[] newR = new int[size];
-        int[] newG = new int[size];
-        int[] newB = new int[size];
-        int i = 0;
-        Color key, value;
-        for (Map.Entry<Color,Color> entry : colorMap.entrySet()) {
-            key = entry.getKey();
-            value = entry.getValue();
-            oldR[i] = key.getRedByte();
-            oldG[i] = key.getGreenByte();
-            oldB[i] = key.getBlueByte();
-            newR[i] = value.getRedByte();
-            newG[i] = value.getGreenByte();
-            newB[i] = value.getBlueByte();
-            i++;
-        }
-        Color color;
-        int colorR, colorG, colorB;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                color = intToColor(newImage.getRGB(x, y));
-                colorR = color.getRedByte();
-                colorG = color.getGreenByte();
-                colorB = color.getBlueByte();
-                for (int j = 0; j < size; j++) {
-                    if (oldR[j] == colorR && oldG[j] == colorG && oldB[j] == colorB) {
-                        color = new Color(newR[j], newG[j], newB[j], color.getAlphaByte());
-                        newImage.setRGB(x, y, colorToInt(color));
-                        break;
-                    }
-                }
-                graphics.setColor(color);
-                graphics.fillRect(x, y, 1, 1);
-            }
-        }
-        graphics.flush();
-        return new GameImage(image, newImage);
-    }
-    
-    static final GameImage getRecoloredImage(BufferedImage bufferedImage, Color newColor) throws SlickException {
-        int width = bufferedImage.getWidth();
-        int height = bufferedImage.getHeight();
-        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-        java.awt.Graphics bufferedGraphics = newImage.getGraphics();
-        bufferedGraphics.drawImage(bufferedImage, 0, 0, null);
-        bufferedGraphics.dispose();
-        Image image = new Image(width, height);
-        image.setFilter(Image.FILTER_NEAREST);
-        Graphics graphics = image.getGraphics();
-        int newColorR = newColor.getRedByte();
-        int newColorG = newColor.getGreenByte();
-        int newColorB = newColor.getBlueByte();
-        Color color;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                color = new Color(newColorR, newColorG, newColorB, (newImage.getRGB(x, y) >> 24) & 0xFF);
-                newImage.setRGB(x, y, colorToInt(color));
-                graphics.setColor(color);
-                graphics.fillRect(x, y, 1, 1);
-            }
-        }
-        graphics.flush();
-        return new GameImage(image, newImage);
     }
     
     private void updateScreen(GameContainer container) throws SlickException {
@@ -728,11 +589,14 @@ public abstract class CellGame {
     /**
      * Actions for this CellGame to take when initializing itself before
      * entering its first state. This should include creating at least one
-     * CellGameState for it, binding default controls to its commands, etc.
-     * enterState() must be called during this method to tell the CellGame which
-     * CellGameState to start out in, or the game will crash.
+     * CellGameState for it, binding default controls to its commands, loading
+     * assets and adding them to the Assets class, etc. enterState() must be
+     * called during this method to tell the CellGame which CellGameState to
+     * start out in, or the game will crash.
+     * @throws SlickException If something that involves Slick2D's features goes
+     * wrong
      */
-    public abstract void initActions();
+    public abstract void initActions() throws SlickException;
     
     /**
      * Actions for this CellGame to take each frame after its current

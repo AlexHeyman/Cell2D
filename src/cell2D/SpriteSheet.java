@@ -95,7 +95,7 @@ public class SpriteSheet {
             loaded = true;
             GameImage gameImage;
             if (recolorOf == null) {
-                gameImage = CellGame.getTransparentImage(path, transColor);
+                gameImage = Assets.getTransparentImage(path, transColor);
             } else {
                 recolorOf.load();
                 gameImage = recolorFilter.getFilteredImage(recolorOf.bufferedImage);
