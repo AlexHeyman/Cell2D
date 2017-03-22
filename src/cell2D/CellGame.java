@@ -1032,7 +1032,9 @@ public abstract class CellGame {
         }
         this.fps = fps;
         msPerFrame = 1000/((double)fps);
-        game.getContainer().setTargetFrameRate(fps);
+        if (game.getContainer() != null) {
+            game.getContainer().setTargetFrameRate(fps);
+        }
     }
     
     /**
