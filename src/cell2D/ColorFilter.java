@@ -6,10 +6,10 @@ import org.newdawn.slick.SlickException;
 
 /**
  * A ColorFilter is a Filter that replaces the RGB value of every pixel in the
- * filtered image with that of the one Color that it uses, thus turning the
+ * original image with that of the one Color that it uses, thus turning the
  * filtered image into a colored silhouette. The alpha value of the
  * ColorFilter's Color is irrelevant to its behavior, and the alpha values of
- * the filtered image's pixels are left unchanged.
+ * the original image's pixels are left unchanged in the filtered image.
  * @author Andrew Heyman
  */
 public class ColorFilter extends Filter {
