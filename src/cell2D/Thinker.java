@@ -67,14 +67,6 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
     }
     
-    public final boolean addTo(T state) {
-        return (initialized ? state.addThinker(thisThinker) : false);
-    }
-    
-    public final boolean remove() {
-        return (initialized ? (state == null ? false : state.removeThinker(thisThinker)) : false);
-    }
-    
     void addActions() {
         if (!upcomingStates.isEmpty()) {
             endState(state.getGame(), state, false);

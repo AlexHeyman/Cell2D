@@ -61,6 +61,14 @@ import org.newdawn.slick.state.transition.Transition;
  * bound. A CellGame also allows for the temporary processing of input as
  * assignments of Controls to specific commands, or as the typing of text to
  * a specific String.
+ * 
+ * A CellGame also controls the playing, looping, stopping, pausing, and fading
+ * of Music tracks. It contains a data structure called a music stack in which
+ * Music tracks may be assigned to different integer priority values. Only the
+ * Music track with the greatest priority will play; all others will be paused.
+ * If the currently playing Music track finishes, it will automatically be
+ * removed from the music stack and the Music track with the next greatest
+ * priority will begin playing.
  * @author Andrew Heyman
  */
 public abstract class CellGame {
@@ -128,8 +136,8 @@ public abstract class CellGame {
      * scaled to make the size of the program window
      * @param fullscreen Whether this CellGame should start in fullscreen mode
      * @param loadingImagePath The relative path to the image that this CellGame
-     * will display while loading. If this is null, no loading image will be
-     * displayed.
+     * will display while loading before the first CellGameState is entered. If
+     * this is null, no loading image will be displayed.
      * @throws SlickException If the loading image itself fails to load
      */
     public CellGame(String gamename, int numCommands, int fps,

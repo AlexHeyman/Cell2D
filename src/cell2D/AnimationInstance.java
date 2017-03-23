@@ -20,7 +20,9 @@ import org.newdawn.slick.Graphics;
  * to the beginning or end, respectively.
  * 
  * When an AnimationInstance is drawn, it will appear as the Sprite in its
- * Animation that its current indices specify.
+ * Animation that its current indices specify. The Filters that can be
+ * successfully applied to that Sprite when it is drawn through the
+ * AnimationInstance are the same ones as when the Sprite is drawn by itself.
  * 
  * AnimationInstances keep track of time by being added to one CellGameState
  * each. An AnimationInstance's time factor represents how many time units the
@@ -117,25 +119,6 @@ public class AnimationInstance implements Drawable {
         if (state != null) {
             state.addAnimInstance(this);
         }
-    }
-    
-    /**
-     * Adds this AnimationInstance to the specified CellGameState if it is not
-     * assigned to one already.
-     * @param state The CellGameState to add this AnimationInstance to
-     * @return Whether the addition was successful
-     */
-    public final boolean addTo(CellGameState state) {
-        return state.addAnimInstance(this);
-    }
-    
-    /**
-     * Removes this AnimationInstance from its current CellGameState if it has
-     * one.
-     * @return Whether the removal was successful
-     */
-    public final boolean remove() {
-        return (state == null ? false : state.removeAnimInstance(this));
     }
     
     /**

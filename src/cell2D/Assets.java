@@ -168,7 +168,7 @@ public class Assets {
      * under that name.
      * @param name The name under which the specified Filter is to be added
      * @param filter The Filter to be added to the list of Filters
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public static final boolean add(String name, Filter filter) {
         if (name == null) {
@@ -187,7 +187,7 @@ public class Assets {
      * under that name.
      * @param name The name under which the specified Sprite is to be added
      * @param sprite The Sprite to be added to the list of Sprites
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public static final boolean add(String name, Sprite sprite) {
         if (name == null) {
@@ -207,7 +207,7 @@ public class Assets {
      * @param name The name under which the specified SpriteSheet is to be added
      * @param spriteSheet The SpriteSheet to be added to the list of
      * SpriteSheets
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public static final boolean add(String name, SpriteSheet spriteSheet) {
         if (name == null) {
@@ -226,7 +226,7 @@ public class Assets {
      * been added under that name.
      * @param name The name under which the specified Animation is to be added
      * @param animation The Animation to be added to the list of Animations
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public static final boolean add(String name, Animation animation) {
         if (name == null) {
@@ -245,7 +245,7 @@ public class Assets {
      * name.
      * @param name The name under which the specified Sound is to be added
      * @param sound The Sound to be added to the list of Sounds
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public static final boolean add(String name, Sound sound) {
         if (name == null) {
@@ -264,7 +264,7 @@ public class Assets {
      * been added under that name.
      * @param name The name under which the specified Music track is to be added
      * @param music The Music track to be added to the list of Music tracks
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public static final boolean add(String name, Music music) {
         if (name == null) {

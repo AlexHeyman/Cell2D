@@ -156,7 +156,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * Adds the specified AnimationInstance to this CellGameState if it is not
      * already assigned to a CellGameState.
      * @param instance The AnimationInstance to add
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public final boolean addAnimInstance(AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
@@ -190,7 +190,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * Removes the specified AnimationInstance from this CellGameState if it
      * is currently assigned to this CellGameState.
      * @param instance The AnimationInstance to remove
-     * @return Whether the removal was successful
+     * @return Whether the removal occurred
      */
     public final boolean removeAnimInstance(AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
@@ -224,7 +224,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * CellGameState.
      * @param id The ID with which to assign the specified AnimationInstance
      * @param instance The AnimationInstance to add with the specified ID
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
@@ -408,7 +408,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * Adds the specified Thinker to this CellGameState if it is not already
      * assigned to a CellGameState.
      * @param thinker The Thinker to be added
-     * @return Whether the addition was successful
+     * @return Whether the addition occurred
      */
     public final boolean addThinker(U thinker) {
         if (initialized && thinker.newState == null) {
@@ -422,7 +422,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * Removes the specified Thinker from this CellGameState if it is currently
      * assigned to it.
      * @param thinker The Thinker to be removed
-     * @return Whether the removal was successful
+     * @return Whether the removal occurred
      */
     public final boolean removeThinker(U thinker) {
         if (initialized && thinker.newState == thisState) {
