@@ -13,6 +13,45 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.newdawn.slick.Graphics;
 
+/**
+ * A CellGameState represents one state that a CellGame can be in, such as the
+ * main menu, the options menu, in the middle of a level, etc. CellGameStates
+ * are permanent parts of a specific CellGame and referenced by a specific
+ * non-negative integer ID, both of which are specified upon the CellGameState's
+ * creation.
+ * 
+ * A CellGameState has its own actions to perform every time its CellGame
+ * executes a frame and in response to specific events, but it only performs
+ * these actions while the CellGame is in that state and it is thus active.
+ * 
+ * AnimationInstances may be assigned to one CellGameState each. An
+ * AnimationInstance's assigned CellGameState will keep track of time for it,
+ * thus allowing it to actually animate, while the CellGameState is active. An
+ * AnimationInstance may be assigned to a CellGameState with or without an
+ * integer ID in the context of that CellGameState. Only one AnimationInstance
+ * may be assigned to a given CellGameState with a given ID at once.
+ * 
+ * Thinkers may be assigned to one CellGameState each. A Thinker's assigned
+ * CellGameState will keep track of time for it, thus allowing it to perform
+ * its own time-dependent actions, while the CellGameState is active. Because
+ * a CellGameState's internal list of Thinkers cannot be modified while it is
+ * being iterated through, the actual addition or removal of a Thinker to or
+ * from a CellGameState is delayed until all of its Thinkers have completed
+ * their timeUnitActions() or frameActions() if the CellGameState was instructed
+ * to add or remove the Thinker during those periods. Multiple delayed
+ * instructions may be successfully given to CellGameStates regarding the same
+ * Thinker without having to wait until the end of one of those periods.
+ * 
+ * The CellGameState class is intended to be directly extended by classes T that
+ * extend CellGameState<T,U,V> and interact with Thinkers of class U and
+ * ThinkerStates of class V. BasicGameState is an example of such a class. This
+ * allows a CellGameState's Thinkers and ThinkerStates to interact with it in
+ * ways unique to its subclass of CellGameState.
+ * @author Andrew Heyman
+ * @param <T> The subclass of CellGameState that this CellGameState is
+ * @param <U> The subclass of Thinker that this CellGameState uses
+ * @param <V> The subclass of ThinkerState that this CellGameState uses
+ */
 public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
     
     private static abstract class StateComparator<T> implements Comparator<T>, Serializable {}
@@ -177,6 +216,16 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return (instance == null ? AnimationInstance.BLANK : instance);
     }
     
+    /**
+     * Sets the AnimationInstance that is assigned to this CellGameState with
+     * the specified ID to the specified AnimationInstance, if it is not already
+     * assigned to a CellGameState. If there is already an AnimationInstance
+     * assigned with the specified ID, it will be removed from this
+     * CellGameState.
+     * @param id The ID with which to assign the specified AnimationInstance
+     * @param instance The AnimationInstance to add with the specified ID
+     * @return Whether the addition was successful
+     */
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
             AnimationInstance oldInstance = IDInstances.remove(id);
@@ -198,11 +247,31 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
+    /**
+     * Returns the Animation of the AnimationInstance assigned to this
+     * CellGameState with the specified ID, if there is one.
+     * @param id The ID of the AnimationInstance whose Animation is to be
+     * returned
+     * @return The Animation of the AnimationInstance assigned to this
+     * CellGameState with the specified ID
+     */
     public final Animation getAnimation(int id) {
         AnimationInstance instance = IDInstances.get(id);
         return (instance == null ? Animation.BLANK : instance.getAnimation());
     }
     
+    /**
+     * Sets the AnimationInstance that is assigned to this CellGameState with
+     * the specified ID to a new AnimationInstance of the specified Animation,
+     * if there is not already an AnimationInstance of that Animation assigned
+     * with that ID. In other words, this method will not replace an
+     * AnimationInstance with another of the same Animation. If there is already
+     * an AnimationInstance assigned with the specified ID, it will be removed
+     * from this CellGameState.
+     * @param id The ID with which to assign the new AnimationInstance
+     * @param animation The Animation to add a new AnimationInstance of
+     * @return The new AnimationInstance
+     */
     public final AnimationInstance setAnimation(int id, Animation animation) {
         AnimationInstance instance = getAnimInstance(id);
         if (instance.getAnimation() != animation) {
@@ -226,6 +295,10 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return instance;
     }
     
+    /**
+     * Removes from this CellGameState all AnimationInstances that are currently
+     * assigned to it, with or without IDs.
+     */
     public final void clearAnimInstances() {
         for (AnimationInstance instance : animInstances) {
             instance.state = null;
@@ -289,10 +362,20 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         
     }
     
+    /**
+     * Returns whether any Iterators over this CellGameState's list of Thinkers
+     * are currently in progress.
+     * @return Whether any Iterators over this CellGameState's list of Thinkers
+     * are currently in progress
+     */
     public final boolean iteratingThroughThinkers() {
         return thinkerIterators > 0;
     }
     
+    /**
+     * Returns a new Iterator over this CellGameState's list of Thinkers.
+     * @return A new Iterator over this CellGameState's list of Thinkers
+     */
     public final SafeIterator<U> thinkerIterator() {
         return new ThinkerIterator();
     }
@@ -321,6 +404,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         
     }
     
+    /**
+     * Adds the specified Thinker to this CellGameState if it is not already
+     * assigned to a CellGameState.
+     * @param thinker The Thinker to be added
+     * @return Whether the addition was successful
+     */
     public final boolean addThinker(U thinker) {
         if (initialized && thinker.newState == null) {
             addThinkerChangeData(thinker, thisState);
@@ -329,6 +418,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
+    /**
+     * Removes the specified Thinker from this CellGameState if it is currently
+     * assigned to it.
+     * @param thinker The Thinker to be removed
+     * @return Whether the removal was successful
+     */
     public final boolean removeThinker(U thinker) {
         if (initialized && thinker.newState == thisState) {
             addThinkerChangeData(thinker, null);
@@ -368,6 +463,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         }
     }
     
+    /**
+     * Actions for this CellGameState to take immediately after adding a Thinker
+     * to itself.
+     * @param game This CellGameState's CellGame
+     * @param thinker The Thinker that was added
+     */
     public void addThinkerActions(CellGame game, U thinker) {}
     
     private void removeActions(U thinker) {
@@ -377,6 +478,12 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         thinker.state = null;
     }
     
+    /**
+     * Actions for this CellGameState to take immediately before removing a
+     * Thinker from itself.
+     * @param game This CellGameState's CellGame
+     * @param thinker The Thinker that is about to be removed
+     */
     public void removeThinkerActions(CellGame game, U thinker) {}
     
     private void updateThinkerList() {
@@ -411,6 +518,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         }
     }
     
+    /**
+     * Actions for this CellGameState to take immediately after updating its
+     * list of Thinkers.
+     * @param game This CellGameState's CellGame
+     */
     public void updateThinkerListActions(CellGame game) {}
     
     final void doFrame() {
@@ -432,24 +544,87 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         performingFrameActions = false;
     }
     
+    /**
+     * Actions for this CellGameState to take exactly once every frame, after
+     * all of its Thinkers have performed their frameActions().
+     * @param game This CellGameState's CellGame
+     */
     public void frameActions(CellGame game) {}
     
+    /**
+     * Actions for this CellGameState to take each frame to render its visuals.
+     * @param game This CellGameState's CellGame
+     * @param g The Graphics context to which this CellGameState is rendering
+     * itself this frame
+     * @param x1 The x-coordinate in pixels of the screen's left edge on the
+     * Graphics context
+     * @param y1 The y-coordinate in pixels of the screen's top edge on the
+     * Graphics context
+     * @param x2 The x-coordinate in pixels of the screen's right edge on the
+     * screen on the Graphics context
+     * @param y2 The y-coordinate in pixels of the screen's bottom edge on the
+     * Graphics context
+     */
     public void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {}
     
+    /**
+     * Actions for this CellGameState to take immediately after being entered.
+     * @param game This CellGameState's CellGame
+     */
     public void enteredActions(CellGame game) {}
     
+    /**
+     * Actions for this CellGameState to take immediately before being exited.
+     * @param game This CellGameState's CellGame
+     */
     public void leftActions(CellGame game) {}
     
-    public void charTyped(char c) {}
+    /**
+     * Actions for this CellGameState to take immediately after its CellGame
+     * begins typing a new String.
+     * @param game This CellGameState's CellGame
+     * @param s The initial value of the typed String
+     */
+    public void stringBegan(CellGame game, String s) {}
     
-    public void charDeleted(char c) {}
+    /**
+     * Actions for this CellGameState to take immediately after a character is
+     * typed to its CellGame's typed String.
+     * @param game This CellGameState's CellGame
+     * @param c The character that was just typed
+     */
+    public void charTyped(CellGame game, char c) {}
     
-    public void stringBegan(String s) {}
+    /**
+     * Actions for this CellGameState to take immediately after a character is
+     * deleted from its CellGame's typed String.
+     * @param game This CellGameState's CellGame
+     * @param c The character that was just deleted
+     */
+    public void charDeleted(CellGame game, char c) {}
     
-    public void stringTyped(String s) {}
+    /**
+     * Actions for this CellGameState to take immediately after its CellGame's
+     * typed String is deleted and reset to the empty String.
+     * @param game This CellGameState's CellGame
+     * @param s The String that was just deleted
+     */
+    public void stringDeleted(CellGame game, String s) {}
     
-    public void stringDeleted(String s) {}
+    /**
+     * Actions for this CellGameState to take immediately after its CellGame's
+     * typed String is finished.
+     * @param game This CellGameState's CellGame
+     * @param s The String that was just finished
+     */
+    public void stringFinished(CellGame game, String s) {}
     
-    public void stringCanceled(String s) {}
+    /**
+     * Actions for this CellGameState to take immediately after its CellGame's
+     * typed String is canceled.
+     * @param game This CellGameState's CellGame
+     * @param s The String that was just canceled
+     */
+    public void stringCanceled(CellGame game, String s) {}
     
 }

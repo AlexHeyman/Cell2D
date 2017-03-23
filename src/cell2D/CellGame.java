@@ -38,11 +38,11 @@ import org.newdawn.slick.state.transition.Transition;
  * A CellGame has one or more CellGameStates, each with a non-negative integer
  * ID that is unique within the CellGame. A CellGame is in exactly one of these
  * CellGameStates at any given time, and can transition between them. Each
- * CellGameState has its own actions to perform every frame, but it only
- * performs these actions while the CellGame is in that state and it is active.
- * If a CellGameState is created with an ID that another CellGameState of the
- * same CellGame already has, the old CellGameState is replaced and can no
- * longer be entered.
+ * CellGameState has its own actions to perform every frame and in response to
+ * specific events, but it only performs these actions while the CellGame is in
+ * that state and it is thus active. If a CellGameState is created with an ID
+ * that another CellGameState of the same CellGame already has, the old
+ * CellGameState is replaced and can no longer be entered.
  * 
  * A CellGame renders visuals on a rectangular grid of pixels called its screen.
  * Points on the screen have x-coordinates that increase from left to right, as
@@ -372,17 +372,17 @@ public abstract class CellGame {
                     if (typingString.length() > 0) {
                         char toDelete = typingString.charAt(typingString.length() - 1);
                         typingString = typingString.substring(0, typingString.length() - 1);
-                        CellGame.this.getCurrentState().charDeleted(toDelete);
+                        CellGame.this.getCurrentState().charDeleted(CellGame.this, toDelete);
                     }
                 } else if (key == Input.KEY_DELETE) {
                     String s = typingString;
                     typingString = "";
-                    CellGame.this.getCurrentState().stringDeleted(s);
+                    CellGame.this.getCurrentState().stringDeleted(CellGame.this, s);
                 } else if (key == Input.KEY_ENTER) {
                     finishTypingString();
                 } else if (c != '\u0000' && typingString.length() < maxTypingStringLength) {
                     typingString += c;
-                    CellGame.this.getCurrentState().charTyped(c);
+                    CellGame.this.getCurrentState().charTyped(CellGame.this, c);
                 }
             } else if (commandToBind >= 0) {
                 finishBindToCommand(new KeyControl(key));
@@ -557,8 +557,8 @@ public abstract class CellGame {
     
     /**
      * Instructs this CellGame to enter its CellGameState with the specified ID
-     * the next time it finishes a game logic update. If this CellGame has no
-     * CellGameState with the specified ID, this method will do nothing.
+     * at the end of the current frame. If this CellGame has no CellGameState
+     * with the specified ID, this method will do nothing.
      * @param id The ID of the CellGameState to enter
      */
     public final void enterState(int id) {
@@ -568,9 +568,9 @@ public abstract class CellGame {
     /**
      * Instructs this CellGame to enter its CellGameState with the specified ID,
      * using the specified Transitions when leaving the current CellGameState
-     * and entering the new one, the next time it finishes a game logic update.
-     * If this CellGame has no CellGameState with the specified ID, this method
-     * will do nothing.
+     * and entering the new one, at the end of the current frame. If this
+     * CellGame has no CellGameState with the specified ID, this method will do
+     * nothing.
      * @param id The ID of the CellGameState to enter
      * @param leave The Transition to use when leaving the current CellGameState
      * @param enter The Transition to use when entering the new CellGameState
@@ -603,14 +603,14 @@ public abstract class CellGame {
      * CellGameState has finished rendering.
      * @param g The Graphics context to which this CellGame is rendering itself
      * this frame
-     * @param x1 The x-coordinate in pixels of the left edge of the CellGame's
+     * @param x1 The x-coordinate in pixels of the screen's left edge on the
+     * Graphics context
+     * @param y1 The y-coordinate in pixels of the screen's top edge on the
+     * Graphics context
+     * @param x2 The x-coordinate in pixels of the screen's right edge on the
      * screen on the Graphics context
-     * @param y1 The y-coordinate in pixels of the top edge of the CellGame's
-     * screen on the Graphics context
-     * @param x2 The x-coordinate in pixels of the right edge of the CellGame's
-     * screen on the Graphics context
-     * @param y2 The y-coordinate in pixels of the bottom edge of the CellGame's
-     * screen on the Graphics context
+     * @param y2 The y-coordinate in pixels of the screen's bottom edge on the
+     * Graphics context
      */
     public void renderActions(Graphics g, int x1, int y1, int x2, int y2) {}
     
@@ -837,20 +837,20 @@ public abstract class CellGame {
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
         }
-        getCurrentState().stringBegan(initialString);
+        getCurrentState().stringBegan(this, initialString);
     }
     
     /**
      * Instructs this CellGame to stop interpreting inputs as typing a String,
      * if it was doing so, and consider the String finished. This will call the
-     * stringTyped() method of this CellGame's current CellGameState.
+     * stringFinished() method of this CellGame's current CellGameState.
      */
     public final void finishTypingString() {
         if (typingString != null) {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            getCurrentState().stringTyped(s);
+            getCurrentState().stringFinished(this, s);
         }
     }
     
@@ -864,7 +864,7 @@ public abstract class CellGame {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            getCurrentState().stringCanceled(s);
+            getCurrentState().stringCanceled(this, s);
         }
     }
     
