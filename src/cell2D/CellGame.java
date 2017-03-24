@@ -1111,7 +1111,7 @@ public abstract class CellGame {
     }
     
     /**
-     * Plays the specified Music track indefinitely. The track will be treated
+     * Loops the specified Music track indefinitely. The track will be treated
      * as having a higher priority than any of those in the music stack.
      * @param music The Music track to loop
      */
@@ -1120,7 +1120,7 @@ public abstract class CellGame {
     }
     
     /**
-     * Plays the specified Music track indefinitely at the specified pitch and
+     * Loops the specified Music track indefinitely at the specified pitch and
      * volume. The track will be treated as having a higher priority than any of
      * those in the music stack.
      * @param music The Music track to loop
@@ -1134,7 +1134,7 @@ public abstract class CellGame {
     }
     
     /**
-     * Plays the specified Music track indefinitely in this CellGame's music
+     * Loops the specified Music track indefinitely in this CellGame's music
      * stack at the specified priority.
      * @param priority The priority at which to play the specified Music track
      * @param music The Music track to loop
@@ -1144,7 +1144,7 @@ public abstract class CellGame {
     }
     
     /**
-     * Plays the specified Music track indefinitely in this CellGame's music
+     * Loops the specified Music track indefinitely in this CellGame's music
      * stack at the specified priority, pitch, and volume.
      * @param priority The priority at which to play the specified Music track
      * @param music The Music track to loop

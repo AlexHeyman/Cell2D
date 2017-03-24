@@ -32,9 +32,8 @@ public class Music {
     }
     
     /**
-     * Creates a new Music track.
-     * @param path The relative path to the audio file from which this Music
-     * track is created
+     * Creates a new Music track from an audio file.
+     * @param path The relative path to the audio file
      * @param load Whether this Music track should load upon creation
      * @throws SlickException If the Music track could not be properly loaded
      * from the specified path
@@ -48,8 +47,8 @@ public class Music {
     }
     
     /**
-     * Returns whether or not this Music track is loaded.
-     * @return Whether or not this Music track is loaded
+     * Returns whether this Music track is loaded.
+     * @return Whether this Music track is loaded
      */
     public final boolean isLoaded() {
         return loaded;
@@ -59,7 +58,6 @@ public class Music {
      * Loads this Music track if it is not already loaded.
      * @return Whether the loading occurred
      * @throws SlickException If the Music track could not be properly loaded
-     * from the specified path
      */
     public final boolean load() throws SlickException {
         if (blank) {

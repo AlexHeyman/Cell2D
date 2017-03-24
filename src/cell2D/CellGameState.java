@@ -309,7 +309,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     private class ThinkerIterator implements SafeIterator<U> {
         
-        private boolean finished = false;
+        private boolean stopped = false;
         private final Iterator<U> iterator = thinkers.iterator();
         private U lastThinker = null;
         
@@ -319,19 +319,19 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         
         @Override
         public final boolean hasNext() {
-            if (finished) {
+            if (stopped) {
                 return false;
             }
             boolean hasNext = iterator.hasNext();
             if (!hasNext) {
-                finish();
+                stop();
             }
             return hasNext;
         }
         
         @Override
         public final U next() {
-            if (finished) {
+            if (stopped) {
                 return null;
             }
             lastThinker = iterator.next();
@@ -340,21 +340,16 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         
         @Override
         public final void remove() {
-            if (!finished && lastThinker != null) {
+            if (!stopped && lastThinker != null) {
                 removeThinker(lastThinker);
                 lastThinker = null;
             }
         }
         
         @Override
-        public final boolean isFinished() {
-            return finished;
-        }
-        
-        @Override
-        public final void finish() {
-            if (!finished) {
-                finished = true;
+        public final void stop() {
+            if (!stopped) {
+                stopped = true;
                 thinkerIterators--;
                 updateThinkerList();
             }
