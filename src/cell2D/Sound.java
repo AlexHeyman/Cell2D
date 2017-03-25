@@ -3,9 +3,9 @@ package cell2D;
 import org.newdawn.slick.SlickException;
 
 /**
- * A Sound is a sound effect. Like Sprites, SpriteSheets, and Music tracks,
+ * <p>A Sound is a sound effect. Like Sprites, SpriteSheets, and Music tracks,
  * Sounds can be manually loaded and unloaded into and out of memory. Loading
- * may take a moment, but while a Sound is not loaded, it cannot play.
+ * may take a moment, but while a Sound is not loaded, it cannot play.</p>
  * @author Andrew Heyman
  */
 public class Sound {

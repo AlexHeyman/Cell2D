@@ -12,11 +12,11 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
 /**
- * The Assets class stores references to Filters, Sprites, SpriteSheets,
+ * <p>The Assets class stores references to Filters, Sprites, SpriteSheets,
  * Animations, Sounds, and Music tracks under String names that are unique among
  * each of those types of assets. Assets must be added to the Assets class
  * manually, such as in a CellGame's initActions(), after which they can be
- * accessed at any time.
+ * accessed at any time.</p>
  * @author Andrew Heyman
  */
 public class Assets {

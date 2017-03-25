@@ -3,14 +3,14 @@ package cell2D;
 import org.newdawn.slick.SlickException;
 
 /**
- * A Music track is a piece of music that can be played in the background of a
- * CellGame. Because a CellGame must ensure that it is never playing more than
+ * <p>A Music track is a piece of music that can be played in the background of
+ * a CellGame. Because a CellGame must ensure that it is never playing more than
  * one Music track at a time, all playing, looping, stopping, pausing, and
- * fading of Music tracks is controlled by methods of the CellGame.
+ * fading of Music tracks is controlled by methods of the CellGame.</p>
  * 
- * Like Sprites, SpriteSheets, and Sounds, Music tracks can be manually loaded
- * and unloaded into and out of memory. Loading may take a moment, but while a
- * Music track is not loaded, it cannot play.
+ * <p>Like Sprites, SpriteSheets, and Sounds, Music tracks can be manually
+ * loaded and unloaded into and out of memory. Loading may take a moment, but
+ * while a Music track is not loaded, it cannot play.</p>
  * @author Andrew Heyman
  */
 public class Music {

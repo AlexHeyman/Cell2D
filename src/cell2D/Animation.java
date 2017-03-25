@@ -3,26 +3,27 @@ package cell2D;
 import java.util.Arrays;
 
 /**
- * An Animation is a sequence of one or more Animatable frames that may be
+ * <p>An Animation is a sequence of one or more Animatable frames that may be
  * instantiated in an AnimationInstance in order to be displayed one after
  * another and/or smoothly transitioned between. The frames are indexed by the
  * integers from 0 to getNumFrames() - 1 inclusive, and each has its own
  * duration that is measured in time units by default. Durations of 0 or less
- * are interpreted as infinite.
+ * are interpreted as infinite.</p>
  * 
- * The frames of Animations may be other Animations in addition to single
+ * <p>The frames of Animations may be other Animations in addition to single
  * Sprites, which allows for the creation of multi-dimensional Animations in a
- * similar manner to multi-dimensional arrays.
+ * similar manner to multi-dimensional arrays.</p>
  * 
- * In order to be of use, Animations need not represent linear progressions of
- * frames; they may also be collections of counterpart Animations that need to
- * be switched between without an AnimationInstance losing its place in them.
+ * <p>In order to be of use, Animations need not represent linear progressions
+ * of frames; they may also be collections of counterpart Animations that need
+ * to be switched between without an AnimationInstance losing its place in them.
+ * </p>
  * 
- * Once created, Animations are static and immutable, with all movement through
- * time happening in AnimationInstances.
+ * <p>Once created, Animations are static and immutable, with all movement
+ * through time happening in AnimationInstances.</p>
  * 
- * All of Animation's constructors treat a null Animatable as equivalent to
- * Sprite.BLANK, and thus no frame of an Animation may be null.
+ * <p>All of Animation's constructors treat a null Animatable as equivalent to
+ * Sprite.BLANK, and thus no frame of an Animation may be null.</p>
  * @author Andrew Heyman
  */
 public class Animation implements Animatable {

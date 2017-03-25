@@ -1,21 +1,22 @@
 package cell2D;
 
 /**
- * A ThinkerState represents a state that a Thinker can occupy. A Thinker may
+ * <p>A ThinkerState represents a state that a Thinker can occupy. A Thinker may
  * occupy at most one ThinkerState at a time. ThinkerStates take actions
  * alongside their Thinker's own, as well as when entered and left by a Thinker,
  * and can help a Thinker keep track of its position in a multi-frame procedure.
+ * </p>
  * 
- * The ThinkerState class is intended to be directly extended by classes V that
- * extend ThinkerState<T,U,V> and interact with CellGameStates of class T and
- * Thinkers of class U. BasicThinkerState is an example of such a class. This
- * allows a ThinkerState's Thinkers and their CellGameStates to interact with it
- * in ways unique to its subclass of ThinkerState.
+ * <p>The ThinkerState class is intended to be directly extended by classes V
+ * that extend ThinkerState&lt;T,U,V&gt; and interact with CellGameStates of
+ * class T and Thinkers of class U. BasicThinkerState is an example of such a
+ * class. This allows a ThinkerState's Thinkers and their CellGameStates to
+ * interact with it in ways unique to its subclass of ThinkerState.</p>
  * 
- * It is useful to create an individual ThinkerState instance within the class
- * of the Thinker that uses it and override its methods when creating it,
+ * <p>It is useful to create an individual ThinkerState instance within the
+ * class of the Thinker that uses it and override its methods when creating it,
  * allowing those methods to easily access the internal fields and methods of
- * the Thinker.
+ * the Thinker.</p>
  * 
  * @author Andrew Heyman
  * @param <T> The subclass of CellGameState that this ThinkerState's Thinker is

@@ -8,14 +8,14 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
 /**
- * A SpriteSheet is a rectangular grid of Sprites. Each Sprite has an
+ * <p>A SpriteSheet is a rectangular grid of Sprites. Each Sprite has an
  * x-coordinate in the grid that starts at 0 for the leftmost column and
  * increases to the right, as well as a y-coordinate that starts at 0 for the
  * topmost row and increases below. Like Sprites, Sounds, and Music tracks,
  * SpriteSheets can be manually loaded and unloaded into and out of memory.
  * Loading may take a moment, but a SpriteSheet's Sprites cannot be loaded and
  * drawn if the SpriteSheet itself is not loaded. Thus, loading a Sprite that is
- * part of a SpriteSheet will also load its SpriteSheet.
+ * part of a SpriteSheet will also load its SpriteSheet.</p>
  * @author Andrew Heyman
  */
 public class SpriteSheet {

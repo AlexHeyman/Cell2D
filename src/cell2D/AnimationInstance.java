@@ -3,28 +3,29 @@ package cell2D;
 import org.newdawn.slick.Graphics;
 
 /**
- * An AnimationInstance is an instance of an Animation that represents a point
- * in the Animation and rates at which that point progresses through the
+ * <p>An AnimationInstance is an instance of an Animation that represents a
+ * point in the Animation and rates at which that point progresses through the
  * Animation. An AnimationInstance has one level for each dimension of its
  * Animation, numbered 0 through the number of dimensions minus 1 inclusive. For
  * example, an instance of a level 2 Animation (an Animation of Animations) has
  * two levels: level 0 for the component Animations, and level 1 for the
- * Animation of Animations.
+ * Animation of Animations.</p>
  * 
- * At each of its levels, an AnimationInstance has an index of its current
+ * <p>At each of its levels, an AnimationInstance has an index of its current
  * position in that level of the Animation, as well as a speed that represents
  * how fast, in frame duration units per time unit, it advances through that
  * level. If a level's speed is negative, the AnimationInstance will cycle
  * through the Animation at that level backward. If an AnimationInstance moves
  * forward past a level's end or backward past its beginning, it will loop back
- * to the beginning or end, respectively.
+ * to the beginning or end, respectively.</p>
  * 
- * When an AnimationInstance is drawn, it will appear as the Sprite in its
+ * <p>When an AnimationInstance is drawn, it will appear as the Sprite in its
  * Animation that its current indices specify. The Filters that can be
  * successfully applied to that Sprite when it is drawn through the
  * AnimationInstance are the same ones as when the Sprite is drawn by itself.
+ * </p>
  * 
- * AnimationInstances keep track of time by being added to one CellGameState
+ * <p>AnimationInstances keep track of time by being added to one CellGameState
  * each. An AnimationInstance's time factor represents how many time units the
  * AnimationInstance will experience every frame while assigned to an active
  * CellGameState. If its own time factor is negative, an AnimationInstance will
@@ -32,7 +33,7 @@ import org.newdawn.slick.Graphics;
  * is assigned to an inactive CellGameState or none at all, time will not pass
  * for it. AnimationInstances assigned to the active CellGameState update their
  * indices at the beginning of each frame, before Thinkers' timeUnitActions()
- * are taken.
+ * are taken.</p>
  * @author Andrew Heyman
  */
 public class AnimationInstance implements Drawable {

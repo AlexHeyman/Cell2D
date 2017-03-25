@@ -10,8 +10,8 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A Thinker is a collection of methods that contributes to the mechanics of the
- * CellGameState to which it is assigned. A Thinker's assigned CellGameState
+ * <p>A Thinker is a collection of methods that contributes to the mechanics of
+ * the CellGameState to which it is assigned. A Thinker's assigned CellGameState
  * will keep track of time for it, thus allowing it to take its own
  * time-dependent actions, while the CellGameState is active. Because a
  * CellGameState's internal list of Thinkers cannot be modified while it is
@@ -20,33 +20,34 @@ import java.util.concurrent.atomic.AtomicLong;
  * their timeUnitActions() or frameActions() if the CellGameState was instructed
  * to add or remove the Thinker during those periods. Multiple delayed
  * instructions may be successfully given to CellGameStates regarding the same
- * Thinker without having to wait until the end of one of those periods.
+ * Thinker without having to wait until the end of one of those periods.</p>
  * 
- * A Thinker's time factor represents how many time units the Thinker will
+ * <p>A Thinker's time factor represents how many time units the Thinker will
  * experience every frame while assigned to an active CellGameState. If its own
  * time factor is negative, a Thinker will use its assigned CellGameState's time
  * factor instead. If a Thinker is assigned to an inactive CellGameState or none
- * at all, time will not pass for it.
+ * at all, time will not pass for it.</p>
  * 
- * A Thinker may occupy at most one ThinkerState at a time. ThinkerStates take
- * actions alongside their Thinker's own, as well as when entered and left by a
- * Thinker, and can help a Thinker keep track of its position in a multi-frame
- * procedure.
+ * <p>A Thinker may occupy at most one ThinkerState at a time. ThinkerStates
+ * take actions alongside their Thinker's own, as well as when entered and left
+ * by a Thinker, and can help a Thinker keep track of its position in a
+ * multi-frame procedure.</p>
  * 
- * A Thinker has timers that can activate TimedEvents after a certain number of
- * time units. Timers have integer values, with a positive value x indicating
+ * <p>A Thinker has timers that can activate TimedEvents after a certain number
+ * of time units. Timers have integer values, with a positive value x indicating
  * that the TimedEvent will be activated in x time units, a negative value
  * indicating that the timer is not running, and a value of 0 indicating that
  * either the TimedEvent was activated or the value was deliberately set to 0
  * this time unit. Each time unit, before this Thinker and its ThinkerState (if
  * it has one) take their timeUnitActions(), non-negative timers' values are
  * decreased by 1 and the TimedEvents whose timers have reached 0 are activated.
+ * </p>
  * 
- * The Thinker class is intended to be directly extended by classes U that
- * extend Thinker<T,U,V> and interact with CellGameStates of class T and
+ * <p>The Thinker class is intended to be directly extended by classes U that
+ * extend Thinker&lt;T,U,V&gt; and interact with CellGameStates of class T and
  * ThinkerStates of class V. BasicThinker is an example of such a class. This
  * allows a Thinker's CellGameStates and ThinkerStates to interact with it in
- * ways unique to its subclass of Thinker.
+ * ways unique to its subclass of Thinker.</p>
  * @author Andrew Heyman
  * @param <T> The subclass of CellGameState that this Thinker is used by
  * @param <U> The subclass of Thinker that this Thinker is
@@ -93,9 +94,9 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     
     /**
      * A method which returns this Thinker as a U, rather than as a
-     * Thinker<T,U,V>. This must be implemented somewhere in the lineage of
-     * every subclass of Thinker in order to get around Java's limitations with
-     * regard to generic types.
+     * Thinker&lt;T,U,V&gt;. This must be implemented somewhere in the lineage
+     * of every subclass of Thinker in order to get around Java's limitations
+     * with regard to generic types.
      * @return This Thinker as a U
      */
     public abstract U getThis();

@@ -3,12 +3,12 @@ package cell2D;
 import org.newdawn.slick.Graphics;
 
 /**
- * A Drawable object is one that visually represents itself with an image that
- * is contextless by itself but can be drawn to a Graphics context. Points on
- * the image have x-coordinates, which are 0 at its left edge and increase from
- * left to right, and y-coordinates, which are 0 at its top edge and increase
- * from top to bottom. The drawn image has an origin point somewhere on (or off)
- * it around which it is flipped, rotated, and scaled.
+ * <p>A Drawable object is one that visually represents itself with an image
+ * that is contextless by itself but can be drawn to a Graphics context. Points
+ * on the image have x-coordinates, which are 0 at its left edge and increase
+ * from left to right, and y-coordinates, which are 0 at its top edge and
+ * increase from top to bottom. The drawn image has an origin point somewhere on
+ * (or off) it around which it is flipped, rotated, and scaled.</p>
  * @author Andrew Heyman
  */
 public interface Drawable {

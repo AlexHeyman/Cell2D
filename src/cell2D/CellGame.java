@@ -31,44 +31,44 @@ import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.Transition;
 
 /**
- * A CellGame is a game made with Cell2D. A certain number of times per second,
- * a CellGame executes a frame, in which it processes input, updates the logic
- * of the game, and renders visuals.
+ * <p>A CellGame is a game made with Cell2D. A certain number of times per
+ * second, a CellGame executes a frame, in which it processes input, updates the
+ * logic of the game, and renders visuals.</p>
  * 
- * A CellGame has one or more CellGameStates, each with a non-negative integer
- * ID that is unique within the CellGame. A CellGame is in exactly one of these
- * CellGameStates at any given time, and can transition between them. Each
- * CellGameState has its own actions to take every frame and in response to
+ * <p>A CellGame has one or more CellGameStates, each with a non-negative
+ * integer ID that is unique within the CellGame. A CellGame is in exactly one
+ * of these CellGameStates at any given time, and can transition between them.
+ * Each CellGameState has its own actions to take every frame and in response to
  * specific events, but it only takes these actions while the CellGame is in
  * that state and it is thus active. If a CellGameState is created with an ID
  * that another CellGameState of the same CellGame already has, the old
- * CellGameState is replaced and can no longer be entered.
+ * CellGameState is replaced and can no longer be entered.</p>
  * 
- * A CellGame renders visuals on a rectangular grid of pixels called its screen.
+ * <p>A CellGame renders visuals on a rectangular grid of pixels called its screen.
  * Points on the screen have x-coordinates that increase from left to right, as
  * well as y-coordinates that increase from top to bottom. The dimensions of the
  * screen are not necessarily the same as the dimensions of the CellGame's
  * program window, as the screen may be scaled to different apparent sizes using
  * the CellGame's scale factor. A CellGame may be displayed in windowed or
- * fullscreen mode.
+ * fullscreen mode.</p>
  * 
- * A CellGame processes input in the form of a fixed number of binary commands,
- * numbered from 0 to getNumCommands() - 1 inclusive, as well as the position of
- * the mouse cursor on the screen and the movement of the mouse wheel. Slick2D
- * objects called Controls, which represent keys, mouse buttons, controller
- * buttons, etc. may be bound to at most one command at a time so that when they
- * are pressed, held, and released, so too are the commands to which they are
- * bound. A CellGame also allows for the temporary processing of input as
- * assignments of Controls to specific commands, or as the typing of text to
- * a specific String.
+ * <p>A CellGame processes input in the form of a fixed number of binary
+ * commands, numbered from 0 to getNumCommands() - 1 inclusive, as well as the
+ * position of the mouse cursor on the screen and the movement of the mouse
+ * wheel. Slick2D objects called Controls, which represent keys, mouse buttons,
+ * controller buttons, etc. may be bound to at most one command at a time so
+ * that when they are pressed, held, and released, so too are the commands to
+ * which they are bound. A CellGame also allows for the temporary processing of
+ * input as assignments of Controls to specific commands, or as the typing of
+ * text to a specific String.</p>
  * 
- * A CellGame also controls the playing, looping, stopping, pausing, and fading
- * of Music tracks. It contains a data structure called a music stack in which
- * Music tracks may be assigned to different integer priority values. Only the
- * Music track with the greatest priority will play; all others will be paused.
- * If the currently playing Music track finishes, it will automatically be
- * removed from the music stack and the Music track with the next greatest
- * priority will begin playing.
+ * <p>A CellGame also controls the playing, looping, stopping, pausing, and
+ * fading of Music tracks. It contains a data structure called a music stack in
+ * which Music tracks may be assigned to different integer priority values. Only
+ * the Music track with the greatest priority will play; all others will be
+ * paused. If the currently playing Music track finishes, it will automatically
+ * be removed from the music stack and the Music track with the next greatest
+ * priority will begin playing.</p>
  * @author Andrew Heyman
  */
 public abstract class CellGame {

@@ -1,13 +1,13 @@
 package cell2D;
 
 /**
- * An Animatable object is one that may be incorporated into an Animation as one
- * of its frames. For simplicity's sake, all Animatable objects, not just
+ * <p>An Animatable object is one that may be incorporated into an Animation as
+ * one of its frames. For simplicity's sake, all Animatable objects, not just
  * Animations, may be treated as consisting of one or more Animatable frames,
  * indexed by the integers from 0 to getNumFrames() - 1 inclusive, each with its
  * own duration. Durations of 0 or less are interpreted as infinite. An
  * Animatable object that is not an Animation has exactly one frame, namely
- * itself, with a duration of 0.
+ * itself, with a duration of 0.</p>
  * @author Andrew Heyman
  */
 public interface Animatable {

@@ -14,24 +14,24 @@ import java.util.TreeSet;
 import org.newdawn.slick.Graphics;
 
 /**
- * A CellGameState represents one state that a CellGame can be in, such as the
- * main menu, the options menu, in the middle of a level, etc. CellGameStates
- * are permanent parts of a specific CellGame and referenced by a specific
- * non-negative integer ID, both of which are specified upon the CellGameState's
- * creation.
+ * <p>A CellGameState represents one state that a CellGame can be in, such as
+ * the main menu, the options menu, in the middle of a level, etc.
+ * CellGameStates are permanent parts of a specific CellGame and referenced by a
+ * specific non-negative integer ID, both of which are specified upon the
+ * CellGameState's creation.</p>
  * 
- * A CellGameState has its own actions to take every time its CellGame executes
- * a frame and in response to specific events, but it only takes these actions
- * while the CellGame is in that state and it is thus active.
+ * <p>A CellGameState has its own actions to take every time its CellGame
+ * executes a frame and in response to specific events, but it only takes these
+ * actions while the CellGame is in that state and it is thus active.</p>
  * 
- * AnimationInstances may be assigned to one CellGameState each. An
+ * <p>AnimationInstances may be assigned to one CellGameState each. An
  * AnimationInstance's assigned CellGameState will keep track of time for it,
  * thus allowing it to actually animate, while the CellGameState is active. An
  * AnimationInstance may be assigned to a CellGameState with or without an
  * integer ID in the context of that CellGameState. Only one AnimationInstance
- * may be assigned to a given CellGameState with a given ID at once.
+ * may be assigned to a given CellGameState with a given ID at once.</p>
  * 
- * Thinkers may be assigned to one CellGameState each. A Thinker's assigned
+ * <p>Thinkers may be assigned to one CellGameState each. A Thinker's assigned
  * CellGameState will keep track of time for it, thus allowing it to take its
  * own time-dependent actions, while the CellGameState is active. Because a
  * CellGameState's internal list of Thinkers cannot be modified while it is
@@ -40,13 +40,13 @@ import org.newdawn.slick.Graphics;
  * their timeUnitActions() or frameActions() if the CellGameState was instructed
  * to add or remove the Thinker during those periods. Multiple delayed
  * instructions may be successfully given to CellGameStates regarding the same
- * Thinker without having to wait until the end of one of those periods.
+ * Thinker without having to wait until the end of one of those periods.</p>
  * 
- * The CellGameState class is intended to be directly extended by classes T that
- * extend CellGameState<T,U,V> and interact with Thinkers of class U and
- * ThinkerStates of class V. BasicGameState is an example of such a class. This
- * allows a CellGameState's Thinkers and their ThinkerStates to interact with it
- * in ways unique to its subclass of CellGameState.
+ * <p>The CellGameState class is intended to be directly extended by classes T
+ * that extend CellGameState&lt;T,U,V&gt; and interact with Thinkers of class U
+ * and ThinkerStates of class V. BasicGameState is an example of such a class.
+ * This allows a CellGameState's Thinkers and their ThinkerStates to interact
+ * with it in ways unique to its subclass of CellGameState.</p>
  * @author Andrew Heyman
  * @param <T> The subclass of CellGameState that this CellGameState is
  * @param <U> The subclass of Thinker that this CellGameState uses
@@ -101,8 +101,8 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     /**
      * A method which returns this CellGameState as a T, rather than as a
-     * CellGameState<T,U,V>. This must be implemented somewhere in the lineage
-     * of every subclass of CellGameState in order to get around Java's
+     * CellGameState&lt;T,U,V&gt;. This must be implemented somewhere in the
+     * lineage of every subclass of CellGameState in order to get around Java's
      * limitations with regard to generic types.
      * @return This CellGameState as a T
      */

@@ -11,11 +11,12 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Vector2f;
 
 /**
- * A Sprite is a static image that can be drawn to a Graphics context. Like
+ * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
  * SpriteSheets, Sounds, and Music tracks, Sprites can be manually loaded and
  * unloaded into and out of memory. Loading may take a moment, but while a
  * Sprite is not loaded, it cannot be drawn. A Sprite may also be treated as an
  * Animatable with exactly one frame, namely itself, that has a duration of 0.
+ * </p>
  * @author Andrew Heyman
  */
 public class Sprite implements Animatable, Drawable {
