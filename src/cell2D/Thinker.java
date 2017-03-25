@@ -283,6 +283,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
             endState(state.getGame(), state);
         }
     }
+    
     /**
      * Returns the current value of this Thinker's timer for the specified
      * TimedEvent.
