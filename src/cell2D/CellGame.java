@@ -38,8 +38,8 @@ import org.newdawn.slick.state.transition.Transition;
  * A CellGame has one or more CellGameStates, each with a non-negative integer
  * ID that is unique within the CellGame. A CellGame is in exactly one of these
  * CellGameStates at any given time, and can transition between them. Each
- * CellGameState has its own actions to perform every frame and in response to
- * specific events, but it only performs these actions while the CellGame is in
+ * CellGameState has its own actions to take every frame and in response to
+ * specific events, but it only takes these actions while the CellGame is in
  * that state and it is thus active. If a CellGameState is created with an ID
  * that another CellGameState of the same CellGame already has, the old
  * CellGameState is replaced and can no longer be entered.

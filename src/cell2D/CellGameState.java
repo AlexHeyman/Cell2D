@@ -20,9 +20,9 @@ import org.newdawn.slick.Graphics;
  * non-negative integer ID, both of which are specified upon the CellGameState's
  * creation.
  * 
- * A CellGameState has its own actions to perform every time its CellGame
- * executes a frame and in response to specific events, but it only performs
- * these actions while the CellGame is in that state and it is thus active.
+ * A CellGameState has its own actions to take every time its CellGame executes
+ * a frame and in response to specific events, but it only takes these actions
+ * while the CellGame is in that state and it is thus active.
  * 
  * AnimationInstances may be assigned to one CellGameState each. An
  * AnimationInstance's assigned CellGameState will keep track of time for it,
@@ -32,9 +32,9 @@ import org.newdawn.slick.Graphics;
  * may be assigned to a given CellGameState with a given ID at once.
  * 
  * Thinkers may be assigned to one CellGameState each. A Thinker's assigned
- * CellGameState will keep track of time for it, thus allowing it to perform
- * its own time-dependent actions, while the CellGameState is active. Because
- * a CellGameState's internal list of Thinkers cannot be modified while it is
+ * CellGameState will keep track of time for it, thus allowing it to take its
+ * own time-dependent actions, while the CellGameState is active. Because a
+ * CellGameState's internal list of Thinkers cannot be modified while it is
  * being iterated through, the actual addition or removal of a Thinker to or
  * from a CellGameState is delayed until all of its Thinkers have completed
  * their timeUnitActions() or frameActions() if the CellGameState was instructed
@@ -45,12 +45,13 @@ import org.newdawn.slick.Graphics;
  * The CellGameState class is intended to be directly extended by classes T that
  * extend CellGameState<T,U,V> and interact with Thinkers of class U and
  * ThinkerStates of class V. BasicGameState is an example of such a class. This
- * allows a CellGameState's Thinkers and ThinkerStates to interact with it in
- * ways unique to its subclass of CellGameState.
+ * allows a CellGameState's Thinkers and their ThinkerStates to interact with it
+ * in ways unique to its subclass of CellGameState.
  * @author Andrew Heyman
  * @param <T> The subclass of CellGameState that this CellGameState is
  * @param <U> The subclass of Thinker that this CellGameState uses
- * @param <V> The subclass of ThinkerState that this CellGameState uses
+ * @param <V> The subclass of ThinkerState that this CellGameState's Thinkers
+ * use
  */
 public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
     
@@ -72,7 +73,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     private int id;
     boolean active = false;
     private double timeFactor = 1;
-    private boolean performingFrameActions = false;
+    private boolean takingFrameActions = false;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
     private final SortedSet<U> thinkers = new TreeSet<>(actionPriorityComparator);
@@ -143,7 +144,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     
     /**
      * Sets this CellGameState's time factor to the specified value.
-     * @param timeFactor The value to which the time factor will be set
+     * @param timeFactor The new time factor
      */
     public final void setTimeFactor(double timeFactor) {
         if (timeFactor < 0) {
@@ -453,7 +454,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         thinker.addActions();
         thinker.addedActions(game, thisState);
         addThinkerActions(game, thinker);
-        if (performingFrameActions) {
+        if (takingFrameActions) {
             thinker.doFrame(game, thisState);
         }
     }
@@ -530,18 +531,18 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
                 iterator.next().update(game);
             }
         }
-        performingFrameActions = true;
+        takingFrameActions = true;
         Iterator<U> iterator = thinkerIterator();
         while (iterator.hasNext()) {
             iterator.next().doFrame(game, thisState);
         }
         frameActions(game);
-        performingFrameActions = false;
+        takingFrameActions = false;
     }
     
     /**
-     * Actions for this CellGameState to take exactly once every frame, after
-     * all of its Thinkers have performed their frameActions().
+     * Actions for this CellGameState to take once every frame, after all of its
+     * Thinkers have taken their frameActions().
      * @param game This CellGameState's CellGame
      */
     public void frameActions(CellGame game) {}

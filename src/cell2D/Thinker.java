@@ -9,6 +9,49 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * A Thinker is a collection of methods that contributes to the mechanics of the
+ * CellGameState to which it is assigned. A Thinker's assigned CellGameState
+ * will keep track of time for it, thus allowing it to take its own
+ * time-dependent actions, while the CellGameState is active. Because a
+ * CellGameState's internal list of Thinkers cannot be modified while it is
+ * being iterated through, the actual addition or removal of a Thinker to or
+ * from a CellGameState is delayed until all of its Thinkers have completed
+ * their timeUnitActions() or frameActions() if the CellGameState was instructed
+ * to add or remove the Thinker during those periods. Multiple delayed
+ * instructions may be successfully given to CellGameStates regarding the same
+ * Thinker without having to wait until the end of one of those periods.
+ * 
+ * A Thinker's time factor represents how many time units the Thinker will
+ * experience every frame while assigned to an active CellGameState. If its own
+ * time factor is negative, a Thinker will use its assigned CellGameState's time
+ * factor instead. If a Thinker is assigned to an inactive CellGameState or none
+ * at all, time will not pass for it.
+ * 
+ * A Thinker may occupy at most one ThinkerState at a time. ThinkerStates take
+ * actions alongside their Thinker's own, as well as when entered and left by a
+ * Thinker, and can help a Thinker keep track of its position in a multi-frame
+ * procedure.
+ * 
+ * A Thinker has timers that can activate TimedEvents after a certain number of
+ * time units. Timers have integer values, with a positive value x indicating
+ * that the TimedEvent will be activated in x time units, a negative value
+ * indicating that the timer is not running, and a value of 0 indicating that
+ * either the TimedEvent was activated or the value was deliberately set to 0
+ * this time unit. Each time unit, before this Thinker and its ThinkerState (if
+ * it has one) take their timeUnitActions(), non-negative timers' values are
+ * decreased by 1 and the TimedEvents whose timers have reached 0 are activated.
+ * 
+ * The Thinker class is intended to be directly extended by classes U that
+ * extend Thinker<T,U,V> and interact with CellGameStates of class T and
+ * ThinkerStates of class V. BasicThinker is an example of such a class. This
+ * allows a Thinker's CellGameStates and ThinkerStates to interact with it in
+ * ways unique to its subclass of Thinker.
+ * @author Andrew Heyman
+ * @param <T> The subclass of CellGameState that this Thinker is used by
+ * @param <U> The subclass of Thinker that this Thinker is
+ * @param <V> The subclass of ThinkerState that this Thinker uses
+ */
 public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
     
     private static final AtomicLong idCounter = new AtomicLong(0);
@@ -25,16 +68,19 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     private final Map<TimedEvent<T>,Integer> timers = new HashMap<>();
     private V thinkerState = null;
     private final Queue<V> upcomingStates = new LinkedList<>();
-    private boolean changingState = false;
-    private final TimedEvent<T> nextState = new TimedEvent<T>() {
+    private boolean delayedStateChange = false;
+    private final TimedEvent<T> nextStateEvent = new TimedEvent<T>() {
         
         @Override
         public void eventActions(CellGame game, T state) {
-            endState(game, state, true);
+            endState(game, state);
         }
         
     };
     
+    /**
+     * Creates a new Thinker.
+     */
     public Thinker() {
         id = getNextID();
         thisThinker = getThis();
@@ -45,16 +91,43 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         return idCounter.getAndIncrement();
     }
     
+    /**
+     * A method which returns this Thinker as a U, rather than as a
+     * Thinker<T,U,V>. This must be implemented somewhere in the lineage of
+     * every subclass of Thinker in order to get around Java's limitations with
+     * regard to generic types.
+     * @return This Thinker as a U
+     */
     public abstract U getThis();
     
+    /**
+     * Returns the CellGameState to which this Thinker is currently assigned, or
+     * null if it is assigned to none.
+     * @return The CellGameState to which this Thinker is currently assigned
+     */
     public final T getGameState() {
         return state;
     }
     
+    /**
+     * Returns the CellGameState to which this Thinker is about to be assigned,
+     * but has not yet been due to one or more of the Thinker lists involved
+     * being iterated over. If this Thinker is about to be removed from its
+     * CellGameState without being added to a new one afterward, this will be
+     * null. If this Thinker is not about to change CellGameStates, this method
+     * will simply return its current CellGameState.
+     * @return The CellGameState to which this Thinker is about to be assigned
+     */
     public final T getNewGameState() {
         return newState;
     }
     
+    /**
+     * Sets the CellGameState to which this Thinker is currently
+     * assigned. If it is set to a null CellGameState, this Thinker
+     * will be removed from its current CellGameState if it has one.
+     * @param state The CellGameState to which this Thinker should be assigned
+     */
     public final void setGameState(T state) {
         if (!initialized) {
             return;
@@ -68,31 +141,60 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     }
     
     void addActions() {
-        if (!upcomingStates.isEmpty()) {
-            endState(state.getGame(), state, false);
+        if (!upcomingStates.isEmpty() || timers.get(nextStateEvent) == 0) {
+            endState(state.getGame(), state);
         }
     }
     
+    /**
+     * Returns this Thinker's time factor.
+     * @return This Thinker's time factor
+     */
     public final double getTimeFactor() {
         return timeFactor;
     }
     
+    /**
+     * Returns this Thinker's effective time factor; that is, how many time
+     * units it experiences every frame. If it is not assigned to a
+     * CellGameState, this will be 0.
+     * @return This Thinker's effective time factor
+     */
     public final double getEffectiveTimeFactor() {
         return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
     }
     
+    /**
+     * Sets this Thinker's time factor to the specified value.
+     * @param timeFactor The new time factor
+     */
     public final void setTimeFactor(double timeFactor) {
         this.timeFactor = timeFactor;
     }
     
+    /**
+     * Returns this Thinker's action priority.
+     * @return This Thinker's action priority
+     */
     public final int getActionPriority() {
         return actionPriority;
     }
     
+    /**
+     * Returns the action priority that this Thinker is about to have, but does
+     * not yet have due to its CellGameState's Thinker list being iterated over.
+     * If this Thinker is not about to change its action priority, this method
+     * will simply return its current action priority.
+     * @return The action priority that this Thinker is about to have
+     */
     public final int getNewActionPriority() {
         return newActionPriority;
     }
     
+    /**
+     * Sets this Thinker's action priority.
+     * @param actionPriority The new action priority
+     */
     public final void setActionPriority(int actionPriority) {
         if (state == null) {
             newActionPriority = actionPriority;
@@ -103,60 +205,104 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
     }
     
+    /**
+     * Returns this Thinker's current ThinkerState.
+     * @return This Thinker's current ThinkerState
+     */
     public final V getThinkerState() {
         return thinkerState;
     }
     
-    private void endState(CellGame game, T state, boolean useNextState) {
+    private void endState(CellGame game, T state) {
         if (thinkerState != null) {
-            setTimerValue(nextState, -1);
-            changingState = true;
+            delayedStateChange = true;
             thinkerState.leftActions(game, state);
-            changingState = false;
+            delayedStateChange = false;
         }
-        if (!upcomingStates.isEmpty()) {
+        if (upcomingStates.isEmpty()) {
+            delayedStateChange = true;
+            V nextState = thinkerState.getNextState();
+            delayedStateChange = false;
+            beginState(game, state, nextState);
+        } else {
             beginState(game, state, upcomingStates.remove());
-        } else if (useNextState) {
-            beginState(game, state, thinkerState.getNextState());
         }
     }
     
     private void beginState(CellGame game, T state, V newState) {
         thinkerState = newState;
-        if (thinkerState != null) {
-            changingState = true;
-            thinkerState.enteredActions(game, state);
-            changingState = false;
-        }
-        if (upcomingStates.isEmpty()) {
-            if (thinkerState != null) {
-                int duration = thinkerState.getDuration();
-                if (duration > 0) {
-                    setTimerValue(nextState, duration);
-                } else if (duration == 0) {
-                    endState(game, state, true);
-                }
-            }
+        int duration;
+        if (thinkerState == null) {
+            duration = -1;
         } else {
-            endState(game, state, false);
+            delayedStateChange = true;
+            thinkerState.enteredActions(game, state);
+            duration = thinkerState.getDuration();
+            delayedStateChange = false;
+        }
+        setTimerValue(nextStateEvent, duration);
+        if (!upcomingStates.isEmpty() || duration == 0) {
+            endState(game, state);
         }
     }
     
-    public final void changeThinkerState(V thinkerState) {
+    /**
+     * Sets this Thinker's current ThinkerState to the specified one. If this
+     * Thinker is not assigned to a CellGameState, the change will not occur
+     * until it is added to one, immediately before it takes its addedActions().
+     * @param thinkerState The new ThinkerState
+     */
+    public final void setThinkerState(V thinkerState) {
         upcomingStates.add(thinkerState);
-        if (state != null && !changingState) {
-            endState(state.getGame(), state, false);
+        if (state != null && !delayedStateChange) {
+            endState(state.getGame(), state);
         }
     }
     
+    /**
+     * Returns the remaining duration in time units of this Thinker's current
+     * ThinkerState. A negative value indicates an infinite duration.
+     * @return The remaining duration in time units of this Thinker's current
+     * ThinkerState
+     */
+    public final int getThinkerStateDuration() {
+        return getTimerValue(nextStateEvent);
+    }
+    
+    /**
+     * Sets the remaining duration in time units of this Thinker's current
+     * ThinkerState to the specified value. A negative value indicates an
+     * infinite duration, and a value of 0 indicates that the ThinkerState
+     * should end as soon as possible.
+     * @param duration The new duration in time units of this Thinker's current
+     * ThinkerState
+     */
+    public final void setThinkerStateDuration(int duration) {
+        setTimerValue(nextStateEvent, duration);
+        if (duration == 0 && state != null && !delayedStateChange) {
+            endState(state.getGame(), state);
+        }
+    }
+    /**
+     * Returns the current value of this Thinker's timer for the specified
+     * TimedEvent.
+     * @param timedEvent The TimedEvent whose timer value should be returned
+     * @return The current value of the timer for the specified TimedEvent
+     */
     public final int getTimerValue(TimedEvent<T> timedEvent) {
         Integer value = timers.get(timedEvent);
         return (value == null ? -1 : value);
     }
     
+    /**
+     * Sets the value of this Thinker's timer for the specified TimedEvent to
+     * the specified value.
+     * @param timedEvent The TimedEvent whose timer value should be set
+     * @param value The new value of the specified TimedEvent's timer
+     */
     public final void setTimerValue(TimedEvent<T> timedEvent, int value) {
         if (timedEvent == null) {
-            throw new RuntimeException("Attempted to set the value of a timer with no TimedEvent");
+            throw new RuntimeException("Attempted to set the value of a timer for a null TimedEvent");
         }
         if (value < 0) {
             timers.remove(timedEvent);
@@ -165,6 +311,13 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
     }
     
+    /**
+     * Actions for this Thinker to take once every time unit, after
+     * AnimationInstances update their indices but before Thinkers take their
+     * frameActions().
+     * @param game This Thinker's CellGame
+     * @param state This Thinker's CellGameState
+     */
     public void timeUnitActions(CellGame game, T state) {}
     
     final void doFrame(CellGame game, T state) {
@@ -174,10 +327,29 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         frameActions(game, state);
     }
     
+    /**
+     * Actions for this Thinker to take once every frame, after Thinkers take
+     * their timeUnitActions() but before its CellGameState takes its own
+     * frameActions().
+     * @param game This Thinker's CellGame
+     * @param state This Thinker's CellGameState
+     */
     public void frameActions(CellGame game, T state) {}
     
+    /**
+     * Actions for this Thinker to take immediately after being added to a new
+     * CellGameState.
+     * @param game This Thinker's CellGame
+     * @param state This Thinker's CellGameState
+     */
     public void addedActions(CellGame game, T state) {}
     
+    /**
+     * Actions for this Thinker to take immediately before being removed from
+     * its CellGameState.
+     * @param game This Thinker's CellGame
+     * @param state This Thinker's CellGameState
+     */
     public void removedActions(CellGame game, T state) {}
     
     final void update(CellGame game) {

@@ -7,6 +7,17 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
+/**
+ * A SpriteSheet is a rectangular grid of Sprites. Each Sprite has an
+ * x-coordinate in the grid that starts at 0 for the leftmost column and
+ * increases to the right, as well as a y-coordinate that starts at 0 for the
+ * topmost row and increases below. Like Sprites, Sounds, and Music tracks,
+ * SpriteSheets can be manually loaded and unloaded into and out of memory.
+ * Loading may take a moment, but a SpriteSheet's Sprites cannot be loaded and
+ * drawn if the SpriteSheet itself is not loaded. Thus, loading a Sprite that is
+ * part of a SpriteSheet will also load its SpriteSheet.
+ * @author Andrew Heyman
+ */
 public class SpriteSheet {
     
     private boolean loaded = false;
@@ -150,7 +161,8 @@ public class SpriteSheet {
     }
     
     /**
-     * Loads this SpriteSheet if it is not already loaded.
+     * Loads this SpriteSheet, along with all of its Sprites, if it is not
+     * already loaded.
      * @return Whether the loading occurred
      * @throws SlickException If the SpriteSheet could not be properly loaded
      */
@@ -190,7 +202,8 @@ public class SpriteSheet {
     }
     
     /**
-     * Unloads this SpriteSheet if it is currently loaded.
+     * Unloads this SpriteSheet, along with all of its Sprites, if it is
+     * currently loaded.
      * @return Whether the unloading occurred
      */
     public final boolean unload() {
@@ -208,37 +221,71 @@ public class SpriteSheet {
     
     final void tryUnload() {
         for (Sprite sprite : spriteList) {
-            if (sprite.isLoaded()) {
+            if (sprite.loaded) {
                 return;
             }
         }
         loaded = false;
+        bufferedImage = null;
         for (Sprite sprite : spriteList) {
             sprite.loaded = false;
             sprite.clear();
         }
     }
     
+    /**
+     * Returns the Set of Filters that will have an effect on this SpriteSheet's
+     * Sprites when applied to them with draw(). Changes to the returned Set
+     * will not be reflected in the SpriteSheet.
+     * @return The Set of Filters that will have an effect on this SpriteSheet's
+     * Sprites when applied to them with draw()
+     */
     public final Set<Filter> getFilters() {
         return new HashSet<>(filters);
     }
     
+    /**
+     * Returns the width in Sprites of this SpriteSheet.
+     * @return The width in Sprites of this SpriteSheet
+     */
     public final int getWidth() {
         return width;
     }
     
+    /**
+     * Returns the height in Sprites of this SpriteSheet.
+     * @return The height in Sprites of this SpriteSheet
+     */
     public final int getHeight() {
         return height;
     }
     
+    /**
+     * Returns the x-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of its origin.
+     * @return The x-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of its origin
+     */
     public final int getOriginX() {
         return originX;
     }
     
+    /**
+     * Returns the y-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of its origin.
+     * @return The y-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of its origin
+     */
     public final int getOriginY() {
         return originY;
     }
     
+    /**
+     * Returns the Sprite at the specified coordinates.
+     * @param x The x-coordinate in Sprites of the Sprite
+     * @param y The y-coordinate in Sprites of the Sprite
+     * @return The Sprite at the specified coordinates
+     */
     public Sprite getSprite(int x, int y) {
         if (x < 0 || x >= sprites.length || y < 0 || y >= sprites[x].length) {
             throw new RuntimeException("Attempted to retrieve a Sprite from a SpriteSheet at invalid coordinates");

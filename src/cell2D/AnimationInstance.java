@@ -30,7 +30,9 @@ import org.newdawn.slick.Graphics;
  * CellGameState. If its own time factor is negative, an AnimationInstance will
  * use its assigned CellGameState's time factor instead. If an AnimationInstance
  * is assigned to an inactive CellGameState or none at all, time will not pass
- * for it.
+ * for it. AnimationInstances assigned to the active CellGameState update their
+ * indices at the beginning of each frame, before Thinkers' timeUnitActions()
+ * are taken.
  * @author Andrew Heyman
  */
 public class AnimationInstance implements Drawable {
@@ -110,7 +112,8 @@ public class AnimationInstance implements Drawable {
      * Sets the CellGameState to which this AnimationInstance is currently
      * assigned. If it is set to a null CellGameState, this AnimationInstance
      * will be removed from its current CellGameState if it has one.
-     * @param state The CellGameState to add this AnimationInstance to
+     * @param state The CellGameState to which this AnimationInstance should be
+     * assigned
      */
     public final void setGameState(CellGameState state) {
         if (this.state != null) {
@@ -141,7 +144,7 @@ public class AnimationInstance implements Drawable {
     
     /**
      * Sets this AnimationInstance's time factor to the specified value.
-     * @param timeFactor The value to which the time factor will be set
+     * @param timeFactor The new time factor
      */
     public final void setTimeFactor(double timeFactor) {
         if (!blank) {

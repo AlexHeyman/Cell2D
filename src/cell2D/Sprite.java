@@ -170,7 +170,9 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Loads this Sprite if it is not already loaded.
+     * Loads this Sprite if it is not already loaded. If this Sprite was created
+     * from another Sprite or is part of a SpriteSheet, that other Sprite or
+     * SpriteSheet will be loaded as well.
      * @return Whether the loading occurred
      * @throws SlickException If the Sprite could not be properly loaded
      */
@@ -224,7 +226,9 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Unloads this Sprite if it is currently loaded.
+     * Unloads this Sprite if it is currently loaded. If this Sprite is part of
+     * a SpriteSheet that had no other Sprites loaded, that SpriteSheet will be
+     * unloaded as well.
      * @return Whether the unloading occurred
      */
     public final boolean unload() {
@@ -298,7 +302,8 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Returns this Sprite's width in pixels.
+     * Returns this Sprite's width in pixels. If the Sprite is not loaded, this
+     * method will return 0.
      * @return This Sprite's width in pixels
      */
     public final int getWidth() {
@@ -306,7 +311,8 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Returns this Sprite's height in pixels.
+     * Returns this Sprite's height in pixels. If the Sprite is not loaded, this
+     * method will return 0.
      * @return This Sprite's height in pixels
      */
     public final int getHeight() {
