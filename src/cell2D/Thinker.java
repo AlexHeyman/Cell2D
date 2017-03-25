@@ -142,7 +142,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     }
     
     void addActions() {
-        if (!upcomingStates.isEmpty() || timers.get(nextStateEvent) == 0) {
+        if (!upcomingStates.isEmpty() || getTimerValue(nextStateEvent) == 0) {
             endState(state.getGame(), state);
         }
     }
