@@ -32,7 +32,8 @@ public class Music {
     }
     
     /**
-     * Creates a new Music track from an audio file.
+     * Creates a new Music track from an audio file. Files of WAV, OGG, MOD, and
+     * XM formats are supported.
      * @param path The relative path to the audio file
      * @param load Whether this Music track should load upon creation
      * @throws SlickException If the Music track could not be properly loaded

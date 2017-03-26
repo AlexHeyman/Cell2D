@@ -15,7 +15,8 @@ public class Sound {
     private org.newdawn.slick.Sound sound = null;
     
     /**
-     * Creates a new Sound from an audio file.
+     * Creates a new Sound from an audio file. Files of WAV, OGG, MOD, and XM
+     * formats are supported.
      * @param path The relative path to the audio file
      * @param load Whether this Sound should load upon creation
      * @throws SlickException If the Sound could not be properly loaded from the
