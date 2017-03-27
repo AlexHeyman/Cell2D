@@ -45,9 +45,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * that the TimedEvent will be activated in x time units, a negative value
  * indicating that the timer is not running, and a value of 0 indicating that
  * either the TimedEvent was activated or the value was deliberately set to 0
- * this time unit. Each time unit, before this Thinker and its ThinkerState (if
- * it has one) take their timeUnitActions(), non-negative timers' values are
- * decreased by 1 and the TimedEvents whose timers have reached 0 are activated.
+ * this time unit. Each time unit, after a Thinker automatically changes
+ * ThinkerStates (if it did) but before it and its ThinkerState (if it has one)
+ * take their timeUnitActions(), its non-negative timers' values are decreased
+ * by 1 and the TimedEvents whose timers have reached 0 are activated.
  * </p>
  * 
  * <p>The Thinker class is intended to be directly extended by classes U that
