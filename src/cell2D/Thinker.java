@@ -28,10 +28,17 @@ import java.util.concurrent.atomic.AtomicLong;
  * factor instead. If a Thinker is assigned to an inactive CellGameState or none
  * at all, time will not pass for it.</p>
  * 
+ * <p>A Thinker's action priority determines when it will act relative to other
+ * Thinkers. All of the Thinkers assigned to the active CellGameState will take
+ * their timeUnitActions() and their frameActions() in order from highest to
+ * lowest action priority.</p>
+ * 
  * <p>A Thinker may occupy at most one ThinkerState at a time. ThinkerStates
  * take actions alongside their Thinker's own, as well as when entered and left
  * by a Thinker, and can help a Thinker keep track of its position in a
- * multi-frame procedure.</p>
+ * multi-frame procedure. A ThinkerState can have a limited duration in time
+ * units, and at the beginning of the time unit when that duration is up, its
+ * Thinker automatically transitions to its next ThinkerState.</p>
  * 
  * <p>A Thinker has timers that can activate TimedEvents after a certain number
  * of time units. Timers have integer values, with a positive value x indicating
@@ -66,18 +73,11 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     private double timeToRun = 0;
     int actionPriority = 0;
     int newActionPriority = 0;
-    private final Map<TimedEvent<T>,Integer> timers = new HashMap<>();
     private V thinkerState = null;
     private final Queue<V> upcomingStates = new LinkedList<>();
     private boolean delayedStateChange = false;
-    private final TimedEvent<T> nextStateEvent = new TimedEvent<T>() {
-        
-        @Override
-        public void eventActions(CellGame game, T state) {
-            endState(game, state);
-        }
-        
-    };
+    private int thinkerStateDuration = -1;
+    private final Map<TimedEvent<T>,Integer> timers = new HashMap<>();
     
     /**
      * Creates a new Thinker.
@@ -142,7 +142,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     }
     
     void addActions() {
-        if (!upcomingStates.isEmpty() || getTimerValue(nextStateEvent) == 0) {
+        if (!upcomingStates.isEmpty() || thinkerStateDuration == 0) {
             endState(state.getGame(), state);
         }
     }
@@ -241,7 +241,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
             duration = thinkerState.getDuration();
             delayedStateChange = false;
         }
-        setTimerValue(nextStateEvent, duration);
+        setThinkerStateDuration(duration);
         if (!upcomingStates.isEmpty() || duration == 0) {
             endState(game, state);
         }
@@ -267,7 +267,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * ThinkerState
      */
     public final int getThinkerStateDuration() {
-        return getTimerValue(nextStateEvent);
+        return thinkerStateDuration;
     }
     
     /**
@@ -279,7 +279,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * ThinkerState
      */
     public final void setThinkerStateDuration(int duration) {
-        setTimerValue(nextStateEvent, duration);
+        thinkerStateDuration = (duration < 0 ? -1 : duration);
         if (duration == 0 && state != null && !delayedStateChange) {
             endState(state.getGame(), state);
         }
@@ -361,6 +361,12 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
         timeToRun += time;
         while (timeToRun >= 1) {
+            if (thinkerStateDuration >= 0) {
+                thinkerStateDuration--;
+                if (thinkerStateDuration == 0) {
+                    endState(game, state);
+                }
+            }
             List<TimedEvent<T>> timedEventsToDo = new ArrayList<>();
             Iterator<Map.Entry<TimedEvent<T>,Integer>> iterator = timers.entrySet().iterator();
             while (iterator.hasNext()) {

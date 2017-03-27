@@ -61,8 +61,8 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         
         @Override
         public final int compare(Thinker thinker1, Thinker thinker2) {
-            int priorityDifference = thinker1.actionPriority - thinker2.actionPriority;
-            return (priorityDifference == 0 ? Long.signum(thinker1.id - thinker2.id) : priorityDifference);
+            int priorityDifference = thinker2.actionPriority - thinker1.actionPriority;
+            return (priorityDifference == 0 ? Long.signum(thinker2.id - thinker1.id) : priorityDifference);
         }
         
     };
