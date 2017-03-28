@@ -74,12 +74,39 @@ import org.newdawn.slick.state.transition.Transition;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.0.0.
+     * The version number of Cell2D, currently 1.0.1.
      */
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.0.1";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
+    }
+    
+    /**
+     * Loads the native libraries that are necessary for LWJGL 2, and thus
+     * Slick2D, and thus Cell2D, to run. This method should be called exactly
+     * once before any CellGames are created.
+     * @param path The relative path to the folder containing the native
+     * libraries
+     */
+    public static final void loadNatives(String path) {
+        System.setProperty("java.library.path", path);
+        System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
+    }
+    
+    /**
+     * Starts a CellGame. This method will not finish until the started CellGame
+     * is closed.
+     * @param game The CellGame to be started
+     * @throws SlickException If something goes wrong with Slick2D's
+     * initialization of the game
+     */
+    public static final void startGame(CellGame game) throws SlickException {
+        AppGameContainer container = new AppGameContainer(game.game);
+        game.updateScreen(container);
+        container.setTargetFrameRate(game.getFPS());
+        container.setShowFPS(false);
+        container.start();
     }
     
     private boolean closeRequested = false;
@@ -174,33 +201,6 @@ public abstract class CellGame {
         if (loadingImagePath != null) {
             loadingImage = new Image(loadingImagePath);
         }
-    }
-    
-    /**
-     * Loads the native libraries that are necessary for LWJGL 2, and thus
-     * Slick2D, and thus Cell2D, to run. This method should be called exactly
-     * once before any CellGames are created.
-     * @param path The relative path to the folder containing the native
-     * libraries
-     */
-    public static final void loadNatives(String path) {
-        System.setProperty("java.library.path", path);
-        System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
-    }
-    
-    /**
-     * Starts a CellGame. This method will not finish until the started CellGame
-     * is closed.
-     * @param game The CellGame to be started
-     * @throws SlickException If something goes wrong with Slick2D's
-     * initialization of the game
-     */
-    public static final void startGame(CellGame game) throws SlickException {
-        AppGameContainer container = new AppGameContainer(game.game);
-        game.updateScreen(container);
-        container.setTargetFrameRate(game.getFPS());
-        container.setShowFPS(false);
-        container.start();
     }
     
     private void updateScreen(GameContainer container) throws SlickException {

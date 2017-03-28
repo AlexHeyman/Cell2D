@@ -30,6 +30,8 @@ public class Assets {
     private static final Map<String,Sound> sounds = new HashMap<>();
     private static final Map<String,Music> musics = new HashMap<>();
     
+    private Assets() {}
+    
     private static int colorToInt(Color color) {
         return (color.getAlphaByte() << 24) | (color.getRedByte() << 16) | (color.getGreenByte() << 8) | color.getBlueByte();
     }
@@ -172,7 +174,7 @@ public class Assets {
      */
     public static final boolean add(String name, Filter filter) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a Filter with a null name");
+            throw new RuntimeException("Attempted to add a Filter to Assets under a null name");
         }
         if (filters.get(name) == null) {
             filters.put(name, filter);
@@ -191,7 +193,7 @@ public class Assets {
      */
     public static final boolean add(String name, Sprite sprite) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a Sprite with a null name");
+            throw new RuntimeException("Attempted to add a Sprite to Assets under a null name");
         }
         if (sprites.get(name) == null) {
             sprites.put(name, sprite);
@@ -211,7 +213,7 @@ public class Assets {
      */
     public static final boolean add(String name, SpriteSheet spriteSheet) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a SpriteSheet with a null name");
+            throw new RuntimeException("Attempted to add a SpriteSheet to Assets under a null name");
         }
         if (spriteSheets.get(name) == null) {
             spriteSheets.put(name, spriteSheet);
@@ -230,7 +232,7 @@ public class Assets {
      */
     public static final boolean add(String name, Animation animation) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add an Animation with a null name");
+            throw new RuntimeException("Attempted to add an Animation to Assets under a null name");
         }
         if (animations.get(name) == null) {
             animations.put(name, animation);
@@ -249,7 +251,7 @@ public class Assets {
      */
     public static final boolean add(String name, Sound sound) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a Sound with a null name");
+            throw new RuntimeException("Attempted to add a Sound to Assets under a null name");
         }
         if (sounds.get(name) == null) {
             sounds.put(name, sound);
@@ -268,7 +270,7 @@ public class Assets {
      */
     public static final boolean add(String name, Music music) {
         if (name == null) {
-            throw new RuntimeException("Attempted to add a music track with a null name");
+            throw new RuntimeException("Attempted to add a music track to Assets under a null name");
         }
         if (musics.get(name) == null) {
             musics.put(name, music);
