@@ -29,6 +29,7 @@ import org.newdawn.slick.command.MouseButtonControl;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.Transition;
+import org.newdawn.slick.util.Log;
 
 /**
  * <p>A CellGame is a game made with Cell2D. A certain number of times per
@@ -95,13 +96,14 @@ public abstract class CellGame {
     }
     
     /**
-     * Starts a CellGame. This method will not finish until the started CellGame
-     * is closed.
-     * @param game The CellGame to be started
+     * Starts a CellGame. Once the started CellGame is closed, the program will
+     * finish.
+     * @param game The CellGame to start
      * @throws SlickException If something goes wrong with Slick2D's
      * initialization of the game
      */
     public static final void startGame(CellGame game) throws SlickException {
+        Log.info("Cell2D Version: " + VERSION);
         AppGameContainer container = new AppGameContainer(game.game);
         game.updateScreen(container);
         container.setTargetFrameRate(game.getFPS());
