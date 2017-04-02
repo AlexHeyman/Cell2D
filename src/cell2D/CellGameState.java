@@ -154,6 +154,16 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     }
     
     /**
+     * Returns the number of AnimationInstances that are currently assigned to
+     * this CellGameState.
+     * @return The number of AnimationInstances that are currently assigned to
+     * this CellGameState
+     */
+    public final int getNumAnimInstances() {
+        return animInstances.size();
+    }
+    
+    /**
      * Adds the specified AnimationInstance to this CellGameState if it is not
      * already assigned to a CellGameState.
      * @param instance The AnimationInstance to add
@@ -306,6 +316,16 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         }
         animInstances.clear();
         IDInstances.clear();
+    }
+    
+    /**
+     * Returns the number of Thinkers that are currently assigned to this
+     * CellGameState.
+     * @return The number of Thinkers that are currently assigned to this
+     * CellGameState
+     */
+    public final int getNumThinkers() {
+        return thinkers.size();
     }
     
     private class ThinkerIterator implements SafeIterator<U> {
