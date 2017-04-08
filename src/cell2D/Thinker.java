@@ -356,11 +356,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     public void removedActions(CellGame game, T state) {}
     
     final void update(CellGame game) {
-        double time = getEffectiveTimeFactor();
-        if (time == 0) {
-            return;
-        }
-        timeToRun += time;
+        timeToRun += getEffectiveTimeFactor();
         while (timeToRun >= 1) {
             if (thinkerStateDuration >= 0) {
                 thinkerStateDuration--;
@@ -368,22 +364,24 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
                     endState(game, state);
                 }
             }
-            List<TimedEvent<T>> timedEventsToDo = new ArrayList<>();
-            Iterator<Map.Entry<TimedEvent<T>,Integer>> iterator = timers.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<TimedEvent<T>,Integer> entry = iterator.next();
-                int value = entry.getValue();
-                if (value == 0) {
-                    iterator.remove();
-                } else {
-                    if (value == 1) {
-                        timedEventsToDo.add(entry.getKey());
+            if (!timers.isEmpty()) {
+                List<TimedEvent<T>> timedEventsToDo = new ArrayList<>();
+                Iterator<Map.Entry<TimedEvent<T>,Integer>> iterator = timers.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<TimedEvent<T>,Integer> entry = iterator.next();
+                    int value = entry.getValue();
+                    if (value == 0) {
+                        iterator.remove();
+                    } else {
+                        if (value == 1) {
+                            timedEventsToDo.add(entry.getKey());
+                        }
+                        entry.setValue(value - 1);
                     }
-                    entry.setValue(value - 1);
                 }
-            }
-            for (TimedEvent<T> timedEvent : timedEventsToDo) {
-                timedEvent.eventActions(game, state);
+                for (TimedEvent<T> timedEvent : timedEventsToDo) {
+                    timedEvent.eventActions(game, state);
+                }
             }
             if (thinkerState != null) {
                 thinkerState.timeUnitActions(game, state);
