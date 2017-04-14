@@ -294,7 +294,7 @@ public class Sprite implements Animatable, Drawable {
     /**
      * Returns the Set of Filters that will have an effect on this Sprite when
      * applied to it with draw(). Changes to the returned Set will not be
-     * reflected in the Sprite.
+     * reflected in this Sprite.
      * @return The Set of Filters that will have an effect on this Sprite when
      * applied to it with draw()
      */

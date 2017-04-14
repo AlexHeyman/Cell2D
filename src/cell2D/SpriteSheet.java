@@ -236,7 +236,7 @@ public class SpriteSheet {
     /**
      * Returns the Set of Filters that will have an effect on this SpriteSheet's
      * Sprites when applied to them with draw(). Changes to the returned Set
-     * will not be reflected in the SpriteSheet.
+     * will not be reflected in this SpriteSheet.
      * @return The Set of Filters that will have an effect on this SpriteSheet's
      * Sprites when applied to them with draw()
      */
