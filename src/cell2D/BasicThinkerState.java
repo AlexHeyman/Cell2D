@@ -10,5 +10,6 @@ package cell2D;
  * to override its methods for single instances without creating completely new
  * class files.</p>
  * @author Andrew Heyman
+ * @param <T> The subclass of CellGame that this BasicThinkerState is used by
  */
-public abstract class BasicThinkerState extends ThinkerState<BasicGameState,BasicThinker,BasicThinkerState> {}
+public abstract class BasicThinkerState<T extends CellGame> extends ThinkerState<T,BasicGameState<T>,BasicThinker<T>,BasicThinkerState<T>> {}

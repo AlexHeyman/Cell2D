@@ -51,34 +51,36 @@ import java.util.concurrent.atomic.AtomicLong;
  * by 1 and the TimedEvents whose timers have reached 0 are activated.
  * </p>
  * 
- * <p>The Thinker class is intended to be directly extended by classes U that
- * extend Thinker&lt;T,U,V&gt; and interact with CellGameStates of class T and
- * ThinkerStates of class V. BasicThinker is an example of such a class. This
+ * <p>The Thinker class is intended to be directly extended by classes V that
+ * extend Thinker&lt;T,U,V,W&gt; and interact with CellGameStates of class U and
+ * ThinkerStates of class W. BasicThinker is an example of such a class. This
  * allows a Thinker's CellGameStates and ThinkerStates to interact with it in
  * ways unique to its subclass of Thinker.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGameState that this Thinker is used by
- * @param <U> The subclass of Thinker that this Thinker is
- * @param <V> The subclass of ThinkerState that this Thinker uses
+ * @param <T> The subclass of CellGame that this Thinker's CellGameState is used
+ * by
+ * @param <U> The subclass of CellGameState that this Thinker is used by
+ * @param <V> The subclass of Thinker that this Thinker is
+ * @param <W> The subclass of ThinkerState that this Thinker uses
  */
-public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
+public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,W>, V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
     
     private static final AtomicLong idCounter = new AtomicLong(0);
     
     final long id;
     private boolean initialized = false;
-    private final U thisThinker;
-    T state = null;
-    T newState = null;
+    private final V thisThinker;
+    U state = null;
+    U newState = null;
     private double timeFactor = -1;
     private double timeToRun = 0;
     int actionPriority = 0;
     int newActionPriority = 0;
-    private V thinkerState = null;
-    private final Queue<V> upcomingStates = new LinkedList<>();
+    private W thinkerState = null;
+    private final Queue<W> upcomingStates = new LinkedList<>();
     private boolean delayedStateChange = false;
     private int thinkerStateDuration = -1;
-    private final Map<TimedEvent<T>,Integer> timers = new HashMap<>();
+    private final Map<TimedEvent<U>,Integer> timers = new HashMap<>();
     
     /**
      * Creates a new Thinker.
@@ -94,20 +96,20 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
     }
     
     /**
-     * A method which returns this Thinker as a U, rather than as a
-     * Thinker&lt;T,U,V&gt;. This must be implemented somewhere in the lineage
+     * A method which returns this Thinker as a V, rather than as a
+     * Thinker&lt;T,U,V,W&gt;. This must be implemented somewhere in the lineage
      * of every subclass of Thinker in order to get around Java's limitations
      * with regard to generic types.
-     * @return This Thinker as a U
+     * @return This Thinker as a V
      */
-    public abstract U getThis();
+    public abstract V getThis();
     
     /**
      * Returns the CellGameState to which this Thinker is currently assigned, or
      * null if it is assigned to none.
      * @return The CellGameState to which this Thinker is currently assigned
      */
-    public final T getGameState() {
+    public final U getGameState() {
         return state;
     }
     
@@ -120,7 +122,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * will simply return its current CellGameState.
      * @return The CellGameState to which this Thinker is about to be assigned
      */
-    public final T getNewGameState() {
+    public final U getNewGameState() {
         return newState;
     }
     
@@ -130,7 +132,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * will be removed from its current CellGameState if it has one.
      * @param state The CellGameState to which this Thinker should be assigned
      */
-    public final void setGameState(T state) {
+    public final void setGameState(U state) {
         if (!initialized) {
             return;
         }
@@ -211,11 +213,11 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * Returns this Thinker's current ThinkerState.
      * @return This Thinker's current ThinkerState
      */
-    public final V getThinkerState() {
+    public final W getThinkerState() {
         return thinkerState;
     }
     
-    private void endState(CellGame game, T state) {
+    private void endState(T game, U state) {
         if (thinkerState != null) {
             delayedStateChange = true;
             thinkerState.leftActions(game, state);
@@ -223,7 +225,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
         if (upcomingStates.isEmpty()) {
             delayedStateChange = true;
-            V nextState = thinkerState.getNextState();
+            W nextState = thinkerState.getNextState();
             delayedStateChange = false;
             beginState(game, state, nextState);
         } else {
@@ -231,7 +233,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
         }
     }
     
-    private void beginState(CellGame game, T state, V newState) {
+    private void beginState(T game, U state, W newState) {
         thinkerState = newState;
         int duration;
         if (thinkerState == null) {
@@ -254,7 +256,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * until it is added to one, immediately before it takes its addedActions().
      * @param thinkerState The new ThinkerState
      */
-    public final void setThinkerState(V thinkerState) {
+    public final void setThinkerState(W thinkerState) {
         upcomingStates.add(thinkerState);
         if (state != null && !delayedStateChange) {
             endState(state.getGame(), state);
@@ -292,7 +294,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * @param timedEvent The TimedEvent whose timer value should be returned
      * @return The current value of the timer for the specified TimedEvent
      */
-    public final int getTimerValue(TimedEvent<T> timedEvent) {
+    public final int getTimerValue(TimedEvent<U> timedEvent) {
         Integer value = timers.get(timedEvent);
         return (value == null ? -1 : value);
     }
@@ -303,7 +305,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * @param timedEvent The TimedEvent whose timer value should be set
      * @param value The new value of the specified TimedEvent's timer
      */
-    public final void setTimerValue(TimedEvent<T> timedEvent, int value) {
+    public final void setTimerValue(TimedEvent<U> timedEvent, int value) {
         if (timedEvent == null) {
             throw new RuntimeException("Attempted to set the value of a timer for a null TimedEvent");
         }
@@ -321,9 +323,9 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * @param game This Thinker's CellGame
      * @param state This Thinker's CellGameState
      */
-    public void timeUnitActions(CellGame game, T state) {}
+    public void timeUnitActions(T game, U state) {}
     
-    final void doFrame(CellGame game, T state) {
+    final void doFrame(T game, U state) {
         if (thinkerState != null) {
             thinkerState.frameActions(game, state);
         }
@@ -337,7 +339,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * @param game This Thinker's CellGame
      * @param state This Thinker's CellGameState
      */
-    public void frameActions(CellGame game, T state) {}
+    public void frameActions(T game, U state) {}
     
     /**
      * Actions for this Thinker to take immediately after being added to a new
@@ -345,7 +347,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * @param game This Thinker's CellGame
      * @param state This Thinker's CellGameState
      */
-    public void addedActions(CellGame game, T state) {}
+    public void addedActions(T game, U state) {}
     
     /**
      * Actions for this Thinker to take immediately before being removed from
@@ -353,9 +355,9 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
      * @param game This Thinker's CellGame
      * @param state This Thinker's CellGameState
      */
-    public void removedActions(CellGame game, T state) {}
+    public void removedActions(T game, U state) {}
     
-    final void update(CellGame game) {
+    final void update(T game) {
         timeToRun += getEffectiveTimeFactor();
         while (timeToRun >= 1) {
             if (thinkerStateDuration >= 0) {
@@ -365,10 +367,10 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
                 }
             }
             if (!timers.isEmpty()) {
-                List<TimedEvent<T>> timedEventsToDo = new ArrayList<>();
-                Iterator<Map.Entry<TimedEvent<T>,Integer>> iterator = timers.entrySet().iterator();
+                List<TimedEvent<U>> timedEventsToDo = new ArrayList<>();
+                Iterator<Map.Entry<TimedEvent<U>,Integer>> iterator = timers.entrySet().iterator();
                 while (iterator.hasNext()) {
-                    Map.Entry<TimedEvent<T>,Integer> entry = iterator.next();
+                    Map.Entry<TimedEvent<U>,Integer> entry = iterator.next();
                     int value = entry.getValue();
                     if (value == 0) {
                         iterator.remove();
@@ -379,7 +381,7 @@ public abstract class Thinker<T extends CellGameState<T,U,V>, U extends Thinker<
                         entry.setValue(value - 1);
                     }
                 }
-                for (TimedEvent<T> timedEvent : timedEventsToDo) {
+                for (TimedEvent<U> timedEvent : timedEventsToDo) {
                     timedEvent.eventActions(game, state);
                 }
             }

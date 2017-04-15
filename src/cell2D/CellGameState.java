@@ -42,18 +42,19 @@ import org.newdawn.slick.Graphics;
  * instructions may be successfully given to CellGameStates regarding the same
  * Thinker without having to wait until the end of one of those periods.</p>
  * 
- * <p>The CellGameState class is intended to be directly extended by classes T
- * that extend CellGameState&lt;T,U,V&gt; and interact with Thinkers of class U
- * and ThinkerStates of class V. BasicGameState is an example of such a class.
+ * <p>The CellGameState class is intended to be directly extended by classes U
+ * that extend CellGameState&lt;T,U,V,W&gt; and interact with Thinkers of class
+ * V and ThinkerStates of class W. BasicGameState is an example of such a class.
  * This allows a CellGameState's Thinkers and their ThinkerStates to interact
  * with it in ways unique to its subclass of CellGameState.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGameState that this CellGameState is
- * @param <U> The subclass of Thinker that this CellGameState uses
- * @param <V> The subclass of ThinkerState that this CellGameState's Thinkers
+ * @param <T> The subclass of CellGame that uses this CellGameState
+ * @param <U> The subclass of CellGameState that this CellGameState is
+ * @param <V> The subclass of Thinker that this CellGameState uses
+ * @param <W> The subclass of ThinkerState that this CellGameState's Thinkers
  * use
  */
-public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
+public abstract class CellGameState<T extends CellGame, U extends CellGameState<T,U,V,W>, V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
     
     private static abstract class StateComparator<T> implements Comparator<T>, Serializable {}
     
@@ -68,17 +69,17 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     };
     
     private boolean initialized = false;
-    private final T thisState;
-    private CellGame game;
+    private final U thisState;
+    private T game;
     private int id;
     boolean active = false;
     private double timeFactor = 1;
     private boolean takingFrameActions = false;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
-    private final SortedSet<U> thinkers = new TreeSet<>(actionPriorityComparator);
+    private final SortedSet<V> thinkers = new TreeSet<>(actionPriorityComparator);
     private int thinkerIterators = 0;
-    private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
+    private final Queue<ThinkerChangeData<T,U,V,W>> thinkerChanges = new LinkedList<>();
     private boolean updatingThinkerList = false;
     
     /**
@@ -88,7 +89,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game The CellGame to which this CellGameState belongs
      * @param id This CellGameState's ID
      */
-    public CellGameState(CellGame game, int id) {
+    public CellGameState(T game, int id) {
         if (game == null) {
             throw new RuntimeException("Attempted to create a CellGameState with no CellGame");
         }
@@ -100,19 +101,19 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
     }
     
     /**
-     * A method which returns this CellGameState as a T, rather than as a
-     * CellGameState&lt;T,U,V&gt;. This must be implemented somewhere in the
+     * A method which returns this CellGameState as a U, rather than as a
+     * CellGameState&lt;T,U,V,W&gt;. This must be implemented somewhere in the
      * lineage of every subclass of CellGameState in order to get around Java's
      * limitations with regard to generic types.
-     * @return This CellGameState as a T
+     * @return This CellGameState as a U
      */
-    public abstract T getThis();
+    public abstract U getThis();
     
     /**
      * Returns the CellGame to which this CellGameState belongs.
      * @return The CellGame to which this CellGameState belongs
      */
-    public final CellGame getGame() {
+    public final T getGame() {
         return game;
     }
     
@@ -328,11 +329,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return thinkers.size();
     }
     
-    private class ThinkerIterator implements SafeIterator<U> {
+    private class ThinkerIterator implements SafeIterator<V> {
         
         private boolean stopped = false;
-        private final Iterator<U> iterator = thinkers.iterator();
-        private U lastThinker = null;
+        private final Iterator<V> iterator = thinkers.iterator();
+        private V lastThinker = null;
         
         private ThinkerIterator() {
             thinkerIterators++;
@@ -351,7 +352,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         }
         
         @Override
-        public final U next() {
+        public final V next() {
             if (stopped) {
                 return null;
             }
@@ -392,26 +393,26 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * Returns a new Iterator over this CellGameState's list of Thinkers.
      * @return A new Iterator over this CellGameState's list of Thinkers
      */
-    public final SafeIterator<U> thinkerIterator() {
+    public final SafeIterator<V> thinkerIterator() {
         return new ThinkerIterator();
     }
     
-    private static class ThinkerChangeData<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
+    private static class ThinkerChangeData<T extends CellGame, U extends CellGameState<T,U,V,W>, V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
         
         private boolean used = false;
         private final boolean changePriority;
-        private final U thinker;
-        private final T newState;
+        private final V thinker;
+        private final U newState;
         private final int actionPriority;
         
-        private ThinkerChangeData(U thinker, T newState) {
+        private ThinkerChangeData(V thinker, U newState) {
             changePriority = false;
             this.thinker = thinker;
             this.newState = newState;
             actionPriority = 0;
         }
         
-        private ThinkerChangeData(U thinker, int actionPriority) {
+        private ThinkerChangeData(V thinker, int actionPriority) {
             changePriority = true;
             this.thinker = thinker;
             newState = null;
@@ -426,7 +427,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param thinker The Thinker to be added
      * @return Whether the addition occurred
      */
-    public final boolean addThinker(U thinker) {
+    public final boolean addThinker(V thinker) {
         if (initialized && thinker.newState == null) {
             addThinkerChangeData(thinker, thisState);
             return true;
@@ -440,7 +441,7 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param thinker The Thinker to be removed
      * @return Whether the removal occurred
      */
-    public final boolean removeThinker(U thinker) {
+    public final boolean removeThinker(V thinker) {
         if (initialized && thinker.newState == thisState) {
             addThinkerChangeData(thinker, null);
             return true;
@@ -448,27 +449,27 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
         return false;
     }
     
-    final void changeThinkerActionPriority(U thinker, int actionPriority) {
+    final void changeThinkerActionPriority(V thinker, int actionPriority) {
         thinkerChanges.add(new ThinkerChangeData<>(thinker, actionPriority));
         updateThinkerList();
     }
     
-    private void addThinkerChangeData(U thinker, T newState) {
+    private void addThinkerChangeData(V thinker, U newState) {
         thinker.newState = newState;
-        ThinkerChangeData<T,U,V> data = new ThinkerChangeData<>(thinker, newState);
+        ThinkerChangeData<T,U,V,W> data = new ThinkerChangeData<>(thinker, newState);
         if (thinker.state != null) {
-            CellGameState<T,U,V> state = thinker.state;
+            CellGameState<T,U,V,W> state = thinker.state;
             state.thinkerChanges.add(data);
             state.updateThinkerList();
         }
         if (newState != null) {
-            CellGameState<T,U,V> state = newState;
+            CellGameState<T,U,V,W> state = newState;
             state.thinkerChanges.add(data);
             state.updateThinkerList();
         }
     }
     
-    private void addActions(U thinker) {
+    private void addActions(V thinker) {
         thinkers.add(thinker);
         thinker.state = thisState;
         thinker.addActions();
@@ -485,9 +486,9 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param thinker The Thinker that was added
      */
-    public void addThinkerActions(CellGame game, U thinker) {}
+    public void addThinkerActions(T game, V thinker) {}
     
-    private void removeActions(U thinker) {
+    private void removeActions(V thinker) {
         removeThinkerActions(game, thinker);
         thinker.removedActions(game, thisState);
         thinkers.remove(thinker);
@@ -500,13 +501,13 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param thinker The Thinker that is about to be removed
      */
-    public void removeThinkerActions(CellGame game, U thinker) {}
+    public void removeThinkerActions(T game, V thinker) {}
     
     private void updateThinkerList() {
         if (thinkerIterators == 0 && !updatingThinkerList) {
             updatingThinkerList = true;
             while (!thinkerChanges.isEmpty()) {
-                ThinkerChangeData<T,U,V> data = thinkerChanges.remove();
+                ThinkerChangeData<T,U,V,W> data = thinkerChanges.remove();
                 if (!data.used) {
                     data.used = true;
                     if (data.changePriority) {
@@ -518,11 +519,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
                             thinkers.add(data.thinker);
                         }
                     } else {
-                        CellGameState<T,U,V> thinkerState = data.thinker.state;
+                        CellGameState<T,U,V,W> thinkerState = data.thinker.state;
                         if (thinkerState != null) {
                             thinkerState.removeActions(data.thinker);
                         }
-                        CellGameState<T,U,V> newState = data.newState;
+                        CellGameState<T,U,V,W> newState = data.newState;
                         if (newState != null) {
                             newState.addActions(data.thinker);
                         }
@@ -539,20 +540,20 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * list of Thinkers.
      * @param game This CellGameState's CellGame
      */
-    public void updateThinkerListActions(CellGame game) {}
+    public void updateThinkerListActions(T game) {}
     
-    final void doFrame() {
+    final void frame() {
         if (timeFactor > 0) {
             for (AnimationInstance instance : animInstances) {
                 instance.update();
             }
-            Iterator<U> iterator = thinkerIterator();
+            Iterator<V> iterator = thinkerIterator();
             while (iterator.hasNext()) {
                 iterator.next().update(game);
             }
         }
         takingFrameActions = true;
-        Iterator<U> iterator = thinkerIterator();
+        Iterator<V> iterator = thinkerIterator();
         while (iterator.hasNext()) {
             iterator.next().doFrame(game, thisState);
         }
@@ -565,7 +566,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * Thinkers have taken their frameActions().
      * @param game This CellGameState's CellGame
      */
-    public void frameActions(CellGame game) {}
+    public void frameActions(T game) {}
+    
+    final void render(Graphics g, int x1, int y1, int x2, int y2) {
+        renderActions(game, g, x1, y1, x2, y2);
+    }
     
     /**
      * Actions for this CellGameState to take each frame to render its visuals.
@@ -581,19 +586,31 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param y2 The y-coordinate in pixels of the screen's bottom edge on the
      * Graphics context
      */
-    public void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {}
+    public void renderActions(T game, Graphics g, int x1, int y1, int x2, int y2) {}
+    
+    final void entered() {
+        enteredActions(game);
+    }
     
     /**
      * Actions for this CellGameState to take immediately after being entered.
      * @param game This CellGameState's CellGame
      */
-    public void enteredActions(CellGame game) {}
+    public void enteredActions(T game) {}
+    
+    final void left() {
+        leftActions(game);
+    }
     
     /**
      * Actions for this CellGameState to take immediately before being exited.
      * @param game This CellGameState's CellGame
      */
-    public void leftActions(CellGame game) {}
+    public void leftActions(T game) {}
+    
+    final void stringBegan(String s) {
+        stringBeganActions(game, s);
+    }
     
     /**
      * Actions for this CellGameState to take immediately after its CellGame
@@ -601,7 +618,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param s The initial value of the typed String
      */
-    public void stringBegan(CellGame game, String s) {}
+    public void stringBeganActions(T game, String s) {}
+    
+    final void charTyped(char c) {
+        charTypedActions(game, c);
+    }
     
     /**
      * Actions for this CellGameState to take immediately after a character is
@@ -609,7 +630,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param c The character that was just typed
      */
-    public void charTyped(CellGame game, char c) {}
+    public void charTypedActions(T game, char c) {}
+    
+    final void charDeleted(char c) {
+        charDeletedActions(game, c);
+    }
     
     /**
      * Actions for this CellGameState to take immediately after a character is
@@ -617,7 +642,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param c The character that was just deleted
      */
-    public void charDeleted(CellGame game, char c) {}
+    public void charDeletedActions(T game, char c) {}
+    
+    final void stringDeleted(String s) {
+        stringDeletedActions(game, s);
+    }
     
     /**
      * Actions for this CellGameState to take immediately after its CellGame's
@@ -625,7 +654,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param s The String that was just deleted
      */
-    public void stringDeleted(CellGame game, String s) {}
+    public void stringDeletedActions(T game, String s) {}
+    
+    final void stringFinished(String s) {
+        stringFinishedActions(game, s);
+    }
     
     /**
      * Actions for this CellGameState to take immediately after its CellGame's
@@ -633,7 +666,11 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param s The String that was just finished
      */
-    public void stringFinished(CellGame game, String s) {}
+    public void stringFinishedActions(T game, String s) {}
+    
+    final void stringCanceled(String s) {
+        stringCanceledActions(game, s);
+    }
     
     /**
      * Actions for this CellGameState to take immediately after its CellGame's
@@ -641,6 +678,6 @@ public abstract class CellGameState<T extends CellGameState<T,U,V>, U extends Th
      * @param game This CellGameState's CellGame
      * @param s The String that was just canceled
      */
-    public void stringCanceled(CellGame game, String s) {}
+    public void stringCanceledActions(T game, String s) {}
     
 }

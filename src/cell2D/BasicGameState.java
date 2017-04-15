@@ -7,20 +7,21 @@ package cell2D;
  * custom fields or methods to be automatically shared among themselves, their
  * Thinkers, and their ThinkerStates.</p>
  * @author Andrew Heyman
+ * @param <T> The subclass of CellGame that this BasicGameState is used by
  */
-public abstract class BasicGameState extends CellGameState<BasicGameState,BasicThinker,BasicThinkerState> {
+public abstract class BasicGameState<T extends CellGame> extends CellGameState<T,BasicGameState<T>,BasicThinker<T>,BasicThinkerState<T>> {
     
     /**
      * Creates a BasicGameState of the specified CellGame with the specified ID.
      * @param game The CellGame of which this BasicGameState is
      * @param id This BasicGameState's ID
      */
-    public BasicGameState(CellGame game, int id) {
+    public BasicGameState(T game, int id) {
         super(game, id);
     }
     
     @Override
-    public BasicGameState getThis() {
+    public BasicGameState<T> getThis() {
         return this;
     }
     

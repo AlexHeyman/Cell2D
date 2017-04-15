@@ -75,9 +75,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.0.2.
+     * The version number of Cell2D, currently 1.1.0.
      */
-    public static final String VERSION = "1.0.2";
+    public static final String VERSION = "1.1.0";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -116,7 +116,7 @@ public abstract class CellGame {
     private final Map<Integer,CellGameState> states = new HashMap<>();
     private CellGameState currentState = null;
     private boolean negativeIDsOffLimits = false;
-    private boolean initialized = false;
+    private boolean loaded = false;
     private InputProvider provider = null;
     private Input input = null;
     private int commandToBind = -1;
@@ -297,7 +297,7 @@ public abstract class CellGame {
         @Override
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
             if (loadingScreenRenderedOnce) {
-                if (initialized) {
+                if (loaded) {
                     double timeElapsed = Math.min(delta, msPerFrame);
                     msToRun += timeElapsed;
                     if (currentMusic.music != null && !musicPaused) {
@@ -332,7 +332,7 @@ public abstract class CellGame {
                         adjustedMouseY = Math.min(Math.max((int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
                         mouseWheelChange = newMouseWheelChange;
                         newMouseWheelChange = 0;
-                        CellGame.this.getCurrentState().doFrame();
+                        currentState.frame();
                         msToRun -= msPerFrame;
                         if (closeRequested) {
                             container.exit();
@@ -347,7 +347,7 @@ public abstract class CellGame {
                     newMouseX = input.getMouseX();
                     newMouseY = input.getMouseY();
                     initActions();
-                    initialized = true;
+                    loaded = true;
                 }
             }
         }
@@ -361,7 +361,7 @@ public abstract class CellGame {
         
         @Override
         public final void postRenderState(GameContainer container, Graphics g) throws SlickException {
-            if (initialized) {
+            if (loaded) {
                 renderActions(g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
             }
             g.clearWorldClip();
@@ -387,17 +387,17 @@ public abstract class CellGame {
                     if (typingString.length() > 0) {
                         char toDelete = typingString.charAt(typingString.length() - 1);
                         typingString = typingString.substring(0, typingString.length() - 1);
-                        CellGame.this.getCurrentState().charDeleted(CellGame.this, toDelete);
+                        currentState.charDeleted(toDelete);
                     }
                 } else if (key == Input.KEY_DELETE) {
                     String s = typingString;
                     typingString = "";
-                    CellGame.this.getCurrentState().stringDeleted(CellGame.this, s);
+                    currentState.stringDeleted(s);
                 } else if (key == Input.KEY_ENTER) {
                     finishTypingString();
                 } else if (c != '\u0000' && typingString.length() < maxTypingStringLength) {
                     typingString += c;
-                    CellGame.this.getCurrentState().charTyped(CellGame.this, c);
+                    currentState.charTyped(c);
                 }
             } else if (commandToBind >= 0) {
                 finishBindToCommand(new KeyControl(key));
@@ -501,24 +501,24 @@ public abstract class CellGame {
         
         @Override
         public final void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-            state.renderActions(CellGame.this, g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
+            state.renderActions(state.getGame(), g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
         }
         
         @Override
         public final void enter(GameContainer container, StateBasedGame game) {
             state.active = true;
-            state.enteredActions(CellGame.this);
+            state.enteredActions(state.getGame());
         }
         
         @Override
         public final void leave(GameContainer container, StateBasedGame game) {
-            state.leftActions(CellGame.this);
+            state.leftActions(state.getGame());
             state.active = false;
         }
         
     }
     
-    private class LoadingState extends cell2D.BasicGameState {
+    private class LoadingState extends cell2D.BasicGameState<CellGame> {
         
         private LoadingState() {
             super(CellGame.this, -2);
@@ -852,34 +852,34 @@ public abstract class CellGame {
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
         }
-        getCurrentState().stringBegan(this, initialString);
+        getCurrentState().stringBegan(initialString);
     }
     
     /**
      * Instructs this CellGame to stop interpreting inputs as typing a String,
      * if it was doing so, and consider the String finished. This will call the
-     * stringFinished() method of this CellGame's current CellGameState.
+     * stringFinishedActions() method of this CellGame's current CellGameState.
      */
     public final void finishTypingString() {
         if (typingString != null) {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            getCurrentState().stringFinished(this, s);
+            getCurrentState().stringFinished(s);
         }
     }
     
     /**
      * Instructs this CellGame to stop interpreting inputs as typing a String,
      * if it was doing so, and consider the typing canceled. This will call the
-     * stringCanceled() method of this CellGame's current CellGameState.
+     * stringCanceledActions() method of this CellGame's current CellGameState.
      */
     public final void cancelTypingString() {
         if (typingString != null) {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            getCurrentState().stringCanceled(this, s);
+            getCurrentState().stringCanceled(s);
         }
     }
     

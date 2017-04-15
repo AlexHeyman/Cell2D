@@ -10,11 +10,12 @@ package cell2D;
  * to override its methods for single instances without creating completely new
  * class files.</p>
  * @author Andrew Heyman
+ * @param <T> The subclass of CellGame that this BasicThinker is used by
  */
-public abstract class BasicThinker extends Thinker<BasicGameState,BasicThinker,BasicThinkerState> {
+public abstract class BasicThinker<T extends CellGame> extends Thinker<T,BasicGameState<T>,BasicThinker<T>,BasicThinkerState<T>> {
     
     @Override
-    public final BasicThinker getThis() {
+    public final BasicThinker<T> getThis() {
         return this;
     }
     

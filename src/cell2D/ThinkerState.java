@@ -7,9 +7,9 @@ package cell2D;
  * and can help a Thinker keep track of its position in a multi-frame procedure.
  * </p>
  * 
- * <p>The ThinkerState class is intended to be directly extended by classes V
- * that extend ThinkerState&lt;T,U,V&gt; and interact with CellGameStates of
- * class T and Thinkers of class U. BasicThinkerState is an example of such a
+ * <p>The ThinkerState class is intended to be directly extended by classes W
+ * that extend ThinkerState&lt;T,U,V,W&gt; and interact with CellGameStates of
+ * class U and Thinkers of class V. BasicThinkerState is an example of such a
  * class. This allows a ThinkerState's Thinkers and their CellGameStates to
  * interact with it in ways unique to its subclass of ThinkerState.</p>
  * 
@@ -19,12 +19,14 @@ package cell2D;
  * the Thinker.</p>
  * 
  * @author Andrew Heyman
- * @param <T> The subclass of CellGameState that this ThinkerState's Thinker is
+ * @param <T> The subclass of CellGame that this ThinkerState's Thinker's
+ * CellGameState is used by
+ * @param <U> The subclass of CellGameState that this ThinkerState's Thinker is
  * used by
- * @param <U> The subclass of Thinker that this ThinkerState is used by
- * @param <V> The subclass of ThinkerState that this ThinkerState is
+ * @param <V> The subclass of Thinker that this ThinkerState is used by
+ * @param <W> The subclass of ThinkerState that this ThinkerState is
  */
-public abstract class ThinkerState<T extends CellGameState<T,U,V>, U extends Thinker<T,U,V>, V extends ThinkerState<T,U,V>> {
+public abstract class ThinkerState<T extends CellGame, U extends CellGameState<T,U,V,W>, V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
     
     /**
      * Returns how long in time units this ThinkerState should last. This method
@@ -44,7 +46,7 @@ public abstract class ThinkerState<T extends CellGameState<T,U,V>, U extends Thi
      * @return The ThinkerState that this ThinkerState's Thinker should enter
      * after it leaves this one
      */
-    public abstract V getNextState();
+    public abstract W getNextState();
     
     /**
      * Actions for this ThinkerState to take once every time unit, immediately
@@ -52,7 +54,7 @@ public abstract class ThinkerState<T extends CellGameState<T,U,V>, U extends Thi
      * @param game This ThinkerState's Thinker's CellGame
      * @param state This ThinkerState's Thinker's CellGameState
      */
-    public void timeUnitActions(CellGame game, T state) {}
+    public void timeUnitActions(CellGame game, U state) {}
     
     /**
      * Actions for this ThinkerState to take once every frame, immediately
@@ -60,7 +62,7 @@ public abstract class ThinkerState<T extends CellGameState<T,U,V>, U extends Thi
      * @param game This ThinkerState's Thinker's CellGame
      * @param state This ThinkerState's Thinker's CellGameState
      */
-    public void frameActions(CellGame game, T state) {}
+    public void frameActions(CellGame game, U state) {}
     
     /**
      * Actions for this ThinkerState to take immediately after being entered and
@@ -68,7 +70,7 @@ public abstract class ThinkerState<T extends CellGameState<T,U,V>, U extends Thi
      * @param game This ThinkerState's Thinker's CellGame
      * @param state This ThinkerState's Thinker's CellGameState
      */
-    public void enteredActions(CellGame game, T state) {}
+    public void enteredActions(CellGame game, U state) {}
     
     /**
      * Actions for this ThinkerState to take before being left, and immediately
@@ -76,6 +78,6 @@ public abstract class ThinkerState<T extends CellGameState<T,U,V>, U extends Thi
      * @param game This ThinkerState's Thinker's CellGame
      * @param state This ThinkerState's Thinker's CellGameState
      */
-    public void leftActions(CellGame game, T state) {}
+    public void leftActions(CellGame game, U state) {}
     
 }
