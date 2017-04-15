@@ -576,7 +576,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * Actions for this CellGameState to take each frame to render its visuals.
      * @param game This CellGameState's CellGame
      * @param g The Graphics context to which this CellGameState is rendering
-     * itself this frame
+     * its visuals this frame
      * @param x1 The x-coordinate in pixels of the screen's left edge on the
      * Graphics context
      * @param y1 The y-coordinate in pixels of the screen's top edge on the

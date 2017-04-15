@@ -616,8 +616,8 @@ public abstract class CellGame {
     /**
      * Actions for this CellGame to take each frame after its current
      * CellGameState has finished rendering.
-     * @param g The Graphics context to which this CellGame is rendering itself
-     * this frame
+     * @param g The Graphics context to which this CellGame is rendering its
+     * visuals this frame
      * @param x1 The x-coordinate in pixels of the screen's left edge on the
      * Graphics context
      * @param y1 The y-coordinate in pixels of the screen's top edge on the
