@@ -25,15 +25,11 @@ import org.newdawn.slick.Graphics;
  * actions while the CellGame is in that state and it is thus active.</p>
  * 
  * <p>AnimationInstances may be assigned to one CellGameState each. An
- * AnimationInstance's assigned CellGameState will keep track of time for it,
- * thus allowing it to actually animate, while the CellGameState is active. An
  * AnimationInstance may be assigned to a CellGameState with or without an
  * integer ID in the context of that CellGameState. Only one AnimationInstance
  * may be assigned to a given CellGameState with a given ID at once.</p>
  * 
- * <p>Thinkers may be assigned to one CellGameState each. A Thinker's assigned
- * CellGameState will keep track of time for it, thus allowing it to take its
- * own time-dependent actions, while the CellGameState is active. Because a
+ * <p>Thinkers may be assigned to one CellGameState each. Because a
  * CellGameState's internal list of Thinkers cannot be modified while it is
  * being iterated through, the actual addition or removal of a Thinker to or
  * from a CellGameState is delayed until any and all current iterations through

@@ -13,20 +13,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>A Thinker is a collection of methods that contributes to the mechanics of
  * the CellGameState to which it is assigned. A Thinker's assigned CellGameState
  * will keep track of time for it, thus allowing it to take its own
- * time-dependent actions, while the CellGameState is active. Because a
- * CellGameState's internal list of Thinkers cannot be modified while it is
- * being iterated through, the actual addition or removal of a Thinker to or
- * from a CellGameState is delayed until all of its Thinkers have completed
- * their timeUnitActions() or frameActions() if the CellGameState was instructed
- * to add or remove the Thinker during those periods. Multiple delayed
- * instructions may be successfully given to CellGameStates regarding the same
- * Thinker without having to wait until the end of one of those periods.</p>
- * 
- * <p>A Thinker's time factor represents how many time units the Thinker will
- * experience every frame while assigned to an active CellGameState. If its own
- * time factor is negative, a Thinker will use its assigned CellGameState's time
- * factor instead. If a Thinker is assigned to an inactive CellGameState or none
- * at all, time will not pass for it.</p>
+ * time-dependent actions, while the CellGameState is active. A Thinker's time
+ * factor represents how many time units the Thinker will experience every frame
+ * while assigned to an active CellGameState. If its own time factor is
+ * negative, a Thinker will use its assigned CellGameState's time factor
+ * instead. If a Thinker is assigned to an inactive CellGameState or none at
+ * all, time will not pass for it.</p>
  * 
  * <p>A Thinker's action priority determines when it will act relative to other
  * Thinkers. All of the Thinkers assigned to the active CellGameState will take
