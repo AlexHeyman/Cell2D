@@ -36,11 +36,11 @@ import org.newdawn.slick.Graphics;
  * own time-dependent actions, while the CellGameState is active. Because a
  * CellGameState's internal list of Thinkers cannot be modified while it is
  * being iterated through, the actual addition or removal of a Thinker to or
- * from a CellGameState is delayed until all of its Thinkers have completed
- * their timeUnitActions() or frameActions() if the CellGameState was instructed
- * to add or remove the Thinker during those periods. Multiple delayed
+ * from a CellGameState is delayed until any and all current iterations through
+ * its Thinkers, such as the periods during which Thinkers perform their
+ * timeUnitActions() or frameActions(), have been completed. Multiple delayed
  * instructions may be successfully given to CellGameStates regarding the same
- * Thinker without having to wait until the end of one of those periods.</p>
+ * Thinker without having to wait until all iterations have finished.</p>
  * 
  * <p>The CellGameState class is intended to be directly extended by classes U
  * that extend CellGameState&lt;T,U,V,W&gt; and interact with Thinkers of class
