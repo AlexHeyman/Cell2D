@@ -9,6 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * <p>A ThinkerObject is a LevelObject that acts like a LevelThinker, possessing
+ * LevelThinkerStates, timers, and various actions in response to events.</p>
+ * @author Andrew Heyman
+ * @param <T> The type of CellGame that uses the LevelStates that this
+ * ThinkerObject can be assigned to
+ */
 public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     
     private static final AtomicLong idCounter = new AtomicLong(0);
