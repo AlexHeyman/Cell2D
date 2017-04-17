@@ -60,8 +60,8 @@ import org.newdawn.slick.Graphics;
  * LevelStates as appropriate to match its own time factor and assigned
  * LevelState.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the LevelStates that can use
- * this LevelObject
+ * @param <T> The type of CellGame that uses the LevelStates that this
+ * LevelObject can be assigned to
  */
 public abstract class LevelObject<T extends CellGame> {
     
@@ -738,7 +738,9 @@ public abstract class LevelObject<T extends CellGame> {
     /**
      * Sets this LevelObject's overlap Hitbox to the specified Hitbox. The new
      * overlap Hitbox may not be a component of a CompositeHitbox or in use by
-     * another LevelObject.
+     * another LevelObject. If the specified Hitbox is null, the current overlap
+     * Hitbox will be removed if there is one, but it will not be replaced with
+     * anything.
      * @param overlapHitbox The new overlap Hitbox
      * @return Whether the change occurred
      */
@@ -891,7 +893,9 @@ public abstract class LevelObject<T extends CellGame> {
     /**
      * Sets this LevelObject's solid Hitbox to the specified Hitbox. The new
      * solid Hitbox may not be a component of a CompositeHitbox or in use by
-     * another LevelObject.
+     * another LevelObject. If the specified Hitbox is null, the current solid
+     * Hitbox will be removed if there is one, but it will not be replaced with
+     * anything.
      * @param solidHitbox The new solid Hitbox
      * @return Whether the change occurred
      */
@@ -1156,7 +1160,7 @@ public abstract class LevelObject<T extends CellGame> {
     }
     
     /**
-     * Returns this LevelObject's Filter.
+     * Returns this LevelObject's Filter, or null if it has none.
      * @return This LevelObject's Filter
      */
     public final Filter getFilter() {
@@ -1164,7 +1168,8 @@ public abstract class LevelObject<T extends CellGame> {
     }
     
     /**
-     * Sets this LevelObject's Filter to the specified Filter.
+     * Sets this LevelObject's Filter to the specified Filter, or to none if the
+     * specified Filter is null.
      * @param filter The new Filter
      */
     public final void setFilter(Filter filter) {
