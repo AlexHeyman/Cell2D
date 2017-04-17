@@ -2,11 +2,9 @@ package cell2D.level;
 
 import cell2D.CellGame;
 import cell2D.TimedEvent;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -230,22 +228,6 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
             }
         }
         return false;
-    }
-    
-    public final <O extends LevelObject<T>> boolean isIntersectingSolidObject(Class<O> cls) {
-        return (state == null || collisionHitbox == null ? false : state.intersectingSolidObject(collisionHitbox, cls) != null);
-    }
-    
-    public final <O extends LevelObject<T>> O intersectingSolidObject(Class<O> cls) {
-        return (state == null || collisionHitbox == null ? null : state.intersectingSolidObject(collisionHitbox, cls));
-    }
-    
-    public final <O extends LevelObject<T>> List<O> intersectingSolidObjects(Class<O> cls) {
-        return (state == null || collisionHitbox == null ? new ArrayList<>() : state.intersectingSolidObjects(collisionHitbox, cls));
-    }
-    
-    public final <O extends LevelObject<T>> O nearestIntersectingSolidObject(Hitbox<T> hitbox, Class<O> cls) {
-        return (state == null ? null : state.nearestIntersectingSolidObject(getCenterX(), getCenterY(), hitbox, cls));
     }
     
     public final Double getPressingAngle() {

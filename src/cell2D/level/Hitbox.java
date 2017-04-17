@@ -1344,7 +1344,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns whether this Hitbox overlaps the specified Hitbox. Two Hitboxes
      * are not considered to overlap if they are both being used by the same
      * LevelObject.
-     * @param hitbox The Hitbox to check for overlapping
+     * @param hitbox The Hitbox to check for an overlap
      * @return Whether this Hitbox overlaps the specified Hitbox
      */
     public final boolean overlaps(Hitbox<T> hitbox) {

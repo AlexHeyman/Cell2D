@@ -119,9 +119,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
     }
     
     /**
-     * Sets the CellGameState to which this Thinker is currently
-     * assigned. If it is set to a null CellGameState, this Thinker
-     * will be removed from its current CellGameState if it has one.
+     * Sets the CellGameState to which this Thinker is currently assigned. If it
+     * is set to a null CellGameState, this Thinker will be removed from its
+     * current CellGameState if it has one.
      * @param state The CellGameState to which this Thinker should be assigned
      */
     public final void setGameState(U state) {
