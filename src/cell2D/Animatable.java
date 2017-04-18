@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 /**
  * <p>An Animatable object is one that may be incorporated into an Animation as

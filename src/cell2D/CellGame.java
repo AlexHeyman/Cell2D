@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -518,7 +518,7 @@ public abstract class CellGame {
         
     }
     
-    private class LoadingState extends cell2D.BasicGameState<CellGame> {
+    private class LoadingState extends cell2d.BasicGameState<CellGame> {
         
         private LoadingState() {
             super(CellGame.this, -2);

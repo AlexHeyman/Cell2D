@@ -1,4 +1,4 @@
-package cell2D.level;
+package cell2d.level;
 
 /**
  * <p>A DrawMode is a procedure by which a LevelState determines the order in

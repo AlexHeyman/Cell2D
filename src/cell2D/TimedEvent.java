@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 /**
  * <p>A TimedEvent represents a set of actions that can be taken after a delay

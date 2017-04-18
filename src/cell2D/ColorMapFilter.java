@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 import java.awt.image.BufferedImage;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 /**
  * <p>A BasicThinker is a type of Thinker that is used by BasicGameStates and

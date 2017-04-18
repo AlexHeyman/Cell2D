@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 /**
  * <p>A BasicThinkerState is a type of ThinkerState that is used by

@@ -1,6 +1,6 @@
-package cell2D.level;
+package cell2d.level;
 
-import cell2D.CellGame;
+import cell2d.CellGame;
 
 /**
  * <p>A Viewport is a LevelThinker that represents a rectangular region of the

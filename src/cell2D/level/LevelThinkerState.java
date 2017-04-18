@@ -1,7 +1,7 @@
-package cell2D.level;
+package cell2d.level;
 
-import cell2D.CellGame;
-import cell2D.ThinkerState;
+import cell2d.CellGame;
+import cell2d.ThinkerState;
 
 /**
  * <p>A LevelThinkerState is the type of ThinkerState that is used by

@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 /**
  * <p>A BasicGameState is a type of CellGameState that uses BasicThinkers and

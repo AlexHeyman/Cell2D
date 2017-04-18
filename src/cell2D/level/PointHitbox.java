@@ -1,6 +1,6 @@
-package cell2D.level;
+package cell2d.level;
 
-import cell2D.CellGame;
+import cell2d.CellGame;
 
 /**
  * A PointHitbox is a Hitbox that consists only of the point that is its

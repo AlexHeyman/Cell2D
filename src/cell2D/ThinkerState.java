@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 /**
  * <p>A ThinkerState represents a state that a Thinker can occupy. A Thinker may

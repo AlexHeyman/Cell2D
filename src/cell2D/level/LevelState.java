@@ -1,8 +1,8 @@
-package cell2D.level;
+package cell2d.level;
 
-import cell2D.CellGame;
-import cell2D.CellGameState;
-import cell2D.SafeIterator;
+import cell2d.CellGame;
+import cell2d.CellGameState;
+import cell2d.SafeIterator;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;

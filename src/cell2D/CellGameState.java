@@ -1,4 +1,4 @@
-package cell2D;
+package cell2d;
 
 import java.io.Serializable;
 import java.util.Comparator;
