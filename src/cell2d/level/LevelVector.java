@@ -211,7 +211,7 @@ public class LevelVector {
      * @return This LevelVector's angle
      */
     public final double getAngle() {
-        return (x == 0 && y == 0 ? 0 : Math.atan2(-y, x));
+        return (x == 0 && y == 0 ? 0 : Math.toDegrees(Math.atan2(-y, x)));
     }
     
     /**
@@ -254,7 +254,7 @@ public class LevelVector {
      * @return This LevelVector
      */
     public final LevelVector changeAngle(double angle) {
-        return (x == 0 && y == 0 ? this : setAngle(Math.atan2(-y, x) + angle));
+        return (x == 0 && y == 0 ? this : setAngle(Math.toDegrees(Math.atan2(-y, x)) + angle));
     }
     
     /**
