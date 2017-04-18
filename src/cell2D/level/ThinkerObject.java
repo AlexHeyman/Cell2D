@@ -1,7 +1,7 @@
-package cell2D.level;
+package cell2d.level;
 
-import cell2D.CellGame;
-import cell2D.TimedEvent;
+import cell2d.CellGame;
+import cell2d.TimedEvent;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;

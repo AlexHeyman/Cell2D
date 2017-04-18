@@ -1,11 +1,11 @@
-package cell2D.level;
+package cell2d.level;
 
-import cell2D.Animation;
-import cell2D.AnimationInstance;
-import cell2D.CellGame;
-import cell2D.Drawable;
-import cell2D.Filter;
-import cell2D.Sprite;
+import cell2d.Animation;
+import cell2d.AnimationInstance;
+import cell2d.CellGame;
+import cell2d.Drawable;
+import cell2d.Filter;
+import cell2d.Sprite;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

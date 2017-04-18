@@ -1,4 +1,4 @@
-package cell2D.level;
+package cell2d.level;
 
 /**
  * <p>A LevelVector represents a point in LevelState space as a two-dimensional
