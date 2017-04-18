@@ -68,6 +68,10 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     private final LevelVector step = new LevelVector();
     final LevelVector displacement = new LevelVector();
     
+    /**
+     * Creates a new ThinkerObject with the specified locator Hitbox.
+     * @param locatorHitbox This ThinkerObject's locator Hitbox
+     */
     public ThinkerObject(Hitbox locatorHitbox) {
         super(locatorHitbox);
         id = getNextID();
@@ -123,62 +127,169 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         locatorHitbox.addChild(collisionHitbox);
     }
     
+    /**
+     * Returns this ThinkerObject's action priority.
+     * @return This ThinkerObject's action priority
+     */
     public final int getActionPriority() {
         return thinker.getActionPriority();
     }
     
+    /**
+     * Returns the action priority that this ThinkerObject is about to have, but
+     * does not yet have due to its LevelState's LevelThinker list being
+     * iterated over. If this ThinkerObject is not about to change its action
+     * priority, this method will simply return its current action priority.
+     * @return The action priority that this ThinkerObject is about to have
+     */
     public final int getNewActionPriority() {
         return thinker.getNewActionPriority();
     }
     
+    /**
+     * Sets this ThinkerObject's action priority to the specified value.
+     * @param actionPriority The new action priority
+     */
     public final void setActionPriority(int actionPriority) {
         thinker.setActionPriority(actionPriority);
     }
     
+    /**
+     * Returns this ThinkerObject's current LevelThinkerState.
+     * @return This ThinkerObject's current LevelThinkerState
+     */
     public final LevelThinkerState getThinkerState() {
         return thinker.getThinkerState();
     }
     
+    /**
+     * Sets this ThinkerObject's current LevelThinkerState to the specified one.
+     * If this ThinkerObject is not assigned to a LevelState, the change will
+     * not occur until it is added to one, immediately before it takes its
+     * addedActions().
+     * @param thinkerState The new LevelThinkerState
+     */
     public final void setThinkerState(LevelThinkerState thinkerState) {
         thinker.setThinkerState(thinkerState);
     }
     
+    /**
+     * Returns the remaining duration in time units of this ThinkerObject's
+     * current LevelThinkerState. A negative value indicates an infinite
+     * duration.
+     * @return The remaining duration in time units of this ThinkerObject's
+     * current LevelThinkerState
+     */
     public final int getThinkerStateDuration() {
         return thinker.getThinkerStateDuration();
     }
     
+    /**
+     * Sets the remaining duration in time units of this ThinkerObject's current
+     * LevelThinkerState to the specified value. A negative value indicates an
+     * infinite duration, and a value of 0 indicates that the LevelThinkerState
+     * should end as soon as possible.
+     * @param duration The new duration in time units of this ThinkerObject's
+     * current LevelThinkerState
+     */
     public final void setThinkerStateDuration(int duration) {
         thinker.setThinkerStateDuration(duration);
     }
     
+    /**
+     * Returns the current value of this ThinkerObject's timer for the specified
+     * TimedEvent.
+     * @param timedEvent The TimedEvent whose timer value should be returned
+     * @return The current value of the timer for the specified TimedEvent
+     */
     public final int getTimerValue(TimedEvent<LevelState<T>> timedEvent) {
         return thinker.getTimerValue(timedEvent);
     }
     
+    /**
+     * Sets the value of this ThinkerObject's timer for the specified TimedEvent
+     * to the specified value.
+     * @param timedEvent The TimedEvent whose timer value should be set
+     * @param value The new value of the specified TimedEvent's timer
+     */
     public final void setTimerValue(TimedEvent<LevelState<T>> timedEvent, int value) {
         thinker.setTimerValue(timedEvent, value);
     }
     
-    public void timeUnitActions(T game, LevelState<T> levelState) {}
+    /**
+     * Actions for this ThinkerObject to take once every time unit, after
+     * AnimationInstances update their indices but before LevelThinkers take
+     * their frameActions().
+     * @param game This ThinkerObject's CellGame
+     * @param state This ThinkerObject's LevelState
+     */
+    public void timeUnitActions(T game, LevelState<T> state) {}
     
-    public void frameActions(T game, LevelState<T> levelState) {}
+    /**
+     * Actions for this ThinkerObject to take once every frame, after
+     * LevelThinkers take their timeUnitActions() but before its LevelState
+     * takes its own frameActions().
+     * @param game This ThinkerObject's CellGame
+     * @param state This ThinkerObject's LevelState
+     */
+    public void frameActions(T game, LevelState<T> state) {}
     
-    public void beforeMovementActions(T game, LevelState<T> levelState) {}
+    /**
+     * Actions for this ThinkerObject to take once every frame, after
+     * LevelThinkers take their frameActions() but before its LevelState moves
+     * its assigned ThinkerObjects.
+     * @param game This ThinkerObject's CellGame
+     * @param state This ThinkerObject's LevelState
+     */
+    public void beforeMovementActions(T game, LevelState<T> state) {}
     
-    public void afterMovementActions(T game, LevelState<T> levelState) {}
+    /**
+     * Actions for this ThinkerObject to take once every frame, after its
+     * LevelState moves its assigned ThinkerObjects.
+     * @param game This ThinkerObject's CellGame
+     * @param state This ThinkerObject's LevelState
+     */
+    public void afterMovementActions(T game, LevelState<T> state) {}
     
-    public void addedActions(T game, LevelState<T> levelState) {}
+    /**
+     * Actions for this ThinkerObject to take immediately after being added to a
+     * new LevelState.
+     * @param game This ThinkerObject's CellGame
+     * @param state This ThinkerObject's LevelState
+     */
+    public void addedActions(T game, LevelState<T> state) {}
     
-    public void removedActions(T game, LevelState<T> levelState) {}
+    /**
+     * Actions for this ThinkerObject to take immediately before being removed
+     * from its LevelState.
+     * @param game This ThinkerObject's CellGame
+     * @param state This ThinkerObject's LevelState
+     */
+    public void removedActions(T game, LevelState<T> state) {}
     
+    /**
+     * Returns this ThinkerObject's movement priority.
+     * @return This ThinkerObject's movement priority
+     */
     public final int getMovementPriority() {
         return movementPriority;
     }
     
+    /**
+     * Returns the movement priority that this ThinkerObject is about to have,
+     * but does not yet have due to its LevelState's ThinkerObject list being
+     * iterated over. If this ThinkerObject is not about to change its movement
+     * priority, this method will simply return its current movement priority.
+     * @return The movement priority that this ThinkerObject is about to have
+     */
     public final int getNewMovementPriority() {
         return newMovementPriority;
     }
     
+    /**
+     * Sets this ThinkerObject's movement priority to the specified value.
+     * @param movementPriority The new movement priority
+     */
     public final void setMovementPriority(int movementPriority) {
         if (state == null) {
             this.newMovementPriority = movementPriority;
@@ -189,10 +300,21 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         }
     }
     
+    /**
+     * Returns whether this ThinkerObject collides with solid surfaces using
+     * Cell2D's standard collision mechanics.
+     * @return Whether this ThinkerObject collides with solid surfaces
+     */
     public final boolean hasCollision() {
         return hasCollision;
     }
     
+    /**
+     * Sets whether this ThinkerObject collides with solid surfaces using
+     * Cell2D's standard collision mechanics.
+     * @param hasCollision Whether this ThinkerObject should collide with solid
+     * surfaces
+     */
     public final void setCollision(boolean hasCollision) {
         if (state != null && collisionHitbox != null) {
             if (hasCollision && !this.hasCollision) {
@@ -204,10 +326,24 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         this.hasCollision = hasCollision;
     }
     
+    
+    /**
+     * Returns this ThinkerObject's collision Hitbox, or null if it has none.
+     * @return This ThinkerObject's collision Hitbox
+     */
     public final Hitbox<T> getCollisionHitbox() {
         return collisionHitbox;
     }
     
+    /**
+     * Sets this ThinkerObject's collision Hitbox to the specified Hitbox. The
+     * new collision Hitbox may not be a component of a CompositeHitbox or in
+     * use by another LevelObject. If the specified Hitbox is null, the current
+     * collision Hitbox will be removed if there is one, but it will not be
+     * replaced with anything.
+     * @param collisionHitbox The new collision Hitbox
+     * @return Whether the change occurred
+     */
     public final boolean setCollisionHitbox(Hitbox<T> collisionHitbox) {
         if (collisionHitbox != this.collisionHitbox) {
             boolean acceptable;
@@ -237,10 +373,19 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         return false;
     }
     
+    /**
+     * Returns this ThinkerObject's pressing angle, or null if it has none.
+     * @return This ThinkerObject's pressing angle
+     */
     public final Double getPressingAngle() {
         return pressingAngle;
     }
     
+    /**
+     * Sets this ThinkerObject's pressing angle to the specified value, or to
+     * none if the specified value is null.
+     * @param angle The new pressing angle
+     */
     public final void setPressingAngle(Double angle) {
         if (angle == null) {
             pressingAngle = null;
@@ -252,10 +397,20 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         }
     }
     
+    /**
+     * Returns this ThinkerObject's leader, or null if it has none.
+     * @return This ThinkerObject's leader
+     */
     public final ThinkerObject getLeader() {
         return leader;
     }
     
+    /**
+     * Sets this ThinkerObject's leader to the specified ThinkerObject. If it is
+     * set to a null ThinkerObject, this ThinkerObject will be removed from its
+     * current leader if it has one.
+     * @param leader The new leader
+     */
     public final void setLeader(ThinkerObject leader) {
         if (this.leader != null) {
             this.leader.removeFollower(this);
@@ -265,16 +420,31 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         }
     }
     
+    /**
+     * Returns the number of followers that this ThinkerObject currently has.
+     * @return This ThinkerObject's number of followers
+     */
     public final int getNumFollowers() {
         return followers.size();
     }
     
+    /**
+     * Returns the Set of this ThinkerObject's followers. Changes to the
+     * returned Set will not be reflected in this ThinkerObject.
+     * @return The Set of this ThinkerObject's followers
+     */
     public final Set<ThinkerObject> getFollowers() {
         return new HashSet<>(followers);
     }
     
+    /**
+     * Adds the specified ThinkerObject as this ThinkerObject's follower if it
+     * does not have a leader already.
+     * @param follower The new follower
+     * @return Whether the addition occurred
+     */
     public final boolean addFollower(ThinkerObject follower) {
-        if (follower != null && follower != this && follower.leader == null) {
+        if (follower != this && follower.leader == null) {
             ThinkerObject ancestor = leader;
             while (ancestor != null) {
                 if (ancestor == follower) {
@@ -292,8 +462,14 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         return false;
     }
     
+    /**
+     * Removes the specified ThinkerObject as this ThinkerObject's follower if
+     * this ThinkerObject is its leader.
+     * @param follower The follower to be removed
+     * @return Whether the removal occurred
+     */
     public final boolean removeFollower(ThinkerObject follower) {
-        if (follower != null && follower.leader == this) {
+        if (follower.leader == this) {
             followers.remove(follower);
             if (follower.effLeader == follower.leader) {
                 follower.effLeader = null;
@@ -304,6 +480,9 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         return false;
     }
     
+    /**
+     * Removes all of this ThinkerObject's followers from it.
+     */
     public final void clearFollowers() {
         for (ThinkerObject follower : followers) {
             if (follower.effLeader == follower.leader) {
@@ -314,6 +493,15 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         followers.clear();
     }
     
+    /**
+     * Sets the LevelState to which this ThinkerObject is currently assigned. If
+     * it is set to a null LevelState, this ThinkerObject will be removed from
+     * its current LevelState if it has one.
+     * @param state The LevelState to which this ThinkerObject should be
+     * assigned
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will be assigned to the same LevelState; defaults to false
+     */
     public final void setGameState(LevelState<T> state, boolean bringFollowers) {
         setGameState(state);
         if (bringFollowers && !followers.isEmpty()) {
@@ -323,48 +511,152 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         }
     }
     
+    /**
+     * Sets this ThinkerObject's position to the specified value.
+     * @param position The new position
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
     public final void setPosition(LevelVector position, boolean bringFollowers) {
-        double deltaX = position.getX() - getX();
-        double deltaY = position.getY() - getY();
+        double changeX = position.getX() - getX();
+        double changeY = position.getY() - getY();
         setPosition(position);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
-                follower.setPosition(follower.getX() + deltaX, follower.getY() + deltaY, true);
+                follower.changePosition(changeX, changeY, true);
             }
         }
     }
     
+    /**
+     * Sets this ThinkerObject's position to the specified value.
+     * @param x The x-coordinate of the new position
+     * @param y The y-coordinate of the new position
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
     public final void setPosition(double x, double y, boolean bringFollowers) {
-        double deltaX = x - getX();
-        double deltaY = y - getY();
+        double changeX = x - getX();
+        double changeY = y - getY();
         setPosition(x, y);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
-                follower.setPosition(follower.getX() + deltaX, follower.getY() + deltaY, true);
+                follower.changePosition(changeX, changeY, true);
             }
         }
     }
     
+    /**
+     * Sets the x-coordinate of this ThinkerObject's position to the specified
+     * value.
+     * @param x The x-coordinate of the new position
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
     public final void setX(double x, boolean bringFollowers) {
-        double deltaX = x - getX();
+        double changeX = x - getX();
         setX(x);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
-                follower.setX(follower.getX() + deltaX, true);
+                follower.changeX(changeX, true);
             }
         }
     }
     
+    /**
+     * Sets the y-coordinate of this ThinkerObject's position to the specified
+     * value.
+     * @param y The y-coordinate of the new position
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
     public final void setY(double y, boolean bringFollowers) {
-        double deltaY = y - getY();
+        double changeY = y - getY();
         setY(y);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
-                follower.setY(follower.getY() + deltaY, true);
+                follower.changeY(changeY, true);
             }
         }
     }
     
+    /**
+     * Changes this ThinkerObject's position by the specified amount.
+     * @param change The amount to change the position by
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
+    public final void changePosition(LevelVector change, boolean bringFollowers) {
+        changePosition(change);
+        if (bringFollowers && !followers.isEmpty()) {
+            for (ThinkerObject follower : followers) {
+                follower.changePosition(change, true);
+            }
+        }
+    }
+    
+    /**
+     * Changes the coordinates of this ThinkerObject's position by the specified
+     * amounts.
+     * @param changeX The amount to change the position's x-coordinate by
+     * @param changeY The amount to change the position's y-coordinate by
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
+    public final void changePosition(double changeX, double changeY, boolean bringFollowers) {
+        changePosition(changeX, changeY);
+        if (bringFollowers && !followers.isEmpty()) {
+            for (ThinkerObject follower : followers) {
+                follower.changePosition(changeX, changeY, true);
+            }
+        }
+    }
+    
+    /**
+     * Changes the x-coordinate of this ThinkerObject's position by the
+     * specified amount.
+     * @param changeX The amount to change the position's x-coordinate by
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
+    public final void changeX(double changeX, boolean bringFollowers) {
+        changeX(changeX);
+        if (bringFollowers && !followers.isEmpty()) {
+            for (ThinkerObject follower : followers) {
+                follower.changeX(changeX, true);
+            }
+        }
+    }
+    
+    /**
+     * Changes the y-coordinate of this ThinkerObject's position by the
+     * specified amount.
+     * @param changeY The amount to change the position's y-coordinate by
+     * @param bringFollowers If true, all of this ThinkerObject's followers and
+     * sub-followers will change their positions by the same amount as this
+     * ThinkerObject; defaults to false
+     */
+    public final void changeY(double changeY, boolean bringFollowers) {
+        changeY(changeY);
+        if (bringFollowers && !followers.isEmpty()) {
+            for (ThinkerObject follower : followers) {
+                follower.changeY(changeY, true);
+            }
+        }
+    }
+    
+    /**
+     * Moves this ThinkerObject and its followers and sub-followers by the
+     * specified amount, colliding with solid surfaces 
+     * @param change 
+     */
     public final void doMovement(LevelVector change) {
         doMovement(change.getX(), change.getY());
     }
