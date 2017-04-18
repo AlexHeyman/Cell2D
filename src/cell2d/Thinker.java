@@ -188,7 +188,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
     }
     
     /**
-     * Sets this Thinker's action priority.
+     * Sets this Thinker's action priority to the specified value.
      * @param actionPriority The new action priority
      */
     public final void setActionPriority(int actionPriority) {
