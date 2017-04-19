@@ -190,6 +190,9 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
             top = y*cellHeight;
             bottom = top + cellHeight;
             initializeLocatorHitboxes();
+            for (Direction direction : Direction.values()) {
+                solidSurfaces.put(direction, new HashSet<>());
+            }
         }
         
         private void initializeLocatorHitboxes() {
@@ -198,15 +201,6 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
             } else {
                 locatorHitboxes = new HashSet<>();
             }
-        }
-        
-        private Set<Hitbox<T>> getSolidSurfaces(Direction direction) {
-            Set<Hitbox<T>> hitboxes = solidSurfaces.get(direction);
-            if (hitboxes == null) {
-                hitboxes = new HashSet<>();
-                solidSurfaces.put(direction, hitboxes);
-            }
-            return hitboxes;
         }
         
     }
@@ -511,7 +505,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                     if (hitbox.roles[3]) {
                         cell.solidHitboxes.remove(hitbox);
                         for (Direction direction : hitbox.solidSurfaces) {
-                            cell.getSolidSurfaces(direction).remove(hitbox);
+                            cell.solidSurfaces.get(direction).remove(hitbox);
                         }
                     }
                     if (hitbox.roles[4]) {
@@ -535,7 +529,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                 if (hitbox.roles[3]) {
                     cell.solidHitboxes.add(hitbox);
                     for (Direction direction : hitbox.solidSurfaces) {
-                        cell.getSolidSurfaces(direction).add(hitbox);
+                        cell.solidSurfaces.get(direction).add(hitbox);
                     }
                 }
                 if (hitbox.roles[4]) {
@@ -651,14 +645,14 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         hitbox.numCellRoles++;
         Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
-            iterator.next().getSolidSurfaces(direction).add(hitbox);
+            iterator.next().solidSurfaces.get(direction).add(hitbox);
         }
     }
     
     final void removeSolidSurface(Hitbox<T> hitbox, Direction direction) {
         Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
-            iterator.next().getSolidSurfaces(direction).remove(hitbox);
+            iterator.next().solidSurfaces.get(direction).remove(hitbox);
         }
         hitbox.numCellRoles--;
         if (hitbox.solidSurfaces.isEmpty()) {
@@ -674,7 +668,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
             while (iterator.hasNext()) {
                 Cell cell = iterator.next();
                 for (Direction direction : hitbox.solidSurfaces) {
-                    cell.getSolidSurfaces(direction).add(hitbox);
+                    cell.solidSurfaces.get(direction).add(hitbox);
                 }
             }
         }
@@ -686,7 +680,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
             while (iterator.hasNext()) {
                 Cell cell = iterator.next();
                 for (Direction direction : hitbox.solidSurfaces) {
-                    cell.getSolidSurfaces(direction).remove(hitbox);
+                    cell.solidSurfaces.get(direction).remove(hitbox);
                 }
             }
             hitbox.numCellRoles -= hitbox.solidSurfaces.size();
@@ -704,7 +698,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
             for (Direction direction : directionsToAdd) {
-                cell.getSolidSurfaces(direction).add(hitbox);
+                cell.solidSurfaces.get(direction).add(hitbox);
             }
         }
     }
@@ -2154,22 +2148,37 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         }
         if (object.hasCollision() && object.getCollisionHitbox() != null) {
             Hitbox collisionHitbox = object.getCollisionHitbox();
-            double leftEdge = collisionHitbox.getLeftEdge() + left;
-            double rightEdge = collisionHitbox.getRightEdge() + right;
-            double topEdge = collisionHitbox.getTopEdge() + top;
-            double bottomEdge = collisionHitbox.getBottomEdge() + bottom;
-            Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge, rightEdge, topEdge, bottomEdge));
+            double leftEdge = collisionHitbox.getLeftEdge();
+            double rightEdge = collisionHitbox.getRightEdge();
+            double topEdge = collisionHitbox.getTopEdge();
+            double bottomEdge = collisionHitbox.getBottomEdge();
+            Double pressingAngle = object.getPressingAngle();
             if (changeX > 0) {
                 if (changeY > 0) {
                     bottom = changeY;
                 } else if (changeY < 0) {
                     top = changeY;
                 } else {
-                    while (iterator.hasNext()) {
-                        Cell cell = iterator.next();
-                        for (Hitbox hitbox : cell.getSolidSurfaces(Direction.LEFT)) {
-                            
+                    Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge, topEdge, rightEdge + changeX, bottomEdge));
+                    SortedMap<Hitbox,Direction> solidHitboxes = null;
+                    if (pressingAngle == null) {
+                        while (iterator.hasNext()) {
+                            Cell cell = iterator.next();
+                            for (Hitbox hitbox : cell.solidSurfaces.get(Direction.LEFT)) {
+                                double hitboxLeft = hitbox.getLeftEdge();
+                                if (hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
+                                        && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
+                                        && hitbox.getObject() != object) {
+                                    
+                                }
+                            }
                         }
+                    } else if (pressingAngle == 0) {
+                        
+                    } else if (pressingAngle > 0 && pressingAngle < 180) {
+                        
+                    } else if (pressingAngle > 180) {
+                        
                     }
                 }
                 right = changeX;
@@ -2193,11 +2202,10 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         Map<ThinkerObject<T>,LevelVector> objectsToMove = null;
         if (object.isSolid()) {
             Hitbox solidHitbox = object.getSolidHitbox();
-            double leftEdge = solidHitbox.getLeftEdge() + left;
-            double rightEdge = solidHitbox.getRightEdge() + right;
-            double topEdge = solidHitbox.getTopEdge() + top;
-            double bottomEdge = solidHitbox.getBottomEdge() + bottom;
-            Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge, rightEdge, topEdge, bottomEdge));
+            double leftEdge = solidHitbox.getLeftEdge();
+            double rightEdge = solidHitbox.getRightEdge();
+            double topEdge = solidHitbox.getTopEdge();
+            double bottomEdge = solidHitbox.getBottomEdge();
             if (changeX > 0) {
                 if (changeY > 0) {
                     
