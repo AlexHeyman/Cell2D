@@ -78,7 +78,9 @@ public abstract class Hitbox<T extends CellGame> {
      * @param relY The y-coordinate of this Hitbox's relative position
      */
     public Hitbox(double relX, double relY) {
-        this(new LevelVector(relX, relY));
+        id = getNextID();
+        this.relPosition = new LevelVector(relX, relY);
+        absPosition = new LevelVector(relPosition);
     }
     
     /**

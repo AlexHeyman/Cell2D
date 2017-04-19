@@ -20,10 +20,8 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param radius This CircleHitbox's radius
      */
     public CircleHitbox(LevelVector relPosition, double radius) {
-        super(relPosition);
-        if (!setRadius(radius)) {
-            throw new RuntimeException("Attempted to give a CircleHitbox a negative radius");
-        }
+        this(relPosition.getX(), relPosition.getY(), radius);
+        
     }
     
     /**
@@ -34,7 +32,10 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param radius This CircleHitbox's radius
      */
     public CircleHitbox(double relX, double relY, double radius) {
-        this(new LevelVector(relX, relY), radius);
+        super(relX, relY);
+        if (!setRadius(radius)) {
+            throw new RuntimeException("Attempted to give a CircleHitbox a negative radius");
+        }
     }
     
     @Override

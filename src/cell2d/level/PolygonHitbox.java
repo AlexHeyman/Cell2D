@@ -10,7 +10,11 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     private double left, right, top, bottom;
     
     public PolygonHitbox(LevelVector relPosition, LevelVector[] relVertices) {
-        super(relPosition);
+        this(relPosition.getX(), relPosition.getY(), relVertices);
+    }
+    
+    public PolygonHitbox(double relX, double relY, LevelVector[] relVertices) {
+        super(relX, relY);
         vertices = new ArrayList<>(relVertices.length);
         for (LevelVector relVertex : relVertices) {
             vertices.add(new RelAbsPair(new LevelVector(relVertex), null));
@@ -18,18 +22,14 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         updateData();
     }
     
-    public PolygonHitbox(double relX, double relY, LevelVector[] relVertices) {
-        this(new LevelVector(relX, relY), relVertices);
-    }
-    
     public PolygonHitbox(LevelVector relPosition) {
-        super(relPosition);
-        vertices = new ArrayList<>();
-        updateData();
+        this(relPosition.getX(), relPosition.getY());
     }
     
     public PolygonHitbox(double relX, double relY) {
-        this(new LevelVector(relX, relY));
+        super(relX, relY);
+        vertices = new ArrayList<>();
+        updateData();
     }
     
     private PolygonHitbox(double relX, double relY, List<RelAbsPair> vertices) {

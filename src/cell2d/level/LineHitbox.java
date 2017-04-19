@@ -2,20 +2,42 @@ package cell2d.level;
 
 import cell2d.CellGame;
 
+/**
+ * <p>A LineHitbox is a Hitbox shaped like a line segment, with one endpoint
+ * being its position and the other being the sum of its position and a vector
+ * called its difference.</p>
+ * @author Andrew Heyman
+ * @param <T> The subclass of CellGame that uses the LevelStates that can use
+ * this LineHitbox
+ */
 public class LineHitbox<T extends CellGame> extends Hitbox<T> {
     
     private final LevelVector relDifference, absDifference;
     private double left, right, top, bottom;
     
+    /**
+     * Creates a new LineHitbox with the specified relative position and
+     * difference.
+     * @param relPosition This LineHitbox's relative position
+     * @param relDifference This LineHitbox's relative difference
+     */
     public LineHitbox(LevelVector relPosition, LevelVector relDifference) {
-        super(relPosition);
-        this.relDifference = new LevelVector(relDifference);
-        absDifference = new LevelVector();
-        updateData();
+        this(relPosition.getX(), relPosition.getY(), relDifference.getX(), relDifference.getY());
     }
     
+    /**
+     * Creates a new LineHitbox with the specified relative position and
+     * difference.
+     * @param relX The x-coordinate of this LineHitbox's relative position
+     * @param relY The y-coordinate of this LineHitbox's relative position
+     * @param relDX The x-coordinate of this LineHitbox's relative difference
+     * @param relDY The y-coordinate of this LineHitbox's relative difference
+     */
     public LineHitbox(double relX, double relY, double relDX, double relDY) {
-        this(new LevelVector(relX, relY), new LevelVector(relDX, relDY));
+        super(relX, relY);
+        this.relDifference = new LevelVector(relDX, relDY);
+        absDifference = new LevelVector();
+        updateData();
     }
     
     @Override
