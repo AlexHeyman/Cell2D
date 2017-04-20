@@ -382,6 +382,21 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     }
     
     /**
+     * Returns whether this ThinkerObject's pressing angle, if it has one, has
+     * a component in the specified Direction.
+     * @param direction The Direction to check
+     * @return Whether this ThinkerObject's pressing angle causes it to press in
+     * the specified Direction
+     */
+    public final boolean isPressingIn(Direction direction) {
+        return pressingAngle != null
+                && ((direction == Direction.LEFT && (pressingAngle < 90 || pressingAngle > 270))
+                || (direction == Direction.RIGHT && pressingAngle > 90 && pressingAngle < 270)
+                || (direction == Direction.UP && pressingAngle > 0 && pressingAngle < 180)
+                || (direction == Direction.DOWN && pressingAngle > 180));
+    }
+    
+    /**
      * Sets this ThinkerObject's pressing angle to the specified value, or to
      * none if the specified value is null.
      * @param angle The new pressing angle

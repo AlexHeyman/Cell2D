@@ -1355,6 +1355,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> centerHitbox : iterator.next().centerHitboxes) {
                 if (!centerHitbox.scanned) {
+                    centerHitbox.scanned = true;
+                    scanned.add(centerHitbox);
                     if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
                             && centerHitbox.getAbsX() >= x1
                             && centerHitbox.getAbsY() >= y1
@@ -1362,8 +1364,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             && centerHitbox.getAbsY() <= y2) {
                         within.add(cls.cast(centerHitbox.getObject()));
                     }
-                    centerHitbox.scanned = true;
-                    scanned.add(centerHitbox);
                 }
             }
         }
@@ -1414,6 +1414,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> centerHitbox : iterator.next().centerHitboxes) {
                 if (!centerHitbox.scanned) {
+                    centerHitbox.scanned = true;
+                    scanned.add(centerHitbox);
                     SpaceObject<T> object = centerHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && centerHitbox.getAbsX() >= x1
@@ -1426,8 +1428,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             nearestDistance = distance;
                         }
                     }
-                    centerHitbox.scanned = true;
-                    scanned.add(centerHitbox);
                 }
             }
         }
@@ -1573,12 +1573,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
                 for (Hitbox<T> centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
+                        centerHitbox.scanned = true;
+                        scanned.add(centerHitbox);
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
                                 && SpaceVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
                             within.add(cls.cast(centerHitbox.getObject()));
                         }
-                        centerHitbox.scanned = true;
-                        scanned.add(centerHitbox);
                     }
                 }
             }
@@ -1629,6 +1629,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
                 for (Hitbox<T> centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
+                        centerHitbox.scanned = true;
+                        scanned.add(centerHitbox);
                         SpaceObject<T> object = centerHitbox.getObject();
                         if (cls.isAssignableFrom(object.getClass())
                                 && SpaceVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
@@ -1638,8 +1640,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 nearestDistance = distance;
                             }
                         }
-                        centerHitbox.scanned = true;
-                        scanned.add(centerHitbox);
                     }
                 }
             }
@@ -1712,12 +1712,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> overlapHitbox : iterator.next().overlapHitboxes) {
                 if (!overlapHitbox.scanned) {
+                    overlapHitbox.scanned = true;
+                    scanned.add(overlapHitbox);
                     if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
                             && Hitbox.overlap(hitbox, overlapHitbox)) {
                         overlapping.add(cls.cast(overlapHitbox.getObject()));
                     }
-                    overlapHitbox.scanned = true;
-                    scanned.add(overlapHitbox);
                 }
             }
         }
@@ -1762,6 +1762,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> overlapHitbox : iterator.next().overlapHitboxes) {
                 if (!overlapHitbox.scanned) {
+                    overlapHitbox.scanned = true;
+                    scanned.add(overlapHitbox);
                     SpaceObject<T> object = overlapHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && Hitbox.overlap(hitbox, overlapHitbox)) {
@@ -1771,8 +1773,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             nearestDistance = distance;
                         }
                     }
-                    overlapHitbox.scanned = true;
-                    scanned.add(overlapHitbox);
                 }
             }
         }
@@ -1799,6 +1799,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> overlapHitbox : iterator.next().overlapHitboxes) {
                 if (!overlapHitbox.scanned) {
+                    overlapHitbox.scanned = true;
+                    scanned.add(overlapHitbox);
                     if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
                             && hitbox.getLeftEdge() <= overlapHitbox.getRightEdge()
                             && hitbox.getRightEdge() >= overlapHitbox.getLeftEdge()
@@ -1806,8 +1808,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             && hitbox.getBottomEdge() >= overlapHitbox.getTopEdge()) {
                         meeting.add(cls.cast(overlapHitbox.getObject()));
                     }
-                    overlapHitbox.scanned = true;
-                    scanned.add(overlapHitbox);
                 }
             }
         }
@@ -1880,12 +1880,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> solidHitbox : iterator.next().solidHitboxes) {
                 if (!solidHitbox.scanned) {
+                    solidHitbox.scanned = true;
+                    scanned.add(solidHitbox);
                     if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
                             && Hitbox.overlap(hitbox, solidHitbox)) {
                         intersecting.add(cls.cast(solidHitbox.getObject()));
                     }
-                    solidHitbox.scanned = true;
-                    scanned.add(solidHitbox);
                 }
             }
         }
@@ -1930,6 +1930,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> solidHitbox : iterator.next().solidHitboxes) {
                 if (!solidHitbox.scanned) {
+                    solidHitbox.scanned = true;
+                    scanned.add(solidHitbox);
                     SpaceObject<T> object = solidHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && Hitbox.overlap(hitbox, solidHitbox)) {
@@ -1939,8 +1941,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             nearestDistance = distance;
                         }
                     }
-                    solidHitbox.scanned = true;
-                    scanned.add(solidHitbox);
                 }
             }
         }
@@ -2160,61 +2160,106 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             double rightEdge = collisionHitbox.getRightEdge();
             double topEdge = collisionHitbox.getTopEdge();
             double bottomEdge = collisionHitbox.getBottomEdge();
+            boolean pressingLeft = false;
+            boolean pressingRight = false;
+            boolean pressingUp = false;
+            boolean pressingDown = false;
             Double pressingAngle = object.getPressingAngle();
+            if (pressingAngle != null) {
+                pressingLeft = pressingAngle > 90 && pressingAngle < 270;
+                pressingRight = pressingAngle < 90 || pressingAngle > 270;
+                pressingUp = pressingAngle > 0 && pressingAngle < 180;
+                pressingDown = pressingAngle > 180;
+            }
+            List<Hitbox<T>> scanned = new ArrayList<>();
+            SortedMap<Hitbox<T>,Direction> solidHitboxes = null;
+            Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge + left, topEdge + top, rightEdge + right, bottomEdge + bottom));
             if (changeX > 0) {
                 if (changeY > 0) {
-                    bottom = changeY;
+                    
                 } else if (changeY < 0) {
-                    top = changeY;
+                    
                 } else {
-                    SortedMap<Hitbox<T>,Direction> solidHitboxes = null;
-                    Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge, topEdge, rightEdge + changeX, bottomEdge));
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox hitbox : cell.solidHitboxes) {
-                            if (hitbox.surfaceIsSolid(Direction.LEFT)) {
-                                
-                            }
-                        }
-                    }
-                    if (solidHitboxes != null) {
-                        for (Map.Entry<Hitbox<T>,Direction> entry : solidHitboxes.entrySet()) {
-                            SpaceObject<T> collidedWith = entry.getKey().getObject();
-                            CollisionResponse response = object.collide(collidedWith, entry.getValue());
-                            if (response != CollisionResponse.NONE) {
-                                switch (response) {
-                                    case SLIDE:
-                                        object.setVelocityX(0);
-                                        break;
-                                    case STOP:
-                                        object.setVelocity(0, 0);
-                                        break;
-                                    case BOUNCE:
-                                        object.setVelocityX(-object.getVelocityX());
-                                        break;
+                        for (Hitbox<T> hitbox : cell.solidHitboxes) {
+                            if (!hitbox.scanned) {
+                                hitbox.scanned = true;
+                                scanned.add(hitbox);
+                                /*if (hitbox.getObject() instanceof ThinkerObject) {}*/
+                                double hitboxLeft = hitbox.getLeftEdge();
+                                if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
+                                        && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
+                                        && (hitboxLeft < rightEdge + changeX || (pressingRight && hitboxLeft == rightEdge + changeX))) {
+                                    if (solidHitboxes == null) {
+                                        solidHitboxes = new TreeMap<>(rightMovementComparator);
+                                    }
+                                    solidHitboxes.put(hitbox, Direction.LEFT);
+                                } else if (pressingUp && hitbox.surfaceIsSolid(Direction.DOWN)
+                                        && hitbox.getBottomEdge() == topEdge
+                                        && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
+                                    if (solidHitboxes == null) {
+                                        solidHitboxes = new TreeMap<>(rightMovementComparator);
+                                    }
+                                    solidHitboxes.put(hitbox, Direction.DOWN);
+                                } else if (pressingDown && hitbox.surfaceIsSolid(Direction.UP)
+                                        && hitbox.getTopEdge() == bottomEdge
+                                        && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
+                                    if (solidHitboxes == null) {
+                                        solidHitboxes = new TreeMap<>(rightMovementComparator);
+                                    }
+                                    solidHitboxes.put(hitbox, Direction.UP);
                                 }
-                                object.addCollision(collidedWith, entry.getValue());
-                                changeX = entry.getKey().getLeftEdge() - rightEdge;
-                                break;
                             }
                         }
                     }
                 }
-                right = changeX;
             } else if (changeX < 0) {
                 if (changeY > 0) {
-                    bottom = changeY;
+                    
                 } else if (changeY < 0) {
-                    top = changeY;
+                    
                 } else {
                     
                 }
-                left = changeX;
             } else {
                 if (changeY > 0) {
-                    bottom = changeY;
+                    
                 } else {
-                    top = changeY;
+                    
+                }
+            }
+            for (Hitbox<T> scannedHitbox : scanned) {
+                scannedHitbox.scanned = false;
+            }
+            if (solidHitboxes != null) {
+                for (Map.Entry<Hitbox<T>,Direction> entry : solidHitboxes.entrySet()) {
+                    SpaceObject<T> collidedWith = entry.getKey().getObject();
+                    Direction direction = entry.getValue();
+                    CollisionResponse response = object.collide(collidedWith, direction);
+                    if (response != CollisionResponse.NONE) {
+                        switch (response) {
+                            case SLIDE:
+                                if (direction == Direction.LEFT || direction == Direction.RIGHT) {
+                                    object.setVelocityX(0);
+                                } else {
+                                    object.setVelocityY(0);
+                                }
+                                break;
+                            case STOP:
+                                object.setVelocity(0, 0);
+                                break;
+                            case BOUNCE:
+                                if (direction == Direction.LEFT || direction == Direction.RIGHT) {
+                                    object.setVelocityX(-object.getVelocityX());
+                                } else {
+                                    object.setVelocityY(-object.getVelocityY());
+                                }
+                                break;
+                        }
+                        object.addCollision(collidedWith, direction);
+                        break;
+                    }
                 }
             }
         }
