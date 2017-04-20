@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 
@@ -10,7 +10,7 @@ import cell2d.CellGame;
  * rotation affects only any other Hitboxes that are relative to it. A
  * RectangleHitbox cannot have a negative width or height.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the LevelStates that can use
+ * @param <T> The subclass of CellGame that uses the SpaceStates that can use
  * this RectangleHitbox
  */
 public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
@@ -30,7 +30,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relBottom The difference of the y-coordinates of this
      * RectangleHitbox's relative bottom edge and relative position
      */
-    public RectangleHitbox(LevelVector relPosition, double relLeft, double relRight, double relTop, double relBottom) {
+    public RectangleHitbox(SpaceVector relPosition, double relLeft, double relRight, double relTop, double relBottom) {
         this(relPosition.getX(), relPosition.getY(), relLeft, relRight, relTop, relBottom);
     }
     

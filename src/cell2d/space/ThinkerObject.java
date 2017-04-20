@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 import cell2d.TimedEvent;
@@ -10,46 +10,46 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * <p>A ThinkerObject is a LevelObject that acts like a LevelThinker, possessing
- * LevelThinkerStates, timers, and various actions in response to events.</p>
+ * <p>A ThinkerObject is a SpaceObject that acts like a SpaceThinker, possessing
+ * SpaceThinkerStates, timers, and various actions in response to events.</p>
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the LevelStates that this
+ * @param <T> The type of CellGame that uses the SpaceStates that this
  * ThinkerObject can be assigned to
  */
-public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
+public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     
     private static final AtomicLong idCounter = new AtomicLong(0);
     
     final long id;
-    private final LevelThinker<T> thinker = new LevelThinker<T>() {
+    private final SpaceThinker<T> thinker = new SpaceThinker<T>() {
         
         @Override
-        public final void timeUnitActions(T game, LevelState<T> levelState) {
+        public final void timeUnitActions(T game, SpaceState<T> levelState) {
             ThinkerObject.this.timeUnitActions(game, levelState);
         }
         
         @Override
-        public final void frameActions(T game, LevelState<T> levelState) {
+        public final void frameActions(T game, SpaceState<T> levelState) {
             ThinkerObject.this.frameActions(game, levelState);
         }
         
         @Override
-        public final void beforeMovementActions(T game, LevelState<T> levelState) {
+        public final void beforeMovementActions(T game, SpaceState<T> levelState) {
             ThinkerObject.this.beforeMovementActions(game, levelState);
         }
         
         @Override
-        public final void afterMovementActions(T game, LevelState<T> levelState) {
+        public final void afterMovementActions(T game, SpaceState<T> levelState) {
             ThinkerObject.this.afterMovementActions(game, levelState);
         }
         
         @Override
-        public final void addedActions(T game, LevelState<T> levelState) {
+        public final void addedActions(T game, SpaceState<T> levelState) {
             ThinkerObject.this.addedActions(game, levelState);
         }
         
         @Override
-        public final void removedActions(T game, LevelState<T> levelState) {
+        public final void removedActions(T game, SpaceState<T> levelState) {
             ThinkerObject.this.removedActions(game, levelState);
         }
         
@@ -62,11 +62,11 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     private ThinkerObject leader = null;
     final Set<ThinkerObject<T>> followers = new HashSet<>();
     ThinkerObject effLeader = null;
-    final Map<LevelObject<T>,Set<Direction>> collisions = new HashMap<>();
+    final Map<SpaceObject<T>,Set<Direction>> collisions = new HashMap<>();
     final Set<Direction> collisionDirections = EnumSet.noneOf(Direction.class);
-    private final LevelVector velocity = new LevelVector();
-    private final LevelVector step = new LevelVector();
-    final LevelVector displacement = new LevelVector();
+    private final SpaceVector velocity = new SpaceVector();
+    private final SpaceVector step = new SpaceVector();
+    final SpaceVector displacement = new SpaceVector();
     
     /**
      * Creates a new ThinkerObject with the specified locator Hitbox.
@@ -137,8 +137,8 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     
     /**
      * Returns the action priority that this ThinkerObject is about to have, but
-     * does not yet have due to its LevelState's LevelThinker list being
-     * iterated over. If this ThinkerObject is not about to change its action
+ does not yet have due to its SpaceState's SpaceThinker list being
+ iterated over. If this ThinkerObject is not about to change its action
      * priority, this method will simply return its current action priority.
      * @return The action priority that this ThinkerObject is about to have
      */
@@ -155,30 +155,30 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     }
     
     /**
-     * Returns this ThinkerObject's current LevelThinkerState.
-     * @return This ThinkerObject's current LevelThinkerState
+     * Returns this ThinkerObject's current SpaceThinkerState.
+     * @return This ThinkerObject's current SpaceThinkerState
      */
-    public final LevelThinkerState getThinkerState() {
+    public final SpaceThinkerState getThinkerState() {
         return thinker.getThinkerState();
     }
     
     /**
-     * Sets this ThinkerObject's current LevelThinkerState to the specified one.
-     * If this ThinkerObject is not assigned to a LevelState, the change will
-     * not occur until it is added to one, immediately before it takes its
-     * addedActions().
-     * @param thinkerState The new LevelThinkerState
+     * Sets this ThinkerObject's current SpaceThinkerState to the specified one.
+     * If this ThinkerObject is not assigned to a SpaceState, the change will
+ not occur until it is added to one, immediately before it takes its
+ addedActions().
+     * @param thinkerState The new SpaceThinkerState
      */
-    public final void setThinkerState(LevelThinkerState thinkerState) {
+    public final void setThinkerState(SpaceThinkerState thinkerState) {
         thinker.setThinkerState(thinkerState);
     }
     
     /**
      * Returns the remaining duration in time units of this ThinkerObject's
-     * current LevelThinkerState. A negative value indicates an infinite
+     * current SpaceThinkerState. A negative value indicates an infinite
      * duration.
      * @return The remaining duration in time units of this ThinkerObject's
-     * current LevelThinkerState
+     * current SpaceThinkerState
      */
     public final int getThinkerStateDuration() {
         return thinker.getThinkerStateDuration();
@@ -186,11 +186,11 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     
     /**
      * Sets the remaining duration in time units of this ThinkerObject's current
-     * LevelThinkerState to the specified value. A negative value indicates an
-     * infinite duration, and a value of 0 indicates that the LevelThinkerState
+     * SpaceThinkerState to the specified value. A negative value indicates an
+     * infinite duration, and a value of 0 indicates that the SpaceThinkerState
      * should end as soon as possible.
      * @param duration The new duration in time units of this ThinkerObject's
-     * current LevelThinkerState
+     * current SpaceThinkerState
      */
     public final void setThinkerStateDuration(int duration) {
         thinker.setThinkerStateDuration(duration);
@@ -202,7 +202,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
      * @param timedEvent The TimedEvent whose timer value should be returned
      * @return The current value of the timer for the specified TimedEvent
      */
-    public final int getTimerValue(TimedEvent<LevelState<T>> timedEvent) {
+    public final int getTimerValue(TimedEvent<SpaceState<T>> timedEvent) {
         return thinker.getTimerValue(timedEvent);
     }
     
@@ -212,60 +212,60 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
      * @param timedEvent The TimedEvent whose timer value should be set
      * @param value The new value of the specified TimedEvent's timer
      */
-    public final void setTimerValue(TimedEvent<LevelState<T>> timedEvent, int value) {
+    public final void setTimerValue(TimedEvent<SpaceState<T>> timedEvent, int value) {
         thinker.setTimerValue(timedEvent, value);
     }
     
     /**
      * Actions for this ThinkerObject to take once every time unit, after
-     * AnimationInstances update their indices but before LevelThinkers take
+     * AnimationInstances update their indices but before SpaceThinkers take
      * their frameActions().
      * @param game This ThinkerObject's CellGame
-     * @param state This ThinkerObject's LevelState
+     * @param state This ThinkerObject's SpaceState
      */
-    public void timeUnitActions(T game, LevelState<T> state) {}
+    public void timeUnitActions(T game, SpaceState<T> state) {}
     
     /**
      * Actions for this ThinkerObject to take once every frame, after
-     * LevelThinkers take their timeUnitActions() but before its LevelState
+     * SpaceThinkers take their timeUnitActions() but before its SpaceState
      * takes its own frameActions().
      * @param game This ThinkerObject's CellGame
-     * @param state This ThinkerObject's LevelState
+     * @param state This ThinkerObject's SpaceState
      */
-    public void frameActions(T game, LevelState<T> state) {}
+    public void frameActions(T game, SpaceState<T> state) {}
     
     /**
      * Actions for this ThinkerObject to take once every frame, after
-     * LevelThinkers take their frameActions() but before its LevelState moves
+     * SpaceThinkers take their frameActions() but before its SpaceState moves
      * its assigned ThinkerObjects.
      * @param game This ThinkerObject's CellGame
-     * @param state This ThinkerObject's LevelState
+     * @param state This ThinkerObject's SpaceState
      */
-    public void beforeMovementActions(T game, LevelState<T> state) {}
+    public void beforeMovementActions(T game, SpaceState<T> state) {}
     
     /**
      * Actions for this ThinkerObject to take once every frame, after its
-     * LevelState moves its assigned ThinkerObjects.
+     * SpaceState moves its assigned ThinkerObjects.
      * @param game This ThinkerObject's CellGame
-     * @param state This ThinkerObject's LevelState
+     * @param state This ThinkerObject's SpaceState
      */
-    public void afterMovementActions(T game, LevelState<T> state) {}
+    public void afterMovementActions(T game, SpaceState<T> state) {}
     
     /**
      * Actions for this ThinkerObject to take immediately after being added to a
-     * new LevelState.
+     * new SpaceState.
      * @param game This ThinkerObject's CellGame
-     * @param state This ThinkerObject's LevelState
+     * @param state This ThinkerObject's SpaceState
      */
-    public void addedActions(T game, LevelState<T> state) {}
+    public void addedActions(T game, SpaceState<T> state) {}
     
     /**
      * Actions for this ThinkerObject to take immediately before being removed
-     * from its LevelState.
+     * from its SpaceState.
      * @param game This ThinkerObject's CellGame
-     * @param state This ThinkerObject's LevelState
+     * @param state This ThinkerObject's SpaceState
      */
-    public void removedActions(T game, LevelState<T> state) {}
+    public void removedActions(T game, SpaceState<T> state) {}
     
     /**
      * Returns this ThinkerObject's movement priority.
@@ -277,7 +277,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     
     /**
      * Returns the movement priority that this ThinkerObject is about to have,
-     * but does not yet have due to its LevelState's ThinkerObject list being
+     * but does not yet have due to its SpaceState's ThinkerObject list being
      * iterated over. If this ThinkerObject is not about to change its movement
      * priority, this method will simply return its current movement priority.
      * @return The movement priority that this ThinkerObject is about to have
@@ -338,7 +338,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     /**
      * Sets this ThinkerObject's collision Hitbox to the specified Hitbox. The
      * new collision Hitbox may not be a component of a CompositeHitbox or in
-     * use by another LevelObject. If the specified Hitbox is null, the current
+     * use by another SpaceObject. If the specified Hitbox is null, the current
      * collision Hitbox will be removed if there is one, but it will not be
      * replaced with anything.
      * @param collisionHitbox The new collision Hitbox
@@ -351,7 +351,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
             if (collisionHitbox == null) {
                 acceptable = true;
             } else {
-                LevelObject<T> object = collisionHitbox.getObject();
+                SpaceObject<T> object = collisionHitbox.getObject();
                 Hitbox<T> parent = collisionHitbox.getParent();
                 acceptable = (object == null && parent == null)
                         || (collisionHitbox == locatorHitbox)
@@ -394,6 +394,17 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
             if (pressingAngle < 0) {
                 pressingAngle += 360;
             }
+        }
+    }
+    
+    /**
+     * Sets this ThinkerObject's pressing angle to the specified value.
+     * @param angle The new pressing angle
+     */
+    public final void setPressingAngle(double angle) {
+        pressingAngle = angle % 360;
+        if (pressingAngle < 0) {
+            pressingAngle += 360;
         }
     }
     
@@ -494,15 +505,15 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
     }
     
     /**
-     * Sets the LevelState to which this ThinkerObject is currently assigned. If
-     * it is set to a null LevelState, this ThinkerObject will be removed from
-     * its current LevelState if it has one.
-     * @param state The LevelState to which this ThinkerObject should be
+     * Sets the SpaceState to which this ThinkerObject is currently assigned. If
+     * it is set to a null SpaceState, this ThinkerObject will be removed from
+     * its current SpaceState if it has one.
+     * @param state The SpaceState to which this ThinkerObject should be
      * assigned
      * @param bringFollowers If true, all of this ThinkerObject's followers and
-     * sub-followers will be assigned to the same LevelState; defaults to false
+     * sub-followers will be assigned to the same SpaceState; defaults to false
      */
-    public final void setGameState(LevelState<T> state, boolean bringFollowers) {
+    public final void setGameState(SpaceState<T> state, boolean bringFollowers) {
         setGameState(state);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -518,7 +529,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject; defaults to false
      */
-    public final void setPosition(LevelVector position, boolean bringFollowers) {
+    public final void setPosition(SpaceVector position, boolean bringFollowers) {
         double changeX = position.getX() - getX();
         double changeY = position.getY() - getY();
         setPosition(position);
@@ -591,7 +602,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject; defaults to false
      */
-    public final void changePosition(LevelVector change, boolean bringFollowers) {
+    public final void changePosition(SpaceVector change, boolean bringFollowers) {
         changePosition(change);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -657,7 +668,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
      * specified amount, colliding with solid surfaces 
      * @param change 
      */
-    public final void doMovement(LevelVector change) {
+    public final void doMovement(SpaceVector change) {
         doMovement(change.getX(), change.getY());
     }
     
@@ -676,11 +687,11 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         }
     }
     
-    public CollisionResponse collide(LevelObject<T> object, Direction direction) {
+    public CollisionResponse collide(SpaceObject<T> object, Direction direction) {
         return CollisionResponse.SLIDE;
     }
     
-    final void addCollision(LevelObject<T> object, Direction direction) {
+    final void addCollision(SpaceObject<T> object, Direction direction) {
         Set<Direction> collisionsWithObject = collisions.get(object);
         if (collisionsWithObject == null) {
             collisionsWithObject = EnumSet.of(direction);
@@ -691,9 +702,9 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         collisionDirections.add(direction);
     }
     
-    public final Map<LevelObject<T>,Set<Direction>> getCollisions() {
-        Map<LevelObject<T>,Set<Direction>> collisionMap = new HashMap<>();
-        for (Map.Entry<LevelObject<T>,Set<Direction>> entry : collisions.entrySet()) {
+    public final Map<SpaceObject<T>,Set<Direction>> getCollisions() {
+        Map<SpaceObject<T>,Set<Direction>> collisionMap = new HashMap<>();
+        for (Map.Entry<SpaceObject<T>,Set<Direction>> entry : collisions.entrySet()) {
             collisionMap.put(entry.getKey(), EnumSet.copyOf(entry.getValue()));
         }
         return collisionMap;
@@ -711,8 +722,8 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         return collisionDirections.contains(direction);
     }
     
-    public final LevelVector getVelocity() {
-        return new LevelVector(velocity);
+    public final SpaceVector getVelocity() {
+        return new SpaceVector(velocity);
     }
     
     public final double getVelocityX() {
@@ -727,7 +738,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         return velocity.getMagnitude();
     }
     
-    public final void setVelocity(LevelVector velocity) {
+    public final void setVelocity(SpaceVector velocity) {
         this.velocity.setCoordinates(velocity);
     }
     
@@ -747,8 +758,8 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         velocity.setMagnitude(speed);
     }
     
-    public final LevelVector getStep() {
-        return new LevelVector(step);
+    public final SpaceVector getStep() {
+        return new SpaceVector(step);
     }
     
     public final double getStepX() {
@@ -763,7 +774,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         return step.getMagnitude();
     }
     
-    public final void setStep(LevelVector step) {
+    public final void setStep(SpaceVector step) {
         this.step.setCoordinates(step);
     }
     
@@ -775,7 +786,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         step.setMagnitude(length);
     }
     
-    public final void changeStep(LevelVector change) {
+    public final void changeStep(SpaceVector change) {
         step.add(change);
     }
     
@@ -799,7 +810,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         step.add(0, changeY);
     }
     
-    public final void moveToward(LevelVector position, double speed) {
+    public final void moveToward(SpaceVector position, double speed) {
         setVelocity(position.getX() - getX(), position.getY() - getY());
         setSpeed(speed);
     }
@@ -809,7 +820,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         setSpeed(speed);
     }
     
-    public final void stepTo(LevelVector position) {
+    public final void stepTo(SpaceVector position) {
         setVelocity(0, 0);
         setStep(position.getX() - getX(), position.getY() - getY());
     }
@@ -819,7 +830,7 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         setStep(x - getX(), y - getY());
     }
     
-    public final void stepToward(LevelVector position, double speed) {
+    public final void stepToward(SpaceVector position, double speed) {
         setVelocity(0, 0);
         setStep(position.getX() - getX(), position.getY() - getY());
         if (getStepLength() > speed) {
@@ -835,8 +846,8 @@ public abstract class ThinkerObject<T extends CellGame> extends LevelObject<T> {
         }
     }
     
-    public final LevelVector getDisplacement() {
-        return new LevelVector(displacement);
+    public final SpaceVector getDisplacement() {
+        return new SpaceVector(displacement);
     }
     
     public final double getDisplacementX() {

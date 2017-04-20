@@ -1,24 +1,24 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 import org.newdawn.slick.Graphics;
 
 /**
- * <p>An HUD (heads-up display) is a LevelThinker that renders visuals in front
- * of those of the Viewport or LevelState to which it is assigned. To render
- * visuals, an HUD must be assigned to a Viewport or LevelState through its
+ * <p>An HUD (heads-up display) is a SpaceThinker that renders visuals in front
+ * of those of the Viewport or SpaceState to which it is assigned. To render
+ * visuals, an HUD must be assigned to a Viewport or SpaceState through its
  * setHUD() method. HUDs are intended to be used to display information about a
- * LevelState's space, rather than physical objects in it.</p>
+ * SpaceState's space, rather than physical objects in it.</p>
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the LevelStates that this HUD can
+ * @param <T> The type of CellGame that uses the SpaceStates that this HUD can
  * be assigned to
  */
-public abstract class HUD<T extends CellGame> extends LevelThinker<T> {
+public abstract class HUD<T extends CellGame> extends SpaceThinker<T> {
     
     /**
      * Actions for this HUD to take to render its visuals.
-     * @param game This HUD's LevelState's CellGame
-     * @param state This HUD's LevelState
+     * @param game This HUD's SpaceState's CellGame
+     * @param state This HUD's SpaceState
      * @param g The Graphics context to which this HUD is rendering its visuals
      * this frame
      * @param x1 The x-coordinate in pixels of this HUD's rendering region's
@@ -30,7 +30,7 @@ public abstract class HUD<T extends CellGame> extends LevelThinker<T> {
      * @param y2 The y-coordinate in pixels of this HUD's rendering region's
      * bottom edge on the Graphics context
      */
-    public abstract void renderActions(T game, LevelState<T> state,
+    public abstract void renderActions(T game, SpaceState<T> state,
             Graphics g, int x1, int y1, int x2, int y2);
     
 }

@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 /**
  * <p>A CollisionResponse is a possible response that a ThinkerObject can have

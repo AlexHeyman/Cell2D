@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 import java.util.EnumSet;
@@ -13,23 +13,23 @@ import java.util.concurrent.atomic.AtomicLong;
  * but may not always be. Hitboxes can be rotated around their positions and
  * flipped across horizontal and vertical axes through their positions. Rotating
  * a Hitbox will also rotate the axes along which it is flipped. As with
- * LevelVectors, Hitbox angles are measured in degrees going counterclockwise
+ * SpaceVectors, Hitbox angles are measured in degrees going counterclockwise
  * from directly right and are normalized to be between 0 and 360.</p>
  * 
  * <p>If a Hitbox is a component of a CompositeHitbox, its position, flipped
  * status, and angle of rotation are all relative to those of the
- * CompositeHitbox. The same is true of a Hitbox being used by a LevelObject,
- * but not as its locator Hitbox, in relation to that LevelObject's locator
+ * CompositeHitbox. The same is true of a Hitbox being used by a SpaceObject,
+ * but not as its locator Hitbox, in relation to that SpaceObject's locator
  * Hitbox. To avoid confusion, all spatial information about a Hitbox is
  * specified as relative or absolute. For Hitboxes which are not located
  * relative to other Hitboxes in this way, the two types of information are
  * identical.</p>
  * 
  * <p>A Hitbox stores information on whether its surfaces in each Direction are
- * solid, but this only affects its behavior when being used as a LevelObject's
+ * solid, but this only affects its behavior when being used as a SpaceObject's
  * solid Hitbox.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the LevelStates that can use
+ * @param <T> The subclass of CellGame that uses the SpaceStates that can use
  * this Hitbox
  */
 public abstract class Hitbox<T extends CellGame> {
@@ -42,15 +42,15 @@ public abstract class Hitbox<T extends CellGame> {
     private final Set<Hitbox<T>> children = new HashSet<>();
     CompositeHitbox<T> componentOf = null;
     EnumSet<Direction> solidSurfaces = EnumSet.noneOf(Direction.class);
-    private LevelObject<T> object = null;
+    private SpaceObject<T> object = null;
     final boolean[] roles = new boolean[HITBOXES_PER_OBJECT];
     private int numRoles = 0;
-    LevelState<T> state = null;
+    SpaceState<T> state = null;
     int[] cellRange = null;
     boolean scanned = false;
     int drawPriority = 0;
     int numCellRoles = 0;
-    private final LevelVector relPosition, absPosition;
+    private final SpaceVector relPosition, absPosition;
     private boolean relXFlip = false;
     private boolean absXFlip = false;
     private boolean relYFlip = false;
@@ -66,10 +66,10 @@ public abstract class Hitbox<T extends CellGame> {
      * Creates a new Hitbox with the specified relative position.
      * @param relPosition This Hitbox's relative position
      */
-    public Hitbox(LevelVector relPosition) {
+    public Hitbox(SpaceVector relPosition) {
         id = getNextID();
-        this.relPosition = new LevelVector(relPosition);
-        absPosition = new LevelVector(relPosition);
+        this.relPosition = new SpaceVector(relPosition);
+        absPosition = new SpaceVector(relPosition);
     }
     
     /**
@@ -79,8 +79,8 @@ public abstract class Hitbox<T extends CellGame> {
      */
     public Hitbox(double relX, double relY) {
         id = getNextID();
-        this.relPosition = new LevelVector(relX, relY);
-        absPosition = new LevelVector(relPosition);
+        this.relPosition = new SpaceVector(relX, relY);
+        absPosition = new SpaceVector(relPosition);
     }
     
     /**
@@ -215,22 +215,22 @@ public abstract class Hitbox<T extends CellGame> {
     }
     
     /**
-     * Returns the LevelObject that is currently using this Hitbox, directly or
+     * Returns the SpaceObject that is currently using this Hitbox, directly or
      * indirectly as part of a CompositeHitbox, or null if it is not being used
-     * by a LevelObject.
-     * @return This Hitbox's LevelObject
+     * by a SpaceObject.
+     * @return This Hitbox's SpaceObject
      */
-    public final LevelObject<T> getObject() {
+    public final SpaceObject<T> getObject() {
         return object;
     }
     
-    final void setObject(LevelObject<T> object) {
+    final void setObject(SpaceObject<T> object) {
         if (object != this.object) {
             recursivelySetObject(object);
         }
     }
     
-    private void recursivelySetObject(LevelObject<T> object) {
+    private void recursivelySetObject(SpaceObject<T> object) {
         this.object = object;
         state = (object == null ? null : object.state);
         if (!children.isEmpty()) {
@@ -370,16 +370,16 @@ public abstract class Hitbox<T extends CellGame> {
     }
     
     /**
-     * Returns the LevelState of the LevelObject that is currently using this
-     * Hitbox, or null if either the LevelObject is not assigned to a LevelState
-     * or this Hitbox is not being used by a LevelObject.
-     * @return This Hitbox's LevelObject's LevelState
+     * Returns the SpaceState of the SpaceObject that is currently using this
+     * Hitbox, or null if either the SpaceObject is not assigned to a SpaceState
+     * or this Hitbox is not being used by a SpaceObject.
+     * @return This Hitbox's SpaceObject's SpaceState
      */
-    public final LevelState<T> getGameState() {
+    public final SpaceState<T> getGameState() {
         return state;
     }
     
-    final void setGameState(LevelState state) {
+    final void setGameState(SpaceState<T> state) {
         this.state = state;
         if (!children.isEmpty()) {
             for (Hitbox<T> child : children) {
@@ -392,8 +392,8 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns this Hitbox's relative position.
      * @return This Hitbox's relative position
      */
-    public final LevelVector getRelPosition() {
-        return new LevelVector(relPosition);
+    public final SpaceVector getRelPosition() {
+        return new SpaceVector(relPosition);
     }
     
     /**
@@ -416,7 +416,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Sets this Hitbox's relative position to the specified value.
      * @param relPosition The new relative position
      */
-    public final void setRelPosition(LevelVector relPosition) {
+    public final void setRelPosition(SpaceVector relPosition) {
         this.relPosition.setCoordinates(relPosition);
         recursivelyUpdateAbsPosition();
     }
@@ -455,7 +455,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Changes this Hitbox's relative position by the specified amount.
      * @param change The amount to change the relative position by
      */
-    public final void changeRelPosition(LevelVector change) {
+    public final void changeRelPosition(SpaceVector change) {
         relPosition.add(change);
         recursivelyUpdateAbsPosition();
     }
@@ -499,8 +499,8 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns this Hitbox's absolute position.
      * @return This Hitbox's absolute position
      */
-    public final LevelVector getAbsPosition() {
-        return new LevelVector(absPosition);
+    public final SpaceVector getAbsPosition() {
+        return new SpaceVector(absPosition);
     }
     
     /**
@@ -523,7 +523,7 @@ public abstract class Hitbox<T extends CellGame> {
         if (parent == null) {
             absPosition.setCoordinates(relPosition);
         } else {
-            absPosition.setCoordinates(parent.absPosition).add(new LevelVector(relPosition).relativeTo(parent));
+            absPosition.setCoordinates(parent.absPosition).add(new SpaceVector(relPosition).relativeTo(parent));
         }
         updateBoundaries();
     }
@@ -848,7 +848,7 @@ public abstract class Hitbox<T extends CellGame> {
      * specified Hitbox's position
      */
     public final double distanceTo(Hitbox hitbox) {
-        return LevelVector.distanceBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
+        return SpaceVector.distanceBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
     /**
@@ -859,12 +859,12 @@ public abstract class Hitbox<T extends CellGame> {
      * Hitbox's position
      */
     public final double angleTo(Hitbox hitbox) {
-        return LevelVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
+        return SpaceVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
-    private static boolean circleEdgeIntersectsSeg(LevelVector center, double radius, LevelVector start, LevelVector diff) {
+    private static boolean circleEdgeIntersectsSeg(SpaceVector center, double radius, SpaceVector start, SpaceVector diff) {
         //Credit to bobobobo of StackOverflow for the algorithm.
-        LevelVector f = LevelVector.sub(start, center);
+        SpaceVector f = SpaceVector.sub(start, center);
         double a = diff.dot(diff);
         double b = 2*f.dot(diff);
         double c = f.dot(f) - radius*radius;
@@ -878,27 +878,27 @@ public abstract class Hitbox<T extends CellGame> {
         return (t1 > 0 && t1 < 1) || (t2 > 0 && t2 < 1);
     }
     
-    private static boolean circleIntersectsLineSegment(LevelVector center, double radius, LevelVector start, LevelVector diff) {
+    private static boolean circleIntersectsLineSegment(SpaceVector center, double radius, SpaceVector start, SpaceVector diff) {
         return center.distanceTo(start) < radius
-                || center.distanceTo(LevelVector.add(start, diff)) < radius
+                || center.distanceTo(SpaceVector.add(start, diff)) < radius
                 || circleEdgeIntersectsSeg(center, radius, start, diff);
     }
     
-    private static boolean circleIntersectsPolygon(LevelVector center, double radius, PolygonHitbox polygon) {
+    private static boolean circleIntersectsPolygon(SpaceVector center, double radius, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
             return center.distanceTo(polygon.getAbsPosition()) < radius;
         } else if (numVertices == 1) {
             return center.distanceTo(polygon.getAbsVertex(0)) < radius;
         }
-        LevelVector firstVertex = polygon.getAbsVertex(0);
+        SpaceVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
             return circleIntersectsLineSegment(center, radius, polygon.getAbsVertex(0), polygon.getAbsVertex(1).sub(firstVertex));
         }
         if (center.distanceTo(firstVertex) < radius) {
             return true;
         }
-        LevelVector[] vertices = new LevelVector[numVertices];
+        SpaceVector[] vertices = new SpaceVector[numVertices];
         vertices[0] = firstVertex;
         for (int i = 1; i < numVertices; i++) {
             vertices[i] = polygon.getAbsVertex(i);
@@ -906,14 +906,14 @@ public abstract class Hitbox<T extends CellGame> {
                 return true;
             }
         }
-        LevelVector[] diffs = new LevelVector[numVertices];
+        SpaceVector[] diffs = new SpaceVector[numVertices];
         for (int i = 0; i < numVertices - 1; i++) {
-            diffs[i] = LevelVector.sub(vertices[i + 1], vertices[i]);
+            diffs[i] = SpaceVector.sub(vertices[i + 1], vertices[i]);
             if (circleEdgeIntersectsSeg(center, radius, vertices[i], diffs[i])) {
                 return true;
             }
         }
-        diffs[numVertices - 1] = LevelVector.sub(firstVertex, vertices[numVertices - 1]);
+        diffs[numVertices - 1] = SpaceVector.sub(firstVertex, vertices[numVertices - 1]);
         if (circleEdgeIntersectsSeg(center, radius, vertices[numVertices - 1], diffs[numVertices - 1])) {
             return true;
         }
@@ -939,68 +939,68 @@ public abstract class Hitbox<T extends CellGame> {
                 || circleIntersectsOrthogonalLine(cy, cx, radius, y1, y2, x2);
     }
     /*
-    private static boolean circleIntersectsSlope(LevelVector center, double radius, SlopeHitbox slope) {
+    private static boolean circleIntersectsSlope(SpaceVector center, double radius, SlopeHitbox slope) {
         if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return circleIntersectsLineSegment(center, radius, slope.getAbsPosition(), slope.getAbsDifference());
         } else if (!slope.isSloping()) {
             return circleIntersectsRectangle(center.getX(), center.getY(), radius, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
-        LevelVector vertex1 = slope.getAbsPosition();
+        SpaceVector vertex1 = slope.getAbsPosition();
         if (center.distanceTo(vertex1) < radius) {
             return true;
         }
-        LevelVector vertex2 = slope.getPosition2();
+        SpaceVector vertex2 = slope.getPosition2();
         if (center.distanceTo(vertex2) < radius) {
             return true;
         }
-        LevelVector diff2 = new LevelVector(-slope.getAbsDX(), 0);
-        LevelVector vertex3 = LevelVector.add(vertex2, diff2);
+        SpaceVector diff2 = new SpaceVector(-slope.getAbsDX(), 0);
+        SpaceVector vertex3 = SpaceVector.add(vertex2, diff2);
         if (center.distanceTo(vertex3) < radius
                 || circleEdgeIntersectsSeg(center, radius, vertex1, slope.getAbsDifference())
                 || circleEdgeIntersectsSeg(center, radius, vertex2, diff2)
-                || circleEdgeIntersectsSeg(center, radius, vertex3, new LevelVector(0, -slope.getAbsDY()))) {
+                || circleEdgeIntersectsSeg(center, radius, vertex3, new SpaceVector(0, -slope.getAbsDY()))) {
             return true;
         }
         return pointIntersectsRightSlope(center, slope);
     }
     */
-    private static boolean lineSegmentIntersectsPoint(LevelVector start, LevelVector diff, LevelVector point) {
-        LevelVector relPoint = LevelVector.sub(point, start);
+    private static boolean lineSegmentIntersectsPoint(SpaceVector start, SpaceVector diff, SpaceVector point) {
+        SpaceVector relPoint = SpaceVector.sub(point, start);
         if (diff.getX() == 0) {
             return relPoint.getX() == 0 && Math.signum(relPoint.getY()) == Math.signum(diff.getY()) && Math.abs(relPoint.getY()) < Math.abs(diff.getY());
         }
         return relPoint.cross(diff) == 0 && Math.signum(relPoint.getX()) == Math.signum(diff.getX()) && Math.abs(relPoint.getX()) < Math.abs(diff.getX());
     }
     
-    private static boolean lineSegmentIntersectsPolygon(LevelVector start, LevelVector diff, PolygonHitbox polygon) {
+    private static boolean lineSegmentIntersectsPolygon(SpaceVector start, SpaceVector diff, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
             return lineSegmentIntersectsPoint(start, diff, polygon.getAbsPosition());
         } else if (numVertices == 1) {
             return lineSegmentIntersectsPoint(start, diff, polygon.getAbsVertex(0));
         }
-        LevelVector firstVertex = polygon.getAbsVertex(0);
+        SpaceVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
-            return LevelVector.lineSegmentsIntersect(start, diff, firstVertex, polygon.getAbsVertex(1).sub(firstVertex));
+            return SpaceVector.lineSegmentsIntersect(start, diff, firstVertex, polygon.getAbsVertex(1).sub(firstVertex));
         }
-        LevelVector[] vertices = new LevelVector[numVertices];
+        SpaceVector[] vertices = new SpaceVector[numVertices];
         vertices[0] = firstVertex;
-        LevelVector[] diffs = new LevelVector[numVertices];
+        SpaceVector[] diffs = new SpaceVector[numVertices];
         for (int i = 0; i < numVertices - 1; i++) {
             vertices[i + 1] = polygon.getAbsVertex(i + 1);
-            diffs[i] = LevelVector.sub(vertices[i + 1], vertices[i]);
-            if (LevelVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
+            diffs[i] = SpaceVector.sub(vertices[i + 1], vertices[i]);
+            if (SpaceVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
                 return true;
             }
         }
-        diffs[numVertices - 1] = LevelVector.sub(firstVertex, vertices[numVertices - 1]);
-        if (LevelVector.lineSegmentsIntersect(start, diff, vertices[numVertices - 1], diffs[numVertices - 1])) {
+        diffs[numVertices - 1] = SpaceVector.sub(firstVertex, vertices[numVertices - 1]);
+        if (SpaceVector.lineSegmentsIntersect(start, diff, vertices[numVertices - 1], diffs[numVertices - 1])) {
             return true;
         }
         return pointIntersectsPolygon(start, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     
-    private static boolean lineSegmentIntersectsRectangle(LevelVector start, LevelVector diff, double x1, double y1, double x2, double y2) {
+    private static boolean lineSegmentIntersectsRectangle(SpaceVector start, SpaceVector diff, double x1, double y1, double x2, double y2) {
         if (start.getX() > x1 && start.getX() < x2 && start.getY() > y1 && start.getY() < y2) {
             return true;
         }
@@ -1009,30 +1009,30 @@ public abstract class Hitbox<T extends CellGame> {
         if (lineX2 > x1 && lineX2 < x2 && lineY2 > y1 && lineY2 < y2) {
             return true;
         }
-        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
-        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
-        LevelVector topLeft = new LevelVector(x1, y1);
-        return LevelVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
-                || LevelVector.lineSegmentsIntersect(start, diff, new LevelVector(x1, y2), horizontalDiff)
-                || LevelVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
-                || LevelVector.lineSegmentsIntersect(start, diff, new LevelVector(x2, y1), verticalDiff);
+        SpaceVector horizontalDiff = new SpaceVector(x2 - x1, 0);
+        SpaceVector verticalDiff = new SpaceVector(0, y2 - y1);
+        SpaceVector topLeft = new SpaceVector(x1, y1);
+        return SpaceVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
+                || SpaceVector.lineSegmentsIntersect(start, diff, new SpaceVector(x1, y2), horizontalDiff)
+                || SpaceVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
+                || SpaceVector.lineSegmentsIntersect(start, diff, new SpaceVector(x2, y1), verticalDiff);
     }
     /*
-    private static boolean lineSegmentIntersectsSlope(LevelVector start, LevelVector diff, SlopeHitbox slope) {
+    private static boolean lineSegmentIntersectsSlope(SpaceVector start, SpaceVector diff, SlopeHitbox slope) {
         if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
-            return LevelVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference());
+            return SpaceVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference());
         } else if (!slope.isSloping()) {
             return lineSegmentIntersectsRectangle(start, diff, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
-        if (LevelVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference())) {
+        if (SpaceVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference())) {
             return true;
         }
-        LevelVector vertex2 = slope.getPosition2();
-        LevelVector diff2 = new LevelVector(-slope.getAbsDX(), 0);
-        if (LevelVector.lineSegmentsIntersect(start, diff, vertex2, diff2)) {
+        SpaceVector vertex2 = slope.getPosition2();
+        SpaceVector diff2 = new SpaceVector(-slope.getAbsDX(), 0);
+        if (SpaceVector.lineSegmentsIntersect(start, diff, vertex2, diff2)) {
             return true;
         }
-        if (LevelVector.lineSegmentsIntersect(start, diff, LevelVector.add(vertex2, diff2), new LevelVector(0, -slope.getAbsDY()))) {
+        if (SpaceVector.lineSegmentsIntersect(start, diff, SpaceVector.add(vertex2, diff2), new SpaceVector(0, -slope.getAbsDY()))) {
             return true;
         }
         return pointIntersectsRightSlope(start, slope);
@@ -1040,55 +1040,55 @@ public abstract class Hitbox<T extends CellGame> {
     */
     //Credit to Mecki of StackOverflow for the point-polygon intersection algorithm.
     
-    private static boolean pointIntersectsPolygon(LevelVector point, double startX, LevelVector[] vertices, LevelVector[] diffs) {
-        LevelVector start = new LevelVector(startX, point.getY());
-        LevelVector diff = new LevelVector(point.getX() - startX, 0);
+    private static boolean pointIntersectsPolygon(SpaceVector point, double startX, SpaceVector[] vertices, SpaceVector[] diffs) {
+        SpaceVector start = new SpaceVector(startX, point.getY());
+        SpaceVector diff = new SpaceVector(point.getX() - startX, 0);
         boolean intersects = false;
         for (int i = 0; i < vertices.length; i++) {
-            if (LevelVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
+            if (SpaceVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
                 intersects = !intersects;
             }
         }
         return intersects;
     }
     
-    private static boolean pointIntersectsPolygon(LevelVector point, PolygonHitbox polygon) {
+    private static boolean pointIntersectsPolygon(SpaceVector point, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
-            LevelVector position = polygon.getAbsPosition();
+            SpaceVector position = polygon.getAbsPosition();
             return point.getX() == position.getX() && point.getY() == position.getY();
         } else if (numVertices == 1) {
-            LevelVector position = polygon.getAbsVertex(0);
+            SpaceVector position = polygon.getAbsVertex(0);
             return point.getX() == position.getX() && point.getY() == position.getY();
         }
-        LevelVector firstVertex = polygon.getAbsVertex(0);
+        SpaceVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
             return lineSegmentIntersectsPoint(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), point);
         }
         double startX = polygon.getLeftEdge() - 1;
-        LevelVector start = new LevelVector(startX, point.getY());
-        LevelVector diff = new LevelVector(point.getX() - startX, 0);
-        LevelVector lastVertex = firstVertex;
+        SpaceVector start = new SpaceVector(startX, point.getY());
+        SpaceVector diff = new SpaceVector(point.getX() - startX, 0);
+        SpaceVector lastVertex = firstVertex;
         boolean intersects = false;
         for (int i = 1; i < numVertices; i++) {
-            LevelVector vertex = polygon.getAbsVertex(i);
-            if (LevelVector.lineSegmentsIntersect(start, diff, lastVertex, LevelVector.sub(vertex, lastVertex))) {
+            SpaceVector vertex = polygon.getAbsVertex(i);
+            if (SpaceVector.lineSegmentsIntersect(start, diff, lastVertex, SpaceVector.sub(vertex, lastVertex))) {
                 intersects = !intersects;
             }
             lastVertex = vertex;
         }
-        if (LevelVector.lineSegmentsIntersect(start, diff, lastVertex, LevelVector.sub(firstVertex, lastVertex))) {
+        if (SpaceVector.lineSegmentsIntersect(start, diff, lastVertex, SpaceVector.sub(firstVertex, lastVertex))) {
             intersects = !intersects;
         }
         return intersects;
     }
     
-    private static boolean pointIntersectsRectangle(LevelVector point, double x1, double y1, double x2, double y2) {
+    private static boolean pointIntersectsRectangle(SpaceVector point, double x1, double y1, double x2, double y2) {
         return point.getX() > x1 && point.getX() < x2
                 && point.getY() > y1 && point.getY() < y2;
     }
     /*
-    private static boolean pointIntersectsRightSlope(LevelVector point, SlopeHitbox slope) {
+    private static boolean pointIntersectsRightSlope(SpaceVector point, SlopeHitbox slope) {
         if (point.getX() > slope.getLeftEdge() && point.getX() < slope.getRightEdge()) {
             if (slope.isPresentAbove()) {
                 return point.getY() > slope.getTopEdge() && point.getY() < slope.getSlopeY(point.getX());
@@ -1098,7 +1098,7 @@ public abstract class Hitbox<T extends CellGame> {
         return false;
     }
     
-    private static boolean pointIntersectsSlope(LevelVector point, SlopeHitbox slope) {
+    private static boolean pointIntersectsSlope(SpaceVector point, SlopeHitbox slope) {
         if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return lineSegmentIntersectsPoint(slope.getAbsPosition(), slope.getAbsDifference(), point);
         } else if (!slope.isSloping()) {
@@ -1119,47 +1119,47 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (numVertices2 == 1) {
             return pointIntersectsPolygon(polygon2.getAbsVertex(0), polygon1);
         }
-        LevelVector firstVertex1 = polygon1.getAbsVertex(0);
+        SpaceVector firstVertex1 = polygon1.getAbsVertex(0);
         if (numVertices1 == 2) {
             return lineSegmentIntersectsPolygon(firstVertex1, polygon1.getAbsVertex(1).sub(firstVertex1), polygon2);
         }
-        LevelVector firstVertex2 = polygon2.getAbsVertex(0);
+        SpaceVector firstVertex2 = polygon2.getAbsVertex(0);
         if (numVertices2 == 2) {
             return lineSegmentIntersectsPolygon(firstVertex2, polygon2.getAbsVertex(1).sub(firstVertex2), polygon1);
         }
-        LevelVector secondVertex2 = polygon2.getAbsVertex(1);
-        LevelVector firstDiff2 = LevelVector.sub(secondVertex2, firstVertex2);
-        LevelVector[] vertices1 = new LevelVector[numVertices1];
+        SpaceVector secondVertex2 = polygon2.getAbsVertex(1);
+        SpaceVector firstDiff2 = SpaceVector.sub(secondVertex2, firstVertex2);
+        SpaceVector[] vertices1 = new SpaceVector[numVertices1];
         vertices1[0] = firstVertex1;
-        LevelVector[] diffs1 = new LevelVector[numVertices1];
+        SpaceVector[] diffs1 = new SpaceVector[numVertices1];
         for (int i = 0; i < numVertices1 - 1; i++) {
             vertices1[i + 1] = polygon1.getAbsVertex(i + 1);
-            diffs1[i] = LevelVector.sub(vertices1[i + 1], vertices1[i]);
-            if (LevelVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[i], diffs1[i])) {
+            diffs1[i] = SpaceVector.sub(vertices1[i + 1], vertices1[i]);
+            if (SpaceVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[i], diffs1[i])) {
                 return true;
             }
         }
-        diffs1[numVertices1 - 1] = LevelVector.sub(firstVertex1, vertices1[numVertices1 - 1]);
-        if (LevelVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[numVertices1 - 1], diffs1[numVertices1 - 1])) {
+        diffs1[numVertices1 - 1] = SpaceVector.sub(firstVertex1, vertices1[numVertices1 - 1]);
+        if (SpaceVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[numVertices1 - 1], diffs1[numVertices1 - 1])) {
             return true;
         }
-        LevelVector[] vertices2 = new LevelVector[numVertices2];
+        SpaceVector[] vertices2 = new SpaceVector[numVertices2];
         vertices2[0] = firstVertex2;
         vertices2[1] = secondVertex2;
-        LevelVector[] diffs2 = new LevelVector[numVertices2];
+        SpaceVector[] diffs2 = new SpaceVector[numVertices2];
         diffs2[0] = firstDiff2;
         for (int i = 1; i < numVertices2 - 1; i++) {
             vertices2[i + 1] = polygon2.getAbsVertex(i);
-            diffs2[i] = LevelVector.sub(vertices2[i + 1], vertices2[i]);
+            diffs2[i] = SpaceVector.sub(vertices2[i + 1], vertices2[i]);
             for (int j = 0; j < numVertices1; j++) {
-                if (LevelVector.lineSegmentsIntersect(vertices2[i], diffs2[i], vertices1[j], diffs1[j])) {
+                if (SpaceVector.lineSegmentsIntersect(vertices2[i], diffs2[i], vertices1[j], diffs1[j])) {
                     return true;
                 }
             }
         }
-        diffs2[numVertices2 - 1] = LevelVector.sub(firstVertex2, vertices2[numVertices2 - 1]);
+        diffs2[numVertices2 - 1] = SpaceVector.sub(firstVertex2, vertices2[numVertices2 - 1]);
         for (int j = 0; j < numVertices1; j++) {
-            if (LevelVector.lineSegmentsIntersect(vertices2[numVertices2 - 1], diffs2[numVertices2 - 1], vertices1[j], diffs1[j])) {
+            if (SpaceVector.lineSegmentsIntersect(vertices2[numVertices2 - 1], diffs2[numVertices2 - 1], vertices1[j], diffs1[j])) {
                 return true;
             }
         }
@@ -1175,36 +1175,36 @@ public abstract class Hitbox<T extends CellGame> {
             return pointIntersectsRectangle(polygon.getAbsVertex(0), x1, y1, x2, y2);
         }
         if (numVertices == 2) {
-            LevelVector firstVertex = polygon.getAbsVertex(0);
+            SpaceVector firstVertex = polygon.getAbsVertex(0);
             return lineSegmentIntersectsRectangle(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), x1, y1, x2, y2);
         }
-        LevelVector[] vertices = new LevelVector[numVertices];
+        SpaceVector[] vertices = new SpaceVector[numVertices];
         for (int i = 0; i < numVertices; i++) {
             vertices[i] = polygon.getAbsVertex(i);
             if (pointIntersectsRectangle(vertices[i], x1, y1, x2, y2)) {
                 return true;
             }
         }
-        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
-        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
-        LevelVector topLeft = new LevelVector(x1, y1);
-        LevelVector bottomLeft = new LevelVector(x1, y2);
-        LevelVector topRight = new LevelVector(x2, y1);
+        SpaceVector horizontalDiff = new SpaceVector(x2 - x1, 0);
+        SpaceVector verticalDiff = new SpaceVector(0, y2 - y1);
+        SpaceVector topLeft = new SpaceVector(x1, y1);
+        SpaceVector bottomLeft = new SpaceVector(x1, y2);
+        SpaceVector topRight = new SpaceVector(x2, y1);
         for (int i = 0; i < numVertices - 1; i++) {
-            LevelVector diff = LevelVector.sub(vertices[i + 1], vertices[i]);
-            if (LevelVector.lineSegmentsIntersect(vertices[i], diff, topLeft, horizontalDiff)
-                    || LevelVector.lineSegmentsIntersect(vertices[i], diff, bottomLeft, horizontalDiff)
-                    || LevelVector.lineSegmentsIntersect(vertices[i], diff, topLeft, verticalDiff)
-                    || LevelVector.lineSegmentsIntersect(vertices[i], diff, topRight, verticalDiff)) {
+            SpaceVector diff = SpaceVector.sub(vertices[i + 1], vertices[i]);
+            if (SpaceVector.lineSegmentsIntersect(vertices[i], diff, topLeft, horizontalDiff)
+                    || SpaceVector.lineSegmentsIntersect(vertices[i], diff, bottomLeft, horizontalDiff)
+                    || SpaceVector.lineSegmentsIntersect(vertices[i], diff, topLeft, verticalDiff)
+                    || SpaceVector.lineSegmentsIntersect(vertices[i], diff, topRight, verticalDiff)) {
                 return true;
             }
         }
-        LevelVector start = vertices[numVertices - 1];
-        LevelVector diff = LevelVector.sub(vertices[0], start);
-        return LevelVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
-                || LevelVector.lineSegmentsIntersect(start, diff, bottomLeft, horizontalDiff)
-                || LevelVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
-                || LevelVector.lineSegmentsIntersect(start, diff, topRight, verticalDiff);
+        SpaceVector start = vertices[numVertices - 1];
+        SpaceVector diff = SpaceVector.sub(vertices[0], start);
+        return SpaceVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
+                || SpaceVector.lineSegmentsIntersect(start, diff, bottomLeft, horizontalDiff)
+                || SpaceVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
+                || SpaceVector.lineSegmentsIntersect(start, diff, topRight, verticalDiff);
     }
     /*
     private static boolean polygonIntersectsSlope(PolygonHitbox polygon, SlopeHitbox slope) {
@@ -1219,39 +1219,39 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (numVertices == 1) {
             return pointIntersectsRightSlope(polygon.getAbsVertex(0), slope);
         }
-        LevelVector firstVertex = polygon.getAbsVertex(0);
+        SpaceVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
             return lineSegmentIntersectsSlope(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), slope);
         }
-        LevelVector[] vertices = new LevelVector[numVertices];
+        SpaceVector[] vertices = new SpaceVector[numVertices];
         vertices[0] = firstVertex;
-        LevelVector[] diffs = new LevelVector[numVertices];
-        LevelVector[] slopeVertices = new LevelVector[3];
+        SpaceVector[] diffs = new SpaceVector[numVertices];
+        SpaceVector[] slopeVertices = new SpaceVector[3];
         slopeVertices[0] = slope.getAbsPosition();
-        LevelVector[] slopeDiffs = new LevelVector[3];
+        SpaceVector[] slopeDiffs = new SpaceVector[3];
         slopeDiffs[0] = slope.getAbsDifference();
         for (int i = 0; i < numVertices - 1; i++) {
             vertices[i + 1] = polygon.getAbsVertex(i + 1);
-            diffs[i] = LevelVector.sub(vertices[i + 1], vertices[i]);
-            if (LevelVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[0], slopeDiffs[0])) {
+            diffs[i] = SpaceVector.sub(vertices[i + 1], vertices[i]);
+            if (SpaceVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[0], slopeDiffs[0])) {
                 return true;
             }
         }
-        diffs[numVertices - 1] = LevelVector.sub(firstVertex, vertices[numVertices - 1]);
-        if (LevelVector.lineSegmentsIntersect(vertices[numVertices - 1], diffs[numVertices - 1], slopeVertices[0], slopeDiffs[0])) {
+        diffs[numVertices - 1] = SpaceVector.sub(firstVertex, vertices[numVertices - 1]);
+        if (SpaceVector.lineSegmentsIntersect(vertices[numVertices - 1], diffs[numVertices - 1], slopeVertices[0], slopeDiffs[0])) {
             return true;
         }
         slopeVertices[1] = slope.getPosition2();
-        slopeDiffs[1] = new LevelVector(-slope.getAbsDX(), 0);
+        slopeDiffs[1] = new SpaceVector(-slope.getAbsDX(), 0);
         for (int i = 0; i < numVertices; i++) {
-            if (LevelVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[1], slopeDiffs[1])) {
+            if (SpaceVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[1], slopeDiffs[1])) {
                 return true;
             }
         }
-        slopeVertices[2] = LevelVector.add(slopeVertices[1], slopeDiffs[1]);
-        slopeDiffs[2] = new LevelVector(0, -slope.getAbsDY());
+        slopeVertices[2] = SpaceVector.add(slopeVertices[1], slopeDiffs[1]);
+        slopeDiffs[2] = new SpaceVector(0, -slope.getAbsDY());
         for (int i = 0; i < numVertices; i++) {
-            if (LevelVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[2], slopeDiffs[2])) {
+            if (SpaceVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[2], slopeDiffs[2])) {
                 return true;
             }
         }
@@ -1269,37 +1269,37 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (!slope.isSloping()) {
             return rectanglesIntersect(x1, y1, x2, y2, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
-        LevelVector[] vertices = new LevelVector[3];
+        SpaceVector[] vertices = new SpaceVector[3];
         vertices[0] = slope.getAbsPosition();
         if (pointIntersectsRectangle(vertices[0], x1, y1, x2, y2)) {
             return true;
         }
-        LevelVector[] diffs = new LevelVector[3];
+        SpaceVector[] diffs = new SpaceVector[3];
         diffs[0] = slope.getAbsDifference();
         vertices[1] = slope.getPosition2();
         if (pointIntersectsRectangle(vertices[1], x1, y1, x2, y2)) {
             return true;
         }
-        diffs[1] = new LevelVector(-slope.getAbsDX(), 0);
-        vertices[2] = LevelVector.add(vertices[1], diffs[1]);
+        diffs[1] = new SpaceVector(-slope.getAbsDX(), 0);
+        vertices[2] = SpaceVector.add(vertices[1], diffs[1]);
         if (pointIntersectsRectangle(vertices[2], x1, y1, x2, y2)) {
             return true;
         }
-        diffs[2] = new LevelVector(0, -slope.getAbsDY());
-        LevelVector horizontalDiff = new LevelVector(x2 - x1, 0);
-        LevelVector verticalDiff = new LevelVector(0, y2 - y1);
-        LevelVector topLeft = new LevelVector(x1, y1);
-        LevelVector bottomLeft = new LevelVector(x1, y2);
-        LevelVector topRight = new LevelVector(x2, y1);
+        diffs[2] = new SpaceVector(0, -slope.getAbsDY());
+        SpaceVector horizontalDiff = new SpaceVector(x2 - x1, 0);
+        SpaceVector verticalDiff = new SpaceVector(0, y2 - y1);
+        SpaceVector topLeft = new SpaceVector(x1, y1);
+        SpaceVector bottomLeft = new SpaceVector(x1, y2);
+        SpaceVector topRight = new SpaceVector(x2, y1);
         for (int i = 0; i < 3; i++) {
-            if (LevelVector.lineSegmentsIntersect(topLeft, horizontalDiff, vertices[i], diffs[i])
-                    || LevelVector.lineSegmentsIntersect(bottomLeft, horizontalDiff, vertices[i], diffs[i])
-                    || LevelVector.lineSegmentsIntersect(topLeft, verticalDiff, vertices[i], diffs[i])
-                    || LevelVector.lineSegmentsIntersect(topRight, verticalDiff, vertices[i], diffs[i])) {
+            if (SpaceVector.lineSegmentsIntersect(topLeft, horizontalDiff, vertices[i], diffs[i])
+                    || SpaceVector.lineSegmentsIntersect(bottomLeft, horizontalDiff, vertices[i], diffs[i])
+                    || SpaceVector.lineSegmentsIntersect(topLeft, verticalDiff, vertices[i], diffs[i])
+                    || SpaceVector.lineSegmentsIntersect(topRight, verticalDiff, vertices[i], diffs[i])) {
                 return true;
             }
         }
-        return pointIntersectsPolygon(new LevelVector(x1, y1), slope.getLeftEdge() - 1, vertices, diffs);
+        return pointIntersectsPolygon(new SpaceVector(x1, y1), slope.getLeftEdge() - 1, vertices, diffs);
     }
     
     private static boolean slopesIntersect(SlopeHitbox slope1, SlopeHitbox slope2) {
@@ -1312,29 +1312,29 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (!slope2.isSloping()) {
             return rectangleIntersectsSlope(slope2.getLeftEdge(), slope2.getTopEdge(), slope2.getRightEdge(), slope2.getBottomEdge(), slope1);
         }
-        LevelVector[] vertices1 = {slope1.getAbsPosition(), slope1.getPosition2(), null};
-        LevelVector[] diffs1 = {slope1.getAbsDifference(), new LevelVector(-slope1.getAbsDX(), 0), new LevelVector(0, -slope1.getAbsDY())};
-        vertices1[2] = LevelVector.add(vertices1[1], diffs1[1]);
-        LevelVector[] vertices2 = new LevelVector[3];
+        SpaceVector[] vertices1 = {slope1.getAbsPosition(), slope1.getPosition2(), null};
+        SpaceVector[] diffs1 = {slope1.getAbsDifference(), new SpaceVector(-slope1.getAbsDX(), 0), new SpaceVector(0, -slope1.getAbsDY())};
+        vertices1[2] = SpaceVector.add(vertices1[1], diffs1[1]);
+        SpaceVector[] vertices2 = new SpaceVector[3];
         vertices2[0] = slope2.getAbsPosition();
-        LevelVector[] diffs2 = new LevelVector[3];
+        SpaceVector[] diffs2 = new SpaceVector[3];
         diffs2[0] = slope2.getAbsDifference();
         for (int i = 0; i < 3; i++) {
-            if (LevelVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[0], diffs2[0])) {
+            if (SpaceVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[0], diffs2[0])) {
                 return true;
             }
         }
         vertices2[1] = slope2.getPosition2();
-        diffs2[1] = new LevelVector(-slope2.getAbsDX(), 0);
+        diffs2[1] = new SpaceVector(-slope2.getAbsDX(), 0);
         for (int i = 0; i < 3; i++) {
-            if (LevelVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[1], diffs2[1])) {
+            if (SpaceVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[1], diffs2[1])) {
                 return true;
             }
         }
-        vertices2[2] = LevelVector.add(vertices2[1], diffs2[1]);
-        diffs2[2] = new LevelVector(0, -slope2.getAbsDY());
+        vertices2[2] = SpaceVector.add(vertices2[1], diffs2[1]);
+        diffs2[2] = new SpaceVector(0, -slope2.getAbsDY());
         for (int i = 0; i < 3; i++) {
-            if (LevelVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[2], diffs2[2])) {
+            if (SpaceVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[2], diffs2[2])) {
                 return true;
             }
         }
@@ -1345,7 +1345,7 @@ public abstract class Hitbox<T extends CellGame> {
     /**
      * Returns whether this Hitbox overlaps the specified Hitbox. Two Hitboxes
      * are not considered to overlap if they are both being used by the same
-     * LevelObject.
+     * SpaceObject.
      * @param hitbox The Hitbox to check for an overlap
      * @return Whether this Hitbox overlaps the specified Hitbox
      */
@@ -1356,8 +1356,8 @@ public abstract class Hitbox<T extends CellGame> {
     /**
      * Returns whether the two specified Hitboxes overlap. Two Hitboxes are not
      * considered to overlap if they are both being used by the same
-     * LevelObject.
-     * @param <T> The subclass of CellGame that uses the LevelStates that the
+     * SpaceObject.
+     * @param <T> The subclass of CellGame that uses the SpaceStates that the
      * two Hitboxes can be used by
      * @param hitbox1 The first Hitbox
      * @param hitbox2 The second Hitbox
@@ -1401,7 +1401,7 @@ public abstract class Hitbox<T extends CellGame> {
                 if (hitbox2 instanceof CircleHitbox) {
                     return circleIntersectsLineSegment(hitbox2.absPosition, ((CircleHitbox)hitbox2).getRadius(), hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference());
                 } else if (hitbox2 instanceof LineHitbox) {
-                    return LevelVector.directSegsIntersect(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference());
+                    return SpaceVector.directSegsIntersect(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference());
                 } else if (hitbox2 instanceof PointHitbox) {
                     return lineSegmentIntersectsPoint(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition);
                 } else if (hitbox2 instanceof PolygonHitbox) {

@@ -1,28 +1,34 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ * @author Andrew Heyman
+ * @param <T> The subclass of CellGame that uses the SpaceStates that can use
+ * this PolygonHitbox
+ */
 public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     
     private final List<RelAbsPair> vertices;
     private double left, right, top, bottom;
     
-    public PolygonHitbox(LevelVector relPosition, LevelVector[] relVertices) {
+    public PolygonHitbox(SpaceVector relPosition, SpaceVector[] relVertices) {
         this(relPosition.getX(), relPosition.getY(), relVertices);
     }
     
-    public PolygonHitbox(double relX, double relY, LevelVector[] relVertices) {
+    public PolygonHitbox(double relX, double relY, SpaceVector[] relVertices) {
         super(relX, relY);
         vertices = new ArrayList<>(relVertices.length);
-        for (LevelVector relVertex : relVertices) {
-            vertices.add(new RelAbsPair(new LevelVector(relVertex), null));
+        for (SpaceVector relVertex : relVertices) {
+            vertices.add(new RelAbsPair(new SpaceVector(relVertex), null));
         }
         updateData();
     }
     
-    public PolygonHitbox(LevelVector relPosition) {
+    public PolygonHitbox(SpaceVector relPosition) {
         this(relPosition.getX(), relPosition.getY());
     }
     
@@ -38,18 +44,18 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         updateData();
     }
     
-    public static final PolygonHitbox makeRegularPolygon(double relX, double relY,
+    public static final PolygonHitbox regularPolygon(double relX, double relY,
             int numVertices, double radius, double angle) {
-        if (numVertices < 2) {
-            throw new RuntimeException("Attempted to make a regular polygon with less than 2 vertices");
+        if (numVertices < 3) {
+            throw new RuntimeException("Attempted to make a regular polygon with fewer than 3 vertices");
         }
         if (radius < 0) {
             throw new RuntimeException("Attempted to make a regular polygon with a negative radius");
         }
-        LevelVector[] relVertices = new LevelVector[numVertices];
+        SpaceVector[] relVertices = new SpaceVector[numVertices];
         double angleChange = 360/numVertices;
         for (int i = 0; i < numVertices; i++) {
-            relVertices[i] = new LevelVector(angle).scale(radius);
+            relVertices[i] = new SpaceVector(angle).scale(radius);
             angle += angleChange;
         }
         return new PolygonHitbox(relX, relY, relVertices);
@@ -57,10 +63,10 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     
     private class RelAbsPair {
         
-        private final LevelVector rel;
-        private final LevelVector abs;
+        private final SpaceVector rel;
+        private final SpaceVector abs;
         
-        private RelAbsPair(LevelVector rel, LevelVector abs) {
+        private RelAbsPair(SpaceVector rel, SpaceVector abs) {
             this.rel = rel;
             this.abs = abs;
         }
@@ -71,7 +77,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     public Hitbox<T> getCopy() {
         List<RelAbsPair> newVertices = new ArrayList<>(vertices.size());
         for (RelAbsPair vertex : vertices) {
-            newVertices.add(new RelAbsPair(new LevelVector(vertex.rel), null));
+            newVertices.add(new RelAbsPair(new SpaceVector(vertex.rel), null));
         }
         return new PolygonHitbox<>(0, 0, newVertices);
     }
@@ -83,13 +89,9 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
             top = 0;
             bottom = 0;
         } else {
-            double sumX = 0;
-            double sumY = 0;
             boolean comparing = false;
             for (RelAbsPair vertex : vertices) {
                 vertex.abs.setCoordinates(vertex.rel).relativeTo(this);
-                sumX += vertex.abs.getX();
-                sumY += vertex.abs.getY();
                 if (comparing) {
                     left = Math.min(left, vertex.abs.getX());
                     right = Math.max(right, vertex.abs.getX());
@@ -111,8 +113,8 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         return vertices.size();
     }
     
-    public final LevelVector getRelVertex(int index) {
-        return new LevelVector(vertices.get(index).rel);
+    public final SpaceVector getRelVertex(int index) {
+        return new SpaceVector(vertices.get(index).rel);
     }
     
     public final double getRelVertexX(int index) {
@@ -123,8 +125,8 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         return vertices.get(index).rel.getY();
     }
     
-    public final LevelVector getAbsVertex(int index) {
-        return new LevelVector(vertices.get(index).abs);
+    public final SpaceVector getAbsVertex(int index) {
+        return new SpaceVector(vertices.get(index).abs);
     }
     
     public final double getAbsVertexX(int index) {
@@ -135,23 +137,23 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         return vertices.get(index).abs.getY();
     }
     
-    public final void addVertex(LevelVector relVertex) {
-        vertices.add(new RelAbsPair(new LevelVector(relVertex), null));
+    public final void addVertex(SpaceVector relVertex) {
+        vertices.add(new RelAbsPair(new SpaceVector(relVertex), null));
         updateData();
     }
     
     public final void addVertex(double relX, double relY) {
-        vertices.add(new RelAbsPair(new LevelVector(relX, relY), null));
+        vertices.add(new RelAbsPair(new SpaceVector(relX, relY), null));
         updateData();
     }
     
-    public final void setRelVertex(int index, LevelVector relVertex) {
-        vertices.set(index, new RelAbsPair(new LevelVector(relVertex), null));
+    public final void setRelVertex(int index, SpaceVector relVertex) {
+        vertices.set(index, new RelAbsPair(new SpaceVector(relVertex), null));
         updateData();
     }
     
     public final void setRelVertex(int index, double relX, double relY) {
-        vertices.set(index, new RelAbsPair(new LevelVector(relX, relY), null));
+        vertices.set(index, new RelAbsPair(new SpaceVector(relX, relY), null));
         updateData();
     }
     
@@ -175,7 +177,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         updateData();
     }
     
-    public final PolygonHitbox translate(LevelVector translation) {
+    public final PolygonHitbox translate(SpaceVector translation) {
         for (RelAbsPair vertex : vertices) {
             vertex.rel.add(translation);
         }
@@ -184,7 +186,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     public final PolygonHitbox translate(double x, double y) {
-        return translate(new LevelVector(x, y));
+        return translate(new SpaceVector(x, y));
     }
     
     public final PolygonHitbox flip() {

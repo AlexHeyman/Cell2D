@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 import cell2d.CellGameState;
@@ -26,70 +26,87 @@ import javafx.util.Pair;
 import org.newdawn.slick.Graphics;
 
 /**
- * <p>A LevelState is a CellGameState that handles gameplay in a 2D space,
- * intended for action games in which events happen in real time. Space in a
- * LevelState is divided into rectangular cells of equal and positive widths and
- * heights, both of which are specified externally. A LevelState automatically
- * creates more cells as LevelObjects enter where they would be if they existed.
- * </p>
+ * <p>A SpaceState is a CellGameState that handles gameplay in a continuous
+ * two-dimensional space. Space in a SpaceState is divided into rectangular
+ * cells of equal and positive widths and heights, both of which are specified
+ * externally. A SpaceState automatically creates more cells as SpaceObjects
+ * enter where they would be if they existed.</p>
  * 
- * <p>LevelObjects may be assigned to one LevelState each in much the same way
+ * <p>SpaceObjects may be assigned to one SpaceState each in much the same way
  * that Thinkers are assigned to CellGameStates. Similarly to Thinkers, the
- * actual addition or removal of a LevelObject to or from a LevelState is
- * delayed until any and all current iterations through its LevelThinkers,
- * LevelObjects, or ThinkerObjects, such as the periods during which
- * ThinkerObjects move or LevelThinkers perform their various types of actions,
+ * actual addition or removal of a SpaceObject to or from a SpaceState is
+ * delayed until any and all current iterations through its SpaceThinkers,
+ * SpaceObjects, or ThinkerObjects, such as the periods during which
+ * ThinkerObjects move or SpaceThinkers perform their various types of actions,
  * have been completed. Multiple delayed instructions may be successfully given
- * to LevelStates regarding the same LevelObject without having to wait until
+ * to SpaceStates regarding the same SpaceObject without having to wait until
  * all iterations have finished.</p>
  * 
- * <p>LevelStates use cells to organize LevelObjects by location, improving the
+ * <p>SpaceStates use cells to organize SpaceObjects by location, improving the
  * efficiency of processes like ThinkerObject movement that are concerned only
- * with LevelObjects in a small region of space. For maximum efficiency, cells
- * should be set to be large enough that LevelObjects do not change which cells
- * they are in too frequently, but small enough that not too many LevelObjects
+ * with SpaceObjects in a small region of space. For maximum efficiency, cells
+ * should be set to be large enough that SpaceObjects do not change which cells
+ * they are in too frequently, but small enough that not too many SpaceObjects
  * are in each cell at any one time.</p>
  * 
- * <p>Every frame, between the periods in which its LevelThinkers perform their
- * beforeMovementActions() and afterMovementActions(), a LevelState moves each
+ * <p>Every frame, between the periods in which its SpaceThinkers perform their
+ * beforeMovementActions() and afterMovementActions(), a SpaceState moves each
  * of its ThinkerObjects by the sum of its velocity and step vectors multiplied
  * by its time factor, then resets its step vector to (0, 0). This, along with
  * manual calls to the ThinkerObject's doMovement() method, is when the
- * ThinkerObject interacts with the solid surfaces of LevelObjects in its path
+ * ThinkerObject interacts with the solid surfaces of SpaceObjects in its path
  * if it has collision enabled.</p>
  * 
- * <p>LevelLayers may be assigned to one LevelState each with an integer ID in
- * the context of that LevelState. Only one LevelLayer may be assigned to a
- * given LevelState with a given ID at once. LevelLayers with higher IDs are
- * rendered in front of those with lower ones. LevelLayers with positive IDs
- * are rendered in front of the LevelState's LevelObjects, and LevelLayers with
- * negative IDs are rendered behind its LevelObjects. LevelLayers may not be
+ * <p>SpaceLayers may be assigned to one SpaceState each with an integer ID in
+ * the context of that SpaceState. Only one SpaceLayer may be assigned to a
+ * given SpaceState with a given ID at once. SpaceLayers with higher IDs are
+ * rendered in front of those with lower ones. SpaceLayers with positive IDs
+ * are rendered in front of the SpaceState's SpaceObjects, and SpaceLayers with
+ * negative IDs are rendered behind its SpaceObjects. SpaceLayers may not be
  * added with an ID of 0.</p>
  * 
- * <p>HUDs may be assigned to one LevelState each. Only one HUD may be assigned
- * to a given LevelState at once. A LevelState's HUD uses the entire screen as
+ * <p>HUDs may be assigned to one SpaceState each. Only one HUD may be assigned
+ * to a given SpaceState at once. A SpaceState's HUD uses the entire screen as
  * its rendering region.</p>
  * 
- * <p>Viewports may be assigned to one LevelState each with an integer ID in
- * the context of that LevelState. Only one Viewport may be assigned to a
- * given LevelState with a given ID at once.</p>
+ * <p>Viewports may be assigned to one SpaceState each with an integer ID in
+ * the context of that SpaceState. Only one Viewport may be assigned to a
+ * given SpaceState with a given ID at once.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses this LevelState
+ * @param <T> The subclass of CellGame that uses this SpaceState
  */
-public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T>,LevelThinker<T>,LevelThinkerState<T>> {
+public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T>,SpaceThinker<T>,SpaceThinkerState<T>> {
     
-    private static abstract class LevelComparator<T> implements Comparator<T>, Serializable {}
+    private static abstract class SpaceComparator<T> implements Comparator<T>, Serializable {}
     
-    private Comparator<Hitbox<T>> drawPriorityComparator = new LevelComparator<Hitbox<T>>() {
+    private Comparator<ThinkerObject<T>> movementPriorityComparator = new SpaceComparator<ThinkerObject<T>>() {
         
         @Override
-        public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
-            int drawPriorityDifference = hitbox1.drawPriority - hitbox2.drawPriority;
-            return (drawPriorityDifference == 0 ? Long.signum(hitbox1.id - hitbox2.id) : drawPriorityDifference);
+        public final int compare(ThinkerObject<T> object1, ThinkerObject<T> object2) {
+            int priorityDifference = object2.movementPriority - object1.movementPriority;
+            return (priorityDifference == 0 ? Long.signum(object1.id - object2.id) : priorityDifference);
         }
         
     };
-    private Comparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>> drawPriorityIteratorComparator = new LevelComparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>>() {
+    private Comparator<Hitbox<T>> rightMovementComparator = new SpaceComparator<Hitbox<T>>() {
+        
+        @Override
+        public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
+            double diff = hitbox1.getLeftEdge() - hitbox2.getLeftEdge();
+            return (diff == 0 ? Long.signum(hitbox1.id - hitbox2.id) : (int)Math.signum(diff));
+        }
+        
+    };
+    private Comparator<Hitbox<T>> drawPriorityComparator = new SpaceComparator<Hitbox<T>>() {
+        
+        @Override
+        public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
+            int drawPriorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+            return (drawPriorityDiff == 0 ? Long.signum(hitbox1.id - hitbox2.id) : drawPriorityDiff);
+        }
+        
+    };
+    private Comparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>> drawPriorityIteratorComparator = new SpaceComparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>>() {
         
         @Override
         public final int compare(Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair1, Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair2) {
@@ -97,44 +114,35 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         }
         
     };
-    private Comparator<Hitbox<T>> overModeComparator = new LevelComparator<Hitbox<T>>() {
+    private Comparator<Hitbox<T>> overModeComparator = new SpaceComparator<Hitbox<T>>() {
         
         @Override
         public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
-            int drawPriorityDifference = hitbox1.drawPriority - hitbox2.drawPriority;
-            if (drawPriorityDifference == 0) {
-                int yDiffSignum = (int)Math.signum(hitbox1.getRelY() - hitbox2.getRelY());
-                return (yDiffSignum == 0 ? Long.signum(hitbox1.id - hitbox2.id) : yDiffSignum);
+            int drawPriorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+            if (drawPriorityDiff == 0) {
+                double yDiff = hitbox1.getRelY() - hitbox2.getRelY();
+                return (yDiff == 0 ? Long.signum(hitbox1.id - hitbox2.id) : (int)Math.signum(yDiff));
             }
-            return drawPriorityDifference;
+            return drawPriorityDiff;
         }
         
     };
-    private Comparator<Hitbox<T>> underModeComparator = new LevelComparator<Hitbox<T>>() {
+    private Comparator<Hitbox<T>> underModeComparator = new SpaceComparator<Hitbox<T>>() {
         
         @Override
         public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
-            int drawPriorityDifference = hitbox1.drawPriority - hitbox2.drawPriority;
-            if (drawPriorityDifference == 0) {
-                int yDiffSignum = (int)Math.signum(hitbox2.getRelY() - hitbox1.getRelY());
-                return (yDiffSignum == 0 ? Long.signum(hitbox1.id - hitbox2.id) : yDiffSignum);
+            int drawPriorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+            if (drawPriorityDiff == 0) {
+                double yDiff = hitbox2.getRelY() - hitbox1.getRelY();
+                return (yDiff == 0 ? Long.signum(hitbox1.id - hitbox2.id) : (int)Math.signum(yDiff));
             }
-            return drawPriorityDifference;
-        }
-        
-    };
-    private Comparator<ThinkerObject<T>> movementPriorityComparator = new LevelComparator<ThinkerObject<T>>() {
-        
-        @Override
-        public final int compare(ThinkerObject<T> object1, ThinkerObject<T> object2) {
-            int priorityDifference = object2.movementPriority - object1.movementPriority;
-            return (priorityDifference == 0 ? Long.signum(object2.id - object1.id) : priorityDifference);
+            return drawPriorityDiff;
         }
         
     };
     
     private int frameState = 0;
-    private final Set<LevelObject<T>> levelObjects = new HashSet<>();
+    private final Set<SpaceObject<T>> levelObjects = new HashSet<>();
     private int objectIterators = 0;
     private final Queue<ObjectChangeData<T>> objectChanges = new LinkedList<>();
     private boolean updatingObjectList = false;
@@ -148,26 +156,26 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     private int cellTop = 0;
     private int cellBottom = 0;
     private DrawMode drawMode;
-    private final SortedMap<Integer,LevelLayer<T>> levelLayers = new TreeMap<>();
+    private final SortedMap<Integer,SpaceLayer<T>> levelLayers = new TreeMap<>();
     private HUD<T> hud = null;
     private final Map<Integer,Viewport<T>> viewports = new HashMap<>();
     
     /**
-     * Creates a new LevelState of the specified CellGame with the specified ID.
-     * @param game The CellGame to which this LevelState belongs
-     * @param id This LevelState's ID
-     * @param cellWidth The width of each of this LevelState's cells
-     * @param cellHeight The height of each of this LevelState's cells
-     * @param drawMode This LevelState's DrawMode
+     * Creates a new SpaceState of the specified CellGame with the specified ID.
+     * @param game The CellGame to which this SpaceState belongs
+     * @param id This SpaceState's ID
+     * @param cellWidth The width of each of this SpaceState's cells
+     * @param cellHeight The height of each of this SpaceState's cells
+     * @param drawMode This SpaceState's DrawMode
      */
-    public LevelState(T game, int id, double cellWidth, double cellHeight, DrawMode drawMode) {
+    public SpaceState(T game, int id, double cellWidth, double cellHeight, DrawMode drawMode) {
         super(game, id);
         setCellDimensions(cellWidth, cellHeight);
         setDrawMode(drawMode);
     }
     
     @Override
-    public final LevelState<T> getThis() {
+    public final SpaceState<T> getThis() {
         return this;
     }
     
@@ -348,48 +356,48 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns the width of each of this LevelState's cells.
-     * @return The width of each of this LevelState's cells
+     * Returns the width of each of this SpaceState's cells.
+     * @return The width of each of this SpaceState's cells
      */
     public final double getCellWidth() {
         return cellWidth;
     }
     
     /**
-     * Returns the height of each of this LevelState's cells.
-     * @return The height of each of this LevelState's cells
+     * Returns the height of each of this SpaceState's cells.
+     * @return The height of each of this SpaceState's cells
      */
     public final double getCellHeight() {
         return cellHeight;
     }
     
     /**
-     * Sets the dimensions of each of this LevelState's cells to the specified
-     * values. The more LevelObjects are currently assigned to this LevelState,
-     * the longer this operation takes, as LevelObjects need to be reorganized.
-     * @param cellWidth The new width of each of this LevelState's cells
-     * @param cellHeight The new height of each of this LevelState's cells
+     * Sets the dimensions of each of this SpaceState's cells to the specified
+     * values. The more SpaceObjects are currently assigned to this SpaceState,
+     * the longer this operation takes, as SpaceObjects need to be reorganized.
+     * @param cellWidth The new width of each of this SpaceState's cells
+     * @param cellHeight The new height of each of this SpaceState's cells
      */
     public final void setCellDimensions(double cellWidth, double cellHeight) {
         if (cellWidth <= 0) {
-            throw new RuntimeException("Attempted to give a LevelState a non-positive cell width");
+            throw new RuntimeException("Attempted to give a SpaceState a non-positive cell width");
         }
         if (cellHeight <= 0) {
-            throw new RuntimeException("Attempted to give a LevelState a non-positive cell height");
+            throw new RuntimeException("Attempted to give a SpaceState a non-positive cell height");
         }
         cells.clear();
         this.cellWidth = cellWidth;
         this.cellHeight = cellHeight;
         if (!levelObjects.isEmpty()) {
-            for (LevelObject<T> object : levelObjects) {
+            for (SpaceObject<T> object : levelObjects) {
                 object.addCellData();
             }
         }
     }
     
     /**
-     * Removes any cells that no longer have LevelObjects in them, freeing up
-     * the memory that they occupied. The more cells this LevelState has, the
+     * Removes any cells that no longer have SpaceObjects in them, freeing up
+     * the memory that they occupied. The more cells this SpaceState has, the
      * longer this operation takes.
      */
     public final void clearEmptyCells() {
@@ -425,16 +433,16 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns this LevelState's DrawMode.
-     * @return This LevelState's DrawMode
+     * Returns this SpaceState's DrawMode.
+     * @return This SpaceState's DrawMode
      */
     public final DrawMode getDrawMode() {
         return drawMode;
     }
     
     /**
-     * Sets this LevelState's DrawMode. The more cells this LevelState has, the
-     * longer this operation may take, as cells' records of LevelObjects may
+     * Sets this SpaceState's DrawMode. The more cells this SpaceState has, the
+     * longer this operation may take, as cells' records of SpaceObjects may
      * need to be reorganized.
      * @param drawMode The new DrawMode
      */
@@ -456,7 +464,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
      * @param origin The origin point about which to load the Area
      * @param area The Area to load
      */
-    public final void loadArea(LevelVector origin, Area<T> area) {
+    public final void loadArea(SpaceVector origin, Area<T> area) {
         loadArea(origin.getX(), origin.getY(), area);
     }
     
@@ -469,7 +477,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
      * @param area The Area to load
      */
     public final void loadArea(double originX, double originY, Area<T> area) {
-        for (LevelObject<T> object : area.load(getGame(), this)) {
+        for (SpaceObject<T> object : area.load(getGame(), this)) {
             if (object.state == null && object.newState == null) {
                 object.changePosition(originX, originY);
                 object.newState = this;
@@ -726,7 +734,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     @Override
-    public final void addThinkerActions(T game, LevelThinker<T> thinker) {
+    public final void addThinkerActions(T game, SpaceThinker<T> thinker) {
         if (frameState == 1) {
             thinker.beforeMovement(game, this);
         } else if (frameState == 2) {
@@ -740,20 +748,20 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns the number of LevelObjects that are currently assigned to this
-     * LevelState.
-     * @return The number of LevelObjects that are currently assigned to this
-     * LevelState
+     * Returns the number of SpaceObjects that are currently assigned to this
+     * SpaceState.
+     * @return The number of SpaceObjects that are currently assigned to this
+     * SpaceState
      */
     public final int getNumObjects() {
         return levelObjects.size();
     }
     
-    private class ObjectIterator implements SafeIterator<LevelObject<T>> {
+    private class ObjectIterator implements SafeIterator<SpaceObject<T>> {
         
         private boolean stopped = false;
-        private final Iterator<LevelObject<T>> iterator = levelObjects.iterator();
-        private LevelObject<T> lastObject = null;
+        private final Iterator<SpaceObject<T>> iterator = levelObjects.iterator();
+        private SpaceObject<T> lastObject = null;
         
         private ObjectIterator() {
             objectIterators++;
@@ -772,7 +780,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         }
         
         @Override
-        public final LevelObject<T> next() {
+        public final SpaceObject<T> next() {
             if (stopped) {
                 return null;
             }
@@ -800,9 +808,9 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns whether any Iterators over this LevelState's list of LevelObjects
+     * Returns whether any Iterators over this SpaceState's list of SpaceObjects
      * are currently in progress.
-     * @return Whether any Iterators over this LevelState's list of LevelObjects
+     * @return Whether any Iterators over this SpaceState's list of SpaceObjects
      * are currently in progress
      */
     public final boolean iteratingThroughObjects() {
@@ -810,20 +818,20 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns a new Iterator over this LevelState's list of LevelObjects.
-     * @return A new Iterator over this LevelState's list of LevelObjects
+     * Returns a new Iterator over this SpaceState's list of SpaceObjects.
+     * @return A new Iterator over this SpaceState's list of SpaceObjects
      */
-    public final SafeIterator<LevelObject<T>> objectIterator() {
+    public final SafeIterator<SpaceObject<T>> objectIterator() {
         return new ObjectIterator();
     }
     
     private static class ObjectChangeData<T extends CellGame> {
         
         private boolean used = false;
-        private final LevelObject<T> object;
-        private final LevelState<T> newState;
+        private final SpaceObject<T> object;
+        private final SpaceState<T> newState;
         
-        private ObjectChangeData(LevelObject<T> object, LevelState<T> newState) {
+        private ObjectChangeData(SpaceObject<T> object, SpaceState<T> newState) {
             this.object = object;
             this.newState = newState;
         }
@@ -831,12 +839,12 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Adds the specified LevelObject to this LevelState if it is not already
+     * Adds the specified SpaceObject to this SpaceState if it is not already
      * assigned to a levelState.
-     * @param object The LevelObject to be added
+     * @param object The SpaceObject to be added
      * @return Whether the addition occurred
      */
-    public final boolean addObject(LevelObject<T> object) {
+    public final boolean addObject(SpaceObject<T> object) {
         if (object.newState == null) {
             addObjectChangeData(object, this);
             return true;
@@ -845,12 +853,12 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes the specified LevelObject from this LevelState if it is currently
+     * Removes the specified SpaceObject from this SpaceState if it is currently
      * assigned to it.
-     * @param object The LevelObject to be removed
+     * @param object The SpaceObject to be removed
      * @return Whether the removal occurred
      */
-    public final boolean removeObject(LevelObject<T> object) {
+    public final boolean removeObject(SpaceObject<T> object) {
         if (object.newState == this) {
             addObjectChangeData(object, null);
             return true;
@@ -858,7 +866,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         return false;
     }
     
-    private void addObjectChangeData(LevelObject<T> object, LevelState<T> newState) {
+    private void addObjectChangeData(SpaceObject<T> object, SpaceState<T> newState) {
         object.newState = newState;
         ObjectChangeData<T> data = new ObjectChangeData<>(object, newState);
         if (object.state != null) {
@@ -871,14 +879,14 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         }
     }
     
-    private void addActions(LevelObject<T> object) {
+    private void addActions(SpaceObject<T> object) {
         levelObjects.add(object);
         object.state = this;
         object.addCellData();
         object.addActions();
     }
     
-    private void removeActions(LevelObject<T> object) {
+    private void removeActions(SpaceObject<T> object) {
         object.removeActions();
         levelObjects.remove(object);
         object.state = null;
@@ -905,11 +913,11 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all of the LevelObjects that are currently
+     * Removes from this SpaceState all of the SpaceObjects that are currently
      * assigned to it.
      */
     public final void removeAllObjects() {
-        for (LevelObject<T> object : levelObjects) {
+        for (SpaceObject<T> object : levelObjects) {
             if (object.newState == this) {
                 object.newState = null;
                 objectChanges.add(new ObjectChangeData(object, null));
@@ -920,7 +928,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all of its LevelObjects that exist entirely
+     * Removes from this SpaceState all of its SpaceObjects that exist entirely
      * inside the specified rectangular region.
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
@@ -933,7 +941,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().locatorHitboxes) {
                 if (!locatorHitbox.scanned) {
-                    LevelObject<T> object = locatorHitbox.getObject();
+                    SpaceObject<T> object = locatorHitbox.getObject();
                     if (object.newState == this
                             && locatorHitbox.getLeftEdge() >= x1
                             && locatorHitbox.getRightEdge() <= x2
@@ -953,7 +961,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all of its LevelObjects that exist entirely
+     * Removes from this SpaceState all of its SpaceObjects that exist entirely
      * outside the specified rectangular region.
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
@@ -966,7 +974,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
             if (cell.left < x1 || cell.right > x2 || cell.top < y1 || cell.bottom > y2) {
                 for (Hitbox<T> locatorHitbox : cell.locatorHitboxes) {
                     if (!locatorHitbox.scanned) {
-                        LevelObject<T> object = locatorHitbox.getObject();
+                        SpaceObject<T> object = locatorHitbox.getObject();
                         if (object.newState == this
                                 && (locatorHitbox.getLeftEdge() >= x2
                                 || locatorHitbox.getRightEdge() <= x1
@@ -987,7 +995,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all of its LevelObjects that exist entirely
+     * Removes from this SpaceState all of its SpaceObjects that exist entirely
      * to the left of the specified vertical line.
      * @param x The line's x-coordinate
      */
@@ -997,7 +1005,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().locatorHitboxes) {
                 if (!locatorHitbox.scanned) {
-                    LevelObject<T> object = locatorHitbox.getObject();
+                    SpaceObject<T> object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getRightEdge() <= x) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -1013,7 +1021,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all of its LevelObjects that exist entirely
+     * Removes from this SpaceState all of its SpaceObjects that exist entirely
      * to the right of the specified vertical line.
      * @param x The line's x-coordinate
      */
@@ -1023,7 +1031,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().locatorHitboxes) {
                 if (!locatorHitbox.scanned) {
-                    LevelObject<T> object = locatorHitbox.getObject();
+                    SpaceObject<T> object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getLeftEdge() >= x) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -1039,7 +1047,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all of its LevelObjects that exist entirely
+     * Removes from this SpaceState all of its SpaceObjects that exist entirely
      * above the specified horizontal line.
      * @param y The line's y-coordinate
      */
@@ -1049,7 +1057,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().locatorHitboxes) {
                 if (!locatorHitbox.scanned) {
-                    LevelObject<T> object = locatorHitbox.getObject();
+                    SpaceObject<T> object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getBottomEdge() <= y) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -1065,7 +1073,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all of its LevelObjects that exist entirely
+     * Removes from this SpaceState all of its SpaceObjects that exist entirely
      * below the specified horizontal line.
      * @param y The line's y-coordinate
      */
@@ -1075,7 +1083,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().locatorHitboxes) {
                 if (!locatorHitbox.scanned) {
-                    LevelObject<T> object = locatorHitbox.getObject();
+                    SpaceObject<T> object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getTopEdge() >= y) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -1092,9 +1100,9 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     
     /**
      * Returns the number of ThinkerObjects that are currently assigned to this
-     * LevelState.
+     * SpaceState.
      * @return The number of ThinkerObjects that are currently assigned to this
-     * LevelState
+     * SpaceState
      */
     public final int getNumThinkerObjects() {
         return thinkerObjects.size();
@@ -1151,9 +1159,9 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns whether any Iterators over this LevelState's list of
+     * Returns whether any Iterators over this SpaceState's list of
      * ThinkerObjects are currently in progress.
-     * @return Whether any Iterators over this LevelState's list of
+     * @return Whether any Iterators over this SpaceState's list of
      * ThinkerObjects are currently in progress
      */
     public final boolean iteratingThroughThinkerObjects() {
@@ -1161,8 +1169,8 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns a new Iterator over this LevelState's list of ThinkerObjects.
-     * @return A new Iterator over this LevelState's list of ThinkerObjects
+     * Returns a new Iterator over this SpaceState's list of ThinkerObjects.
+     * @return A new Iterator over this SpaceState's list of ThinkerObjects
      */
     public final SafeIterator<ThinkerObject<T>> thinkerObjectIterator() {
         return new ThinkerObjectIterator();
@@ -1233,36 +1241,36 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class whose center
-     * is nearest to the specified point, or null if this LevelState has no
-     * LevelObjects of that class.
-     * @param <O> The subclass of LevelObject to search for
+     * Returns this SpaceState's SpaceObject of the specified class whose center
+     * is nearest to the specified point, or null if this SpaceState has no
+     * SpaceObjects of that class.
+     * @param <O> The subclass of SpaceObject to search for
      * @param point The point to check distance to
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The nearest LevelObject of the specified class to the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The nearest SpaceObject of the specified class to the specified
      * point
      */
-    public final <O extends LevelObject<T>> O nearestObject(LevelVector point, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObject(SpaceVector point, Class<O> cls) {
         return nearestObject(point.getX(), point.getY(), cls);
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class whose center
-     * is nearest to the specified point, or null if this LevelState has no
-     * LevelObjects of that class.
-     * @param <O> The subclass of LevelObject to search for
+     * Returns this SpaceState's SpaceObject of the specified class whose center
+     * is nearest to the specified point, or null if this SpaceState has no
+     * SpaceObjects of that class.
+     * @param <O> The subclass of SpaceObject to search for
      * @param pointX The x-coordinate of the point to check the distance to
      * @param pointY The y-coordinate of the point to check the distance to
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The nearest LevelObject of the specified class to the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The nearest SpaceObject of the specified class to the specified
      * point
      */
-    public final <O extends LevelObject<T>> O nearestObject(double pointX, double pointY, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObject(double pointX, double pointY, Class<O> cls) {
         O nearest = null;
         double nearestDistance = -1;
-        for (LevelObject<T> object : (ThinkerObject.class.isAssignableFrom(cls) ? thinkerObjects : levelObjects)) {
+        for (SpaceObject<T> object : (ThinkerObject.class.isAssignableFrom(cls) ? thinkerObjects : levelObjects)) {
             if (cls.isAssignableFrom(object.getClass())) {
-                double distance = LevelVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
+                double distance = SpaceVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
                 if (nearestDistance < 0 || distance < nearestDistance) {
                     nearest = cls.cast(object);
                     nearestDistance = distance;
@@ -1273,35 +1281,35 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns whether this LevelState has any LevelObjects of the specified
+     * Returns whether this SpaceState has any SpaceObjects of the specified
      * class with their centers within the specified rectangular region.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return Whether there are any LevelObjects of the specified class within
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return Whether there are any SpaceObjects of the specified class within
      * the specified rectangular region
      */
-    public final <O extends LevelObject<T>> boolean objectIsWithinRectangle(double x1, double y1, double x2, double y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean objectIsWithinRectangle(double x1, double y1, double x2, double y2, Class<O> cls) {
         return objectWithinRectangle(x1, y1, x2, y2, cls) != null;
     }
     
     /**
-     * Returns one of this LevelState's LevelObjects of the specified class with
+     * Returns one of this SpaceState's SpaceObjects of the specified class with
      * its center within the specified rectangular region, or null if there is
      * none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return A LevelObject of the specified class within the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return A SpaceObject of the specified class within the specified
      * rectangular region
      */
-    public final <O extends LevelObject<T>> O objectWithinRectangle(double x1, double y1, double x2, double y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O objectWithinRectangle(double x1, double y1, double x2, double y2, Class<O> cls) {
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
@@ -1329,18 +1337,18 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns all of this LevelState's LevelObjects of the specified class with
+     * Returns all of this SpaceState's SpaceObjects of the specified class with
      * their centers within the specified rectangular region.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return All of the LevelObjects of the specified class within the
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the SpaceObjects of the specified class within the
      * specified rectangular region
      */
-    public final <O extends LevelObject<T>> List<O> objectsWithinRectangle(double x1, double y1, double x2, double y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> objectsWithinRectangle(double x1, double y1, double x2, double y2, Class<O> cls) {
         List<O> within = new ArrayList<>();
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
@@ -1366,39 +1374,39 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class within the
+     * Returns this SpaceState's SpaceObject of the specified class within the
      * specified rectangular region whose center is nearest to the specified
      * point, or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param point The point to check the distance to
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class within the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestObjectWithinRectangle(LevelVector point, double x1, double y1, double x2, double y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(SpaceVector point, double x1, double y1, double x2, double y2, Class<O> cls) {
         return nearestObjectWithinRectangle(point.getX(), point.getY(), x1, y1, x2, y2, cls);
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class within the
+     * Returns this SpaceState's SpaceObject of the specified class within the
      * specified rectangular region whose center is nearest to the specified
      * point, or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param pointX The x-coordinate of the point to check the distance to
      * @param pointY The y-coordinate of the point to check the distance to
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class within the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestObjectWithinRectangle(double pointX, double pointY, double x1, double y1, double x2, double y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(double pointX, double pointY, double x1, double y1, double x2, double y2, Class<O> cls) {
         O nearest = null;
         double nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
@@ -1406,13 +1414,13 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> centerHitbox : iterator.next().centerHitboxes) {
                 if (!centerHitbox.scanned) {
-                    LevelObject<T> object = centerHitbox.getObject();
+                    SpaceObject<T> object = centerHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && centerHitbox.getAbsX() >= x1
                             && centerHitbox.getAbsY() >= y1
                             && centerHitbox.getAbsX() <= x2
                             && centerHitbox.getAbsY() <= y2) {
-                        double distance = LevelVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
+                        double distance = SpaceVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
                         if (nearestDistance < 0 || distance < nearestDistance) {
                             nearest = cls.cast(object);
                             nearestDistance = distance;
@@ -1449,62 +1457,62 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns whether this LevelState has any LevelObjects of the specified
+     * Returns whether this SpaceState has any SpaceObjects of the specified
      * class with their centers within the specified circular region.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param center The region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return Whether there are any LevelObjects of the specified class within
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return Whether there are any SpaceObjects of the specified class within
      * the specified circular region
      */
-    public final <O extends LevelObject<T>> boolean objectIsWithinCircle(LevelVector center, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(SpaceVector center, double radius, Class<O> cls) {
         return objectWithinCircle(center.getX(), center.getY(), radius, cls) != null;
     }
     
     /**
-     * Returns whether this LevelState has any LevelObjects of the specified
+     * Returns whether this SpaceState has any SpaceObjects of the specified
      * class with their centers within the specified circular region.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param centerX The x-coordinate of the region's center
      * @param centerY The y-coordinate of the region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return Whether there are any LevelObjects of the specified class within
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return Whether there are any SpaceObjects of the specified class within
      * the specified circular region
      */
-    public final <O extends LevelObject<T>> boolean objectIsWithinCircle(double centerX, double centerY, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(double centerX, double centerY, double radius, Class<O> cls) {
         return objectWithinCircle(centerX, centerY, radius, cls) != null;
     }
     
     /**
-     * Returns one of this LevelState's LevelObjects of the specified class with
+     * Returns one of this SpaceState's SpaceObjects of the specified class with
      * its center within the specified circular region, or null if there is
      * none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param center The region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return A LevelObject of the specified class within the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return A SpaceObject of the specified class within the specified
      * circular region
      */
-    public final <O extends LevelObject<T>> O objectWithinCircle(LevelVector center, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O objectWithinCircle(SpaceVector center, double radius, Class<O> cls) {
         return objectWithinCircle(center.getX(), center.getY(), radius, cls);
     }
     
     /**
-     * Returns one of this LevelState's LevelObjects of the specified class with
+     * Returns one of this SpaceState's SpaceObjects of the specified class with
      * its center within the specified circular region, or null if there is
      * none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param centerX The x-coordinate of the region's center
      * @param centerY The y-coordinate of the region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return A LevelObject of the specified class within the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return A SpaceObject of the specified class within the specified
      * circular region
      */
-    public final <O extends LevelObject<T>> O objectWithinCircle(double centerX, double centerY, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O objectWithinCircle(double centerX, double centerY, double radius, Class<O> cls) {
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
         while (iterator.hasNext()) {
@@ -1513,7 +1521,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                 for (Hitbox<T> centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
-                                && LevelVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
+                                && SpaceVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
                             for (Hitbox<T> hitbox : scanned) {
                                 hitbox.scanned = false;
                             }
@@ -1532,31 +1540,31 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns all of this LevelState's LevelObjects of the specified class with
+     * Returns all of this SpaceState's SpaceObjects of the specified class with
      * their centers within the specified circular region.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param center The region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return All of the LevelObjects of the specified class within the
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the SpaceObjects of the specified class within the
      * specified circular region
      */
-    public final <O extends LevelObject<T>> List<O> objectsWithinCircle(LevelVector center, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(SpaceVector center, double radius, Class<O> cls) {
         return objectsWithinCircle(center.getX(), center.getY(), radius, cls);
     }
     
     /**
-     * Returns all of this LevelState's LevelObjects of the specified class with
+     * Returns all of this SpaceState's SpaceObjects of the specified class with
      * their centers within the specified circular region.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param centerX The x-coordinate of the region's center
      * @param centerY The y-coordinate of the region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return All of the LevelObjects of the specified class within the
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the SpaceObjects of the specified class within the
      * specified circular region
      */
-    public final <O extends LevelObject<T>> List<O> objectsWithinCircle(double centerX, double centerY, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(double centerX, double centerY, double radius, Class<O> cls) {
         List<O> within = new ArrayList<>();
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
@@ -1566,7 +1574,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                 for (Hitbox<T> centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
-                                && LevelVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
+                                && SpaceVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
                             within.add(cls.cast(centerHitbox.getObject()));
                         }
                         centerHitbox.scanned = true;
@@ -1582,36 +1590,36 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class within the
+     * Returns this SpaceState's SpaceObject of the specified class within the
      * specified circular region whose center is nearest to the specified point,
      * or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param point The point to check the distance to
      * @param center The region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class within the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestObjectWithinCircle(LevelVector point, LevelVector center, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(SpaceVector point, SpaceVector center, double radius, Class<O> cls) {
         return nearestObjectWithinCircle(point.getX(), point.getY(), center.getX(), center.getY(), radius, cls);
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class within the
+     * Returns this SpaceState's SpaceObject of the specified class within the
      * specified circular region whose center is nearest to the specified point,
      * or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param pointX The x-coordinate of the point to check the distance to
      * @param pointY The y-coordinate of the point to check the distance to
      * @param centerX The x-coordinate of the region's center
      * @param centerY The y-coordinate of the region's center
      * @param radius The region's radius
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class within the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestObjectWithinCircle(double pointX, double pointY, double centerX, double centerY, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(double pointX, double pointY, double centerX, double centerY, double radius, Class<O> cls) {
         O nearest = null;
         double nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
@@ -1621,10 +1629,10 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
             if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
                 for (Hitbox<T> centerHitbox : cell.centerHitboxes) {
                     if (!centerHitbox.scanned) {
-                        LevelObject<T> object = centerHitbox.getObject();
+                        SpaceObject<T> object = centerHitbox.getObject();
                         if (cls.isAssignableFrom(object.getClass())
-                                && LevelVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
-                            double distance = LevelVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
+                                && SpaceVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
+                            double distance = SpaceVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
                             if (nearestDistance < 0 || distance < nearestDistance) {
                                 nearest = cls.cast(object);
                                 nearestDistance = distance;
@@ -1643,28 +1651,28 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns whether this LevelState has any LevelObjects of the specified
+     * Returns whether this SpaceState has any SpaceObjects of the specified
      * class that overlap the specified Hitbox.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return Whether there are any LevelObjects of the specified class that
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return Whether there are any SpaceObjects of the specified class that
      * overlap the specified Hitbox.
      */
-    public final <O extends LevelObject<T>> boolean isOverlappingObject(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean isOverlappingObject(Hitbox<T> hitbox, Class<O> cls) {
         return overlappingObject(hitbox, cls) != null;
     }
     
     /**
-     * Returns one of this LevelState's LevelObjects of the specified class that
+     * Returns one of this SpaceState's SpaceObjects of the specified class that
      * overlaps the specified Hitbox, or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return A LevelObject of the specified class that overlaps the specified
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return A SpaceObject of the specified class that overlaps the specified
      * Hitbox
      */
-    public final <O extends LevelObject<T>> O overlappingObject(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O overlappingObject(Hitbox<T> hitbox, Class<O> cls) {
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
@@ -1689,15 +1697,15 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns all of this LevelState's LevelObjects of the specified class that
+     * Returns all of this SpaceState's SpaceObjects of the specified class that
      * overlap the specified Hitbox.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return All of the LevelObjects of the specified class that overlap the
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the SpaceObjects of the specified class that overlap the
      * specified Hitbox
      */
-    public final <O extends LevelObject<T>> List<O> overlappingObjects(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> overlappingObjects(Hitbox<T> hitbox, Class<O> cls) {
         List<O> overlapping = new ArrayList<>();
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
@@ -1720,33 +1728,33 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class that
+     * Returns this SpaceState's SpaceObject of the specified class that
      * overlaps the specified Hitbox whose center is nearest to the specified
      * point, or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param point The point to check the distance to
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class that overlaps the
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class that overlaps the
      * specified Hitbox that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestOverlappingObject(LevelVector point, Hitbox hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestOverlappingObject(SpaceVector point, Hitbox hitbox, Class<O> cls) {
         return nearestOverlappingObject(point.getX(), point.getY(), hitbox, cls);
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class that
+     * Returns this SpaceState's SpaceObject of the specified class that
      * overlaps the specified Hitbox whose center is nearest to the specified
      * point, or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param pointX The x-coordinate of the point to check the distance to
      * @param pointY The y-coordinate of the point to check the distance to
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class that overlaps the
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class that overlaps the
      * specified Hitbox that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestOverlappingObject(double pointX, double pointY, Hitbox hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestOverlappingObject(double pointX, double pointY, Hitbox hitbox, Class<O> cls) {
         O nearest = null;
         double nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
@@ -1754,10 +1762,10 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> overlapHitbox : iterator.next().overlapHitboxes) {
                 if (!overlapHitbox.scanned) {
-                    LevelObject<T> object = overlapHitbox.getObject();
+                    SpaceObject<T> object = overlapHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && Hitbox.overlap(hitbox, overlapHitbox)) {
-                        double distance = LevelVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
+                        double distance = SpaceVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
                         if (nearestDistance < 0 || distance < nearestDistance) {
                             nearest = cls.cast(object);
                             nearestDistance = distance;
@@ -1775,16 +1783,16 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns all of this LevelState's LevelObjects of the specified class
+     * Returns all of this SpaceState's SpaceObjects of the specified class
      * whose overlap Hitboxes' rectangular bounding boxes touch or intersect the
      * specified Hitbox's rectangular bounding box.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox whose bounding box to check
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return All of the LevelObjects of the specified class whose overlap
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the SpaceObjects of the specified class whose overlap
      * Hitboxes' bounding boxes meet the specified Hitbox's bounding box
      */
-    public final <O extends LevelObject<T>> List<O> boundingBoxesMeet(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> boundingBoxesMeet(Hitbox<T> hitbox, Class<O> cls) {
         List<O> meeting = new ArrayList<>();
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
@@ -1810,29 +1818,29 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns whether this LevelState has any LevelObjects of the specified
+     * Returns whether this SpaceState has any SpaceObjects of the specified
      * class whose solid Hitboxes overlap the specified Hitbox.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return Whether there are any LevelObjects of the specified class whose
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return Whether there are any SpaceObjects of the specified class whose
      * solid Hitboxes overlap the specified Hitbox
      */
-    public final <O extends LevelObject<T>> boolean isIntersectingSolidObject(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean isIntersectingSolidObject(Hitbox<T> hitbox, Class<O> cls) {
         return intersectingSolidObject(hitbox, cls) != null;
     }
     
     /**
-     * Returns one of this LevelState's LevelObjects of the specified class
+     * Returns one of this SpaceState's SpaceObjects of the specified class
      * whose solid Hitbox overlaps the specified Hitbox, or null if there is
      * none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return A LevelObject of the specified class whose solid Hitbox overlaps
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return A SpaceObject of the specified class whose solid Hitbox overlaps
      * the specified Hitbox
      */
-    public final <O extends LevelObject<T>> O intersectingSolidObject(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O intersectingSolidObject(Hitbox<T> hitbox, Class<O> cls) {
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
@@ -1857,15 +1865,15 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns all of this LevelState's LevelObjects of the specified class
+     * Returns all of this SpaceState's SpaceObjects of the specified class
      * whose solid Hitboxes overlap the specified Hitbox.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return All of the LevelObjects of the specified class whose solid
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the SpaceObjects of the specified class whose solid
      * Hitboxes overlap the specified Hitbox
      */
-    public final <O extends LevelObject<T>> List<O> intersectingSolidObjects(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> intersectingSolidObjects(Hitbox<T> hitbox, Class<O> cls) {
         List<O> intersecting = new ArrayList<>();
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
@@ -1888,33 +1896,33 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class whose solid
+     * Returns this SpaceState's SpaceObject of the specified class whose solid
      * Hitbox overlaps the specified Hitbox whose center is nearest to the
      * specified point, or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param point The point to check the distance to
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class whose solid Hitbox
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class whose solid Hitbox
      * overlaps the specified Hitbox that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestIntersectingSolidObject(LevelVector point, Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(SpaceVector point, Hitbox<T> hitbox, Class<O> cls) {
         return nearestIntersectingSolidObject(point.getX(), point.getY(), hitbox, cls);
     }
     
     /**
-     * Returns this LevelState's LevelObject of the specified class whose solid
+     * Returns this SpaceState's SpaceObject of the specified class whose solid
      * Hitbox overlaps the specified Hitbox whose center is nearest to the
      * specified point, or null if there is none.
-     * @param <O> The subclass of LevelObject to search for
+     * @param <O> The subclass of SpaceObject to search for
      * @param pointX The x-coordinate of the point to check the distance to
      * @param pointY The y-coordinate of the point to check the distance to
      * @param hitbox The Hitbox to check for overlapping
-     * @param cls The Class object that represents the LevelObject subclass
-     * @return The LevelObject of the specified class whose solid Hitbox
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return The SpaceObject of the specified class whose solid Hitbox
      * overlaps the specified Hitbox that is nearest to the specified point
      */
-    public final <O extends LevelObject<T>> O nearestIntersectingSolidObject(double pointX, double pointY, Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(double pointX, double pointY, Hitbox<T> hitbox, Class<O> cls) {
         O nearest = null;
         double nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
@@ -1922,10 +1930,10 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
         while (iterator.hasNext()) {
             for (Hitbox<T> solidHitbox : iterator.next().solidHitboxes) {
                 if (!solidHitbox.scanned) {
-                    LevelObject<T> object = solidHitbox.getObject();
+                    SpaceObject<T> object = solidHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && Hitbox.overlap(hitbox, solidHitbox)) {
-                        double distance = LevelVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
+                        double distance = SpaceVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
                         if (nearestDistance < 0 || distance < nearestDistance) {
                             nearest = cls.cast(object);
                             nearestDistance = distance;
@@ -1943,43 +1951,43 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Returns the number of LevelLayers that are currently assigned to this
-     * LevelState.
-     * @return The number of LevelLayers that are currently assigned to this
-     * LevelState
+     * Returns the number of SpaceLayers that are currently assigned to this
+     * SpaceState.
+     * @return The number of SpaceLayers that are currently assigned to this
+     * SpaceState
      */
     public final int getNumLayers() {
         return levelLayers.size();
     }
     
     /**
-     * Returns the LevelLayer that is assigned to this LevelState with the
+     * Returns the SpaceLayer that is assigned to this SpaceState with the
      * specified ID.
-     * @param id The ID of the LevelLayer to be returned
-     * @return The LevelLayer that is assigned to this LevelState with the
+     * @param id The ID of the SpaceLayer to be returned
+     * @return The SpaceLayer that is assigned to this SpaceState with the
      * specified ID
      */
-    public final LevelLayer<T> getLayer(int id) {
+    public final SpaceLayer<T> getLayer(int id) {
         return levelLayers.get(id);
     }
     
     /**
-     * Sets the LevelLayer that is assigned to this LevelState with the
-     * specified ID to the specified LevelLayer, if it is not already assigned
-     * to a LevelState. If there is already a LevelLayer assigned with the
-     * specified ID, it will be removed from this LevelState. If the specified
-     * LevelLayer is null, the LevelLayer with the specified ID will be removed
+     * Sets the SpaceLayer that is assigned to this SpaceState with the
+     * specified ID to the specified SpaceLayer, if it is not already assigned
+     * to a SpaceState. If there is already a SpaceLayer assigned with the
+     * specified ID, it will be removed from this SpaceState. If the specified
+     * SpaceLayer is null, the SpaceLayer with the specified ID will be removed
      * if there is one, but it will not be replaced with anything.
-     * @param id The ID with which to assign the specified LevelLayer
-     * @param layer The LevelLayer to add with the specified ID
+     * @param id The ID with which to assign the specified SpaceLayer
+     * @param layer The SpaceLayer to add with the specified ID
      * @return Whether the addition occurred
      */
-    public final boolean setLayer(int id, LevelLayer<T> layer) {
+    public final boolean setLayer(int id, SpaceLayer<T> layer) {
         if (id == 0) {
-            throw new RuntimeException("Attempted to set a LevelLayer with an ID of 0");
+            throw new RuntimeException("Attempted to set a SpaceLayer with an ID of 0");
         }
         if (layer == null) {
-            LevelLayer<T> oldLayer = levelLayers.get(id);
+            SpaceLayer<T> oldLayer = levelLayers.get(id);
             if (oldLayer != null) {
                 removeThinker(oldLayer);
                 levelLayers.remove(id);
@@ -1988,7 +1996,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
             return false;
         }
         if (addThinker(layer)) {
-            LevelLayer<T> oldLayer = levelLayers.get(id);
+            SpaceLayer<T> oldLayer = levelLayers.get(id);
             if (oldLayer != null) {
                 removeThinker(oldLayer);
             }
@@ -1999,29 +2007,29 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all LevelLayers that are currently assigned
+     * Removes from this SpaceState all SpaceLayers that are currently assigned
      * to it.
      */
     public final void clearLayers() {
-        for (LevelLayer<T> layer : levelLayers.values()) {
+        for (SpaceLayer<T> layer : levelLayers.values()) {
             removeThinker(layer);
         }
         levelLayers.clear();
     }
     
     /**
-     * Returns the HUD that is currently assigned to this LevelState, or null if
+     * Returns the HUD that is currently assigned to this SpaceState, or null if
      * there is none.
-     * @return This LevelState's HUD
+     * @return This SpaceState's HUD
      */
     public final HUD<T> getHUD() {
         return hud;
     }
     
     /**
-     * Sets the HUD that is assigned to this LevelState to the specified HUD, if
-     * it is not already assigned to a LevelState. If there is already an HUD
-     * assigned to this LevelState, it will be removed. If the specified HUD is
+     * Sets the HUD that is assigned to this SpaceState to the specified HUD, if
+     * it is not already assigned to a SpaceState. If there is already an HUD
+     * assigned to this SpaceState, it will be removed. If the specified HUD is
      * null, the current HUD will be removed if there is one, but it will not be
      * replaced with anything.
      * @param hud The HUD to add
@@ -2040,19 +2048,19 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     
     /**
      * Returns the number of Viewports that are currently assigned to this
-     * LevelState.
+     * SpaceState.
      * @return The number of Viewports that are currently assigned to this
-     * LevelState
+     * SpaceState
      */
     public final int getNumViewports() {
         return viewports.size();
     }
     
     /**
-     * Returns the Viewport that is assigned to this LevelState with the
+     * Returns the Viewport that is assigned to this SpaceState with the
      * specified ID.
      * @param id The ID of the Viewport to be returned
-     * @return The Viewport that is assigned to this LevelState with the
+     * @return The Viewport that is assigned to this SpaceState with the
      * specified ID
      */
     public final Viewport<T> getViewport(int id) {
@@ -2060,10 +2068,10 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Sets the Viewport that is assigned to this LevelState with the specified
+     * Sets the Viewport that is assigned to this SpaceState with the specified
      * ID to the specified Viewport, if it is not already assigned to a
-     * LevelState. If there is already a Viewport assigned with the specified
-     * ID, it will be removed from this LevelState. If the specified Viewport is
+     * SpaceState. If there is already a Viewport assigned with the specified
+     * ID, it will be removed from this SpaceState. If the specified Viewport is
      * null, the Viewport with the specified ID will be removed if there is one,
      * but it will not be replaced with anything.
      * @param id The ID with which to assign the specified Viewport
@@ -2092,7 +2100,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     }
     
     /**
-     * Removes from this LevelState all Viewports that are currently assigned to
+     * Removes from this SpaceState all Viewports that are currently assigned to
      * it.
      */
     public final void clearViewports() {
@@ -2104,13 +2112,13 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     
     /**
      * Returns whether any part of the specified rectangular region is visible
-     * through any of this LevelState's Viewports.
+     * through any of this SpaceState's Viewports.
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
      * @return Whether the specified rectangular region is visible through any
-     * of this LevelState's Viewports
+     * of this SpaceState's Viewports
      */
     public final boolean rectangleIsVisible(double x1, double y1, double x2, double y2) {
         x1 = Math.round(x1);
@@ -2159,26 +2167,37 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                 } else if (changeY < 0) {
                     top = changeY;
                 } else {
+                    SortedMap<Hitbox<T>,Direction> solidHitboxes = null;
                     Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge, topEdge, rightEdge + changeX, bottomEdge));
-                    SortedMap<Hitbox,Direction> solidHitboxes = null;
-                    if (pressingAngle == null) {
-                        while (iterator.hasNext()) {
-                            Cell cell = iterator.next();
-                            for (Hitbox hitbox : cell.solidSurfaces.get(Direction.LEFT)) {
-                                double hitboxLeft = hitbox.getLeftEdge();
-                                if (hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
-                                        && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
-                                        && hitbox.getObject() != object) {
-                                    
-                                }
+                    while (iterator.hasNext()) {
+                        Cell cell = iterator.next();
+                        for (Hitbox hitbox : cell.solidHitboxes) {
+                            if (hitbox.surfaceIsSolid(Direction.LEFT)) {
+                                
                             }
                         }
-                    } else if (pressingAngle == 0) {
-                        
-                    } else if (pressingAngle > 0 && pressingAngle < 180) {
-                        
-                    } else if (pressingAngle > 180) {
-                        
+                    }
+                    if (solidHitboxes != null) {
+                        for (Map.Entry<Hitbox<T>,Direction> entry : solidHitboxes.entrySet()) {
+                            SpaceObject<T> collidedWith = entry.getKey().getObject();
+                            CollisionResponse response = object.collide(collidedWith, entry.getValue());
+                            if (response != CollisionResponse.NONE) {
+                                switch (response) {
+                                    case SLIDE:
+                                        object.setVelocityX(0);
+                                        break;
+                                    case STOP:
+                                        object.setVelocity(0, 0);
+                                        break;
+                                    case BOUNCE:
+                                        object.setVelocityX(-object.getVelocityX());
+                                        break;
+                                }
+                                object.addCollision(collidedWith, entry.getValue());
+                                changeX = entry.getKey().getLeftEdge() - rightEdge;
+                                break;
+                            }
+                        }
                     }
                 }
                 right = changeX;
@@ -2199,7 +2218,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                 }
             }
         }
-        Map<ThinkerObject<T>,LevelVector> objectsToMove = null;
+        Map<ThinkerObject<T>,SpaceVector> objectsToMove = null;
         if (object.isSolid()) {
             Hitbox solidHitbox = object.getSolidHitbox();
             double leftEdge = solidHitbox.getLeftEdge();
@@ -2236,8 +2255,8 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                 move(follower, changeX, changeY);
             }
         } else {
-            for (Map.Entry<ThinkerObject<T>,LevelVector> movement : objectsToMove.entrySet()) {
-                LevelVector change = movement.getValue();
+            for (Map.Entry<ThinkerObject<T>,SpaceVector> movement : objectsToMove.entrySet()) {
+                SpaceVector change = movement.getValue();
                 move(movement.getKey(), change.getX(), change.getY());
             }
         }
@@ -2247,7 +2266,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
     public final void frameActions(T game) {
         if (getTimeFactor() > 0) {
             frameState = 1;
-            Iterator<LevelThinker<T>> iterator = thinkerIterator();
+            Iterator<SpaceThinker<T>> iterator = thinkerIterator();
             while (iterator.hasNext()) {
                 iterator.next().beforeMovement(game, this);
             }
@@ -2301,7 +2320,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                 if (viewport.getCamera() != null && viewport.getCamera().newState == this) {
                     double cx = viewport.getCamera().getCenterX();
                     double cy = viewport.getCamera().getCenterY();
-                    for (LevelLayer layer : levelLayers.headMap(0).values()) {
+                    for (SpaceLayer layer : levelLayers.headMap(0).values()) {
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                     int rx = (int)Math.round(cx);
@@ -2395,7 +2414,7 @@ public class LevelState<T extends CellGame> extends CellGameState<T,LevelState<T
                             draw(g, locatorHitbox, left, right, top, bottom, xOffset, yOffset);
                         }
                     }
-                    for (LevelLayer layer : levelLayers.tailMap(0).values()) {
+                    for (SpaceLayer layer : levelLayers.tailMap(0).values()) {
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                 }

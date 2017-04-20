@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 
@@ -6,7 +6,7 @@ import cell2d.CellGame;
  * <p>A CircleHitbox is a circular Hitbox with its origin at its center. A
  * CircleHitbox's radius cannot be negative.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the LevelStates that can use
+ * @param <T> The subclass of CellGame that uses the SpaceStates that can use
  * this CircleHitbox
  */
 public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
@@ -19,7 +19,7 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relPosition This CircleHitbox's relative position
      * @param radius This CircleHitbox's radius
      */
-    public CircleHitbox(LevelVector relPosition, double radius) {
+    public CircleHitbox(SpaceVector relPosition, double radius) {
         this(relPosition.getX(), relPosition.getY(), radius);
         
     }

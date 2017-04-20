@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 /**
  * <p>A Direction is one of the four orthogonal directions.</p>

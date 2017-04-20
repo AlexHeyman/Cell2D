@@ -1,27 +1,27 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 
 /**
- * <p>A Viewport is a LevelThinker that represents a rectangular region of the
- * screen through which the space of the LevelState to which it is assigned can
+ * <p>A Viewport is a SpaceThinker that represents a rectangular region of the
+ * screen through which the space of the SpaceState to which it is assigned can
  * be viewed. The center of a Viewport's rectangular field of view in its
- * LevelState is marked by a LevelObject called the Viewport's camera. To render
+ * SpaceState is marked by a SpaceObject called the Viewport's camera. To render
  * any visuals, including its HUD if it has one, a Viewport must be assigned to
- * a LevelState through its setViewport() method. To render the region of its
- * LevelState in its field of view, a Viewport's camera must be assigned to the
- * same LevelState as it.</p>
+ * a SpaceState through its setViewport() method. To render the region of its
+ * SpaceState in its field of view, a Viewport's camera must be assigned to the
+ * same SpaceState as it.</p>
  * 
  * <p>HUDs may be assigned to one Viewport each. Only one HUD may be assigned
  * to a given Viewport at once. A Viewport's HUD uses the region of the screen
  * that the Viewport occupies as its rendering region.</p>
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the LevelStates that this Viewport
+ * @param <T> The type of CellGame that uses the SpaceStates that this Viewport
  * can be assigned to
  */
-public class Viewport<T extends CellGame> extends LevelThinker<T> {
+public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     
-    private LevelObject camera = null;
+    private SpaceObject camera = null;
     private HUD<T> hud;
     private double x1, y1, x2, y2;
     int roundX1, roundY1, roundX2, roundY2, left, right, top, bottom;
@@ -69,14 +69,14 @@ public class Viewport<T extends CellGame> extends LevelThinker<T> {
     }
     
     @Override
-    public final void addedActions(T game, LevelState<T> levelState) {
+    public final void addedActions(T game, SpaceState<T> levelState) {
         if (hud != null) {
             levelState.addThinker(hud);
         }
     }
     
     @Override
-    public final void removedActions(T game, LevelState<T> levelState) {
+    public final void removedActions(T game, SpaceState<T> levelState) {
         if (hud != null) {
             levelState.removeThinker(hud);
         }
@@ -86,16 +86,16 @@ public class Viewport<T extends CellGame> extends LevelThinker<T> {
      * Returns this Viewport's camera, or null if it has none.
      * @return This Viewport's camera
      */
-    public final LevelObject getCamera() {
+    public final SpaceObject getCamera() {
         return camera;
     }
     
     /**
-     * Sets this Viewport's camera to the specified LevelObject, or to none if
-     * the specified LevelObject is null.
+     * Sets this Viewport's camera to the specified SpaceObject, or to none if
+     * the specified SpaceObject is null.
      * @param camera The new camera
      */
-    public final void setCamera(LevelObject camera) {
+    public final void setCamera(SpaceObject camera) {
         this.camera = camera;
     }
     
@@ -110,7 +110,7 @@ public class Viewport<T extends CellGame> extends LevelThinker<T> {
     
     /**
      * Sets the HUD that is assigned to this Viewport to the specified HUD, if
-     * it is not already assigned to a LevelState. If there is already an HUD
+ it is not already assigned to a SpaceState. If there is already an HUD
      * assigned to this Viewport, it will be removed. If the specified HUD is
      * null, the current HUD will be removed if there is one, but it will not be
      * replaced with anything.

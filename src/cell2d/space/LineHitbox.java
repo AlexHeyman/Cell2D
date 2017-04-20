@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 
@@ -7,12 +7,12 @@ import cell2d.CellGame;
  * being its position and the other being the sum of its position and a vector
  * called its difference.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the LevelStates that can use
+ * @param <T> The subclass of CellGame that uses the SpaceStates that can use
  * this LineHitbox
  */
 public class LineHitbox<T extends CellGame> extends Hitbox<T> {
     
-    private final LevelVector relDifference, absDifference;
+    private final SpaceVector relDifference, absDifference;
     private double left, right, top, bottom;
     
     /**
@@ -21,7 +21,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relPosition This LineHitbox's relative position
      * @param relDifference This LineHitbox's relative difference
      */
-    public LineHitbox(LevelVector relPosition, LevelVector relDifference) {
+    public LineHitbox(SpaceVector relPosition, SpaceVector relDifference) {
         this(relPosition.getX(), relPosition.getY(), relDifference.getX(), relDifference.getY());
     }
     
@@ -35,14 +35,14 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      */
     public LineHitbox(double relX, double relY, double relDX, double relDY) {
         super(relX, relY);
-        this.relDifference = new LevelVector(relDX, relDY);
-        absDifference = new LevelVector();
+        this.relDifference = new SpaceVector(relDX, relDY);
+        absDifference = new SpaceVector();
         updateData();
     }
     
     @Override
     public Hitbox<T> getCopy() {
-        return new LineHitbox<>(new LevelVector(0, 0), relDifference);
+        return new LineHitbox<>(new SpaceVector(0, 0), relDifference);
     }
     
     private void updateData() {
@@ -54,86 +54,118 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
         updateBoundaries();
     }
     
-    public final LevelVector getRelDifference() {
-        return new LevelVector(relDifference);
+    /**
+     * Returns this LineHitbox's relative difference.
+     * @return This LineHitbox's relative difference
+     */
+    public final SpaceVector getRelDifference() {
+        return new SpaceVector(relDifference);
     }
     
+    /**
+     * Returns the x-coordinate of this LineHitbox's relative difference.
+     * @return The x-coordinate of this LineHitbox's relative difference
+     */
     public final double getRelDX() {
         return relDifference.getX();
     }
     
+    /**
+     * Returns the y-coordinate of this LineHitbox's relative difference.
+     * @return The y-coordinate of this LineHitbox's relative difference
+     */
     public final double getRelDY() {
         return relDifference.getY();
     }
     
-    public final void setRelDifference(LevelVector difference) {
+    /**
+     * Sets this LineHitbox's relative difference to the specified value.
+     * @param difference The new relative difference
+     */
+    public final void setRelDifference(SpaceVector difference) {
         relDifference.setCoordinates(difference);
         updateData();
     }
     
+    /**
+     * Sets this LineHitbox's relative difference to the specified value.
+     * @param relDX The x-coordinate of the new relative difference
+     * @param relDY The y-coordinate of the new relative difference
+     */
     public final void setRelDifference(double relDX, double relDY) {
         relDifference.setCoordinates(relDX, relDY);
         updateData();
     }
     
+    /**
+     * Sets the x-coordinate of this LineHitbox's relative difference to the
+     * specified value.
+     * @param relDX The x-coordinate of the new relative difference
+     */
     public final void setRelDX(double relDX) {
         relDifference.setX(relDX);
         updateData();
     }
     
+    /**
+     * Sets the y-coordinate of this LineHitbox's relative difference to the
+     * specified value.
+     * @param relDY The y-coordinate of the new relative difference
+     */
     public final void setRelDY(double relDY) {
         relDifference.setY(relDY);
         updateData();
     }
     
-    public final LevelVector getAbsDifference() {
-        return new LevelVector(absDifference);
+    /**
+     * Returns this LineHitbox's absolute difference.
+     * @return This LineHitbox's absolute difference
+     */
+    public final SpaceVector getAbsDifference() {
+        return new SpaceVector(absDifference);
     }
     
+    /**
+     * Returns the x-coordinate of this LineHitbox's relative difference.
+     * @return The x-coordinate of this LineHitbox's relative difference
+     */
     public final double getAbsDX() {
         return absDifference.getX();
     }
     
+    /**
+     * Returns the y-coordinate of this LineHitbox's relative difference.
+     * @return The y-coordinate of this LineHitbox's relative difference
+     */
     public final double getAbsDY() {
         return absDifference.getY();
     }
     
-    public final LevelVector getPosition2() {
-        return new LevelVector(getAbsX() + absDifference.getX(), getAbsY() + absDifference.getY());
+    /**
+     * Returns the position of this LineHitbox's second endpoint, the sum of its
+     * absolute position and absolute difference.
+     * @return The position of this LineHitbox's second endpoint
+     */
+    public final SpaceVector getPosition2() {
+        return new SpaceVector(getAbsX() + absDifference.getX(), getAbsY() + absDifference.getY());
     }
     
+    /**
+     * Returns the x-coordinate of this LineHitbox's second endpoint, the sum of
+     * its absolute position and absolute difference.
+     * @return The x-coordinate of this LineHitbox's second endpoint
+     */
     public final double getX2() {
         return getAbsX() + absDifference.getX();
     }
     
+    /**
+     * Returns the y-coordinate of this LineHitbox's second endpoint, the sum of
+     * its absolute position and absolute difference.
+     * @return The y-coordinate of this LineHitbox's second endpoint
+     */
     public final double getY2() {
         return getAbsY() + absDifference.getY();
-    }
-    
-    public final double getLength() {
-        return relDifference.getMagnitude();
-    }
-    
-    public final void setLength(double length) {
-        relDifference.setMagnitude(length);
-        updateData();
-    }
-    
-    public final void scale(double scaleFactor) {
-        relDifference.scale(scaleFactor);
-        updateData();
-    }
-    
-    public final double getLineAngle() {
-        return absDifference.getAngle();
-    }
-    
-    public final double getLineAngleX() {
-        return absDifference.getAngleX();
-    }
-    
-    public final double getLineAngleY() {
-        return absDifference.getAngleY();
     }
     
     @Override

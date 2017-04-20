@@ -1,4 +1,4 @@
-package cell2d.level;
+package cell2d.space;
 
 import cell2d.CellGame;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.Map;
  * CompositeHitbox. Only one Hitbox may be assigned to a given CompositeHitbox
  * with a given ID at once.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the LevelStates that can use
+ * @param <T> The subclass of CellGame that uses the SpaceStates that can use
  * this CompositeHitbox
  */
 public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
@@ -27,7 +27,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
      * Creates a new CompositeHitbox with the specified relative position.
      * @param relPosition This CompositeHitbox's relative position
      */
-    public CompositeHitbox(LevelVector relPosition) {
+    public CompositeHitbox(SpaceVector relPosition) {
         super(relPosition);
     }
     
@@ -115,7 +115,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
     /**
      * Sets the component Hitbox that is assigned to this CompositeHitbox with
      * the specified ID to the specified Hitbox. The specified Hitbox cannot be
-     * in use by a LevelObject, and this CompositeHitbox cannot be its
+     * in use by a SpaceObject, and this CompositeHitbox cannot be its
      * component, direct or indirect, or vice versa. If there is already a
      * component Hitbox assigned with the specified ID, it will be removed from
      * this CompositeHitbox. If the specified Hitbox is null, the component
