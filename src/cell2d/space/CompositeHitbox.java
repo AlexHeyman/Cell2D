@@ -10,7 +10,8 @@ import java.util.Map;
  * of the CompositeHitbox itself. Each of a CompositeHitbox's component Hitboxes
  * is assigned to it with an integer ID that is unique in the context of the
  * CompositeHitbox. Only one Hitbox may be assigned to a given CompositeHitbox
- * with a given ID at once.</p>
+ * with a given ID at once. A CompositeHitbox with no component Hitboxes is a
+ * point at its absolute position that cannot overlap other Hitboxes.</p>
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that uses the SpaceStates that can use
  * this CompositeHitbox

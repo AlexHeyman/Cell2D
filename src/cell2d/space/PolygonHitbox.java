@@ -5,20 +5,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ * <p>A PolygonHitbox is a polygonal Hitbox defined by a List of vertices. A
+ * PolygonHitbox occupies the area enclosed by a loop of line segments between
+ * each of its vertices and the next, and between the first and last vertices.
+ * It is the responsibility of the creators and modifiers of a PolygonHitbox to
+ * ensure that its vertices are not positioned in such a way that this loop
+ * crosses itself. Both relative and absolute vertices are relative to their
+ * PolygonHitbox's position. A PolygonHitbox with no vertices is a point at its
+ * absolute position.</p>
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that uses the SpaceStates that can use
  * this PolygonHitbox
  */
 public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     
+    private static class RelAbsPair {
+        
+        private final SpaceVector rel;
+        private final SpaceVector abs;
+        
+        private RelAbsPair(SpaceVector rel, SpaceVector abs) {
+            this.rel = rel;
+            this.abs = abs;
+        }
+        
+    }
+    
     private final List<RelAbsPair> vertices;
     private double left, right, top, bottom;
     
+    /**
+     * Creates a new PolygonHitbox with the specified relative position and
+     * vertices.
+     * @param relPosition This PolygonHitbox's relative position
+     * @param relVertices This PolygonHitbox's relative vertices
+     */
     public PolygonHitbox(SpaceVector relPosition, SpaceVector[] relVertices) {
         this(relPosition.getX(), relPosition.getY(), relVertices);
     }
     
+    /**
+     * Creates a new PolygonHitbox with the specified relative position and
+     * vertices.
+     * @param relX The x-coordinate of this PolygonHitbox's relative position
+     * @param relY The y-coordinate of this PolygonHitbox's relative position
+     * @param relVertices This PolygonHitbox's relative vertices
+     */
     public PolygonHitbox(double relX, double relY, SpaceVector[] relVertices) {
         super(relX, relY);
         vertices = new ArrayList<>(relVertices.length);
@@ -28,10 +60,21 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         updateData();
     }
     
+    /**
+     * Creates a new PolygonHitbox with the specified relative position and no
+     * vertices.
+     * @param relPosition This PolygonHitbox's relative position
+     */
     public PolygonHitbox(SpaceVector relPosition) {
         this(relPosition.getX(), relPosition.getY());
     }
     
+    /**
+     * Creates a new PolygonHitbox with the specified relative position and no
+     * vertices.
+     * @param relX The x-coordinate of this PolygonHitbox's relative position
+     * @param relY The y-coordinate of this PolygonHitbox's relative position
+     */
     public PolygonHitbox(double relX, double relY) {
         super(relX, relY);
         vertices = new ArrayList<>();
@@ -44,6 +87,18 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         updateData();
     }
     
+    /**
+     * Returns a new PolygonHitbox in the shape of a regular polygon.
+     * @param relX The x-coordinate of the new PolygonHitbox's relative position
+     * @param relY The y-coordinate of the new PolygonHitbox's relative position
+     * @param numVertices The new PolygonHitbox's number of vertices. This must
+     * be at least 3.
+     * @param radius The distance from the new PolygonHitbox's position to each
+     * of its vertices
+     * @param angle The angle from the origin to the new PolygonHitbox's first
+     * relative vertex
+     * @return The new PolygonHitbox
+     */
     public static final PolygonHitbox regularPolygon(double relX, double relY,
             int numVertices, double radius, double angle) {
         if (numVertices < 3) {
@@ -53,24 +108,12 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
             throw new RuntimeException("Attempted to make a regular polygon with a negative radius");
         }
         SpaceVector[] relVertices = new SpaceVector[numVertices];
-        double angleChange = 360/numVertices;
+        double angleChange = 360.0/numVertices;
         for (int i = 0; i < numVertices; i++) {
             relVertices[i] = new SpaceVector(angle).scale(radius);
             angle += angleChange;
         }
         return new PolygonHitbox(relX, relY, relVertices);
-    }
-    
-    private class RelAbsPair {
-        
-        private final SpaceVector rel;
-        private final SpaceVector abs;
-        
-        private RelAbsPair(SpaceVector rel, SpaceVector abs) {
-            this.rel = rel;
-            this.abs = abs;
-        }
-        
     }
     
     @Override
@@ -107,6 +150,22 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
             }
         }
         updateBoundaries();
+    }
+    
+    public final List<SpaceVector> getRelVertices() {
+        List<SpaceVector> relVertices = new ArrayList<>(vertices.size());
+        for (int i = 0; i < vertices.size(); i++) {
+            relVertices.add(new SpaceVector(vertices.get(i).rel));
+        }
+        return relVertices;
+    }
+    
+    public final List<SpaceVector> getAbsVertices() {
+        List<SpaceVector> absVertices = new ArrayList<>(vertices.size());
+        for (int i = 0; i < vertices.size(); i++) {
+            absVertices.add(new SpaceVector(vertices.get(i).abs));
+        }
+        return absVertices;
     }
     
     public final int getNumVertices() {
@@ -177,16 +236,16 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         updateData();
     }
     
-    public final PolygonHitbox translate(SpaceVector translation) {
+    public final PolygonHitbox translate(SpaceVector change) {
+        return translate(change.getX(), change.getY());
+    }
+    
+    public final PolygonHitbox translate(double changeX, double changeY) {
         for (RelAbsPair vertex : vertices) {
-            vertex.rel.add(translation);
+            vertex.rel.add(changeX, changeY);
         }
         updateData();
         return this;
-    }
-    
-    public final PolygonHitbox translate(double x, double y) {
-        return translate(new SpaceVector(x, y));
     }
     
     public final PolygonHitbox flip() {
