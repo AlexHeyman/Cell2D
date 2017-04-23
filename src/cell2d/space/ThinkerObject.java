@@ -137,8 +137,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     
     /**
      * Returns the action priority that this ThinkerObject is about to have, but
- does not yet have due to its SpaceState's SpaceThinker list being
- iterated over. If this ThinkerObject is not about to change its action
+     * does not yet have due to its SpaceState's SpaceThinker list being
+     * iterated over. If this ThinkerObject is not about to change its action
      * priority, this method will simply return its current action priority.
      * @return The action priority that this ThinkerObject is about to have
      */
@@ -165,8 +165,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     /**
      * Sets this ThinkerObject's current SpaceThinkerState to the specified one.
      * If this ThinkerObject is not assigned to a SpaceState, the change will
- not occur until it is added to one, immediately before it takes its
- addedActions().
+     * not occur until it is added to one, immediately before it takes its
+     * addedActions().
      * @param thinkerState The new SpaceThinkerState
      */
     public final void setThinkerState(SpaceThinkerState thinkerState) {
@@ -696,9 +696,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
             collisions.clear();
             collisionDirections.clear();
             displacement.clear();
-            if (changeX != 0 || changeY != 0) {
-                state.move(this, changeX, changeY);
-            }
+            state.move(this, changeX, changeY);
         }
     }
     
