@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 
 /**
@@ -19,7 +20,7 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relPosition This CircleHitbox's relative position
      * @param radius This CircleHitbox's radius
      */
-    public CircleHitbox(SpaceVector relPosition, double radius) {
+    public CircleHitbox(CellVector relPosition, double radius) {
         this(relPosition.getX(), relPosition.getY(), radius);
         
     }

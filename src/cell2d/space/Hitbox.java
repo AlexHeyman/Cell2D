@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * but may not always be. Hitboxes can be rotated around their positions and
  * flipped across horizontal and vertical axes through their positions. Rotating
  * a Hitbox will also rotate the axes along which it is flipped. As with
- * SpaceVectors, Hitbox angles are measured in degrees going counterclockwise
+ * CellVectors, Hitbox angles are measured in degrees going counterclockwise
  * from directly right and are normalized to be between 0 and 360.</p>
  * 
  * <p>If a Hitbox is a component of a CompositeHitbox, its position, flipped
@@ -50,7 +51,7 @@ public abstract class Hitbox<T extends CellGame> {
     boolean scanned = false;
     int drawPriority = 0;
     int numCellRoles = 0;
-    private final SpaceVector relPosition, absPosition;
+    private final CellVector relPosition, absPosition;
     private boolean relXFlip = false;
     private boolean absXFlip = false;
     private boolean relYFlip = false;
@@ -66,10 +67,10 @@ public abstract class Hitbox<T extends CellGame> {
      * Creates a new Hitbox with the specified relative position.
      * @param relPosition This Hitbox's relative position
      */
-    public Hitbox(SpaceVector relPosition) {
+    public Hitbox(CellVector relPosition) {
         id = getNextID();
-        this.relPosition = new SpaceVector(relPosition);
-        absPosition = new SpaceVector(relPosition);
+        this.relPosition = new CellVector(relPosition);
+        absPosition = new CellVector(relPosition);
     }
     
     /**
@@ -79,8 +80,8 @@ public abstract class Hitbox<T extends CellGame> {
      */
     public Hitbox(double relX, double relY) {
         id = getNextID();
-        this.relPosition = new SpaceVector(relX, relY);
-        absPosition = new SpaceVector(relPosition);
+        this.relPosition = new CellVector(relX, relY);
+        absPosition = new CellVector(relPosition);
     }
     
     /**
@@ -392,8 +393,8 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns this Hitbox's relative position.
      * @return This Hitbox's relative position
      */
-    public final SpaceVector getRelPosition() {
-        return new SpaceVector(relPosition);
+    public final CellVector getRelPosition() {
+        return new CellVector(relPosition);
     }
     
     /**
@@ -416,7 +417,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Sets this Hitbox's relative position to the specified value.
      * @param relPosition The new relative position
      */
-    public final void setRelPosition(SpaceVector relPosition) {
+    public final void setRelPosition(CellVector relPosition) {
         this.relPosition.setCoordinates(relPosition);
         recursivelyUpdateAbsPosition();
     }
@@ -455,7 +456,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Changes this Hitbox's relative position by the specified amount.
      * @param change The amount to change the relative position by
      */
-    public final void changeRelPosition(SpaceVector change) {
+    public final void changeRelPosition(CellVector change) {
         relPosition.add(change);
         recursivelyUpdateAbsPosition();
     }
@@ -499,8 +500,8 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns this Hitbox's absolute position.
      * @return This Hitbox's absolute position
      */
-    public final SpaceVector getAbsPosition() {
-        return new SpaceVector(absPosition);
+    public final CellVector getAbsPosition() {
+        return new CellVector(absPosition);
     }
     
     /**
@@ -523,7 +524,7 @@ public abstract class Hitbox<T extends CellGame> {
         if (parent == null) {
             absPosition.setCoordinates(relPosition);
         } else {
-            absPosition.setCoordinates(parent.absPosition).add(new SpaceVector(relPosition).relativeTo(parent));
+            absPosition.setCoordinates(parent.absPosition).add(new CellVector(relPosition).relativeTo(parent));
         }
         updateBoundaries();
     }
@@ -848,7 +849,7 @@ public abstract class Hitbox<T extends CellGame> {
      * specified Hitbox's position
      */
     public final double distanceTo(Hitbox hitbox) {
-        return SpaceVector.distanceBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
+        return CellVector.distanceBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
     /**
@@ -859,12 +860,12 @@ public abstract class Hitbox<T extends CellGame> {
      * Hitbox's position
      */
     public final double angleTo(Hitbox hitbox) {
-        return SpaceVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
+        return CellVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
-    private static boolean circleEdgeIntersectsSeg(SpaceVector center, double radius, SpaceVector start, SpaceVector diff) {
+    private static boolean circleEdgeIntersectsSeg(CellVector center, double radius, CellVector start, CellVector diff) {
         //Credit to bobobobo of StackOverflow for the algorithm.
-        SpaceVector f = SpaceVector.sub(start, center);
+        CellVector f = CellVector.sub(start, center);
         double a = diff.dot(diff);
         double b = 2*f.dot(diff);
         double c = f.dot(f) - radius*radius;
@@ -878,27 +879,27 @@ public abstract class Hitbox<T extends CellGame> {
         return (t1 > 0 && t1 < 1) || (t2 > 0 && t2 < 1);
     }
     
-    private static boolean circleIntersectsLineSegment(SpaceVector center, double radius, SpaceVector start, SpaceVector diff) {
+    private static boolean circleIntersectsLineSegment(CellVector center, double radius, CellVector start, CellVector diff) {
         return center.distanceTo(start) < radius
-                || center.distanceTo(SpaceVector.add(start, diff)) < radius
+                || center.distanceTo(CellVector.add(start, diff)) < radius
                 || circleEdgeIntersectsSeg(center, radius, start, diff);
     }
     
-    private static boolean circleIntersectsPolygon(SpaceVector center, double radius, PolygonHitbox polygon) {
+    private static boolean circleIntersectsPolygon(CellVector center, double radius, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
             return center.distanceTo(polygon.getAbsPosition()) < radius;
         } else if (numVertices == 1) {
             return center.distanceTo(polygon.getAbsVertex(0)) < radius;
         }
-        SpaceVector firstVertex = polygon.getAbsVertex(0);
+        CellVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
             return circleIntersectsLineSegment(center, radius, polygon.getAbsVertex(0), polygon.getAbsVertex(1).sub(firstVertex));
         }
         if (center.distanceTo(firstVertex) < radius) {
             return true;
         }
-        SpaceVector[] vertices = new SpaceVector[numVertices];
+        CellVector[] vertices = new CellVector[numVertices];
         vertices[0] = firstVertex;
         for (int i = 1; i < numVertices; i++) {
             vertices[i] = polygon.getAbsVertex(i);
@@ -906,14 +907,14 @@ public abstract class Hitbox<T extends CellGame> {
                 return true;
             }
         }
-        SpaceVector[] diffs = new SpaceVector[numVertices];
+        CellVector[] diffs = new CellVector[numVertices];
         for (int i = 0; i < numVertices - 1; i++) {
-            diffs[i] = SpaceVector.sub(vertices[i + 1], vertices[i]);
+            diffs[i] = CellVector.sub(vertices[i + 1], vertices[i]);
             if (circleEdgeIntersectsSeg(center, radius, vertices[i], diffs[i])) {
                 return true;
             }
         }
-        diffs[numVertices - 1] = SpaceVector.sub(firstVertex, vertices[numVertices - 1]);
+        diffs[numVertices - 1] = CellVector.sub(firstVertex, vertices[numVertices - 1]);
         if (circleEdgeIntersectsSeg(center, radius, vertices[numVertices - 1], diffs[numVertices - 1])) {
             return true;
         }
@@ -939,68 +940,68 @@ public abstract class Hitbox<T extends CellGame> {
                 || circleIntersectsOrthogonalLine(cy, cx, radius, y1, y2, x2);
     }
     /*
-    private static boolean circleIntersectsSlope(SpaceVector center, double radius, SlopeHitbox slope) {
+    private static boolean circleIntersectsSlope(CellVector center, double radius, SlopeHitbox slope) {
         if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return circleIntersectsLineSegment(center, radius, slope.getAbsPosition(), slope.getAbsDifference());
         } else if (!slope.isSloping()) {
             return circleIntersectsRectangle(center.getX(), center.getY(), radius, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
-        SpaceVector vertex1 = slope.getAbsPosition();
+        CellVector vertex1 = slope.getAbsPosition();
         if (center.distanceTo(vertex1) < radius) {
             return true;
         }
-        SpaceVector vertex2 = slope.getPosition2();
+        CellVector vertex2 = slope.getPosition2();
         if (center.distanceTo(vertex2) < radius) {
             return true;
         }
-        SpaceVector diff2 = new SpaceVector(-slope.getAbsDX(), 0);
-        SpaceVector vertex3 = SpaceVector.add(vertex2, diff2);
+        CellVector diff2 = new CellVector(-slope.getAbsDX(), 0);
+        CellVector vertex3 = CellVector.add(vertex2, diff2);
         if (center.distanceTo(vertex3) < radius
                 || circleEdgeIntersectsSeg(center, radius, vertex1, slope.getAbsDifference())
                 || circleEdgeIntersectsSeg(center, radius, vertex2, diff2)
-                || circleEdgeIntersectsSeg(center, radius, vertex3, new SpaceVector(0, -slope.getAbsDY()))) {
+                || circleEdgeIntersectsSeg(center, radius, vertex3, new CellVector(0, -slope.getAbsDY()))) {
             return true;
         }
         return pointIntersectsRightSlope(center, slope);
     }
     */
-    private static boolean lineSegmentIntersectsPoint(SpaceVector start, SpaceVector diff, SpaceVector point) {
-        SpaceVector relPoint = SpaceVector.sub(point, start);
+    private static boolean lineSegmentIntersectsPoint(CellVector start, CellVector diff, CellVector point) {
+        CellVector relPoint = CellVector.sub(point, start);
         if (diff.getX() == 0) {
             return relPoint.getX() == 0 && Math.signum(relPoint.getY()) == Math.signum(diff.getY()) && Math.abs(relPoint.getY()) < Math.abs(diff.getY());
         }
         return relPoint.cross(diff) == 0 && Math.signum(relPoint.getX()) == Math.signum(diff.getX()) && Math.abs(relPoint.getX()) < Math.abs(diff.getX());
     }
     
-    private static boolean lineSegmentIntersectsPolygon(SpaceVector start, SpaceVector diff, PolygonHitbox polygon) {
+    private static boolean lineSegmentIntersectsPolygon(CellVector start, CellVector diff, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
             return lineSegmentIntersectsPoint(start, diff, polygon.getAbsPosition());
         } else if (numVertices == 1) {
             return lineSegmentIntersectsPoint(start, diff, polygon.getAbsVertex(0));
         }
-        SpaceVector firstVertex = polygon.getAbsVertex(0);
+        CellVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
-            return SpaceVector.lineSegmentsIntersect(start, diff, firstVertex, polygon.getAbsVertex(1).sub(firstVertex));
+            return CellVector.lineSegmentsIntersect(start, diff, firstVertex, polygon.getAbsVertex(1).sub(firstVertex));
         }
-        SpaceVector[] vertices = new SpaceVector[numVertices];
+        CellVector[] vertices = new CellVector[numVertices];
         vertices[0] = firstVertex;
-        SpaceVector[] diffs = new SpaceVector[numVertices];
+        CellVector[] diffs = new CellVector[numVertices];
         for (int i = 0; i < numVertices - 1; i++) {
             vertices[i + 1] = polygon.getAbsVertex(i + 1);
-            diffs[i] = SpaceVector.sub(vertices[i + 1], vertices[i]);
-            if (SpaceVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
+            diffs[i] = CellVector.sub(vertices[i + 1], vertices[i]);
+            if (CellVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
                 return true;
             }
         }
-        diffs[numVertices - 1] = SpaceVector.sub(firstVertex, vertices[numVertices - 1]);
-        if (SpaceVector.lineSegmentsIntersect(start, diff, vertices[numVertices - 1], diffs[numVertices - 1])) {
+        diffs[numVertices - 1] = CellVector.sub(firstVertex, vertices[numVertices - 1]);
+        if (CellVector.lineSegmentsIntersect(start, diff, vertices[numVertices - 1], diffs[numVertices - 1])) {
             return true;
         }
         return pointIntersectsPolygon(start, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     
-    private static boolean lineSegmentIntersectsRectangle(SpaceVector start, SpaceVector diff, double x1, double y1, double x2, double y2) {
+    private static boolean lineSegmentIntersectsRectangle(CellVector start, CellVector diff, double x1, double y1, double x2, double y2) {
         if (start.getX() > x1 && start.getX() < x2 && start.getY() > y1 && start.getY() < y2) {
             return true;
         }
@@ -1009,30 +1010,30 @@ public abstract class Hitbox<T extends CellGame> {
         if (lineX2 > x1 && lineX2 < x2 && lineY2 > y1 && lineY2 < y2) {
             return true;
         }
-        SpaceVector horizontalDiff = new SpaceVector(x2 - x1, 0);
-        SpaceVector verticalDiff = new SpaceVector(0, y2 - y1);
-        SpaceVector topLeft = new SpaceVector(x1, y1);
-        return SpaceVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
-                || SpaceVector.lineSegmentsIntersect(start, diff, new SpaceVector(x1, y2), horizontalDiff)
-                || SpaceVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
-                || SpaceVector.lineSegmentsIntersect(start, diff, new SpaceVector(x2, y1), verticalDiff);
+        CellVector horizontalDiff = new CellVector(x2 - x1, 0);
+        CellVector verticalDiff = new CellVector(0, y2 - y1);
+        CellVector topLeft = new CellVector(x1, y1);
+        return CellVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
+                || CellVector.lineSegmentsIntersect(start, diff, new CellVector(x1, y2), horizontalDiff)
+                || CellVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
+                || CellVector.lineSegmentsIntersect(start, diff, new CellVector(x2, y1), verticalDiff);
     }
     /*
-    private static boolean lineSegmentIntersectsSlope(SpaceVector start, SpaceVector diff, SlopeHitbox slope) {
+    private static boolean lineSegmentIntersectsSlope(CellVector start, CellVector diff, SlopeHitbox slope) {
         if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
-            return SpaceVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference());
+            return CellVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference());
         } else if (!slope.isSloping()) {
             return lineSegmentIntersectsRectangle(start, diff, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
-        if (SpaceVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference())) {
+        if (CellVector.lineSegmentsIntersect(start, diff, slope.getAbsPosition(), slope.getAbsDifference())) {
             return true;
         }
-        SpaceVector vertex2 = slope.getPosition2();
-        SpaceVector diff2 = new SpaceVector(-slope.getAbsDX(), 0);
-        if (SpaceVector.lineSegmentsIntersect(start, diff, vertex2, diff2)) {
+        CellVector vertex2 = slope.getPosition2();
+        CellVector diff2 = new CellVector(-slope.getAbsDX(), 0);
+        if (CellVector.lineSegmentsIntersect(start, diff, vertex2, diff2)) {
             return true;
         }
-        if (SpaceVector.lineSegmentsIntersect(start, diff, SpaceVector.add(vertex2, diff2), new SpaceVector(0, -slope.getAbsDY()))) {
+        if (CellVector.lineSegmentsIntersect(start, diff, CellVector.add(vertex2, diff2), new CellVector(0, -slope.getAbsDY()))) {
             return true;
         }
         return pointIntersectsRightSlope(start, slope);
@@ -1040,55 +1041,55 @@ public abstract class Hitbox<T extends CellGame> {
     */
     //Credit to Mecki of StackOverflow for the point-polygon intersection algorithm.
     
-    private static boolean pointIntersectsPolygon(SpaceVector point, double startX, SpaceVector[] vertices, SpaceVector[] diffs) {
-        SpaceVector start = new SpaceVector(startX, point.getY());
-        SpaceVector diff = new SpaceVector(point.getX() - startX, 0);
+    private static boolean pointIntersectsPolygon(CellVector point, double startX, CellVector[] vertices, CellVector[] diffs) {
+        CellVector start = new CellVector(startX, point.getY());
+        CellVector diff = new CellVector(point.getX() - startX, 0);
         boolean intersects = false;
         for (int i = 0; i < vertices.length; i++) {
-            if (SpaceVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
+            if (CellVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
                 intersects = !intersects;
             }
         }
         return intersects;
     }
     
-    private static boolean pointIntersectsPolygon(SpaceVector point, PolygonHitbox polygon) {
+    private static boolean pointIntersectsPolygon(CellVector point, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
-            SpaceVector position = polygon.getAbsPosition();
+            CellVector position = polygon.getAbsPosition();
             return point.getX() == position.getX() && point.getY() == position.getY();
         } else if (numVertices == 1) {
-            SpaceVector position = polygon.getAbsVertex(0);
+            CellVector position = polygon.getAbsVertex(0);
             return point.getX() == position.getX() && point.getY() == position.getY();
         }
-        SpaceVector firstVertex = polygon.getAbsVertex(0);
+        CellVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
             return lineSegmentIntersectsPoint(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), point);
         }
         double startX = polygon.getLeftEdge() - 1;
-        SpaceVector start = new SpaceVector(startX, point.getY());
-        SpaceVector diff = new SpaceVector(point.getX() - startX, 0);
-        SpaceVector lastVertex = firstVertex;
+        CellVector start = new CellVector(startX, point.getY());
+        CellVector diff = new CellVector(point.getX() - startX, 0);
+        CellVector lastVertex = firstVertex;
         boolean intersects = false;
         for (int i = 1; i < numVertices; i++) {
-            SpaceVector vertex = polygon.getAbsVertex(i);
-            if (SpaceVector.lineSegmentsIntersect(start, diff, lastVertex, SpaceVector.sub(vertex, lastVertex))) {
+            CellVector vertex = polygon.getAbsVertex(i);
+            if (CellVector.lineSegmentsIntersect(start, diff, lastVertex, CellVector.sub(vertex, lastVertex))) {
                 intersects = !intersects;
             }
             lastVertex = vertex;
         }
-        if (SpaceVector.lineSegmentsIntersect(start, diff, lastVertex, SpaceVector.sub(firstVertex, lastVertex))) {
+        if (CellVector.lineSegmentsIntersect(start, diff, lastVertex, CellVector.sub(firstVertex, lastVertex))) {
             intersects = !intersects;
         }
         return intersects;
     }
     
-    private static boolean pointIntersectsRectangle(SpaceVector point, double x1, double y1, double x2, double y2) {
+    private static boolean pointIntersectsRectangle(CellVector point, double x1, double y1, double x2, double y2) {
         return point.getX() > x1 && point.getX() < x2
                 && point.getY() > y1 && point.getY() < y2;
     }
     /*
-    private static boolean pointIntersectsRightSlope(SpaceVector point, SlopeHitbox slope) {
+    private static boolean pointIntersectsRightSlope(CellVector point, SlopeHitbox slope) {
         if (point.getX() > slope.getLeftEdge() && point.getX() < slope.getRightEdge()) {
             if (slope.isPresentAbove()) {
                 return point.getY() > slope.getTopEdge() && point.getY() < slope.getSlopeY(point.getX());
@@ -1098,7 +1099,7 @@ public abstract class Hitbox<T extends CellGame> {
         return false;
     }
     
-    private static boolean pointIntersectsSlope(SpaceVector point, SlopeHitbox slope) {
+    private static boolean pointIntersectsSlope(CellVector point, SlopeHitbox slope) {
         if (!slope.isPresentAbove() && !slope.isPresentBelow()) {
             return lineSegmentIntersectsPoint(slope.getAbsPosition(), slope.getAbsDifference(), point);
         } else if (!slope.isSloping()) {
@@ -1119,47 +1120,47 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (numVertices2 == 1) {
             return pointIntersectsPolygon(polygon2.getAbsVertex(0), polygon1);
         }
-        SpaceVector firstVertex1 = polygon1.getAbsVertex(0);
+        CellVector firstVertex1 = polygon1.getAbsVertex(0);
         if (numVertices1 == 2) {
             return lineSegmentIntersectsPolygon(firstVertex1, polygon1.getAbsVertex(1).sub(firstVertex1), polygon2);
         }
-        SpaceVector firstVertex2 = polygon2.getAbsVertex(0);
+        CellVector firstVertex2 = polygon2.getAbsVertex(0);
         if (numVertices2 == 2) {
             return lineSegmentIntersectsPolygon(firstVertex2, polygon2.getAbsVertex(1).sub(firstVertex2), polygon1);
         }
-        SpaceVector secondVertex2 = polygon2.getAbsVertex(1);
-        SpaceVector firstDiff2 = SpaceVector.sub(secondVertex2, firstVertex2);
-        SpaceVector[] vertices1 = new SpaceVector[numVertices1];
+        CellVector secondVertex2 = polygon2.getAbsVertex(1);
+        CellVector firstDiff2 = CellVector.sub(secondVertex2, firstVertex2);
+        CellVector[] vertices1 = new CellVector[numVertices1];
         vertices1[0] = firstVertex1;
-        SpaceVector[] diffs1 = new SpaceVector[numVertices1];
+        CellVector[] diffs1 = new CellVector[numVertices1];
         for (int i = 0; i < numVertices1 - 1; i++) {
             vertices1[i + 1] = polygon1.getAbsVertex(i + 1);
-            diffs1[i] = SpaceVector.sub(vertices1[i + 1], vertices1[i]);
-            if (SpaceVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[i], diffs1[i])) {
+            diffs1[i] = CellVector.sub(vertices1[i + 1], vertices1[i]);
+            if (CellVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[i], diffs1[i])) {
                 return true;
             }
         }
-        diffs1[numVertices1 - 1] = SpaceVector.sub(firstVertex1, vertices1[numVertices1 - 1]);
-        if (SpaceVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[numVertices1 - 1], diffs1[numVertices1 - 1])) {
+        diffs1[numVertices1 - 1] = CellVector.sub(firstVertex1, vertices1[numVertices1 - 1]);
+        if (CellVector.lineSegmentsIntersect(firstVertex2, firstDiff2, vertices1[numVertices1 - 1], diffs1[numVertices1 - 1])) {
             return true;
         }
-        SpaceVector[] vertices2 = new SpaceVector[numVertices2];
+        CellVector[] vertices2 = new CellVector[numVertices2];
         vertices2[0] = firstVertex2;
         vertices2[1] = secondVertex2;
-        SpaceVector[] diffs2 = new SpaceVector[numVertices2];
+        CellVector[] diffs2 = new CellVector[numVertices2];
         diffs2[0] = firstDiff2;
         for (int i = 1; i < numVertices2 - 1; i++) {
             vertices2[i + 1] = polygon2.getAbsVertex(i);
-            diffs2[i] = SpaceVector.sub(vertices2[i + 1], vertices2[i]);
+            diffs2[i] = CellVector.sub(vertices2[i + 1], vertices2[i]);
             for (int j = 0; j < numVertices1; j++) {
-                if (SpaceVector.lineSegmentsIntersect(vertices2[i], diffs2[i], vertices1[j], diffs1[j])) {
+                if (CellVector.lineSegmentsIntersect(vertices2[i], diffs2[i], vertices1[j], diffs1[j])) {
                     return true;
                 }
             }
         }
-        diffs2[numVertices2 - 1] = SpaceVector.sub(firstVertex2, vertices2[numVertices2 - 1]);
+        diffs2[numVertices2 - 1] = CellVector.sub(firstVertex2, vertices2[numVertices2 - 1]);
         for (int j = 0; j < numVertices1; j++) {
-            if (SpaceVector.lineSegmentsIntersect(vertices2[numVertices2 - 1], diffs2[numVertices2 - 1], vertices1[j], diffs1[j])) {
+            if (CellVector.lineSegmentsIntersect(vertices2[numVertices2 - 1], diffs2[numVertices2 - 1], vertices1[j], diffs1[j])) {
                 return true;
             }
         }
@@ -1175,36 +1176,36 @@ public abstract class Hitbox<T extends CellGame> {
             return pointIntersectsRectangle(polygon.getAbsVertex(0), x1, y1, x2, y2);
         }
         if (numVertices == 2) {
-            SpaceVector firstVertex = polygon.getAbsVertex(0);
+            CellVector firstVertex = polygon.getAbsVertex(0);
             return lineSegmentIntersectsRectangle(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), x1, y1, x2, y2);
         }
-        SpaceVector[] vertices = new SpaceVector[numVertices];
+        CellVector[] vertices = new CellVector[numVertices];
         for (int i = 0; i < numVertices; i++) {
             vertices[i] = polygon.getAbsVertex(i);
             if (pointIntersectsRectangle(vertices[i], x1, y1, x2, y2)) {
                 return true;
             }
         }
-        SpaceVector horizontalDiff = new SpaceVector(x2 - x1, 0);
-        SpaceVector verticalDiff = new SpaceVector(0, y2 - y1);
-        SpaceVector topLeft = new SpaceVector(x1, y1);
-        SpaceVector bottomLeft = new SpaceVector(x1, y2);
-        SpaceVector topRight = new SpaceVector(x2, y1);
+        CellVector horizontalDiff = new CellVector(x2 - x1, 0);
+        CellVector verticalDiff = new CellVector(0, y2 - y1);
+        CellVector topLeft = new CellVector(x1, y1);
+        CellVector bottomLeft = new CellVector(x1, y2);
+        CellVector topRight = new CellVector(x2, y1);
         for (int i = 0; i < numVertices - 1; i++) {
-            SpaceVector diff = SpaceVector.sub(vertices[i + 1], vertices[i]);
-            if (SpaceVector.lineSegmentsIntersect(vertices[i], diff, topLeft, horizontalDiff)
-                    || SpaceVector.lineSegmentsIntersect(vertices[i], diff, bottomLeft, horizontalDiff)
-                    || SpaceVector.lineSegmentsIntersect(vertices[i], diff, topLeft, verticalDiff)
-                    || SpaceVector.lineSegmentsIntersect(vertices[i], diff, topRight, verticalDiff)) {
+            CellVector diff = CellVector.sub(vertices[i + 1], vertices[i]);
+            if (CellVector.lineSegmentsIntersect(vertices[i], diff, topLeft, horizontalDiff)
+                    || CellVector.lineSegmentsIntersect(vertices[i], diff, bottomLeft, horizontalDiff)
+                    || CellVector.lineSegmentsIntersect(vertices[i], diff, topLeft, verticalDiff)
+                    || CellVector.lineSegmentsIntersect(vertices[i], diff, topRight, verticalDiff)) {
                 return true;
             }
         }
-        SpaceVector start = vertices[numVertices - 1];
-        SpaceVector diff = SpaceVector.sub(vertices[0], start);
-        return SpaceVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
-                || SpaceVector.lineSegmentsIntersect(start, diff, bottomLeft, horizontalDiff)
-                || SpaceVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
-                || SpaceVector.lineSegmentsIntersect(start, diff, topRight, verticalDiff);
+        CellVector start = vertices[numVertices - 1];
+        CellVector diff = CellVector.sub(vertices[0], start);
+        return CellVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
+                || CellVector.lineSegmentsIntersect(start, diff, bottomLeft, horizontalDiff)
+                || CellVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
+                || CellVector.lineSegmentsIntersect(start, diff, topRight, verticalDiff);
     }
     /*
     private static boolean polygonIntersectsSlope(PolygonHitbox polygon, SlopeHitbox slope) {
@@ -1219,39 +1220,39 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (numVertices == 1) {
             return pointIntersectsRightSlope(polygon.getAbsVertex(0), slope);
         }
-        SpaceVector firstVertex = polygon.getAbsVertex(0);
+        CellVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) {
             return lineSegmentIntersectsSlope(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), slope);
         }
-        SpaceVector[] vertices = new SpaceVector[numVertices];
+        CellVector[] vertices = new CellVector[numVertices];
         vertices[0] = firstVertex;
-        SpaceVector[] diffs = new SpaceVector[numVertices];
-        SpaceVector[] slopeVertices = new SpaceVector[3];
+        CellVector[] diffs = new CellVector[numVertices];
+        CellVector[] slopeVertices = new CellVector[3];
         slopeVertices[0] = slope.getAbsPosition();
-        SpaceVector[] slopeDiffs = new SpaceVector[3];
+        CellVector[] slopeDiffs = new CellVector[3];
         slopeDiffs[0] = slope.getAbsDifference();
         for (int i = 0; i < numVertices - 1; i++) {
             vertices[i + 1] = polygon.getAbsVertex(i + 1);
-            diffs[i] = SpaceVector.sub(vertices[i + 1], vertices[i]);
-            if (SpaceVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[0], slopeDiffs[0])) {
+            diffs[i] = CellVector.sub(vertices[i + 1], vertices[i]);
+            if (CellVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[0], slopeDiffs[0])) {
                 return true;
             }
         }
-        diffs[numVertices - 1] = SpaceVector.sub(firstVertex, vertices[numVertices - 1]);
-        if (SpaceVector.lineSegmentsIntersect(vertices[numVertices - 1], diffs[numVertices - 1], slopeVertices[0], slopeDiffs[0])) {
+        diffs[numVertices - 1] = CellVector.sub(firstVertex, vertices[numVertices - 1]);
+        if (CellVector.lineSegmentsIntersect(vertices[numVertices - 1], diffs[numVertices - 1], slopeVertices[0], slopeDiffs[0])) {
             return true;
         }
         slopeVertices[1] = slope.getPosition2();
-        slopeDiffs[1] = new SpaceVector(-slope.getAbsDX(), 0);
+        slopeDiffs[1] = new CellVector(-slope.getAbsDX(), 0);
         for (int i = 0; i < numVertices; i++) {
-            if (SpaceVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[1], slopeDiffs[1])) {
+            if (CellVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[1], slopeDiffs[1])) {
                 return true;
             }
         }
-        slopeVertices[2] = SpaceVector.add(slopeVertices[1], slopeDiffs[1]);
-        slopeDiffs[2] = new SpaceVector(0, -slope.getAbsDY());
+        slopeVertices[2] = CellVector.add(slopeVertices[1], slopeDiffs[1]);
+        slopeDiffs[2] = new CellVector(0, -slope.getAbsDY());
         for (int i = 0; i < numVertices; i++) {
-            if (SpaceVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[2], slopeDiffs[2])) {
+            if (CellVector.lineSegmentsIntersect(vertices[i], diffs[i], slopeVertices[2], slopeDiffs[2])) {
                 return true;
             }
         }
@@ -1269,37 +1270,37 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (!slope.isSloping()) {
             return rectanglesIntersect(x1, y1, x2, y2, slope.getLeftEdge(), slope.getTopEdge(), slope.getRightEdge(), slope.getBottomEdge());
         }
-        SpaceVector[] vertices = new SpaceVector[3];
+        CellVector[] vertices = new CellVector[3];
         vertices[0] = slope.getAbsPosition();
         if (pointIntersectsRectangle(vertices[0], x1, y1, x2, y2)) {
             return true;
         }
-        SpaceVector[] diffs = new SpaceVector[3];
+        CellVector[] diffs = new CellVector[3];
         diffs[0] = slope.getAbsDifference();
         vertices[1] = slope.getPosition2();
         if (pointIntersectsRectangle(vertices[1], x1, y1, x2, y2)) {
             return true;
         }
-        diffs[1] = new SpaceVector(-slope.getAbsDX(), 0);
-        vertices[2] = SpaceVector.add(vertices[1], diffs[1]);
+        diffs[1] = new CellVector(-slope.getAbsDX(), 0);
+        vertices[2] = CellVector.add(vertices[1], diffs[1]);
         if (pointIntersectsRectangle(vertices[2], x1, y1, x2, y2)) {
             return true;
         }
-        diffs[2] = new SpaceVector(0, -slope.getAbsDY());
-        SpaceVector horizontalDiff = new SpaceVector(x2 - x1, 0);
-        SpaceVector verticalDiff = new SpaceVector(0, y2 - y1);
-        SpaceVector topLeft = new SpaceVector(x1, y1);
-        SpaceVector bottomLeft = new SpaceVector(x1, y2);
-        SpaceVector topRight = new SpaceVector(x2, y1);
+        diffs[2] = new CellVector(0, -slope.getAbsDY());
+        CellVector horizontalDiff = new CellVector(x2 - x1, 0);
+        CellVector verticalDiff = new CellVector(0, y2 - y1);
+        CellVector topLeft = new CellVector(x1, y1);
+        CellVector bottomLeft = new CellVector(x1, y2);
+        CellVector topRight = new CellVector(x2, y1);
         for (int i = 0; i < 3; i++) {
-            if (SpaceVector.lineSegmentsIntersect(topLeft, horizontalDiff, vertices[i], diffs[i])
-                    || SpaceVector.lineSegmentsIntersect(bottomLeft, horizontalDiff, vertices[i], diffs[i])
-                    || SpaceVector.lineSegmentsIntersect(topLeft, verticalDiff, vertices[i], diffs[i])
-                    || SpaceVector.lineSegmentsIntersect(topRight, verticalDiff, vertices[i], diffs[i])) {
+            if (CellVector.lineSegmentsIntersect(topLeft, horizontalDiff, vertices[i], diffs[i])
+                    || CellVector.lineSegmentsIntersect(bottomLeft, horizontalDiff, vertices[i], diffs[i])
+                    || CellVector.lineSegmentsIntersect(topLeft, verticalDiff, vertices[i], diffs[i])
+                    || CellVector.lineSegmentsIntersect(topRight, verticalDiff, vertices[i], diffs[i])) {
                 return true;
             }
         }
-        return pointIntersectsPolygon(new SpaceVector(x1, y1), slope.getLeftEdge() - 1, vertices, diffs);
+        return pointIntersectsPolygon(new CellVector(x1, y1), slope.getLeftEdge() - 1, vertices, diffs);
     }
     
     private static boolean slopesIntersect(SlopeHitbox slope1, SlopeHitbox slope2) {
@@ -1312,29 +1313,29 @@ public abstract class Hitbox<T extends CellGame> {
         } else if (!slope2.isSloping()) {
             return rectangleIntersectsSlope(slope2.getLeftEdge(), slope2.getTopEdge(), slope2.getRightEdge(), slope2.getBottomEdge(), slope1);
         }
-        SpaceVector[] vertices1 = {slope1.getAbsPosition(), slope1.getPosition2(), null};
-        SpaceVector[] diffs1 = {slope1.getAbsDifference(), new SpaceVector(-slope1.getAbsDX(), 0), new SpaceVector(0, -slope1.getAbsDY())};
-        vertices1[2] = SpaceVector.add(vertices1[1], diffs1[1]);
-        SpaceVector[] vertices2 = new SpaceVector[3];
+        CellVector[] vertices1 = {slope1.getAbsPosition(), slope1.getPosition2(), null};
+        CellVector[] diffs1 = {slope1.getAbsDifference(), new CellVector(-slope1.getAbsDX(), 0), new CellVector(0, -slope1.getAbsDY())};
+        vertices1[2] = CellVector.add(vertices1[1], diffs1[1]);
+        CellVector[] vertices2 = new CellVector[3];
         vertices2[0] = slope2.getAbsPosition();
-        SpaceVector[] diffs2 = new SpaceVector[3];
+        CellVector[] diffs2 = new CellVector[3];
         diffs2[0] = slope2.getAbsDifference();
         for (int i = 0; i < 3; i++) {
-            if (SpaceVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[0], diffs2[0])) {
+            if (CellVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[0], diffs2[0])) {
                 return true;
             }
         }
         vertices2[1] = slope2.getPosition2();
-        diffs2[1] = new SpaceVector(-slope2.getAbsDX(), 0);
+        diffs2[1] = new CellVector(-slope2.getAbsDX(), 0);
         for (int i = 0; i < 3; i++) {
-            if (SpaceVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[1], diffs2[1])) {
+            if (CellVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[1], diffs2[1])) {
                 return true;
             }
         }
-        vertices2[2] = SpaceVector.add(vertices2[1], diffs2[1]);
-        diffs2[2] = new SpaceVector(0, -slope2.getAbsDY());
+        vertices2[2] = CellVector.add(vertices2[1], diffs2[1]);
+        diffs2[2] = new CellVector(0, -slope2.getAbsDY());
         for (int i = 0; i < 3; i++) {
-            if (SpaceVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[2], diffs2[2])) {
+            if (CellVector.lineSegmentsIntersect(vertices1[i], diffs1[i], vertices2[2], diffs2[2])) {
                 return true;
             }
         }
@@ -1401,7 +1402,7 @@ public abstract class Hitbox<T extends CellGame> {
                 if (hitbox2 instanceof CircleHitbox) {
                     return circleIntersectsLineSegment(hitbox2.absPosition, ((CircleHitbox)hitbox2).getRadius(), hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference());
                 } else if (hitbox2 instanceof LineHitbox) {
-                    return SpaceVector.directSegsIntersect(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference());
+                    return CellVector.lineSegmentsIntersect(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference());
                 } else if (hitbox2 instanceof PointHitbox) {
                     return lineSegmentIntersectsPoint(hitbox1.absPosition, ((LineHitbox)hitbox1).getAbsDifference(), hitbox2.absPosition);
                 } else if (hitbox2 instanceof PolygonHitbox) {

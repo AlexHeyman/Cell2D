@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 
 /**
@@ -30,7 +31,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relBottom The difference of the y-coordinates of this
      * RectangleHitbox's relative bottom edge and relative position
      */
-    public RectangleHitbox(SpaceVector relPosition, double relLeft, double relRight, double relTop, double relBottom) {
+    public RectangleHitbox(CellVector relPosition, double relLeft, double relRight, double relTop, double relBottom) {
         this(relPosition.getX(), relPosition.getY(), relLeft, relRight, relTop, relBottom);
     }
     

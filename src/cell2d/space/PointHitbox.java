@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 
 /**
@@ -15,7 +16,7 @@ public class PointHitbox<T extends CellGame> extends Hitbox<T> {
      * Creates a new PointHitbox with the specified relative position.
      * @param relPosition This PointHitbox's relative position
      */
-    public PointHitbox(SpaceVector relPosition) {
+    public PointHitbox(CellVector relPosition) {
         super(relPosition);
     }
     

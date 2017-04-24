@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 import cell2d.TimedEvent;
 import java.util.EnumSet;
@@ -58,15 +59,15 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     int newMovementPriority = 0;
     private boolean hasCollision = false;
     private Hitbox<T> collisionHitbox = null;
-    private Double pressingAngle = null;
+    private Double relPressingAngle = null;
     private ThinkerObject leader = null;
     final Set<ThinkerObject<T>> followers = new HashSet<>();
     ThinkerObject effLeader = null;
     final Map<SpaceObject<T>,Set<Direction>> collisions = new HashMap<>();
     final Set<Direction> collisionDirections = EnumSet.noneOf(Direction.class);
-    private final SpaceVector velocity = new SpaceVector();
-    private final SpaceVector step = new SpaceVector();
-    final SpaceVector displacement = new SpaceVector();
+    private final CellVector velocity = new CellVector();
+    private final CellVector step = new CellVector();
+    final CellVector displacement = new CellVector();
     
     /**
      * Creates a new ThinkerObject with the specified locator Hitbox.
@@ -374,53 +375,78 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     }
     
     /**
-     * Returns this ThinkerObject's pressing angle, or null if it has none.
-     * @return This ThinkerObject's pressing angle
+     * Returns this ThinkerObject's relative pressing angle, or null if it has
+     * none.
+     * @return This ThinkerObject's relative pressing angle
      */
-    public final Double getPressingAngle() {
-        return pressingAngle;
+    public final Double getRelPressingAngle() {
+        return relPressingAngle;
     }
     
     /**
-     * Returns whether this ThinkerObject's pressing angle, if it has one, has
-     * a component in the specified Direction.
-     * @param direction The Direction to check
-     * @return Whether this ThinkerObject's pressing angle causes it to press in
-     * the specified Direction
+     * Sets this ThinkerObject's relative pressing angle to the specified value,
+     * or to none if the specified value is null.
+     * @param angle The new relative pressing angle
      */
-    public final boolean isPressingIn(Direction direction) {
-        return pressingAngle != null
-                && ((direction == Direction.LEFT && (pressingAngle < 90 || pressingAngle > 270))
-                || (direction == Direction.RIGHT && pressingAngle > 90 && pressingAngle < 270)
-                || (direction == Direction.UP && pressingAngle > 0 && pressingAngle < 180)
-                || (direction == Direction.DOWN && pressingAngle > 180));
-    }
-    
-    /**
-     * Sets this ThinkerObject's pressing angle to the specified value, or to
-     * none if the specified value is null.
-     * @param angle The new pressing angle
-     */
-    public final void setPressingAngle(Double angle) {
+    public final void setRelPressingAngle(Double angle) {
         if (angle == null) {
-            pressingAngle = null;
+            relPressingAngle = null;
         } else {
-            pressingAngle = angle % 360;
-            if (pressingAngle < 0) {
-                pressingAngle += 360;
+            relPressingAngle = angle % 360;
+            if (relPressingAngle < 0) {
+                relPressingAngle += 360;
             }
         }
     }
     
     /**
-     * Sets this ThinkerObject's pressing angle to the specified value.
-     * @param angle The new pressing angle
+     * Sets this ThinkerObject's relative pressing angle to the specified value.
+     * @param angle The new relative pressing angle
      */
-    public final void setPressingAngle(double angle) {
-        pressingAngle = angle % 360;
-        if (pressingAngle < 0) {
-            pressingAngle += 360;
+    public final void setRelPressingAngle(double angle) {
+        relPressingAngle = angle % 360;
+        if (relPressingAngle < 0) {
+            relPressingAngle += 360;
         }
+    }
+    
+    /**
+     * Returns this ThinkerObject's absolute pressing angle, or null if it has
+     * none.
+     * @return This ThinkerObject's absolute pressing angle
+     */
+    public final Double getAbsPressingAngle() {
+        if (relPressingAngle == null) {
+            return null;
+        }
+        double angle = relPressingAngle + getAngle();
+        if (getXFlip()) {
+            angle = 180 - angle;
+        }
+        if (getYFlip()) {
+            angle = -angle;
+        }
+        angle %= 360;
+        if (angle < 0) {
+            angle += 360;
+        }
+        return angle;
+    }
+    
+    /**
+     * Returns whether this ThinkerObject's absolute pressing angle, if it has
+     * one, has a component in the specified Direction.
+     * @param direction The Direction to check
+     * @return Whether this ThinkerObject's absolute pressing angle causes it to
+     * press in the specified Direction
+     */
+    public final boolean isPressingIn(Direction direction) {
+        Double angle = getAbsPressingAngle();
+        return angle != null
+                && ((direction == Direction.LEFT && (angle < 90 || angle > 270))
+                || (direction == Direction.RIGHT && angle > 90 && angle < 270)
+                || (direction == Direction.UP && angle > 0 && angle < 180)
+                || (direction == Direction.DOWN && angle > 180));
     }
     
     /**
@@ -447,20 +473,20 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     }
     
     /**
-     * Returns the number of followers that this ThinkerObject currently has.
-     * @return This ThinkerObject's number of followers
-     */
-    public final int getNumFollowers() {
-        return followers.size();
-    }
-    
-    /**
      * Returns the Set of this ThinkerObject's followers. Changes to the
      * returned Set will not be reflected in this ThinkerObject.
      * @return The Set of this ThinkerObject's followers
      */
     public final Set<ThinkerObject> getFollowers() {
         return new HashSet<>(followers);
+    }
+    
+    /**
+     * Returns the number of followers that this ThinkerObject currently has.
+     * @return This ThinkerObject's number of followers
+     */
+    public final int getNumFollowers() {
+        return followers.size();
     }
     
     /**
@@ -544,7 +570,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject; defaults to false
      */
-    public final void setPosition(SpaceVector position, boolean bringFollowers) {
+    public final void setPosition(CellVector position, boolean bringFollowers) {
         double changeX = position.getX() - getX();
         double changeY = position.getY() - getY();
         setPosition(position);
@@ -617,7 +643,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject; defaults to false
      */
-    public final void changePosition(SpaceVector change, boolean bringFollowers) {
+    public final void changePosition(CellVector change, boolean bringFollowers) {
         changePosition(change);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -683,7 +709,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * specified amount, colliding with solid surfaces 
      * @param change 
      */
-    public final void doMovement(SpaceVector change) {
+    public final void doMovement(CellVector change) {
         doMovement(change.getX(), change.getY());
     }
     
@@ -735,8 +761,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         return collisionDirections.contains(direction);
     }
     
-    public final SpaceVector getVelocity() {
-        return new SpaceVector(velocity);
+    public final CellVector getVelocity() {
+        return new CellVector(velocity);
     }
     
     public final double getVelocityX() {
@@ -751,7 +777,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         return velocity.getMagnitude();
     }
     
-    public final void setVelocity(SpaceVector velocity) {
+    public final void setVelocity(CellVector velocity) {
         this.velocity.setCoordinates(velocity);
     }
     
@@ -771,8 +797,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         velocity.setMagnitude(speed);
     }
     
-    public final SpaceVector getStep() {
-        return new SpaceVector(step);
+    public final CellVector getStep() {
+        return new CellVector(step);
     }
     
     public final double getStepX() {
@@ -787,7 +813,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         return step.getMagnitude();
     }
     
-    public final void setStep(SpaceVector step) {
+    public final void setStep(CellVector step) {
         this.step.setCoordinates(step);
     }
     
@@ -799,7 +825,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         step.setMagnitude(length);
     }
     
-    public final void changeStep(SpaceVector change) {
+    public final void changeStep(CellVector change) {
         step.add(change);
     }
     
@@ -823,7 +849,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         step.add(0, changeY);
     }
     
-    public final void moveToward(SpaceVector position, double speed) {
+    public final void moveToward(CellVector position, double speed) {
         setVelocity(position.getX() - getX(), position.getY() - getY());
         setSpeed(speed);
     }
@@ -833,7 +859,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         setSpeed(speed);
     }
     
-    public final void stepTo(SpaceVector position) {
+    public final void stepTo(CellVector position) {
         setVelocity(0, 0);
         setStep(position.getX() - getX(), position.getY() - getY());
     }
@@ -843,7 +869,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         setStep(x - getX(), y - getY());
     }
     
-    public final void stepToward(SpaceVector position, double speed) {
+    public final void stepToward(CellVector position, double speed) {
         setVelocity(0, 0);
         setStep(position.getX() - getX(), position.getY() - getY());
         if (getStepLength() > speed) {
@@ -859,8 +885,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         }
     }
     
-    public final SpaceVector getDisplacement() {
-        return new SpaceVector(displacement);
+    public final CellVector getDisplacement() {
+        return new CellVector(displacement);
     }
     
     public final double getDisplacementX() {

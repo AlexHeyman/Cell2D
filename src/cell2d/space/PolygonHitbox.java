@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,10 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     
     private static class RelAbsPair {
         
-        private final SpaceVector rel;
-        private final SpaceVector abs;
+        private final CellVector rel;
+        private final CellVector abs;
         
-        private RelAbsPair(SpaceVector rel, SpaceVector abs) {
+        private RelAbsPair(CellVector rel, CellVector abs) {
             this.rel = rel;
             this.abs = abs;
         }
@@ -40,7 +41,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relPosition This PolygonHitbox's relative position
      * @param relVertices This PolygonHitbox's relative vertices
      */
-    public PolygonHitbox(SpaceVector relPosition, SpaceVector[] relVertices) {
+    public PolygonHitbox(CellVector relPosition, CellVector[] relVertices) {
         this(relPosition.getX(), relPosition.getY(), relVertices);
     }
     
@@ -51,11 +52,11 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relY The y-coordinate of this PolygonHitbox's relative position
      * @param relVertices This PolygonHitbox's relative vertices
      */
-    public PolygonHitbox(double relX, double relY, SpaceVector[] relVertices) {
+    public PolygonHitbox(double relX, double relY, CellVector[] relVertices) {
         super(relX, relY);
         vertices = new ArrayList<>(relVertices.length);
-        for (SpaceVector relVertex : relVertices) {
-            vertices.add(new RelAbsPair(new SpaceVector(relVertex), null));
+        for (CellVector relVertex : relVertices) {
+            vertices.add(new RelAbsPair(new CellVector(relVertex), null));
         }
         updateData();
     }
@@ -65,7 +66,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * vertices.
      * @param relPosition This PolygonHitbox's relative position
      */
-    public PolygonHitbox(SpaceVector relPosition) {
+    public PolygonHitbox(CellVector relPosition) {
         this(relPosition.getX(), relPosition.getY());
     }
     
@@ -107,10 +108,10 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         if (radius < 0) {
             throw new RuntimeException("Attempted to make a regular polygon with a negative radius");
         }
-        SpaceVector[] relVertices = new SpaceVector[numVertices];
+        CellVector[] relVertices = new CellVector[numVertices];
         double angleChange = 360.0/numVertices;
         for (int i = 0; i < numVertices; i++) {
-            relVertices[i] = new SpaceVector(angle).scale(radius);
+            relVertices[i] = new CellVector(angle).scale(radius);
             angle += angleChange;
         }
         return new PolygonHitbox(relX, relY, relVertices);
@@ -120,7 +121,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     public Hitbox<T> getCopy() {
         List<RelAbsPair> newVertices = new ArrayList<>(vertices.size());
         for (RelAbsPair vertex : vertices) {
-            newVertices.add(new RelAbsPair(new SpaceVector(vertex.rel), null));
+            newVertices.add(new RelAbsPair(new CellVector(vertex.rel), null));
         }
         return new PolygonHitbox<>(0, 0, newVertices);
     }
@@ -152,136 +153,214 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
         updateBoundaries();
     }
     
-    public final List<SpaceVector> getRelVertices() {
-        List<SpaceVector> relVertices = new ArrayList<>(vertices.size());
+    /**
+     * Returns the List of this PolygonHitbox's relative vertices. Changes to
+     * the returned List will not be reflected in this PolygonHitbox.
+     * @return The List of this PolygonHitbox's relative vertices
+     */
+    public final List<CellVector> getRelVertices() {
+        List<CellVector> relVertices = new ArrayList<>(vertices.size());
         for (int i = 0; i < vertices.size(); i++) {
-            relVertices.add(new SpaceVector(vertices.get(i).rel));
+            relVertices.add(new CellVector(vertices.get(i).rel));
         }
         return relVertices;
     }
     
-    public final List<SpaceVector> getAbsVertices() {
-        List<SpaceVector> absVertices = new ArrayList<>(vertices.size());
+    /**
+     * Returns the List of this PolygonHitbox's absolute vertices. Changes to
+     * the returned List will not be reflected in this PolygonHitbox.
+     * @return The List of this PolygonHitbox's absolute vertices
+     */
+    public final List<CellVector> getAbsVertices() {
+        List<CellVector> absVertices = new ArrayList<>(vertices.size());
         for (int i = 0; i < vertices.size(); i++) {
-            absVertices.add(new SpaceVector(vertices.get(i).abs));
+            absVertices.add(new CellVector(vertices.get(i).abs));
         }
         return absVertices;
     }
     
+    /**
+     * Returns how many vertices this PolygonHitbox has.
+     * @return How many vertices this PolygonHitbox has
+     */
     public final int getNumVertices() {
         return vertices.size();
     }
     
-    public final SpaceVector getRelVertex(int index) {
-        return new SpaceVector(vertices.get(index).rel);
+    /**
+     * Returns this PolygonHitbox's relative vertex at the specified index.
+     * @param index The index of the relative vertex
+     * @return The relative vertex at the specified index
+     */
+    public final CellVector getRelVertex(int index) {
+        return new CellVector(vertices.get(index).rel);
     }
     
+    /**
+     * Returns the x-coordinate of this PolygonHitbox's relative vertex at the
+     * specified index.
+     * @param index The index of the relative vertex
+     * @return The x-coordinate of the relative vertex at the specified index
+     */
     public final double getRelVertexX(int index) {
         return vertices.get(index).rel.getX();
     }
     
+    /**
+     * Returns the y-coordinate of this PolygonHitbox's relative vertex at the
+     * specified index.
+     * @param index The index of the relative vertex
+     * @return The y-coordinate of the relative vertex at the specified index
+     */
     public final double getRelVertexY(int index) {
         return vertices.get(index).rel.getY();
     }
     
-    public final SpaceVector getAbsVertex(int index) {
-        return new SpaceVector(vertices.get(index).abs);
+    /**
+     * Returns this PolygonHitbox's absolute vertex at the specified index.
+     * @param index The index of the absolute vertex
+     * @return The absolute vertex at the specified index
+     */
+    public final CellVector getAbsVertex(int index) {
+        return new CellVector(vertices.get(index).abs);
     }
     
+    /**
+     * Returns the x-coordinate of this PolygonHitbox's absolute vertex at the
+     * specified index.
+     * @param index The index of the absolute vertex
+     * @return The x-coordinate of the absolute vertex at the specified index
+     */
     public final double getAbsVertexX(int index) {
         return vertices.get(index).abs.getX();
     }
     
+    /**
+     * Returns the y-coordinate of this PolygonHitbox's absolute vertex at the
+     * specified index.
+     * @param index The index of the absolute vertex
+     * @return The y-coordinate of the absolute vertex at the specified index
+     */
     public final double getAbsVertexY(int index) {
         return vertices.get(index).abs.getY();
     }
     
-    public final void addVertex(SpaceVector relVertex) {
-        vertices.add(new RelAbsPair(new SpaceVector(relVertex), null));
+    /**
+     * Adds the specified relative vertex to this PolygonHitbox at the index
+     * after its last one, between its last and first relative vertices.
+     * @param relVertex The new relative vertex
+     */
+    public final void addVertex(CellVector relVertex) {
+        vertices.add(new RelAbsPair(new CellVector(relVertex), null));
         updateData();
     }
     
+    /**
+     * Adds the specified relative vertex to this PolygonHitbox at the index
+     * after its last one, between its last and first relative vertices.
+     * @param relX The x-coordinate of the new relative vertex
+     * @param relY The y-coordinate of the new relative vertex
+     */
     public final void addVertex(double relX, double relY) {
-        vertices.add(new RelAbsPair(new SpaceVector(relX, relY), null));
+        vertices.add(new RelAbsPair(new CellVector(relX, relY), null));
         updateData();
     }
     
-    public final void setRelVertex(int index, SpaceVector relVertex) {
-        vertices.set(index, new RelAbsPair(new SpaceVector(relVertex), null));
+    /**
+     * Adds the specified relative vertex to this PolygonHitbox at the specified
+     * index.
+     * @param index The index at which to add the new relative vertex
+     * @param relVertex The new relative vertex
+     */
+    public final void addRelVertex(int index, CellVector relVertex) {
+        vertices.add(index, new RelAbsPair(new CellVector(relVertex), null));
         updateData();
     }
     
+    /**
+     * Adds the specified relative vertex to this PolygonHitbox at the specified
+     * index.
+     * @param index The index at which to add the new relative vertex
+     * @param relX The x-coordinate of the new relative vertex
+     * @param relY The y-coordinate of the new relative vertex
+     */
+    public final void addRelVertex(int index, double relX, double relY) {
+        vertices.add(index, new RelAbsPair(new CellVector(relX, relY), null));
+        updateData();
+    }
+    
+    /**
+     * Sets this PolygonHitbox's relative vertex at the specified index to the
+     * specified value.
+     * @param index The index of the relative vertex to be changed
+     * @param relVertex The new relative vertex
+     */
+    public final void setRelVertex(int index, CellVector relVertex) {
+        vertices.set(index, new RelAbsPair(new CellVector(relVertex), null));
+        updateData();
+    }
+    
+    /**
+     * Sets this PolygonHitbox's relative vertex at the specified index to the
+     * specified value.
+     * @param index The index of the relative vertex to be changed
+     * @param relX The x-coordinate of the new relative vertex
+     * @param relY The y-coordinate of the new relative vertex
+     */
     public final void setRelVertex(int index, double relX, double relY) {
-        vertices.set(index, new RelAbsPair(new SpaceVector(relX, relY), null));
+        vertices.set(index, new RelAbsPair(new CellVector(relX, relY), null));
         updateData();
     }
     
+    /**
+     * Sets the x-coordinate of this PolygonHitbox's relative vertex at the
+     * specified index to the specified value.
+     * @param index The index of the relative vertex to be changed
+     * @param relX The relative vertex's new x-coordinate
+     */
     public final void setRelVertexX(int index, double relX) {
         vertices.get(index).rel.setX(relX);
         updateData();
     }
     
+    /**
+     * Sets the y-coordinate of this PolygonHitbox's relative vertex at the
+     * specified index to the specified value.
+     * @param index The index of the relative vertex to be changed
+     * @param relY The relative vertex's new y-coordinate
+     */
     public final void setRelVertexY(int index, double relY) {
         vertices.get(index).rel.setY(relY);
         updateData();
     }
     
+    /**
+     * Removes this PolygonHitbox's vertex at the specified index.
+     * @param index The index of the vertex to be removed
+     */
     public final void removeVertex(int index) {
         vertices.remove(index);
         updateData();
     }
     
+    /**
+     * Removes all of this PolygonHitbox's vertices.
+     */
     public final void clearVertices() {
         vertices.clear();
         updateData();
     }
     
-    public final PolygonHitbox translate(SpaceVector change) {
-        return translate(change.getX(), change.getY());
-    }
-    
-    public final PolygonHitbox translate(double changeX, double changeY) {
-        for (RelAbsPair vertex : vertices) {
-            vertex.rel.add(changeX, changeY);
-        }
-        updateData();
-        return this;
-    }
-    
-    public final PolygonHitbox flip() {
-        return flip(true, true);
-    }
-    
-    public final PolygonHitbox flipX() {
-        return flip(true, false);
-    }
-    
-    public final PolygonHitbox flipY() {
-        return flip(false, true);
-    }
-    
-    public final PolygonHitbox flip(boolean xFlip, boolean yFlip) {
-        for (RelAbsPair vertex : vertices) {
-            vertex.rel.flip(xFlip, yFlip);
-        }
-        updateData();
-        return this;
-    }
-    
-    public final PolygonHitbox scale(double scaleFactor) {
+    /**
+     * Multiplies the coordinates of all of this PolygonHitbox's relative
+     * vertices by the specified factor.
+     * @param scaleFactor The factor by which to scale this PolygonHitbox
+     */
+    public final void scale(double scaleFactor) {
         for (RelAbsPair vertex : vertices) {
             vertex.rel.scale(scaleFactor);
         }
         updateData();
-        return this;
-    }
-    
-    public final PolygonHitbox rotate(double angle) {
-        for (RelAbsPair vertex : vertices) {
-            vertex.rel.changeAngle(angle);
-        }
-        updateData();
-        return this;
     }
     
     @Override

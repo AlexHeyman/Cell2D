@@ -1,164 +1,167 @@
-package cell2d.space;
+package cell2d;
+
+import cell2d.space.Hitbox;
+import cell2d.space.SpaceObject;
 
 /**
- * <p>A SpaceVector represents a point in SpaceState space as a two-dimensional
- * vector. A SpaceVector retains its identity as an Object even if the point
- * that it represents is changed, and thus two different SpaceVectors with the
- * same point are not considered equal. SpaceVectors measure angles in degrees
- * going counterclockwise from directly right and normalize them to be between 0
- * and 360. All operations on a SpaceVector return the SpaceVector itself to
- * allow operations to be easily strung together.</p>
+ * <p>A CellVector represents a point in space as a two-dimensional vector. A
+ * CellVector retains its identity as an Object even if the point that it
+ * represents is changed, and thus two different CellVectors with the same point
+ * are not considered equal. CellVectors measure angles in degrees going
+ * counterclockwise from directly right and normalize them to be between 0 and
+ * 360. All operations on a CellVector return the CellVector itself to allow
+ * operations to be easily strung together.</p>
  * @author Andrew Heyman
  */
-public class SpaceVector {
+public class CellVector {
     
     private double x, y;
     
     /**
-     * Creates a new SpaceVector that represents the origin.
+     * Creates a new CellVector that represents the origin.
      */
-    public SpaceVector() {
+    public CellVector() {
         x = 0;
         y = 0;
     }
     
     /**
-     * Creates a new SpaceVector that represents the specified point.
-     * @param point The point that this SpaceVector represents
+     * Creates a new CellVector that represents the specified point.
+     * @param point The point that this CellVector represents
      */
-    public SpaceVector(SpaceVector point) {
+    public CellVector(CellVector point) {
         x = point.x;
         y = point.y;
     }
     
     /**
-     * Creates a new SpaceVector that represents the specified point.
-     * @param x The x-coordinate of the point that this SpaceVector represents
-     * @param y The y-coordinate of the point that this SpaceVector represents
+     * Creates a new CellVector that represents the specified point.
+     * @param x The x-coordinate of the point that this CellVector represents
+     * @param y The y-coordinate of the point that this CellVector represents
      */
-    public SpaceVector(double x, double y) {
+    public CellVector(double x, double y) {
         this.x = x;
         this.y = y;
     }
     
     /**
-     * Creates a new SpaceVector that represents the point on the unit circle
-     * at the specified angle from the origin.
+     * Creates a new CellVector that represents the point on the unit circle at
+     * the specified angle from the origin.
      * @param angle The angle from the origin of the point on the unit circle
-     * that this SpaceVector represents
+     * that this CellVector represents
      */
-    public SpaceVector(double angle) {
+    public CellVector(double angle) {
         double radians = Math.toRadians(angle);
         x = Math.cos(radians);
         y = -Math.sin(radians);
     }
     
     /**
-     * Resets this SpaceVector to represent the origin.
-     * @return This SpaceVector
+     * Resets this CellVector to represent the origin.
+     * @return This CellVector
      */
-    public final SpaceVector clear() {
+    public final CellVector clear() {
         x = 0;
         y = 0;
         return this;
     }
     
     /**
-     * Returns the x-coordinate of the point that this SpaceVector represents.
-     * @return The x-coordinate of the point that this SpaceVector represents
+     * Returns the x-coordinate of the point that this CellVector represents.
+     * @return The x-coordinate of the point that this CellVector represents
      */
     public final double getX() {
         return x;
     }
     
     /**
-     * Sets the x-coordinate of this SpaceVector's point to the specified value.
+     * Sets the x-coordinate of this CellVector's point to the specified value.
      * @param x The point's new x-coordinate
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector setX(double x) {
+    public final CellVector setX(double x) {
         this.x = x;
         return this;
     }
     
     /**
-     * Returns the y-coordinate of the point that this SpaceVector represents.
-     * @return The y-coordinate of the point that this SpaceVector represents
+     * Returns the y-coordinate of the point that this CellVector represents.
+     * @return The y-coordinate of the point that this CellVector represents
      */
     public final double getY() {
         return y;
     }
     
     /**
-     * Sets the y-coordinate of this SpaceVector's point to the specified value.
+     * Sets the y-coordinate of this CellVector's point to the specified value.
      * @param y The point's new y-coordinate
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector setY(double y) {
+    public final CellVector setY(double y) {
         this.y = y;
         return this;
     }
     
     /**
-     * Sets this SpaceVector's point to the specified value.
+     * Sets this CellVector's point to the specified value.
      * @param point The new point
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector setCoordinates(SpaceVector point) {
+    public final CellVector setCoordinates(CellVector point) {
         x = point.x;
         y = point.y;
         return this;
     }
     
     /**
-     * Sets this SpaceVector's point to the specified coordinates.
+     * Sets this CellVector's point to the specified coordinates.
      * @param x The point's new x-coordinate
      * @param y The point's new y-coordinate
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector setCoordinates(double x, double y) {
+    public final CellVector setCoordinates(double x, double y) {
         this.x = x;
         this.y = y;
         return this;
     }
     
     /**
-     * Flips this SpaceVector across both coordinate axes, negating both of its
+     * Flips this CellVector across both coordinate axes, negating both of its
      * coordinates.
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector flip() {
+    public final CellVector flip() {
         x = -x;
         y = -y;
         return this;
     }
     
     /**
-     * Flips this SpaceVector across the x-axis, negating its x-coordinate.
-     * @return This SpaceVector
+     * Flips this CellVector across the x-axis, negating its x-coordinate.
+     * @return This CellVector
      */
-    public final SpaceVector flipX() {
+    public final CellVector flipX() {
         x = -x;
         return this;
     }
     
     /**
-     * Flips this SpaceVector across the y-axis, negating its y-coordinate.
-     * @return This SpaceVector
+     * Flips this CellVector across the y-axis, negating its y-coordinate.
+     * @return This CellVector
      */
-    public final SpaceVector flipY() {
+    public final CellVector flipY() {
         y = -y;
         return this;
     }
     
     /**
-     * Flips this SpaceVector across either, both, or neither of the coordinate
+     * Flips this CellVector across either, both, or neither of the coordinate
      * axes, depending on the parameters.
-     * @param xFlip If true, this SpaceVector will be flipped across the x-axis
-     * @param yFlip If true, this SpaceVector will be flipped across the y-axis
-     * @return This SpaceVector
+     * @param xFlip If true, this CellVector will be flipped across the x-axis
+     * @param yFlip If true, this CellVector will be flipped across the y-axis
+     * @return This CellVector
      */
-    public final SpaceVector flip(boolean xFlip, boolean yFlip) {
+    public final CellVector flip(boolean xFlip, boolean yFlip) {
         if (xFlip) {
             x = -x;
         }
@@ -169,47 +172,47 @@ public class SpaceVector {
     }
     
     /**
-     * Returns the square of this SpaceVector's magnitude.
-     * @return The square of this SpaceVector's magnitude
+     * Returns the square of this CellVector's magnitude.
+     * @return The square of this CellVector's magnitude
      */
     public final double getMagnitudeSquared() {
         return x*x + y*y;
     }
     
     /**
-     * Returns this SpaceVector's magnitude.
-     * @return This SpaceVector's magnitude
+     * Returns this CellVector's magnitude.
+     * @return This CellVector's magnitude
      */
     public final double getMagnitude() {
         return Math.sqrt(x*x + y*y);
     }
     
     /**
-     * Sets this SpaceVector's magnitude to the specified value while retaining
-     * its angle. If the new magnitude is negative, this SpaceVector will be
+     * Sets this CellVector's magnitude to the specified value while retaining
+     * its angle. If the new magnitude is negative, this CellVector will be
      * flipped and its magnitude set to the absolute value of the specified
      * magnitude.
      * @param magnitude The new magnitude
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector setMagnitude(double magnitude) {
+    public final CellVector setMagnitude(double magnitude) {
         return (x == 0 && y == 0 ? setX(magnitude) : scale(magnitude/Math.sqrt(x*x + y*y)));
     }
     
     /**
-     * Multiplies this SpaceVector's coordinates by the specified factor.
-     * @param scaleFactor The factor by which to scale this SpaceVector
-     * @return This SpaceVector
+     * Multiplies this CellVector's coordinates by the specified factor.
+     * @param scaleFactor The factor by which to scale this CellVector
+     * @return This CellVector
      */
-    public final SpaceVector scale(double scaleFactor) {
+    public final CellVector scale(double scaleFactor) {
         x *= scaleFactor;
         y *= scaleFactor;
         return this;
     }
     
     /**
-     * Returns this SpaceVector's angle.
-     * @return This SpaceVector's angle
+     * Returns this CellVector's angle.
+     * @return This CellVector's angle
      */
     public final double getAngle() {
         return (x == 0 && y == 0 ? 0 : Math.toDegrees(Math.atan2(-y, x)));
@@ -217,8 +220,8 @@ public class SpaceVector {
     
     /**
      * Returns the x-coordinate of the unit vector that points in the direction
-     * of this SpaceVector's angle. This is equal to the cosine of the angle.
-     * @return The x-coordinate of this SpaceVector's angle
+     * of this CellVector's angle. This is equal to the cosine of the angle.
+     * @return The x-coordinate of this CellVector's angle
      */
     public final double getAngleX() {
         return (x == 0 && y == 0 ? 1 : x/Math.sqrt(x*x + y*y));
@@ -226,21 +229,21 @@ public class SpaceVector {
     
     /**
      * Returns the y-coordinate of the unit vector that points in the direction
-     * of this SpaceVector's angle. Since y-coordinates increase going downward,
+     * of this CellVector's angle. Since y-coordinates increase going downward,
      * this is equal to the negative sine of the angle.
-     * @return The y-coordinate of this SpaceVector's angle
+     * @return The y-coordinate of this CellVector's angle
      */
     public final double getAngleY() {
         return (x == 0 && y == 0 ? 0 : y/Math.sqrt(x*x + y*y));
     }
     
     /**
-     * Sets this SpaceVector's angle to the specified value while retaining its
+     * Sets this CellVector's angle to the specified value while retaining its
      * magnitude.
      * @param angle The new angle
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector setAngle(double angle) {
+    public final CellVector setAngle(double angle) {
         double length = Math.sqrt(x*x + y*y);
         double radians = Math.toRadians(angle);
         x = length*Math.cos(radians);
@@ -249,134 +252,134 @@ public class SpaceVector {
     }
     
     /**
-     * Changes this SpaceVector's angle by the specified amount while retaining
+     * Changes this CellVector's angle by the specified amount while retaining
      * its magnitude.
      * @param angle The amount by which to change the angle
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector changeAngle(double angle) {
+    public final CellVector changeAngle(double angle) {
         return (x == 0 && y == 0 ? this : setAngle(Math.toDegrees(Math.atan2(-y, x)) + angle));
     }
     
     /**
-     * Adds the specified SpaceVector to this SpaceVector.
-     * @param vector The SpaceVector to be added
-     * @return This SpaceVector
+     * Adds the specified CellVector to this CellVector.
+     * @param vector The CellVector to be added
+     * @return This CellVector
      */
-    public final SpaceVector add(SpaceVector vector) {
+    public final CellVector add(CellVector vector) {
         x += vector.x;
         y += vector.y;
         return this;
     }
     
     /**
-     * Adds the specified coordinates to this SpaceVector's own.
+     * Adds the specified coordinates to this CellVector's own.
      * @param x The x-coordinate to be added
      * @param y The y-coordinate to be added
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector add(double x, double y) {
+    public final CellVector add(double x, double y) {
         this.x += x;
         this.y += y;
         return this;
     }
     
     /**
-     * Returns a new SpaceVector that represents the sum of the two specified
-     * SpaceVectors.
-     * @param first The first SpaceVector
-     * @param second The second SpaceVector
-     * @return The sum of the two SpaceVectors
+     * Returns a new CellVector that represents the sum of the two specified
+     * CellVectors.
+     * @param first The first CellVector
+     * @param second The second CellVector
+     * @return The sum of the two CellVectors
      */
-    public static final SpaceVector add(SpaceVector first, SpaceVector second) {
-        return new SpaceVector(first.x + second.x, first.y + second.y);
+    public static final CellVector add(CellVector first, CellVector second) {
+        return new CellVector(first.x + second.x, first.y + second.y);
     }
     
     /**
-     * Subtracts the specified SpaceVector from this SpaceVector.
-     * @param vector The SpaceVector to be subtracted
-     * @return This SpaceVector
+     * Subtracts the specified CellVector from this CellVector.
+     * @param vector The CellVector to be subtracted
+     * @return This CellVector
      */
-    public final SpaceVector sub(SpaceVector vector) {
+    public final CellVector sub(CellVector vector) {
         x -= vector.x;
         y -= vector.y;
         return this;
     }
     
     /**
-     * Subtracts the specified coordinates from this SpaceVector's own.
+     * Subtracts the specified coordinates from this CellVector's own.
      * @param x The x-coordinate to be subtracted
      * @param y The y-coordinate to be subtracted
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector sub(double x, double y) {
+    public final CellVector sub(double x, double y) {
         this.x -= x;
         this.y -= y;
         return this;
     }
     
     /**
-     * Returns a new SpaceVector that represents the second specified
-     * SpaceVector subtracted from the first.
-     * @param first The first SpaceVector
-     * @param second The second SpaceVector
-     * @return The second SpaceVector subtracted from the first
+     * Returns a new CellVector that represents the second specified
+     * CellVector subtracted from the first.
+     * @param first The first CellVector
+     * @param second The second CellVector
+     * @return The second CellVector subtracted from the first
      */
-    public static final SpaceVector sub(SpaceVector first, SpaceVector second) {
-        return new SpaceVector(first.x - second.x, first.y - second.y);
+    public static final CellVector sub(CellVector first, CellVector second) {
+        return new CellVector(first.x - second.x, first.y - second.y);
     }
     
     /**
-     * Returns the dot product of this SpaceVector and the specified one.
-     * @param vector The SpaceVector to take the dot product with
-     * @return The dot product of this SpaceVector and the specified one
+     * Returns the dot product of this CellVector and the specified one.
+     * @param vector The CellVector to take the dot product with
+     * @return The dot product of this CellVector and the specified one
      */
-    public final double dot(SpaceVector vector) {
+    public final double dot(CellVector vector) {
         return x*vector.x + y*vector.y;
     }
     
     /**
-     * Returns the magnitude of the cross product of this SpaceVector and the
+     * Returns the magnitude of the cross product of this CellVector and the
      * specified one.
-     * @param vector The SpaceVector to take the cross product with
-     * @return The magnitude of the cross product of this SpaceVector and the
+     * @param vector The CellVector to take the cross product with
+     * @return The magnitude of the cross product of this CellVector and the
      * specified one
      */
-    public final double cross(SpaceVector vector) {
+    public final double cross(CellVector vector) {
         return x*vector.y - y*vector.x;
     }
     
     /**
-     * Flips this SpaceVector to reflect the flipped status of the specified
+     * Flips this CellVector to reflect the flipped status of the specified
      * Hitbox and rotates it to reflect the Hitbox's angle of rotation, as if
      * those properties were formerly relative to the Hitbox.
      * @param hitbox The Hitbox to reflect
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector relativeTo(Hitbox hitbox) {
+    public final CellVector relativeTo(Hitbox hitbox) {
         return flip(hitbox.getAbsXFlip(), hitbox.getAbsYFlip()).changeAngle(hitbox.getAbsAngle());
     }
     
     /**
-     * Flips this SpaceVector to reflect the flipped status of the specified
+     * Flips this CellVector to reflect the flipped status of the specified
      * SpaceObject and rotates it to reflect the SpaceObject's angle of
      * rotation, as if those properties were formerly relative to the
      * SpaceObject.
      * @param object The SpaceObject to reflect
-     * @return This SpaceVector
+     * @return This CellVector
      */
-    public final SpaceVector relativeTo(SpaceObject object) {
+    public final CellVector relativeTo(SpaceObject object) {
         return relativeTo(object.getLocatorHitbox());
     }
     
     /**
-     * Returns the distance from this SpaceVector's point to that of the
-     * specified SpaceVector.
+     * Returns the distance from this CellVector's point to that of the
+     * specified CellVector.
      * @param point The point to return the distance to
-     * @return The distance from this SpaceVector's point to that of the
-     * specified SpaceVector
+     * @return The distance from this CellVector's point to that of the
+     * specified CellVector
      */
-    public final double distanceTo(SpaceVector point) {
+    public final double distanceTo(CellVector point) {
         return distanceBetween(x, y, point.x, point.y);
     }
     
@@ -395,13 +398,13 @@ public class SpaceVector {
     }
     
     /**
-     * Returns the angle from this SpaceVector's point to that of the specified
-     * SpaceVector.
+     * Returns the angle from this CellVector's point to that of the specified
+     * CellVector.
      * @param point The point to return the angle to
-     * @return The angle from this SpaceVector's point to that of the specified
-     * SpaceVector
+     * @return The angle from this CellVector's point to that of the specified
+     * CellVector
      */
-    public final double angleTo(SpaceVector point) {
+    public final double angleTo(CellVector point) {
         double angle = Math.toDegrees(Math.atan2(y - point.y, point.x - x)) % 360;
         if (angle < 0) {
             angle += 360;
@@ -425,7 +428,7 @@ public class SpaceVector {
         return angle;
     }
     
-    private static boolean segBoxesIntersect(SpaceVector start1, SpaceVector diff1, SpaceVector start2, SpaceVector diff2) {
+    private static boolean segBoxesIntersect(CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
         double minX1, maxX1, minX2, maxX2;
         if (diff1.x > 0) {
             minX1 = start1.x;
@@ -464,8 +467,20 @@ public class SpaceVector {
     
     //Credit to Gareth Rees of StackOverflow for the line segment intersection algorithm.
     
-    static final boolean directSegsIntersect(SpaceVector start1, SpaceVector diff1, SpaceVector start2, SpaceVector diff2) {
-        SpaceVector start2MinusStart1 = SpaceVector.sub(start2, start1);
+    /**
+     * Returns whether the two specified open-ended line segments share any
+     * points.
+     * @param start1 One of the first line segment's endpoints
+     * @param diff1 The difference of the first line segment's endpoints
+     * @param start2 One of the second line segment's endpoints
+     * @param diff2 The difference of the second line segment's endpoints
+     * @return Whether the two line segments intersect
+     */
+    public static final boolean lineSegmentsIntersect(CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
+        if (!segBoxesIntersect(start1, diff1, start2, diff2)) {
+            return false;
+        }
+        CellVector start2MinusStart1 = CellVector.sub(start2, start1);
         if (diff1.cross(diff2) == 0) {
             if (start2MinusStart1.cross(diff1) == 0) {
                 double diff1Dot = diff1.dot(diff1);
@@ -486,37 +501,25 @@ public class SpaceVector {
     }
     
     /**
-     * Returns whether the two specified open line segments share any points.
-     * @param start1 One of the first line segment's endpoints
-     * @param diff1 The difference of the first line segment's endpoints
-     * @param start2 One of the second line segment's endpoints
-     * @param diff2 The difference of the second line segment's endpoints
-     * @return Whether the two line segments intersect
-     */
-    public static final boolean lineSegmentsIntersect(SpaceVector start1, SpaceVector diff1, SpaceVector start2, SpaceVector diff2) {
-        return segBoxesIntersect(start1, diff1, start2, diff2) && directSegsIntersect(start1, diff1, start2, diff2);
-    }
-    
-    /**
-     * Returns the single point at which the two specified open line segments
-     * intersect, or null if they intersect at no points or at an infinity of
-     * points.
+     * Returns the single point at which the two specified open-ended line
+     * segments intersect, or null if they intersect at no points or at an
+     * infinity of points.
      * @param start1 One of the first line segment's endpoints
      * @param diff1 The difference of the first line segment's endpoints
      * @param start2 One of the second line segment's endpoints
      * @param diff2 The difference of the second line segment's endpoints
      * @return The point at which the two line segments intersect
      */
-    public static final SpaceVector lineSegmentsIntersectionPoint(SpaceVector start1, SpaceVector diff1, SpaceVector start2, SpaceVector diff2) {
+    public static final CellVector lineSegmentsIntersectionPoint(CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
         if (!segBoxesIntersect(start1, diff1, start2, diff2) || diff1.cross(diff2) == 0) {
             return null;
         }
-        SpaceVector start2MinusStart1 = SpaceVector.sub(start2, start1);
+        CellVector start2MinusStart1 = CellVector.sub(start2, start1);
         double diff1CrossDiff2 = diff1.cross(diff2);
         double t = start2MinusStart1.cross(diff2)/diff1CrossDiff2;
         double u = start2MinusStart1.cross(diff1)/diff1CrossDiff2;
         if (t > 0 && t < 1 && u > 0 && u < 1) {
-            return SpaceVector.add(start1, new SpaceVector(diff1).scale(t));
+            return CellVector.add(start1, new CellVector(diff1).scale(t));
         }
         return null;
     }

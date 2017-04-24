@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.Animation;
 import cell2d.AnimationInstance;
 import cell2d.CellGame;
@@ -266,7 +267,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns this SpaceObject's position.
      * @return This SpaceObject's position
      */
-    public final SpaceVector getPosition() {
+    public final CellVector getPosition() {
         return locatorHitbox.getRelPosition();
     }
     
@@ -290,7 +291,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Sets this SpaceObject's position to the specified value.
      * @param position The new position
      */
-    public final void setPosition(SpaceVector position) {
+    public final void setPosition(CellVector position) {
         locatorHitbox.setRelPosition(position);
     }
     
@@ -325,7 +326,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Changes this SpaceObject's position by the specified amount.
      * @param change The amount to change the position by
      */
-    public final void changePosition(SpaceVector change) {
+    public final void changePosition(CellVector change) {
         locatorHitbox.changeRelPosition(change);
     }
     
@@ -502,7 +503,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns this SpaceObject's center's offset.
      * @return This SpaceObject's center's offset
      */
-    public final SpaceVector getCenterOffset() {
+    public final CellVector getCenterOffset() {
         return centerHitbox.getRelPosition();
     }
     
@@ -526,7 +527,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Sets this SpaceObject's center's offset to the specified value.
      * @param offset 
      */
-    public final void setCenterOffset(SpaceVector offset) {
+    public final void setCenterOffset(CellVector offset) {
         centerHitbox.setRelPosition(offset);
     }
     
@@ -562,7 +563,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the absolute position of this SpaceObject's center.
      * @return The absolute position of this SpaceObject's center
      */
-    public final SpaceVector getCenter() {
+    public final CellVector getCenter() {
         return centerHitbox.getAbsPosition();
     }
     
@@ -643,7 +644,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(SpaceVector center, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(CellVector center, double radius, Class<O> cls) {
         return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), center.getX(), center.getY(), radius, cls));
     }
     
@@ -1014,7 +1015,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the AnimationInstance that is assigned to this SpaceObject with
-     * the specified ID.
+     * the specified ID, or AnimationInstance.BLANK if there is none.
      * @param id The ID of the AnimationInstance to be returned
      * @return The AnimationInstance that is assigned to this SpaceObject with
      * the specified ID
@@ -1072,7 +1073,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the Animation of the AnimationInstance assigned to this
-     * SpaceObject with the specified ID, if there is one.
+     * SpaceObject with the specified ID, or Animation.BLANK if there is none.
      * @param id The ID of the AnimationInstance whose Animation is to be
      * returned
      * @return The Animation of the AnimationInstance assigned to this
@@ -1092,7 +1093,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * from this SpaceObject.
      * @param id The ID with which to assign the new AnimationInstance
      * @param animation The Animation to add a new AnimationInstance of
-     * @return The new AnimationInstance
+     * @return The AnimationInstance assigned with the specified ID
      */
     public final AnimationInstance setAnimation(int id, Animation animation) {
         AnimationInstance instance = getAnimInstance(id);
@@ -1115,6 +1116,16 @@ public abstract class SpaceObject<T extends CellGame> {
             }
         }
         return instance;
+    }
+    
+    /**
+     * Returns the Animation of the AnimationInstance assigned to this
+     * SpaceObject with ID 0, or Animation.BLANK if there is none.
+     * @return The Animation of the AnimationInstance assigned to this
+     * SpaceObject with ID 0
+     */
+    public final Animation getAnimation() {
+        return getAnimInstance(0).getAnimation();
     }
     
     /**

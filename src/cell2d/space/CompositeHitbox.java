@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
      * Creates a new CompositeHitbox with the specified relative position.
      * @param relPosition This CompositeHitbox's relative position
      */
-    public CompositeHitbox(SpaceVector relPosition) {
+    public CompositeHitbox(CellVector relPosition) {
         super(relPosition);
     }
     

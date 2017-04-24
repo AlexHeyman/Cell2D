@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import cell2d.CellVector;
 import cell2d.CellGame;
 
 /**
@@ -12,7 +13,7 @@ import cell2d.CellGame;
  */
 public class LineHitbox<T extends CellGame> extends Hitbox<T> {
     
-    private final SpaceVector relDifference, absDifference;
+    private final CellVector relDifference, absDifference;
     private double left, right, top, bottom;
     
     /**
@@ -21,7 +22,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relPosition This LineHitbox's relative position
      * @param relDifference This LineHitbox's relative difference
      */
-    public LineHitbox(SpaceVector relPosition, SpaceVector relDifference) {
+    public LineHitbox(CellVector relPosition, CellVector relDifference) {
         this(relPosition.getX(), relPosition.getY(), relDifference.getX(), relDifference.getY());
     }
     
@@ -35,14 +36,14 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      */
     public LineHitbox(double relX, double relY, double relDX, double relDY) {
         super(relX, relY);
-        this.relDifference = new SpaceVector(relDX, relDY);
-        absDifference = new SpaceVector();
+        this.relDifference = new CellVector(relDX, relDY);
+        absDifference = new CellVector();
         updateData();
     }
     
     @Override
     public Hitbox<T> getCopy() {
-        return new LineHitbox<>(new SpaceVector(0, 0), relDifference);
+        return new LineHitbox<>(new CellVector(0, 0), relDifference);
     }
     
     private void updateData() {
@@ -58,8 +59,8 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns this LineHitbox's relative difference.
      * @return This LineHitbox's relative difference
      */
-    public final SpaceVector getRelDifference() {
-        return new SpaceVector(relDifference);
+    public final CellVector getRelDifference() {
+        return new CellVector(relDifference);
     }
     
     /**
@@ -82,7 +83,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * Sets this LineHitbox's relative difference to the specified value.
      * @param difference The new relative difference
      */
-    public final void setRelDifference(SpaceVector difference) {
+    public final void setRelDifference(CellVector difference) {
         relDifference.setCoordinates(difference);
         updateData();
     }
@@ -121,8 +122,8 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns this LineHitbox's absolute difference.
      * @return This LineHitbox's absolute difference
      */
-    public final SpaceVector getAbsDifference() {
-        return new SpaceVector(absDifference);
+    public final CellVector getAbsDifference() {
+        return new CellVector(absDifference);
     }
     
     /**
@@ -146,8 +147,8 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * absolute position and absolute difference.
      * @return The position of this LineHitbox's second endpoint
      */
-    public final SpaceVector getPosition2() {
-        return new SpaceVector(getAbsX() + absDifference.getX(), getAbsY() + absDifference.getY());
+    public final CellVector getPosition2() {
+        return new CellVector(getAbsX() + absDifference.getX(), getAbsY() + absDifference.getY());
     }
     
     /**

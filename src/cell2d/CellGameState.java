@@ -278,7 +278,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * from this CellGameState.
      * @param id The ID with which to assign the new AnimationInstance
      * @param animation The Animation to add a new AnimationInstance of
-     * @return The new AnimationInstance
+     * @return The AnimationInstance assigned with the specified ID
      */
     public final AnimationInstance setAnimation(int id, Animation animation) {
         AnimationInstance instance = getAnimInstance(id);
