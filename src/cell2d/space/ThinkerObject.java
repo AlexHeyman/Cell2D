@@ -59,7 +59,6 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     private ThinkerObject leader = null;
     final Set<ThinkerObject<T>> followers = new HashSet<>();
     ThinkerObject effLeader = null;
-    Double collisionFactor = null;
     final Map<SpaceObject<T>,Set<Direction>> collisions = new HashMap<>();
     final Set<Direction> collisionDirections = EnumSet.noneOf(Direction.class);
     private final CellVector velocity = new CellVector();

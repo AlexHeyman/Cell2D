@@ -78,6 +78,7 @@ public abstract class SpaceObject<T extends CellGame> {
     private Hitbox<T> overlapHitbox = null;
     private Hitbox<T> solidHitbox = null;
     Double solidFactor = null;
+    Double collisionFactor = null;
     private int drawPriority = 0;
     private Drawable appearance = Sprite.BLANK;
     private final Map<Integer,AnimationInstance> animInstances = new HashMap<>();
