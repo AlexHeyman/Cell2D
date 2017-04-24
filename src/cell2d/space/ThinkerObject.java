@@ -11,7 +11,48 @@ import java.util.Set;
 
 /**
  * <p>A ThinkerObject is a SpaceObject that acts like a SpaceThinker, possessing
- * SpaceThinkerStates, timers, and various actions in response to events.</p>
+ * SpaceThinkerStates, timers, and various actions in response to events. A
+ * ThinkerObject can also simulate continuous movement through its SpaceState's
+ * space. If a ThinkerObject has had Cell2D's standard collision mechanics
+ * enabled for it, this movement will be blocked by any solid surfaces of
+ * SpaceObjects in the ThinkerObject's path.</p>
+ * 
+ * <p>A ThinkerObject may have a collision Hitbox that represents it for
+ * purposes of colliding with solid surfaces. The collision Hitbox's rectangular
+ * bounding box, rather than its exact shape, is what represents the
+ * ThinkerObject in Cell2D's standard collision mechanics, and thus standard
+ * collision only handles interactions between rectangular shapes. A
+ * ThinkerObject with no collision Hitbox cannot collide with solid surfaces,
+ * even if collision is enabled for it.</p>
+ * 
+ * <p>A ThinkerObject may have a pressing angle that causes it to behave during
+ * movement as if it were pressing in the angle's direction while moving
+ * perpendicularly to that direction. The pressing angle is specified as
+ * relative (to the ThinkerObject's flipped status and angle of rotation) or
+ * absolute.</p>
+ * 
+ * <p>A ThinkerObject may have one or more ThinkerObject followers, and if it
+ * does, it is called those followers' leader. When a ThinkerObject moves, all
+ * of its followers automatically move to maintain their relative positions to
+ * it. A ThinkerObject cannot collide with its leader, super-leaders, followers,
+ * or sub-followers.</p>
+ * 
+ * <p>A ThinkerObject has a velocity, as well as a vector called a step that
+ * acts as a short-term adjustment to its velocity, both in pixels per time
+ * unit. Every frame, between its beforeMovementActions() and
+ * afterMovementActions(), a ThinkerObject assigned to an active SpaceState
+ * moves by the sum of its velocity and step multiplied by its time factor, then
+ * resets its step to (0, 0). A ThinkerObject's movement priority determines
+ * when it will move relative to other ThinkerObjects. ThinkerObjects with
+ * higher movement priorities move before those with lower ones.</p>
+ * 
+ * <p>Every time a ThinkerObject moves, it records the SpaceObjects whose solid
+ * surfaces it collided with and the Directions of the surfaces relative to it
+ * when it collided with them, as well as its total displacement over the course
+ * of the movement, not counting pushes from moving solid surfaces or manual
+ * manipulation of its position. These records are reset when the ThinkerObject
+ * moves again, or when it is removed from the SpaceState whose space the
+ * records reflect.</p>
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses the SpaceStates that this
  * ThinkerObject can be assigned to
@@ -63,13 +104,13 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     final Set<Direction> collisionDirections = EnumSet.noneOf(Direction.class);
     private final CellVector velocity = new CellVector();
     private final CellVector step = new CellVector();
-    final CellVector displacement = new CellVector();
+    CellVector displacement = new CellVector();
     
     /**
      * Creates a new ThinkerObject with the specified locator Hitbox.
      * @param locatorHitbox This ThinkerObject's locator Hitbox
      */
-    public ThinkerObject(Hitbox locatorHitbox) {
+    public ThinkerObject(Hitbox<T> locatorHitbox) {
         super(locatorHitbox);
     }
     
@@ -304,19 +345,19 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     }
     
     /**
-     * Returns whether this ThinkerObject collides with solid surfaces using
-     * Cell2D's standard collision mechanics.
-     * @return Whether this ThinkerObject collides with solid surfaces
+     * Returns whether this ThinkerObject has Cell2D's standard collision
+     * mechanics enabled.
+     * @return Whether this ThinkerObject has collision enabled
      */
     public final boolean hasCollision() {
         return hasCollision;
     }
     
     /**
-     * Sets whether this ThinkerObject collides with solid surfaces using
-     * Cell2D's standard collision mechanics.
-     * @param hasCollision Whether this ThinkerObject should collide with solid
-     * surfaces
+     * Sets whether this ThinkerObject has Cell2D's standard collision mechanics
+     * enabled.
+     * @param hasCollision Whether this ThinkerObject should have collision
+     * enabled
      */
     public final void setCollision(boolean hasCollision) {
         if (state != null && collisionHitbox != null) {
@@ -328,7 +369,6 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         }
         this.hasCollision = hasCollision;
     }
-    
     
     /**
      * Returns this ThinkerObject's collision Hitbox, or null if it has none.
@@ -708,13 +748,23 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     
     /**
      * Moves this ThinkerObject and its followers and sub-followers by the
-     * specified amount, colliding with solid surfaces 
-     * @param change 
+     * specified amount, colliding with solid surfaces if they have collision
+     * enabled.
+     * @param change The amount by which this ThinkerObject should move
      */
     public final void doMovement(CellVector change) {
         doMovement(change.getX(), change.getY());
     }
     
+    /**
+     * Moves this ThinkerObject and its followers and sub-followers by the
+     * specified amount, colliding with solid surfaces if they have collision
+     * enabled.
+     * @param changeX The amount by which this ThinkerObject should move along
+     * the x-axis
+     * @param changeY The amount by which this ThinkerObject should move along
+     * the y-axis
+     */
     public final void doMovement(double changeX, double changeY) {
         if (state == null) {
             if (changeX != 0 || changeY != 0) {
@@ -724,10 +774,19 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
             collisions.clear();
             collisionDirections.clear();
             displacement.clear();
-            state.move(this, changeX, changeY);
+            displacement = state.move(this, changeX, changeY);
         }
     }
     
+    /**
+     * This ThinkerObject's response to colliding with a solid surface of the
+     * specified SpaceObject in the specified Direction.
+     * @param object The SpaceObject whose surface this ThinkerObject collided
+     * with
+     * @param direction The Direction in which this ThinkerObject collided with
+     * the surface
+     * @return The CollisionResponse to the collision (SLIDE by default)
+     */
     public CollisionResponse collide(SpaceObject<T> object, Direction direction) {
         return CollisionResponse.SLIDE;
     }
@@ -743,6 +802,13 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         collisionDirections.add(direction);
     }
     
+    /**
+     * Returns a Map of the SpaceObjects whose solid surfaces this ThinkerObject
+     * collided with during its last movement to the Sets of the Directions in
+     * which it collided with them. Changes to the returned Map will not be
+     * reflected in this ThinkerObject.
+     * @return A Map of this ThinkerObject's collisions during its last movement
+     */
     public final Map<SpaceObject<T>,Set<Direction>> getCollisions() {
         Map<SpaceObject<T>,Set<Direction>> collisionMap = new HashMap<>();
         for (Map.Entry<SpaceObject<T>,Set<Direction>> entry : collisions.entrySet()) {
@@ -751,154 +817,281 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         return collisionMap;
     }
     
+    /**
+     * Returns the Set of the Directions in which this ThinkerObject collided
+     * with solid surfaces during its last movement. Changes to the returned set
+     * will not be reflected in this ThinkerObject.
+     * @return The Set of the Directions in which this ThinkerObject collided
+     * with solid surfaces during its last movement
+     */
     public final Set<Direction> getCollisionDirections() {
         return EnumSet.copyOf(collisionDirections);
     }
     
+    /**
+     * Returns whether this ThinkerObject collided with any solid surfaces
+     * during its last movement.
+     * @return Whether this ThinkerObject collided with any solid surfaces
+     * during its last movement
+     */
     public final boolean collided() {
         return !collisions.isEmpty();
     }
     
+    /**
+     * Returns whether this ThinkerObject collided with any solid surfaces in
+     * the specified Direction during its last movement.
+     * @param direction The Direction to check
+     * @return Whether this ThinkerObject collided with any solid surfaces in
+     * the specified Direction during its last movement
+     */
     public final boolean collided(Direction direction) {
         return collisionDirections.contains(direction);
     }
     
+    /**
+     * Returns this ThinkerObject's velocity.
+     * @return This ThinkerObject's velocity
+     */
     public final CellVector getVelocity() {
         return new CellVector(velocity);
     }
     
+    /**
+     * Returns the x-component of this ThinkerObject's velocity.
+     * @return The x-component of this ThinkerObject's velocity
+     */
     public final double getVelocityX() {
         return velocity.getX();
     }
     
+    /**
+     * Returns the y-component of this ThinkerObject's velocity.
+     * @return The y-component of this ThinkerObject's velocity
+     */
     public final double getVelocityY() {
         return velocity.getY();
     }
     
+    /**
+     * Returns this ThinkerObject's speed, the magnitude of its velocity.
+     * @return This ThinkerObject's speed
+     */
     public final double getSpeed() {
         return velocity.getMagnitude();
     }
     
+    /**
+     * Sets this ThinkerObject's velocity to the specified value.
+     * @param velocity The new velocity
+     */
     public final void setVelocity(CellVector velocity) {
         this.velocity.setCoordinates(velocity);
     }
     
+    /**
+     * Sets this ThinkerObject's velocity to the specified value.
+     * @param velocityX The new x-component of the velocity
+     * @param velocityY The new y-component of the velocity
+     */
     public final void setVelocity(double velocityX, double velocityY) {
         velocity.setCoordinates(velocityX, velocityY);
     }
     
+    /**
+     * Sets the x-component of this ThinkerObject's velocity to the specified
+     * value.
+     * @param velocityX The new x-component of the velocity
+     */
     public final void setVelocityX(double velocityX) {
         velocity.setX(velocityX);
     }
     
+    /**
+     * Sets the y-component of this ThinkerObject's velocity to the specified
+     * value.
+     * @param velocityY The new y-component of the velocity
+     */
     public final void setVelocityY(double velocityY) {
         velocity.setY(velocityY);
     }
     
+    /**
+     * Sets this ThinkerObject's speed, the magnitude of its velocity, to the
+     * specified value.
+     * @param speed The new speed
+     */
     public final void setSpeed(double speed) {
         velocity.setMagnitude(speed);
     }
     
-    public final CellVector getStep() {
-        return new CellVector(step);
-    }
-    
-    public final double getStepX() {
-        return step.getX();
-    }
-    
-    public final double getStepY() {
-        return step.getY();
-    }
-    
-    public final double getStepLength() {
-        return step.getMagnitude();
-    }
-    
-    public final void setStep(CellVector step) {
-        this.step.setCoordinates(step);
-    }
-    
-    public final void setStep(double stepX, double stepY) {
-        step.setCoordinates(stepX, stepY);
-    }
-    
-    public final void setStepLength(double length) {
-        step.setMagnitude(length);
-    }
-    
-    public final void changeStep(CellVector change) {
-        step.add(change);
-    }
-    
-    public final void changeStep(double changeX, double changeY) {
-        step.add(changeX, changeY);
-    }
-    
-    public final void setStepX(double stepX) {
-        step.setX(stepX);
-    }
-    
-    public final void changeStepX(double changeX) {
-        step.add(changeX, 0);
-    }
-    
-    public final void setStepY(double stepY) {
-        step.setY(stepY);
-    }
-    
-    public final void changeStepY(double changeY) {
-        step.add(0, changeY);
-    }
-    
-    public final void moveToward(CellVector position, double speed) {
-        setVelocity(position.getX() - getX(), position.getY() - getY());
+    /**
+     * Sets this ThinkerObject's velocity to send it moving toward the specified
+     * point at the specified speed.
+     * @param point The point that this ThinkerObject should move toward
+     * @param speed The speed that this ThinkerObject should move at
+     */
+    public final void moveToward(CellVector point, double speed) {
+        setVelocity(point.getX() - getX(), point.getY() - getY());
         setSpeed(speed);
     }
     
+    /**
+     * Sets this ThinkerObject's velocity to send it moving toward the specified
+     * point at the specified speed.
+     * @param x The x-coordinate of the point that this ThinkerObject should
+     * move toward
+     * @param y The y-coordinate of the point that this ThinkerObject should
+     * move toward
+     * @param speed The speed that this ThinkerObject should move at
+     */
     public final void moveToward(double x, double y, double speed) {
         setVelocity(x - getX(), y - getY());
         setSpeed(speed);
     }
     
-    public final void stepTo(CellVector position) {
-        setVelocity(0, 0);
-        setStep(position.getX() - getX(), position.getY() - getY());
+    /**
+     * Returns this ThinkerObject's step.
+     * @return This ThinkerObject's step
+     */
+    public final CellVector getStep() {
+        return new CellVector(step);
     }
     
-    public final void stepTo(double x, double y) {
-        setVelocity(0, 0);
-        setStep(x - getX(), y - getY());
+    /**
+     * Returns the x-component of this ThinkerObject's step.
+     * @return The x-component of this ThinkerObject's step
+     */
+    public final double getStepX() {
+        return step.getX();
     }
     
-    public final void stepToward(CellVector position, double speed) {
-        setVelocity(0, 0);
-        setStep(position.getX() - getX(), position.getY() - getY());
-        if (getStepLength() > speed) {
-            setStepLength(speed);
-        }
+    /**
+     * Returns the y-component of this ThinkerObject's step.
+     * @return The y-component of this ThinkerObject's step
+     */
+    public final double getStepY() {
+        return step.getY();
     }
     
-    public final void stepToward(double x, double y, double speed) {
-        setVelocity(0, 0);
-        setStep(x - getX(), y - getY());
-        if (getStepLength() > speed) {
-            setStepLength(speed);
-        }
+    /**
+     * Returns the length of this ThinkerObject's step.
+     * @return The length of this ThinkerObject's step
+     */
+    public final double getStepLength() {
+        return step.getMagnitude();
     }
     
+    /**
+     * Sets this ThinkerObject's step to the specified value.
+     * @param step The new step
+     */
+    public final void setStep(CellVector step) {
+        this.step.setCoordinates(step);
+    }
+    
+    /**
+     * Sets this ThinkerObject's step to the specified value.
+     * @param stepX The x-component of the new step
+     * @param stepY The y-component of the new step
+     */
+    public final void setStep(double stepX, double stepY) {
+        step.setCoordinates(stepX, stepY);
+    }
+    
+    /**
+     * Sets the x-component of this ThinkerObject's step to the specified value.
+     * @param stepX The new x-component of the step
+     */
+    public final void setStepX(double stepX) {
+        step.setX(stepX);
+    }
+    
+    /**
+     * Sets the y-component of this ThinkerObject's step to the specified value.
+     * @param stepY The new y-component of the step
+     */
+    public final void setStepY(double stepY) {
+        step.setY(stepY);
+    }
+    
+    /**
+     * Sets the length of this ThinkerObject's step to the specified value.
+     * @param length The new step length
+     */
+    public final void setStepLength(double length) {
+        step.setMagnitude(length);
+    }
+    
+    /**
+     * Changes this ThinkerObject's step by the specified amount.
+     * @param change The amount to change the step by
+     */
+    public final void changeStep(CellVector change) {
+        step.add(change);
+    }
+    
+    /**
+     * Changes this ThinkerObject's step by the specified amount.
+     * @param changeX The amount to change the step's x-component by
+     * @param changeY The amount to change the step's y-component by
+     */
+    public final void changeStep(double changeX, double changeY) {
+        step.add(changeX, changeY);
+    }
+    
+    /**
+     * Changes the x-component of this ThinkerObject's step by the specified
+     * amount.
+     * @param changeX The amount to change the step's x-component by
+     */
+    public final void changeStepX(double changeX) {
+        step.add(changeX, 0);
+    }
+    
+    /**
+     * Changes the y-component of this ThinkerObject's step by the specified
+     * amount.
+     * @param changeY The amount to change the step's y-component by
+     */
+    public final void changeStepY(double changeY) {
+        step.add(0, changeY);
+    }
+    
+    /**
+     * Returns this ThinkerObject's displacement during its last movement.
+     * @return This ThinkerObject's displacement during its last movement
+     */
     public final CellVector getDisplacement() {
         return new CellVector(displacement);
     }
     
+    /**
+     * Returns the x-component of this ThinkerObject's displacement during its
+     * last movement.
+     * @return The x-component of this ThinkerObject's displacement during its
+     * last movement
+     */
     public final double getDisplacementX() {
         return displacement.getX();
     }
     
+    /**
+     * Returns the y-component of this ThinkerObject's displacement during its
+     * last movement.
+     * @return The y-component of this ThinkerObject's displacement during its
+     * last movement
+     */
     public final double getDisplacementY() {
         return displacement.getY();
     }
     
+    /**
+     * Returns the length of this ThinkerObject's displacement during its last
+     * movement.
+     * @return The length of this ThinkerObject's displacement during its last
+     * movement
+     */
     public final double getDisplacementLength() {
         return displacement.getMagnitude();
     }

@@ -52,11 +52,11 @@ import org.newdawn.slick.Graphics;
  * 
  * <p>Every frame, between the periods in which its SpaceThinkers perform their
  * beforeMovementActions() and afterMovementActions(), a SpaceState moves each
- * of its ThinkerObjects by the sum of its velocity and step vectors multiplied
- * by its time factor, then resets its step vector to (0, 0). This, along with
- * manual calls to the ThinkerObject's doMovement() method, is when the
- * ThinkerObject interacts with the solid surfaces of SpaceObjects in its path
- * if it has collision enabled.</p>
+ * of its ThinkerObjects by the sum of its velocity and step multiplied by its
+ * time factor, then resets its step to (0, 0). This, along with manual calls to
+ * the ThinkerObject's doMovement() method, is when the ThinkerObject interacts
+ * with the solid surfaces of SpaceObjects in its path if it has Cell2D's
+ * standard collision mechanics enabled.</p>
  * 
  * <p>SpaceLayers may be assigned to one SpaceState each with an integer ID in
  * the context of that SpaceState. Only one SpaceLayer may be assigned to a
@@ -2166,7 +2166,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return false;
     }
     
-    final void move(ThinkerObject<T> object, double changeX, double changeY) {
+    final CellVector move(ThinkerObject<T> object, double changeX, double changeY) {
         if (changeX == 0 && changeY == 0) {
             Double pressingAngle = object.getAbsPressingAngle();
             if (object.hasCollision() && object.getCollisionHitbox() != null && pressingAngle != null) {
@@ -2286,7 +2286,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             }
-            return;
+            return new CellVector();
         }
         CellVector nextMovement = null;
         double left, right, top, bottom;
@@ -3233,27 +3233,32 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 Direction direction = entry.getValue();
                 CollisionResponse response = objectToPush.collide(object, direction);
                 if (response != CollisionResponse.NONE) {
+                    boolean objectPressing = objectToPush.isPressingIn(direction);
                     switch (response) {
                         case SLIDE:
                             switch (direction) {
                                 case LEFT:
                                     if (objectToPush.getVelocityX() < 0) {
                                         objectToPush.setVelocityX(0);
+                                        objectPressing = true;
                                     }
                                     break;
                                 case RIGHT:
                                     if (objectToPush.getVelocityX() > 0) {
                                         objectToPush.setVelocityX(0);
+                                        objectPressing = true;
                                     }
                                     break;
                                 case UP:
                                     if (objectToPush.getVelocityY() < 0) {
                                         objectToPush.setVelocityY(0);
+                                        objectPressing = true;
                                     }
                                     break;
                                 case DOWN:
                                     if (objectToPush.getVelocityY() > 0) {
                                         objectToPush.setVelocityY(0);
+                                        objectPressing = true;
                                     }
                                     break;
                             }
@@ -3293,7 +3298,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         moveChanges = new ArrayList<>();
                     }
                     objectsToMove.add(objectToPush);
-                    moveChanges.add(new CellVector(changeX, changeY).scale(1 - objectToPush.collisionFactor));
+                    moveChanges.add(new CellVector((objectPressing || direction == Direction.LEFT || direction == Direction.RIGHT ? changeX : 0),
+                            (objectPressing || direction == Direction.UP || direction == Direction.DOWN ? changeY : 0)).scale(1 - objectToPush.collisionFactor));
                 }
             }
         }
@@ -3307,39 +3313,47 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 changeX *= changeFactor;
                 changeY *= changeFactor;
                 nextMovement.sub(changeX, changeY);
-                if (object.getVelocityX() < 0) {
-                    if (slideDirections.contains(Direction.LEFT)) {
+                if (slideDirections.contains(Direction.LEFT)) {
+                    if (object.getVelocityX() < 0) {
                         object.setVelocityX(0);
-                        nextMovement.setX(0);
-                    } else if (bounceDirections.contains(Direction.LEFT)) {
-                        object.setVelocityX(-object.getVelocityX());
-                        nextMovement.flipX();
                     }
-                } else if (object.getVelocityX() > 0) {
-                    if (slideDirections.contains(Direction.RIGHT)) {
+                    nextMovement.setX(0);
+                } else if (bounceDirections.contains(Direction.LEFT)) {
+                    if (object.getVelocityX() < 0) {
+                        object.setVelocityX(-object.getVelocityX());
+                    }
+                    nextMovement.flipX();
+                } else if (slideDirections.contains(Direction.RIGHT)) {
+                    if (object.getVelocityX() > 0) {
                         object.setVelocityX(0);
-                        nextMovement.setX(0);
-                    } else if (bounceDirections.contains(Direction.RIGHT)) {
-                        object.setVelocityX(-object.getVelocityX());
-                        nextMovement.flipX();
                     }
+                    nextMovement.setX(0);
+                } else if (bounceDirections.contains(Direction.RIGHT)) {
+                    if (object.getVelocityX() > 0) {
+                        object.setVelocityX(-object.getVelocityX());
+                    }
+                    nextMovement.flipX();
                 }
-                if (object.getVelocityY() < 0) {
-                    if (slideDirections.contains(Direction.UP)) {
+                if (slideDirections.contains(Direction.UP)) {
+                    if (object.getVelocityY() < 0) {
                         object.setVelocityY(0);
-                        nextMovement.setY(0);
-                    } else if (bounceDirections.contains(Direction.UP)) {
-                        object.setVelocityY(-object.getVelocityY());
-                        nextMovement.flipY();
                     }
-                } else if (object.getVelocityY() > 0) {
-                    if (slideDirections.contains(Direction.DOWN)) {
+                    nextMovement.setY(0);
+                } else if (bounceDirections.contains(Direction.UP)) {
+                    if (object.getVelocityY() < 0) {
+                        object.setVelocityY(-object.getVelocityY());
+                    }
+                    nextMovement.flipY();
+                } else if (slideDirections.contains(Direction.DOWN)) {
+                    if (object.getVelocityY() > 0) {
                         object.setVelocityY(0);
-                        nextMovement.setY(0);
-                    } else if (bounceDirections.contains(Direction.DOWN)) {
-                        object.setVelocityY(-object.getVelocityY());
-                        nextMovement.flipY();
                     }
+                    nextMovement.setY(0);
+                } else if (bounceDirections.contains(Direction.DOWN)) {
+                    if (object.getVelocityY() > 0) {
+                        object.setVelocityY(-object.getVelocityY());
+                    }
+                    nextMovement.flipY();
                 }
             }
         }
@@ -3358,6 +3372,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 objectToPush.collisionFactor = null;
             }
         }
+        CellVector displacement = new CellVector(changeX, changeY);
         object.setPosition(object.getX() + changeX, object.getY() + changeY);
         for (ThinkerObject<T> follower : object.followers) {
             move(follower, changeX, changeY);
@@ -3372,8 +3387,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             }
         }
         if (nextMovement != null && (nextMovement.getX() != 0 || nextMovement.getY() != 0)) {
-            move(object, nextMovement.getX(), nextMovement.getY());
+            displacement.add(move(object, nextMovement.getX(), nextMovement.getY()));
         }
+        return displacement;
     }
     
     @Override
@@ -3396,7 +3412,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 double dx = objectTimeFactor*(object.getVelocityX() + object.getStepX());
                 double dy = objectTimeFactor*(object.getVelocityY() + object.getStepY());
                 object.setStep(0, 0);
-                move(object, dx, dy);
+                object.displacement = move(object, dx, dy);
             }
             frameState = 2;
             iterator = thinkerIterator();

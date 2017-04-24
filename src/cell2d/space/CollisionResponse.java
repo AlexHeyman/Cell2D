@@ -8,12 +8,12 @@ package cell2d.space;
 public enum CollisionResponse {
     /**
      * The ThinkerObject passes through the surface without its velocity
-     * changing.
+     * changing and does not record the collision.
      */
     NONE,
     /**
      * The ThinkerObject's movement is blocked by the surface, and the component
-     * of its velocity perpendicular to the surface is eliminated.
+     * of its velocity toward the surface is eliminated.
      */
     SLIDE,
     /**
@@ -23,7 +23,7 @@ public enum CollisionResponse {
     STOP,
     /**
      * The ThinkerObject's movement is blocked by the surface, and the component
-     * of its velocity perpendicular to the surface is flipped.
+     * of its velocity toward the surface is flipped away from it.
      */
     BOUNCE
 }
