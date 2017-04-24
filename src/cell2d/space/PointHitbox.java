@@ -1,7 +1,7 @@
 package cell2d.space;
 
-import cell2d.CellVector;
 import cell2d.CellGame;
+import cell2d.CellVector;
 
 /**
  * A PointHitbox is a Hitbox that consists only of the point that is its

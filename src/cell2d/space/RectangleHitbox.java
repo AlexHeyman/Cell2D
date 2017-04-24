@@ -1,7 +1,7 @@
 package cell2d.space;
 
-import cell2d.CellVector;
 import cell2d.CellGame;
+import cell2d.CellVector;
 
 /**
  * <p>A RectangleHitbox is a rectangular Hitbox with sides that remain

@@ -89,21 +89,21 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         
     };
-    private Comparator<Pair<Double,Hitbox<T>>> movementComparator = new SpaceComparator<Pair<Double,Hitbox<T>>>() {
+    private Comparator<SpaceObject<T>> solidComparator = new SpaceComparator<SpaceObject<T>>() {
         
         @Override
-        public final int compare(Pair<Double,Hitbox<T>> pair1, Pair<Double,Hitbox<T>> pair2) {
-            double diff = pair1.getKey() - pair2.getKey();
-            return (diff == 0 ? Long.signum(pair1.getValue().id - pair2.getValue().id) : (int)Math.signum(diff));
+        public final int compare(SpaceObject<T> object1, SpaceObject<T> object2) {
+            double diff = object1.solidFactor - object2.solidFactor;
+            return (diff == 0 ? Long.signum(object1.id - object2.id) : (int)Math.signum(diff));
         }
         
     };
-    private Comparator<Pair<Double,ThinkerObject<T>>> pushComparator = new SpaceComparator<Pair<Double,ThinkerObject<T>>>() {
+    private Comparator<ThinkerObject<T>> collisionComparator = new SpaceComparator<ThinkerObject<T>>() {
         
         @Override
-        public final int compare(Pair<Double,ThinkerObject<T>> pair1, Pair<Double,ThinkerObject<T>> pair2) {
-            double diff = pair1.getKey() - pair2.getKey();
-            return (diff == 0 ? Long.signum(pair1.getValue().id - pair2.getValue().id) : (int)Math.signum(diff));
+        public final int compare(ThinkerObject<T> object1, ThinkerObject<T> object2) {
+            double diff = object1.collisionFactor - object2.collisionFactor;
+            return (diff == 0 ? Long.signum(object1.id - object2.id) : (int)Math.signum(diff));
         }
         
     };
@@ -2288,7 +2288,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             }
             return;
         }
-        Map<ThinkerObject<T>,CellVector> objectsToPush = null;
         CellVector nextMovement = null;
         double left, right, top, bottom;
         if (changeX > 0) {
@@ -2305,8 +2304,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             top = changeY;
             bottom = 0;
         }
-        SortedMap<Pair<Double,Hitbox<T>>,Direction> blockingPath = null;
-        SortedMap<Pair<Double,Hitbox<T>>,Direction> pressingAgainst = null;
+        SortedMap<SpaceObject<T>,Direction> blockingPath = null;
+        SortedMap<SpaceObject<T>,Direction> pressingAgainst = null;
+        SortedMap<ThinkerObject<T>,Direction> toPush = null;
         if (object.hasCollision() && object.getCollisionHitbox() != null) {
             Hitbox collisionHitbox = object.getCollisionHitbox();
             double leftEdge = collisionHitbox.getLeftEdge();
@@ -2341,20 +2341,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff
                                         && hitboxLeft < rightEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxLeft - rightEdge)/changeX, hitbox), Direction.RIGHT);
+                                        hitboxObject.solidFactor = (hitboxLeft - rightEdge)/changeX;
+                                        blockingPath.put(hitboxObject, Direction.RIGHT);
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.UP) && hitboxTop >= bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxTop < bottomEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxTop - bottomEdge)/changeY, hitbox), Direction.DOWN);
+                                        hitboxObject.solidFactor = (hitboxTop - bottomEdge)/changeY;
+                                        blockingPath.put(hitboxObject, Direction.DOWN);
                                     }
                                 }
                             }
@@ -2374,20 +2378,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxLeft < rightEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxLeft - rightEdge)/changeX, hitbox), Direction.RIGHT);
+                                        hitboxObject.solidFactor = (hitboxLeft - rightEdge)/changeX;
+                                        blockingPath.put(hitboxObject, Direction.RIGHT);
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.DOWN) && hitboxBottom <= topEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxBottom > topEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxBottom - topEdge)/changeY, hitbox), Direction.UP);
+                                        hitboxObject.solidFactor = (hitboxBottom - topEdge)/changeY;
+                                        blockingPath.put(hitboxObject, Direction.UP);
                                     }
                                 }
                             }
@@ -2404,29 +2412,35 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
                                         && (hitboxLeft < rightEdge + changeX || (pressingRight && hitboxLeft == rightEdge + changeX))) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxLeft - rightEdge)/changeX, hitbox), Direction.RIGHT);
+                                        hitboxObject.solidFactor = (hitboxLeft - rightEdge)/changeX;
+                                        blockingPath.put(hitboxObject, Direction.RIGHT);
                                     }
                                 } else if (pressingUp && hitbox.surfaceIsSolid(Direction.DOWN)
                                         && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxLeft - rightEdge)/changeX, 0), hitbox), Direction.UP);
+                                        hitboxObject.solidFactor = Math.max((hitboxLeft - rightEdge)/changeX, 0);
+                                        pressingAgainst.put(hitboxObject, Direction.UP);
                                     }
                                 } else if (pressingDown && hitbox.surfaceIsSolid(Direction.UP)
                                         && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxLeft - rightEdge)/changeX, 0), hitbox), Direction.DOWN);
+                                        hitboxObject.solidFactor = Math.max((hitboxLeft - rightEdge)/changeX, 0);
+                                        pressingAgainst.put(hitboxObject, Direction.DOWN);
                                     }
                                 }
                             }
@@ -2448,20 +2462,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxRight - leftEdge)/changeX, hitbox), Direction.LEFT);
+                                        hitboxObject.solidFactor = (hitboxRight - leftEdge)/changeX;
+                                        blockingPath.put(hitboxObject, Direction.LEFT);
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.UP) && hitboxTop >= bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxTop < bottomEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxTop - bottomEdge)/changeY, hitbox), Direction.DOWN);
+                                        hitboxObject.solidFactor = (hitboxTop - bottomEdge)/changeY;
+                                        blockingPath.put(hitboxObject, Direction.DOWN);
                                     }
                                 }
                             }
@@ -2481,20 +2499,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxRight - leftEdge)/changeX, hitbox), Direction.LEFT);
+                                        hitboxObject.solidFactor = (hitboxRight - leftEdge)/changeX;
+                                        blockingPath.put(hitboxObject, Direction.LEFT);
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.DOWN) && hitboxBottom <= topEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxBottom > topEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxBottom - topEdge)/changeY, hitbox), Direction.UP);
+                                        hitboxObject.solidFactor = (hitboxBottom - topEdge)/changeY;
+                                        blockingPath.put(hitboxObject, Direction.UP);
                                     }
                                 }
                             }
@@ -2511,29 +2533,35 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
                                         && (hitboxRight > leftEdge + changeX || (pressingLeft && hitboxRight == leftEdge + changeX))) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxRight - leftEdge)/changeX, hitbox), Direction.LEFT);
+                                        hitboxObject.solidFactor = (hitboxRight - leftEdge)/changeX;
+                                        blockingPath.put(hitboxObject, Direction.LEFT);
                                     }
                                 } else if (pressingUp && hitbox.surfaceIsSolid(Direction.DOWN)
                                         && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxRight - leftEdge)/changeX, 0), hitbox), Direction.UP);
+                                        hitboxObject.solidFactor = Math.max((hitboxRight - leftEdge)/changeX, 0);
+                                        pressingAgainst.put(hitboxObject, Direction.UP);
                                     }
                                 } else if (pressingDown && hitbox.surfaceIsSolid(Direction.UP)
                                         && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxRight - leftEdge)/changeX, 0), hitbox), Direction.DOWN);
+                                        hitboxObject.solidFactor = Math.max((hitboxRight - leftEdge)/changeX, 0);
+                                        pressingAgainst.put(hitboxObject, Direction.DOWN);
                                     }
                                 }
                             }
@@ -2552,29 +2580,35 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.UP) && hitboxTop >= bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge
                                         && (hitboxTop < bottomEdge + changeY || (pressingDown && hitboxTop == bottomEdge + changeY))) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxTop - bottomEdge)/changeY, hitbox), Direction.DOWN);
+                                        hitboxObject.solidFactor = (hitboxTop - bottomEdge)/changeY;
+                                        blockingPath.put(hitboxObject, Direction.DOWN);
                                     }
                                 } else if (pressingLeft && hitbox.surfaceIsSolid(Direction.RIGHT)
                                         && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxTop - bottomEdge)/changeY, 0), hitbox), Direction.LEFT);
+                                        hitboxObject.solidFactor = Math.max((hitboxTop - bottomEdge)/changeY, 0);
+                                        pressingAgainst.put(hitboxObject, Direction.LEFT);
                                     }
                                 } else if (pressingRight && hitbox.surfaceIsSolid(Direction.LEFT)
                                         && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxTop - bottomEdge)/changeY, 0), hitbox), Direction.RIGHT);
+                                        hitboxObject.solidFactor = Math.max((hitboxTop - bottomEdge)/changeY, 0);
+                                        pressingAgainst.put(hitboxObject, Direction.RIGHT);
                                     }
                                 }
                             }
@@ -2591,29 +2625,35 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.DOWN) && hitboxBottom <= topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge
                                         && (hitboxBottom > topEdge + changeY || (pressingUp && hitboxBottom == topEdge + changeY))) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (blockingPath == null) {
-                                            blockingPath = new TreeMap<>(movementComparator);
+                                            blockingPath = new TreeMap<>(solidComparator);
                                         }
-                                        blockingPath.put(new Pair<>((hitboxBottom - topEdge)/changeY, hitbox), Direction.UP);
+                                        hitboxObject.solidFactor = (hitboxBottom - topEdge)/changeY;
+                                        blockingPath.put(hitboxObject, Direction.UP);
                                     }
                                 } else if (pressingLeft && hitbox.surfaceIsSolid(Direction.RIGHT)
                                         && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxBottom - topEdge)/changeY, 0), hitbox), Direction.LEFT);
+                                        hitboxObject.solidFactor = (hitboxBottom - topEdge)/changeY;
+                                        pressingAgainst.put(hitboxObject, Direction.LEFT);
                                     }
                                 } else if (pressingRight && hitbox.surfaceIsSolid(Direction.LEFT)
                                         && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
-                                    if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
                                         if (pressingAgainst == null) {
-                                            pressingAgainst = new TreeMap<>(movementComparator);
+                                            pressingAgainst = new TreeMap<>(solidComparator);
                                         }
-                                        pressingAgainst.put(new Pair<>(Math.max((hitboxBottom - topEdge)/changeY, 0), hitbox), Direction.RIGHT);
+                                        hitboxObject.solidFactor = (hitboxBottom - topEdge)/changeY;
+                                        pressingAgainst.put(hitboxObject, Direction.RIGHT);
                                     }
                                 }
                             }
@@ -2662,14 +2702,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         boolean stop = false;
         EnumSet<Direction> bounceDirections = EnumSet.noneOf(Direction.class);
         if (blockingPath != null) {
-            for (Map.Entry<Pair<Double,Hitbox<T>>,Direction> entry : blockingPath.entrySet()) {
-                double entryChangeFactor = entry.getKey().getKey();
+            for (Map.Entry<SpaceObject<T>,Direction> entry : blockingPath.entrySet()) {
+                double entryChangeFactor = entry.getKey().solidFactor;
                 if (entryChangeFactor > changeFactor) {
                     break;
                 }
-                SpaceObject<T> collidedWith = entry.getKey().getValue().getObject();
                 Direction direction = entry.getValue();
-                CollisionResponse response = object.collide(collidedWith, direction);
+                CollisionResponse response = object.collide(entry.getKey(), direction);
                 if (response != CollisionResponse.NONE) {
                     switch (response) {
                         case SLIDE:
@@ -2683,19 +2722,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             break;
                     }
                     changeFactor = entryChangeFactor;
-                    object.addCollision(collidedWith, direction);
+                    object.addCollision(entry.getKey(), direction);
                 }
             }
         }
         if (pressingAgainst != null) {
-            for (Map.Entry<Pair<Double,Hitbox<T>>,Direction> entry : pressingAgainst.entrySet()) {
-                double entryChangeFactor = entry.getKey().getKey();
+            for (Map.Entry<SpaceObject<T>,Direction> entry : pressingAgainst.entrySet()) {
+                double entryChangeFactor = entry.getKey().solidFactor;
                 if (entryChangeFactor > changeFactor) {
                     break;
                 }
-                SpaceObject<T> collidedWith = entry.getKey().getValue().getObject();
                 Direction direction = entry.getValue();
-                CollisionResponse response = object.collide(collidedWith, direction);
+                CollisionResponse response = object.collide(entry.getKey(), direction);
                 if (response != CollisionResponse.NONE) {
                     switch (response) {
                         case SLIDE:
@@ -2710,7 +2748,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             break;
                     }
 
-                    object.addCollision(collidedWith, direction);
+                    object.addCollision(entry.getKey(), direction);
                 }
             }
         }

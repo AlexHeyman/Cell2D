@@ -1,9 +1,9 @@
 package cell2d.space;
 
-import cell2d.CellVector;
 import cell2d.Animation;
 import cell2d.AnimationInstance;
 import cell2d.CellGame;
+import cell2d.CellVector;
 import cell2d.Drawable;
 import cell2d.Filter;
 import cell2d.Sprite;
@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import org.newdawn.slick.Graphics;
 
 /**
@@ -66,6 +67,9 @@ import org.newdawn.slick.Graphics;
  */
 public abstract class SpaceObject<T extends CellGame> {
     
+    private static final AtomicLong idCounter = new AtomicLong(0);
+    
+    final long id;
     SpaceState<T> state = null;
     SpaceState<T> newState = null;
     private double timeFactor = -1;
@@ -73,6 +77,7 @@ public abstract class SpaceObject<T extends CellGame> {
     private final Hitbox<T> centerHitbox;
     private Hitbox<T> overlapHitbox = null;
     private Hitbox<T> solidHitbox = null;
+    Double solidFactor = null;
     private int drawPriority = 0;
     private Drawable appearance = Sprite.BLANK;
     private final Map<Integer,AnimationInstance> animInstances = new HashMap<>();
@@ -89,6 +94,11 @@ public abstract class SpaceObject<T extends CellGame> {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a SpaceObject with an invalid locator hitbox");
         }
+        id = getNextID();
+    }
+    
+    private static long getNextID() {
+        return idCounter.getAndIncrement();
     }
     
     /**
@@ -108,7 +118,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the SpaceState to which this SpaceObject is currently assigned,
- or null if it is assigned to none.
+     * or null if it is assigned to none.
      * @return The SpaceState to which this SpaceObject is currently assigned
      */
     public final SpaceState<T> getGameState() {

@@ -1,14 +1,13 @@
 package cell2d.space;
 
-import cell2d.CellVector;
 import cell2d.CellGame;
+import cell2d.CellVector;
 import cell2d.TimedEvent;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>A ThinkerObject is a SpaceObject that acts like a SpaceThinker, possessing
@@ -19,9 +18,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     
-    private static final AtomicLong idCounter = new AtomicLong(0);
-    
-    final long id;
     private final SpaceThinker<T> thinker = new SpaceThinker<T>() {
         
         @Override
@@ -63,6 +59,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     private ThinkerObject leader = null;
     final Set<ThinkerObject<T>> followers = new HashSet<>();
     ThinkerObject effLeader = null;
+    Double collisionFactor = null;
     final Map<SpaceObject<T>,Set<Direction>> collisions = new HashMap<>();
     final Set<Direction> collisionDirections = EnumSet.noneOf(Direction.class);
     private final CellVector velocity = new CellVector();
@@ -75,11 +72,17 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      */
     public ThinkerObject(Hitbox locatorHitbox) {
         super(locatorHitbox);
-        id = getNextID();
     }
     
-    private static long getNextID() {
-        return idCounter.getAndIncrement();
+    /**
+     * Creates a new ThinkerObject with the specified locator Hitbox that acts
+     * as if it was created by the specified SpaceObject, initially copying its
+     * creator's time factor, flipped status, and angle of rotation.
+     * @param locatorHitbox This ThinkerObject's locator Hitbox
+     * @param creator This ThinkerObject's creator
+     */
+    public ThinkerObject(Hitbox<T> locatorHitbox, SpaceObject<T> creator) {
+        super(locatorHitbox, creator);
     }
     
     @Override
