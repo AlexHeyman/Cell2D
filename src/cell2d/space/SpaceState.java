@@ -8,7 +8,6 @@ import java.awt.Point;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -197,7 +196,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         private final Set<Hitbox<T>> centerHitboxes = new HashSet<>();
         private final Set<Hitbox<T>> overlapHitboxes = new HashSet<>();
         private final Set<Hitbox<T>> solidHitboxes = new HashSet<>();
-        private final Map<Direction,Set<Hitbox<T>>> solidSurfaces = new EnumMap<>(Direction.class);
         private final Set<Hitbox<T>> collisionHitboxes = new HashSet<>();
         
         private Cell(int x, int y) {
@@ -208,9 +206,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             top = y*cellHeight;
             bottom = top + cellHeight;
             initializeLocatorHitboxes();
-            for (Direction direction : Direction.values()) {
-                solidSurfaces.put(direction, new HashSet<>());
-            }
         }
         
         private void initializeLocatorHitboxes() {
@@ -522,9 +517,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                     if (hitbox.roles[3]) {
                         cell.solidHitboxes.remove(hitbox);
-                        for (Direction direction : hitbox.solidSurfaces) {
-                            cell.solidSurfaces.get(direction).remove(hitbox);
-                        }
                     }
                     if (hitbox.roles[4]) {
                         cell.collisionHitboxes.remove(hitbox);
@@ -546,9 +538,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
                 if (hitbox.roles[3]) {
                     cell.solidHitboxes.add(hitbox);
-                    for (Direction direction : hitbox.solidSurfaces) {
-                        cell.solidSurfaces.get(direction).add(hitbox);
-                    }
                 }
                 if (hitbox.roles[4]) {
                     cell.collisionHitboxes.add(hitbox);
@@ -634,7 +623,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
     }
     
-    private void addSolidHitbox(Hitbox<T> hitbox) {
+    final void addSolidHitbox(Hitbox<T> hitbox) {
         if (hitbox.numCellRoles == 0) {
             updateCellRange(hitbox);
         }
@@ -645,7 +634,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
     }
     
-    private void removeSolidHitbox(Hitbox<T> hitbox) {
+    final void removeSolidHitbox(Hitbox<T> hitbox) {
         Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
             iterator.next().solidHitboxes.remove(hitbox);
@@ -653,71 +642,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         hitbox.numCellRoles--;
         if (hitbox.numCellRoles == 0) {
             hitbox.cellRange = null;
-        }
-    }
-    
-    final void addSolidSurface(Hitbox<T> hitbox, Direction direction) {
-        if (hitbox.solidSurfaces.size() == 1) {
-            addSolidHitbox(hitbox);
-        }
-        hitbox.numCellRoles++;
-        Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
-        while (iterator.hasNext()) {
-            iterator.next().solidSurfaces.get(direction).add(hitbox);
-        }
-    }
-    
-    final void removeSolidSurface(Hitbox<T> hitbox, Direction direction) {
-        Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
-        while (iterator.hasNext()) {
-            iterator.next().solidSurfaces.get(direction).remove(hitbox);
-        }
-        hitbox.numCellRoles--;
-        if (hitbox.solidSurfaces.isEmpty()) {
-            removeSolidHitbox(hitbox);
-        }
-    }
-    
-    final void addAllSolidSurfaces(Hitbox<T> hitbox) {
-        if (!hitbox.solidSurfaces.isEmpty()) {
-            addSolidHitbox(hitbox);
-            hitbox.numCellRoles += hitbox.solidSurfaces.size();
-            Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Direction direction : hitbox.solidSurfaces) {
-                    cell.solidSurfaces.get(direction).add(hitbox);
-                }
-            }
-        }
-    }
-    
-    final void removeAllSolidSurfaces(Hitbox<T> hitbox) {
-        if (!hitbox.solidSurfaces.isEmpty()) {
-            Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
-            while (iterator.hasNext()) {
-                Cell cell = iterator.next();
-                for (Direction direction : hitbox.solidSurfaces) {
-                    cell.solidSurfaces.get(direction).remove(hitbox);
-                }
-            }
-            hitbox.numCellRoles -= hitbox.solidSurfaces.size();
-            removeSolidHitbox(hitbox);
-        }
-    }
-    
-    final void completeSolidSurfaces(Hitbox<T> hitbox) {
-        if (hitbox.solidSurfaces.isEmpty()) {
-            addSolidHitbox(hitbox);
-        }
-        Set<Direction> directionsToAdd = EnumSet.complementOf(hitbox.solidSurfaces);
-        hitbox.numCellRoles += directionsToAdd.size();
-        Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
-        while (iterator.hasNext()) {
-            Cell cell = iterator.next();
-            for (Direction direction : directionsToAdd) {
-                cell.solidSurfaces.get(direction).add(hitbox);
-            }
         }
     }
     
@@ -1958,6 +1882,41 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             scannedHitbox.scanned = false;
         }
         return nearest;
+    }
+    
+    /**
+     * Returns all of this SpaceState's solid SpaceObjects of the specified
+     * class whose solid Hitboxes' rectangular bounding boxes touch or intersect
+     * the specified Hitbox's rectangular bounding box.
+     * @param <O> The subclass of SpaceObject to search for
+     * @param hitbox The Hitbox whose bounding box to check
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the solid SpaceObjects of the specified class whose solid
+     * Hitboxes' bounding boxes meet the specified Hitbox's bounding box
+     */
+    public final <O extends SpaceObject<T>> List<O> solidBoundingBoxesMeet(Hitbox<T> hitbox, Class<O> cls) {
+        List<O> meeting = new ArrayList<>();
+        List<Hitbox<T>> scanned = new ArrayList<>();
+        Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
+        while (iterator.hasNext()) {
+            for (Hitbox<T> solidHitbox : iterator.next().solidHitboxes) {
+                if (!solidHitbox.scanned) {
+                    solidHitbox.scanned = true;
+                    scanned.add(solidHitbox);
+                    if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
+                            && hitbox.getLeftEdge() <= solidHitbox.getRightEdge()
+                            && hitbox.getRightEdge() >= solidHitbox.getLeftEdge()
+                            && hitbox.getTopEdge() <= solidHitbox.getBottomEdge()
+                            && hitbox.getBottomEdge() >= solidHitbox.getTopEdge()) {
+                        meeting.add(cls.cast(solidHitbox.getObject()));
+                    }
+                }
+            }
+        }
+        for (Hitbox<T> scannedHitbox : scanned) {
+            scannedHitbox.scanned = false;
+        }
+        return meeting;
     }
     
     /**

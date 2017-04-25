@@ -3,9 +3,11 @@ package cell2d.space;
 import cell2d.CellGame;
 import cell2d.CellVector;
 import cell2d.TimedEvent;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -414,6 +416,21 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
             }
         }
         return false;
+    }
+    
+    /**
+     * Returns all of the solid SpaceObjects of the specified class in this
+     * ThinkerObject's SpaceState whose solid Hitboxes' rectangular bounding
+     * boxes touch or intersect this ThinkerObject's collision Hitbox's
+     * rectangular bounding box.
+     * @param <O> The subclass of SpaceObject to search for
+     * @param cls The Class object that represents the SpaceObject subclass
+     * @return All of the solid SpaceObjects of the specified class whose solid
+     * Hitboxes' bounding boxes meet this ThinkerObject's collision Hitbox's
+     * bounding box
+     */
+    public final <O extends SpaceObject<T>> List<O> solidBoundingBoxesMeet(Class<O> cls) {
+        return (state == null || collisionHitbox == null ? new ArrayList<>() : state.solidBoundingBoxesMeet(collisionHitbox, cls));
     }
     
     /**

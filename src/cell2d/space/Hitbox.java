@@ -186,12 +186,12 @@ public abstract class Hitbox<T extends CellGame> {
      */
     public final void setSurfaceSolid(Direction direction, boolean solid) {
         if (solid) {
-            if (solidSurfaces.add(direction) && roles[3] && state != null) {
-                state.addSolidSurface(this, direction);
+            if (solidSurfaces.add(direction) && solidSurfaces.size() == 1 && roles[3] && state != null) {
+                state.addSolidHitbox(this);
             }
         } else {
-            if (solidSurfaces.remove(direction) && roles[3] && state != null) {
-                state.removeSolidSurface(this, direction);
+            if (solidSurfaces.remove(direction) && solidSurfaces.isEmpty() && roles[3] && state != null) {
+                state.removeSolidHitbox(this);
             }
         }
     }
@@ -203,13 +203,13 @@ public abstract class Hitbox<T extends CellGame> {
      */
     public final void setSolid(boolean solid) {
         if (solid) {
-            if (roles[3] && state != null) {
-                state.completeSolidSurfaces(this);
+            if (solidSurfaces.isEmpty() && roles[3] && state != null) {
+                state.addSolidHitbox(this);
             }
             solidSurfaces = EnumSet.allOf(Direction.class);
         } else {
-            if (roles[3] && state != null) {
-                state.removeAllSolidSurfaces(this);
+            if (!solidSurfaces.isEmpty() && roles[3] && state != null) {
+                state.removeSolidHitbox(this);
             }
             solidSurfaces.clear();
         }
@@ -328,7 +328,7 @@ public abstract class Hitbox<T extends CellGame> {
     
     final void addAsSolidHitbox() {
         if (state != null) {
-            state.addAllSolidSurfaces(this);
+            state.addSolidHitbox(this);
         }
         roles[3] = true;
         numRoles++;
@@ -336,7 +336,7 @@ public abstract class Hitbox<T extends CellGame> {
     
     final void removeAsSolidHitbox() {
         if (state != null) {
-            state.removeAllSolidSurfaces(this);
+            state.removeSolidHitbox(this);
         }
         roles[3] = false;
         numRoles--;
