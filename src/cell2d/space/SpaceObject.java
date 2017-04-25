@@ -170,7 +170,7 @@ public abstract class SpaceObject<T extends CellGame> {
             state.addOverlapHitbox(overlapHitbox);
         }
         if (solidHitbox != null) {
-            state.addAllSolidSurfaces(solidHitbox);
+            state.addSolidHitbox(solidHitbox);
         }
     }
     
@@ -182,7 +182,7 @@ public abstract class SpaceObject<T extends CellGame> {
             state.removeOverlapHitbox(overlapHitbox);
         }
         if (solidHitbox != null) {
-            state.removeAllSolidSurfaces(solidHitbox);
+            state.removeSolidHitbox(solidHitbox);
         }
         if (!animInstances.isEmpty()) {
             for (AnimationInstance instance : animInstances.values()) {
