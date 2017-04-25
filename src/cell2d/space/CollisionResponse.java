@@ -20,10 +20,5 @@ public enum CollisionResponse {
      * The ThinkerObject's movement is blocked by the surface, and its velocity
      * is eliminated.
      */
-    STOP,
-    /**
-     * The ThinkerObject's movement is blocked by the surface, and the component
-     * of its velocity toward the surface is flipped away from it.
-     */
-    BOUNCE
+    STOP
 }

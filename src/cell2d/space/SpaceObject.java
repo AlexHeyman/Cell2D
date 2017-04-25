@@ -618,7 +618,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the SpaceObject of the specified class in this SpaceObject's
- SpaceState that is nearest to it.
+     * SpaceState that is nearest to it.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return The SpaceObject of the specified class that is nearest to this
@@ -630,8 +630,8 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the SpaceObject of the specified class within the specified
- rectangular region in this SpaceObject's SpaceState that is nearest to
- it.
+     * rectangular region in this SpaceObject's SpaceState that is nearest to
+     * it.
      * @param <O> The subclass of SpaceObject to search for
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
@@ -647,7 +647,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the SpaceObject of the specified class within the specified
- circular region in this SpaceObject's SpaceState that is nearest to it.
+     * circular region in this SpaceObject's SpaceState that is nearest to it.
      * @param <O> The subclass of SpaceObject to search for
      * @param center The region's center
      * @param radius The region's radius
@@ -661,7 +661,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the SpaceObject of the specified class within the specified
- circular region in this SpaceObject's SpaceState that is nearest to it.
+     * circular region in this SpaceObject's SpaceState that is nearest to it.
      * @param <O> The subclass of SpaceObject to search for
      * @param centerX The x-coordinate of the region's center
      * @param centerY The y-coordinate of the region's center
@@ -676,7 +676,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the SpaceObject of the specified class that overlaps the
- specified Hitbox in this SpaceObject's SpaceState that is nearest to it.
+     * specified Hitbox in this SpaceObject's SpaceState that is nearest to it.
      * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
      * @param cls The Class object that represents the SpaceObject subclass
@@ -689,7 +689,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns whether there are any SpaceObjects of the specified class within
- the specified radius of this SpaceObject in its SpaceState.
+     * the specified radius of this SpaceObject in its SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
@@ -702,7 +702,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns a SpaceObject of the specified class within the specified radius
- of this SpaceObject in its SpaceState, or null if there is none.
+     * of this SpaceObject in its SpaceState, or null if there is none.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
@@ -715,7 +715,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns all of the SpaceObjects of the specified class within the
- specified radius of this SpaceObject in its SpaceState.
+     * specified radius of this SpaceObject in its SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
@@ -728,7 +728,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns the SpaceObject of the specified class within the specified
- radius of this SpaceObject in its SpaceState that is nearest to it.
+     * radius of this SpaceObject in its SpaceState that is nearest to it.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
@@ -808,7 +808,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns whether this SpaceObject is overlapping a SpaceObject of the
- specified class in its SpaceState.
+     * specified class in its SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return Whether this SpaceObject is overlapping a SpaceObject of the
@@ -820,7 +820,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns a SpaceObject of the specified class in this SpaceObject's
- SpaceState that is overlapping it, or null if there is none.
+     * SpaceState that is overlapping it, or null if there is none.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return A SpaceObject of the specified class that is overlapping this
@@ -832,11 +832,11 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns all of the SpaceObjects of the specified class in this
- SpaceObject's SpaceState that are overlapping it.
+     * SpaceObject's SpaceState that are overlapping it.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return All of the SpaceObjects of the specified class in this
- SpaceObject's SpaceState that are overlapping it
+     * SpaceObject's SpaceState that are overlapping it
      */
     public final <O extends SpaceObject<T>> List<O> overlappingObjects(Class<O> cls) {
         return (state == null || overlapHitbox == null ? new ArrayList<>() : state.overlappingObjects(overlapHitbox, cls));
@@ -844,9 +844,9 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns all of the SpaceObjects of the specified class in this
- SpaceObject's SpaceState whose overlap Hitboxes' rectangular bounding
- boxes touch or intersect this SpaceObject's overlap Hitbox's rectangular
- bounding box.
+     * SpaceObject's SpaceState whose overlap Hitboxes' rectangular bounding
+     * boxes touch or intersect this SpaceObject's overlap Hitbox's rectangular
+     * bounding box.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return All of the SpaceObjects of the specified class whose overlap
@@ -859,7 +859,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns whether this SpaceObject is overlapping the solid Hitbox of a
- solid SpaceObject of the specified class in its SpaceState.
+     * solid SpaceObject of the specified class in its SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return Whether this SpaceObject is overlapping the solid Hitbox of a
@@ -871,8 +871,8 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns a solid SpaceObject of the specified class in this SpaceObject's
- SpaceState whose solid Hitbox is overlapping it, or null if there is
- none.
+     * SpaceState whose solid Hitbox is overlapping it, or null if there is
+     * none.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return A solid SpaceObject of the specified class whose solid Hitbox is
@@ -884,7 +884,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns all of the solid SpaceObjects of the specified class in this
- SpaceObject's SpaceState whose solid Hitboxes are overlapping it.
+     * SpaceObject's SpaceState whose solid Hitboxes are overlapping it.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return All of the solid SpaceObjects of the specified class whose solid
@@ -1200,9 +1200,9 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Returns whether any part of this SpaceObject's rectangular bounding box
- is visible through any of its SpaceState's Viewports.
+     * is visible through any of its SpaceState's Viewports.
      * @return Whether this SpaceObject is visible through any of its
- SpaceState's Viewports
+     * SpaceState's Viewports
      */
     public final boolean isVisible() {
         return (state == null ? false : state.rectangleIsVisible(getLeftEdge(), getTopEdge(), getRightEdge(), getBottomEdge()));

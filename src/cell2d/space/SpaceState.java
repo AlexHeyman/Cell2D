@@ -2234,7 +2234,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 if (pressingAgainst != null) {
                     EnumSet<Direction> slideDirections = EnumSet.noneOf(Direction.class);
                     boolean stop = false;
-                    EnumSet<Direction> bounceDirections = EnumSet.noneOf(Direction.class);
                     for (Map.Entry<Hitbox<T>,Direction> entry : pressingAgainst.entrySet()) {
                         SpaceObject<T> collidedWith = entry.getKey().getObject();
                         Direction direction = entry.getValue();
@@ -2247,9 +2246,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 case STOP:
                                     stop = true;
                                     break;
-                                case BOUNCE:
-                                    bounceDirections.add(direction);
-                                    break;
                             }
                             object.addCollision(collidedWith, direction);
                         }
@@ -2260,27 +2256,19 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         if (object.getVelocityX() < 0) {
                             if (slideDirections.contains(Direction.LEFT)) {
                                 object.setVelocityX(0);
-                            } else if (bounceDirections.contains(Direction.LEFT)) {
-                                object.setVelocityX(-object.getVelocityX());
                             }
                         } else if (object.getVelocityX() > 0) {
                             if (slideDirections.contains(Direction.RIGHT)) {
                                 object.setVelocityX(0);
-                            } else if (bounceDirections.contains(Direction.RIGHT)) {
-                                object.setVelocityX(-object.getVelocityX());
                             }
                         }
                         if (object.getVelocityY() < 0) {
                             if (slideDirections.contains(Direction.UP)) {
                                 object.setVelocityY(0);
-                            } else if (bounceDirections.contains(Direction.UP)) {
-                                object.setVelocityY(-object.getVelocityY());
                             }
                         } else if (object.getVelocityY() > 0) {
                             if (slideDirections.contains(Direction.DOWN)) {
                                 object.setVelocityY(0);
-                            } else if (bounceDirections.contains(Direction.DOWN)) {
-                                object.setVelocityY(-object.getVelocityY());
                             }
                         }
                     }
@@ -3167,7 +3155,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         double changeFactor = 1;
         EnumSet<Direction> slideDirections = EnumSet.noneOf(Direction.class);
         boolean stop = false;
-        EnumSet<Direction> bounceDirections = EnumSet.noneOf(Direction.class);
         if (blockingPath != null) {
             for (Map.Entry<SpaceObject<T>,Direction> entry : blockingPath.entrySet()) {
                 SpaceObject<T> blockingObject = entry.getKey();
@@ -3185,9 +3172,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             break;
                         case STOP:
                             stop = true;
-                            break;
-                        case BOUNCE:
-                            bounceDirections.add(direction);
                             break;
                     }
                     changeFactor = blockingObject.solidFactor;
@@ -3213,9 +3197,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         case STOP:
                             stop = true;
                             changeFactor = pressingObject.solidFactor;
-                            break;
-                        case BOUNCE:
-                            bounceDirections.add(direction);
                             break;
                     }
                     object.addCollision(pressingObject, direction);
@@ -3266,30 +3247,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         case STOP:
                             objectToPush.setVelocity(0, 0);
                             break;
-                        case BOUNCE:
-                            switch (direction) {
-                                case LEFT:
-                                    if (objectToPush.getVelocityX() < 0) {
-                                        objectToPush.setVelocityX(-object.getVelocityX());
-                                    }
-                                    break;
-                                case RIGHT:
-                                    if (objectToPush.getVelocityX() > 0) {
-                                        objectToPush.setVelocityX(-object.getVelocityX());
-                                    }
-                                    break;
-                                case UP:
-                                    if (objectToPush.getVelocityY() < 0) {
-                                        objectToPush.setVelocityY(-object.getVelocityY());
-                                    }
-                                    break;
-                                case DOWN:
-                                    if (objectToPush.getVelocityY() > 0) {
-                                        objectToPush.setVelocityY(-object.getVelocityY());
-                                    }
-                                    break;
-                            }
-                            break;
                     }
                     objectToPush.addCollision(object, direction);
                     objectToPush.effLeader = object;
@@ -3318,42 +3275,22 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         object.setVelocityX(0);
                     }
                     nextMovement.setX(0);
-                } else if (bounceDirections.contains(Direction.LEFT)) {
-                    if (object.getVelocityX() < 0) {
-                        object.setVelocityX(-object.getVelocityX());
-                    }
-                    nextMovement.flipX();
                 } else if (slideDirections.contains(Direction.RIGHT)) {
                     if (object.getVelocityX() > 0) {
                         object.setVelocityX(0);
                     }
                     nextMovement.setX(0);
-                } else if (bounceDirections.contains(Direction.RIGHT)) {
-                    if (object.getVelocityX() > 0) {
-                        object.setVelocityX(-object.getVelocityX());
-                    }
-                    nextMovement.flipX();
                 }
                 if (slideDirections.contains(Direction.UP)) {
                     if (object.getVelocityY() < 0) {
                         object.setVelocityY(0);
                     }
                     nextMovement.setY(0);
-                } else if (bounceDirections.contains(Direction.UP)) {
-                    if (object.getVelocityY() < 0) {
-                        object.setVelocityY(-object.getVelocityY());
-                    }
-                    nextMovement.flipY();
                 } else if (slideDirections.contains(Direction.DOWN)) {
                     if (object.getVelocityY() > 0) {
                         object.setVelocityY(0);
                     }
                     nextMovement.setY(0);
-                } else if (bounceDirections.contains(Direction.DOWN)) {
-                    if (object.getVelocityY() > 0) {
-                        object.setVelocityY(-object.getVelocityY());
-                    }
-                    nextMovement.flipY();
                 }
             }
         }
