@@ -54,10 +54,10 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     
     private static abstract class StateComparator<T> implements Comparator<T>, Serializable {}
     
-    private static final Comparator<Thinker> actionPriorityComparator = new StateComparator<Thinker>() {
+    private final Comparator<V> actionPriorityComparator = new StateComparator<V>() {
         
         @Override
-        public final int compare(Thinker thinker1, Thinker thinker2) {
+        public final int compare(V thinker1, V thinker2) {
             int priorityDifference = thinker2.actionPriority - thinker1.actionPriority;
             return (priorityDifference == 0 ? Long.signum(thinker2.id - thinker1.id) : priorityDifference);
         }
