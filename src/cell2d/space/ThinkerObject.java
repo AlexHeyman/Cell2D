@@ -611,7 +611,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param state The SpaceState to which this ThinkerObject should be
      * assigned
      * @param bringFollowers If true, all of this ThinkerObject's followers and
-     * sub-followers will be assigned to the same SpaceState; defaults to false
+     * sub-followers will be assigned to the same SpaceState (false by default)
      */
     public final void setGameState(SpaceState<T> state, boolean bringFollowers) {
         setGameState(state);
@@ -627,7 +627,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param position The new position
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void setPosition(CellVector position, boolean bringFollowers) {
         double changeX = position.getX() - getX();
@@ -646,7 +646,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param y The y-coordinate of the new position
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void setPosition(double x, double y, boolean bringFollowers) {
         double changeX = x - getX();
@@ -665,7 +665,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param x The x-coordinate of the new position
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void setX(double x, boolean bringFollowers) {
         double changeX = x - getX();
@@ -683,7 +683,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param y The y-coordinate of the new position
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void setY(double y, boolean bringFollowers) {
         double changeY = y - getY();
@@ -700,7 +700,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param change The amount to change the position by
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void changePosition(CellVector change, boolean bringFollowers) {
         changePosition(change);
@@ -718,7 +718,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param changeY The amount to change the position's y-coordinate by
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void changePosition(double changeX, double changeY, boolean bringFollowers) {
         changePosition(changeX, changeY);
@@ -735,7 +735,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param changeX The amount to change the position's x-coordinate by
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void changeX(double changeX, boolean bringFollowers) {
         changeX(changeX);
@@ -752,7 +752,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param changeY The amount to change the position's y-coordinate by
      * @param bringFollowers If true, all of this ThinkerObject's followers and
      * sub-followers will change their positions by the same amount as this
-     * ThinkerObject; defaults to false
+     * ThinkerObject (false by default)
      */
     public final void changeY(double changeY, boolean bringFollowers) {
         changeY(changeY);
