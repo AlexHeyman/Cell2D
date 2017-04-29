@@ -172,58 +172,86 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     
     /**
      * Sets the x-coordinate in pixels of this Viewport's left edge on the
-     * screen to the specified value.
+     * screen to the specified value, if doing so would not cause this
+     * Viewport's width to be negative.
      * @param x1 The new x-coordinate in pixels of this Viewport's left edge
+     * @return Whether the change occurred
      */
-    public final void setX1(double x1) {
-        if (x1 > x2) {
-            throw new RuntimeException("Attempted to give a Viewport a negative width");
+    public final boolean setX1(double x1) {
+        if (x1 <= x2) {
+            this.x1 = x1;
+            roundX1 = (int)Math.round(x1);
+            updateXData();
+            return true;
         }
-        this.x1 = x1;
-        roundX1 = (int)Math.round(x1);
-        updateXData();
+        return false;
     }
     
     /**
      * Sets the y-coordinate in pixels of this Viewport's top edge on the screen
-     * to the specified value.
-     * @param y1 The new x-coordinate in pixels of this Viewport's top edge
+     * to the specified value, if doing so would not cause this Viewport's
+     * height to be negative.
+     * @param y1 The new y-coordinate in pixels of this Viewport's top edge
+     * @return Whether the change occurred
      */
-    public final void setY1(double y1) {
-        if (y1 > y2) {
-            throw new RuntimeException("Attempted to give a Viewport a negative height");
+    public final boolean setY1(double y1) {
+        if (y1 <= y2) {
+            this.y1 = y1;
+            roundY1 = (int)Math.round(y1);
+            updateYData();
+            return true;
         }
-        this.y1 = y1;
-        roundY1 = (int)Math.round(y1);
-        updateYData();
+        return false;
     }
     
     /**
      * Sets the x-coordinate in pixels of this Viewport's right edge on the
-     * screen to the specified value.
+     * screen to the specified value, if doing so would not cause this
+     * Viewport's width to be negative.
      * @param x2 The new x-coordinate in pixels of this Viewport's right edge
+     * @return Whether the change occurred
      */
-    public final void setX2(double x2) {
-        if (x2 < x1) {
-            throw new RuntimeException("Attempted to give a Viewport a negative width");
+    public final boolean setX2(double x2) {
+        if (x1 <= x2) {
+            this.x2 = x2;
+            roundX2 = (int)Math.round(x2);
+            updateXData();
+            return true;
         }
-        this.x2 = x2;
-        roundX2 = (int)Math.round(x2);
-        updateXData();
+        return false;
     }
     
     /**
      * Sets the y-coordinate in pixels of this Viewport's bottom edge on the
-     * screen to the specified value.
+     * screen to the specified value, if doing so would not cause this
+     * Viewport's height to be negative.
      * @param y2 The new y-coordinate in pixels of this Viewport's bottom edge
+     * @return Whether the change occurred
      */
-    public final void setY2(double y2) {
-        if (y2 < y1) {
-            throw new RuntimeException("Attempted to give a Viewport a negative height");
+    public final boolean setY2(double y2) {
+        if (y1 <= y2) {
+            this.y2 = y2;
+            roundY2 = (int)Math.round(y2);
+            updateYData();
+            return true;
         }
-        this.y2 = y2;
-        roundY2 = (int)Math.round(y2);
-        updateYData();
+        return false;
+    }
+    
+    /**
+     * Returns this Viewport's width in pixels on the screen.
+     * @return This Viewport's width in pixels
+     */
+    public final double getWidth() {
+        return right - left;
+    }
+    
+    /**
+     * Returns this Viewport's height in pixels on the screen.
+     * @return This Viewport's height in pixels
+     */
+    public final double getHeight() {
+        return bottom - top;
     }
     
     /**
