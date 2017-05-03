@@ -10,7 +10,8 @@ import cell2d.CellGame;
  * any visuals, including its HUD if it has one, a Viewport must be assigned to
  * a SpaceState through its setViewport() method. To render the region of its
  * SpaceState in its field of view, a Viewport's camera must be assigned to the
- * same SpaceState as it.</p>
+ * same SpaceState as it. One pixel in a Viewport's rendering region on the
+ * screen is equal to one fracunit in its SpaceState.</p>
  * 
  * <p>HUDs may be assigned to one Viewport each. Only one HUD may be assigned
  * to a given Viewport at once. A Viewport's HUD uses the region of the screen
@@ -110,7 +111,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     
     /**
      * Sets the HUD that is assigned to this Viewport to the specified HUD, if
- it is not already assigned to a SpaceState. If there is already an HUD
+     * it is not already assigned to a SpaceState. If there is already an HUD
      * assigned to this Viewport, it will be removed. If the specified HUD is
      * null, the current HUD will be removed if there is one, but it will not be
      * replaced with anything.
