@@ -12,7 +12,7 @@ import cell2d.CellVector;
  */
 public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
     
-    private double radius;
+    private long radius;
     
     /**
      * Creates a new CircleHitbox with the specified relative position and
@@ -20,7 +20,7 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relPosition This CircleHitbox's relative position
      * @param radius This CircleHitbox's radius
      */
-    public CircleHitbox(CellVector relPosition, double radius) {
+    public CircleHitbox(CellVector relPosition, long radius) {
         this(relPosition.getX(), relPosition.getY(), radius);
         
     }
@@ -32,7 +32,7 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relY The y-coordinate of this CircleHitbox's relative position
      * @param radius This CircleHitbox's radius
      */
-    public CircleHitbox(double relX, double relY, double radius) {
+    public CircleHitbox(long relX, long relY, long radius) {
         super(relX, relY);
         if (!setRadius(radius)) {
             throw new RuntimeException("Attempted to give a CircleHitbox a negative radius");
@@ -48,7 +48,7 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns this CircleHitbox's radius.
      * @return This CircleHitbox's radius
      */
-    public final double getRadius() {
+    public final long getRadius() {
         return radius;
     }
     
@@ -57,7 +57,7 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param radius The new radius
      * @return Whether the new radius was valid and the change was successful
      */
-    public final boolean setRadius(double radius) {
+    public final boolean setRadius(long radius) {
         if (radius >= 0) {
             this.radius = radius;
             updateBoundaries();
@@ -67,22 +67,22 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public double getLeftEdge() {
+    public long getLeftEdge() {
         return getAbsX() - radius;
     }
     
     @Override
-    public double getRightEdge() {
+    public long getRightEdge() {
         return getAbsX() + radius;
     }
     
     @Override
-    public double getTopEdge() {
+    public long getTopEdge() {
         return getAbsY() - radius;
     }
     
     @Override
-    public double getBottomEdge() {
+    public long getBottomEdge() {
         return getAbsY() + radius;
     }
     

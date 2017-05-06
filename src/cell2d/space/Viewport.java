@@ -1,6 +1,7 @@
 package cell2d.space;
 
 import cell2d.CellGame;
+import cell2d.Frac;
 
 /**
  * <p>A Viewport is a SpaceThinker that represents a rectangular region of the
@@ -24,7 +25,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     
     private SpaceObject camera = null;
     private HUD<T> hud;
-    private double x1, y1, x2, y2;
+    private long x1, y1, x2, y2;
     int roundX1, roundY1, roundX2, roundY2, left, right, top, bottom;
     
     /**
@@ -39,7 +40,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @param y2 The y-coordinate in pixels of this Viewport's bottom edge on
      * the screen
      */
-    public Viewport(HUD<T> hud, double x1, double y1, double x2, double y2) {
+    public Viewport(HUD<T> hud, long x1, long y1, long x2, long y2) {
         if (x1 > x2) {
             throw new RuntimeException("Attempted to give a Viewport a negative width");
         }
@@ -51,10 +52,10 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
-        roundX1 = (int)Math.round(x1);
-        roundY1 = (int)Math.round(y1);
-        roundX2 = (int)Math.round(x2);
-        roundY2 = (int)Math.round(y2);
+        roundX1 = Frac.toInt(x1);
+        roundY1 = Frac.toInt(y1);
+        roundX2 = Frac.toInt(x2);
+        roundY2 = Frac.toInt(y2);
         updateXData();
         updateYData();
     }
@@ -140,35 +141,8 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * screen.
      * @return The x-coordinate in pixels of this Viewport's left edge
      */
-    public final double getX1() {
+    public final long getX1() {
         return x1;
-    }
-    
-    /**
-     * Returns the y-coordinate in pixels of this Viewport's top edge on the
-     * screen.
-     * @return The y-coordinate in pixels of this Viewport's top edge
-     */
-    public final double getY1() {
-        return y1;
-    }
-    
-    /**
-     * Returns the x-coordinate in pixels of this Viewport's right edge on the
-     * screen.
-     * @return The x-coordinate in pixels of this Viewport's right edge
-     */
-    public final double getX2() {
-        return x2;
-    }
-    
-    /**
-     * Returns the y-coordinate in pixels of this Viewport's bottom edge on the
-     * screen.
-     * @return The y-coordinate in pixels of this Viewport's bottom edge
-     */
-    public final double getY2() {
-        return y2;
     }
     
     /**
@@ -178,14 +152,23 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @param x1 The new x-coordinate in pixels of this Viewport's left edge
      * @return Whether the change occurred
      */
-    public final boolean setX1(double x1) {
+    public final boolean setX1(long x1) {
         if (x1 <= x2) {
             this.x1 = x1;
-            roundX1 = (int)Math.round(x1);
+            roundX1 = Frac.toInt(x1);
             updateXData();
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Returns the y-coordinate in pixels of this Viewport's top edge on the
+     * screen.
+     * @return The y-coordinate in pixels of this Viewport's top edge
+     */
+    public final long getY1() {
+        return y1;
     }
     
     /**
@@ -195,14 +178,23 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @param y1 The new y-coordinate in pixels of this Viewport's top edge
      * @return Whether the change occurred
      */
-    public final boolean setY1(double y1) {
+    public final boolean setY1(long y1) {
         if (y1 <= y2) {
             this.y1 = y1;
-            roundY1 = (int)Math.round(y1);
+            roundY1 = Frac.toInt(y1);
             updateYData();
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Returns the x-coordinate in pixels of this Viewport's right edge on the
+     * screen.
+     * @return The x-coordinate in pixels of this Viewport's right edge
+     */
+    public final long getX2() {
+        return x2;
     }
     
     /**
@@ -212,14 +204,23 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @param x2 The new x-coordinate in pixels of this Viewport's right edge
      * @return Whether the change occurred
      */
-    public final boolean setX2(double x2) {
+    public final boolean setX2(long x2) {
         if (x1 <= x2) {
             this.x2 = x2;
-            roundX2 = (int)Math.round(x2);
+            roundX2 = Frac.toInt(x2);
             updateXData();
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Returns the y-coordinate in pixels of this Viewport's bottom edge on the
+     * screen.
+     * @return The y-coordinate in pixels of this Viewport's bottom edge
+     */
+    public final long getY2() {
+        return y2;
     }
     
     /**
@@ -229,10 +230,10 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @param y2 The new y-coordinate in pixels of this Viewport's bottom edge
      * @return Whether the change occurred
      */
-    public final boolean setY2(double y2) {
+    public final boolean setY2(long y2) {
         if (y1 <= y2) {
             this.y2 = y2;
-            roundY2 = (int)Math.round(y2);
+            roundY2 = Frac.toInt(y2);
             updateYData();
             return true;
         }
@@ -243,7 +244,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * Returns this Viewport's width in pixels on the screen.
      * @return This Viewport's width in pixels
      */
-    public final double getWidth() {
+    public final long getWidth() {
         return right - left;
     }
     
@@ -251,7 +252,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * Returns this Viewport's height in pixels on the screen.
      * @return This Viewport's height in pixels
      */
-    public final double getHeight() {
+    public final long getHeight() {
         return bottom - top;
     }
     
@@ -262,7 +263,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual left edge
      */
     public final int getLeftEdge() {
-        return (int)Math.round(camera.getCenterX()) + left;
+        return Frac.toInt(camera.getCenterX()) + left;
     }
     
     /**
@@ -272,7 +273,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual right edge
      */
     public final int getRightEdge() {
-        return (int)Math.round(camera.getCenterX()) + right;
+        return Frac.toInt(camera.getCenterX()) + right;
     }
     
     /**
@@ -282,7 +283,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual top edge
      */
     public final int getTopEdge() {
-        return (int)Math.round(camera.getCenterY()) + top;
+        return Frac.toInt(camera.getCenterY()) + top;
     }
     
     /**
@@ -292,7 +293,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual bottom edge
      */
     public final int getBottomEdge() {
-        return (int)Math.round(camera.getCenterY()) + bottom;
+        return Frac.toInt(camera.getCenterY()) + bottom;
     }
     
     /**
@@ -305,12 +306,12 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @return Whether the specified rectangular region is visible through this
      * Viewport
      */
-    public final boolean rectangleIsVisible(double x1, double y1, double x2, double y2) {
+    public final boolean rectangleIsVisible(long x1, long y1, long x2, long y2) {
         if (camera != null && camera.newState == getNewGameState()) {
-            double centerX = Math.round(camera.getCenterX());
-            double centerY = Math.round(camera.getCenterY());
-            return Math.round(x1) < centerX + right && Math.round(x2) > centerX + left
-                    && Math.round(y1) < centerY + bottom && Math.round(y2) > centerY + top;
+            int centerX = Frac.toInt(camera.getCenterX());
+            int centerY = Frac.toInt(camera.getCenterY());
+            return Frac.toInt(x1) < centerX + right && Frac.toInt(x2) > centerX + left
+                    && Frac.toInt(y1) < centerY + bottom && Frac.toInt(y2) > centerY + top;
         }
         return false;
     }

@@ -14,7 +14,7 @@ import cell2d.CellVector;
 public class LineHitbox<T extends CellGame> extends Hitbox<T> {
     
     private final CellVector relDifference, absDifference;
-    private double left, right, top, bottom;
+    private long left, right, top, bottom;
     
     /**
      * Creates a new LineHitbox with the specified relative position and
@@ -34,7 +34,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relDX The x-coordinate of this LineHitbox's relative difference
      * @param relDY The y-coordinate of this LineHitbox's relative difference
      */
-    public LineHitbox(double relX, double relY, double relDX, double relDY) {
+    public LineHitbox(long relX, long relY, long relDX, long relDY) {
         super(relX, relY);
         this.relDifference = new CellVector(relDX, relDY);
         absDifference = new CellVector();
@@ -67,7 +67,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns the x-coordinate of this LineHitbox's relative difference.
      * @return The x-coordinate of this LineHitbox's relative difference
      */
-    public final double getRelDX() {
+    public final long getRelDX() {
         return relDifference.getX();
     }
     
@@ -75,7 +75,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns the y-coordinate of this LineHitbox's relative difference.
      * @return The y-coordinate of this LineHitbox's relative difference
      */
-    public final double getRelDY() {
+    public final long getRelDY() {
         return relDifference.getY();
     }
     
@@ -93,7 +93,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relDX The x-coordinate of the new relative difference
      * @param relDY The y-coordinate of the new relative difference
      */
-    public final void setRelDifference(double relDX, double relDY) {
+    public final void setRelDifference(long relDX, long relDY) {
         relDifference.setCoordinates(relDX, relDY);
         updateData();
     }
@@ -103,7 +103,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * specified value.
      * @param relDX The x-coordinate of the new relative difference
      */
-    public final void setRelDX(double relDX) {
+    public final void setRelDX(long relDX) {
         relDifference.setX(relDX);
         updateData();
     }
@@ -113,7 +113,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * specified value.
      * @param relDY The y-coordinate of the new relative difference
      */
-    public final void setRelDY(double relDY) {
+    public final void setRelDY(long relDY) {
         relDifference.setY(relDY);
         updateData();
     }
@@ -130,7 +130,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns the x-coordinate of this LineHitbox's relative difference.
      * @return The x-coordinate of this LineHitbox's relative difference
      */
-    public final double getAbsDX() {
+    public final long getAbsDX() {
         return absDifference.getX();
     }
     
@@ -138,7 +138,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns the y-coordinate of this LineHitbox's relative difference.
      * @return The y-coordinate of this LineHitbox's relative difference
      */
-    public final double getAbsDY() {
+    public final long getAbsDY() {
         return absDifference.getY();
     }
     
@@ -156,7 +156,7 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * its absolute position and absolute difference.
      * @return The x-coordinate of this LineHitbox's second endpoint
      */
-    public final double getX2() {
+    public final long getX2() {
         return getAbsX() + absDifference.getX();
     }
     
@@ -165,27 +165,27 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
      * its absolute position and absolute difference.
      * @return The y-coordinate of this LineHitbox's second endpoint
      */
-    public final double getY2() {
+    public final long getY2() {
         return getAbsY() + absDifference.getY();
     }
     
     @Override
-    public final double getLeftEdge() {
+    public final long getLeftEdge() {
         return getAbsX() + left;
     }
     
     @Override
-    public final double getRightEdge() {
+    public final long getRightEdge() {
         return getAbsX() + right;
     }
     
     @Override
-    public final double getTopEdge() {
+    public final long getTopEdge() {
         return getAbsY() + top;
     }
     
     @Override
-    public final double getBottomEdge() {
+    public final long getBottomEdge() {
         return getAbsY() + bottom;
     }
     

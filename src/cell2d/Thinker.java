@@ -14,11 +14,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * the CellGameState to which it is assigned. A Thinker's assigned CellGameState
  * will keep track of time for it, thus allowing it to take its own
  * time-dependent actions, while the CellGameState is active. A Thinker's time
- * factor represents how many time units the Thinker will experience every frame
- * while assigned to an active CellGameState. If its own time factor is
- * negative, a Thinker will use its assigned CellGameState's time factor
- * instead. If a Thinker is assigned to an inactive CellGameState or none at
- * all, time will not pass for it.</p>
+ * factor represents the average number of discrete time units the Thinker will
+ * experience every frame while assigned to an active CellGameState. If its own
+ * time factor is negative, a Thinker will use its assigned CellGameState's time
+ * factor instead. If a Thinker is assigned to an inactive CellGameState or none
+ * at all, time will not pass for it.</p>
  * 
  * <p>A Thinker's action priority determines when it will act relative to other
  * Thinkers. All of the Thinkers assigned to the active CellGameState will take
@@ -64,8 +64,8 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
     private final V thisThinker;
     U state = null;
     U newState = null;
-    private double timeFactor = -1;
-    private double timeToRun = 0;
+    private long timeFactor = -1;
+    private long timeToRun = 0;
     int actionPriority = 0;
     int newActionPriority = 0;
     private W thinkerState = null;
@@ -146,17 +146,17 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      * Returns this Thinker's time factor.
      * @return This Thinker's time factor
      */
-    public final double getTimeFactor() {
+    public final long getTimeFactor() {
         return timeFactor;
     }
     
     /**
-     * Returns this Thinker's effective time factor; that is, how many time
-     * units it experiences every frame. If it is not assigned to a
+     * Returns this Thinker's effective time factor; that is, the average number
+     * of time units it experiences every frame. If it is not assigned to a
      * CellGameState, this will be 0.
      * @return This Thinker's effective time factor
      */
-    public final double getEffectiveTimeFactor() {
+    public final long getEffectiveTimeFactor() {
         return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
     }
     
@@ -164,7 +164,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      * Sets this Thinker's time factor to the specified value.
      * @param timeFactor The new time factor
      */
-    public final void setTimeFactor(double timeFactor) {
+    public final void setTimeFactor(long timeFactor) {
         this.timeFactor = timeFactor;
     }
     
@@ -351,7 +351,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
     
     final void update(T game) {
         timeToRun += getEffectiveTimeFactor();
-        while (timeToRun >= 1) {
+        while (timeToRun >= Frac.UNIT) {
             if (thinkerStateDuration >= 0) {
                 thinkerStateDuration--;
                 if (thinkerStateDuration == 0) {
@@ -381,7 +381,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
                 thinkerState.timeUnitActions(game, state);
             }
             timeUnitActions(game, state);
-            timeToRun -= 1;
+            timeToRun -= Frac.UNIT;
         }
     }
     

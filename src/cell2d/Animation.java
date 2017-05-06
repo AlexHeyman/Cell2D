@@ -7,8 +7,8 @@ import java.util.Arrays;
  * instantiated in an AnimationInstance in order to be displayed one after
  * another and/or smoothly transitioned between. The frames are indexed by the
  * integers from 0 to getNumFrames() - 1 inclusive, and each has its own
- * duration that is measured in time units by default. Durations of 0 or less
- * are interpreted as infinite.</p>
+ * duration in fracunits. Durations of 0 or less are interpreted as infinite.
+ * </p>
  * 
  * <p>The frames of Animations may be other Animations in addition to single
  * Sprites, which allows for the creation of multi-dimensional Animations in a
@@ -34,14 +34,14 @@ public class Animation implements Animatable {
     public static final Animation BLANK = new Animation();
     
     private final Animatable[] frames;
-    private final double[] frameDurations;
+    private final long[] frameDurations;
     private final boolean[][] compatibilities;
     private final int level;
     
     private Animation() {
         this.frames = new Animatable[1];
         this.frames[0] = Sprite.BLANK;
-        this.frameDurations = new double[1];
+        this.frameDurations = new long[1];
         this.frameDurations[0] = 0;
         compatibilities = new boolean[1][1];
         compatibilities[0][0] = true;
@@ -54,9 +54,9 @@ public class Animation implements Animatable {
         return array;
     }
     
-    private static double[] arrayOfOnes(int length) {
-        double[] array = new double[length];
-        Arrays.fill(array, 1);
+    private static long[] arrayOfFracunits(int length) {
+        long[] array = new long[length];
+        Arrays.fill(array, Frac.UNIT);
         return array;
     }
     
@@ -66,7 +66,7 @@ public class Animation implements Animatable {
      * @param frame The Animatable object out of which to make the Animation
      */
     public Animation(Animatable frame) {
-        this(arrayOf(frame), new double[1]);
+        this(arrayOf(frame), new long[1]);
     }
     
     /**
@@ -75,7 +75,7 @@ public class Animation implements Animatable {
      * @param frames The array of the Animation's frames
      */
     public Animation(Animatable[] frames) {
-        this(frames, arrayOfOnes(frames.length));
+        this(frames, arrayOfFracunits(frames.length));
     }
     
     /**
@@ -85,7 +85,7 @@ public class Animation implements Animatable {
      * @param frames The array of the Animation's frames
      * @param frameDurations The array of the Animation's frame durations
      */
-    public Animation(Animatable[] frames, double[] frameDurations) {
+    public Animation(Animatable[] frames, long[] frameDurations) {
         if (frames.length == 0) {
             throw new RuntimeException("Attempted to create an empty Animation");
         }
@@ -175,7 +175,7 @@ public class Animation implements Animatable {
      * in which they are read.
      * @param frameDurations The array of the Animation's frame durations
      */
-    public Animation(SpriteSheet spriteSheet, int x1, int y1, int x2, int y2, boolean columns, double[] frameDurations) {
+    public Animation(SpriteSheet spriteSheet, int x1, int y1, int x2, int y2, boolean columns, long[] frameDurations) {
         this(spriteSheetToFrames(spriteSheet, x1, y1, x2, y2, columns), frameDurations);
     }
     
@@ -210,7 +210,7 @@ public class Animation implements Animatable {
     }
     
     @Override
-    public final double getFrameDuration(int index) {
+    public final long getFrameDuration(int index) {
         return (index >= 0 && index < frameDurations.length ? frameDurations[index] : 0);
     }
     

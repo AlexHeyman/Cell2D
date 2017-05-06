@@ -4,10 +4,10 @@ import cell2d.space.Hitbox;
 import cell2d.space.SpaceObject;
 
 /**
- * <p>A CellVector represents a point in space as a two-dimensional vector. A
- * CellVector retains its identity as an Object even if the point that it
- * represents is changed, and thus two different CellVectors with the same point
- * are not considered equal. CellVectors measure angles in degrees going
+ * <p>A CellVector represents a point in continuous space as a two-dimensional
+ * vector. A CellVector retains its identity as an Object even if the point that
+ * it represents is changed, and thus two different CellVectors with the same
+ * point are not considered equal. CellVectors measure angles in degrees going
  * counterclockwise from directly right and normalize them to be between 0 and
  * 360. All operations on a CellVector return the CellVector itself to allow
  * operations to be easily strung together.</p>
@@ -15,7 +15,7 @@ import cell2d.space.SpaceObject;
  */
 public class CellVector {
     
-    private double x, y;
+    private long x, y;
     
     /**
      * Creates a new CellVector that represents the origin.
@@ -39,7 +39,7 @@ public class CellVector {
      * @param x The x-coordinate of the point that this CellVector represents
      * @param y The y-coordinate of the point that this CellVector represents
      */
-    public CellVector(double x, double y) {
+    public CellVector(long x, long y) {
         this.x = x;
         this.y = y;
     }
@@ -52,8 +52,8 @@ public class CellVector {
      */
     public CellVector(double angle) {
         double radians = Math.toRadians(angle);
-        x = Math.cos(radians);
-        y = -Math.sin(radians);
+        x = Frac.units(Math.cos(radians));
+        y = Frac.units(-Math.sin(radians));
     }
     
     /**
@@ -70,7 +70,7 @@ public class CellVector {
      * Returns the x-coordinate of the point that this CellVector represents.
      * @return The x-coordinate of the point that this CellVector represents
      */
-    public final double getX() {
+    public final long getX() {
         return x;
     }
     
@@ -79,7 +79,7 @@ public class CellVector {
      * @param x The point's new x-coordinate
      * @return This CellVector
      */
-    public final CellVector setX(double x) {
+    public final CellVector setX(long x) {
         this.x = x;
         return this;
     }
@@ -88,7 +88,7 @@ public class CellVector {
      * Returns the y-coordinate of the point that this CellVector represents.
      * @return The y-coordinate of the point that this CellVector represents
      */
-    public final double getY() {
+    public final long getY() {
         return y;
     }
     
@@ -97,7 +97,7 @@ public class CellVector {
      * @param y The point's new y-coordinate
      * @return This CellVector
      */
-    public final CellVector setY(double y) {
+    public final CellVector setY(long y) {
         this.y = y;
         return this;
     }
@@ -119,7 +119,7 @@ public class CellVector {
      * @param y The point's new y-coordinate
      * @return This CellVector
      */
-    public final CellVector setCoordinates(double x, double y) {
+    public final CellVector setCoordinates(long x, long y) {
         this.x = x;
         this.y = y;
         return this;
@@ -175,16 +175,16 @@ public class CellVector {
      * Returns the square of this CellVector's magnitude.
      * @return The square of this CellVector's magnitude
      */
-    public final double getMagnitudeSquared() {
-        return x*x + y*y;
+    public final long getMagnitudeSquared() {
+        return Frac.mul(x, x) + Frac.mul(y, y);
     }
     
     /**
      * Returns this CellVector's magnitude.
      * @return This CellVector's magnitude
      */
-    public final double getMagnitude() {
-        return Math.sqrt(x*x + y*y);
+    public final long getMagnitude() {
+        return Frac.sqrt(getMagnitudeSquared());
     }
     
     /**
@@ -195,18 +195,19 @@ public class CellVector {
      * @param magnitude The new magnitude
      * @return This CellVector
      */
-    public final CellVector setMagnitude(double magnitude) {
-        return (x == 0 && y == 0 ? setX(magnitude) : scale(magnitude/Math.sqrt(x*x + y*y)));
+    public final CellVector setMagnitude(long magnitude) {
+        return (x == 0 && y == 0 ? setX(magnitude) : scale(Frac.div(magnitude, getMagnitude())));
     }
     
     /**
      * Multiplies this CellVector's coordinates by the specified factor.
-     * @param scaleFactor The factor by which to scale this CellVector
+     * @param scaleFactor The factor in fracunits by which to scale this
+     * CellVector
      * @return This CellVector
      */
-    public final CellVector scale(double scaleFactor) {
-        x *= scaleFactor;
-        y *= scaleFactor;
+    public final CellVector scale(long scaleFactor) {
+        x = Frac.mul(x, scaleFactor);
+        y = Frac.mul(y, scaleFactor);
         return this;
     }
     
@@ -215,7 +216,14 @@ public class CellVector {
      * @return This CellVector's angle
      */
     public final double getAngle() {
-        return (x == 0 && y == 0 ? 0 : Math.toDegrees(Math.atan2(-y, x)));
+        if (x == 0 && y == 0) {
+            return 0;
+        }
+        double angle = Math.toDegrees(Math.atan2(-y, x)) % 360;
+        if (angle < 0) {
+            angle += 360;
+        }
+        return angle;
     }
     
     /**
@@ -223,8 +231,8 @@ public class CellVector {
      * of this CellVector's angle. This is equal to the cosine of the angle.
      * @return The x-coordinate of this CellVector's angle
      */
-    public final double getAngleX() {
-        return (x == 0 && y == 0 ? 1 : x/Math.sqrt(x*x + y*y));
+    public final long getAngleX() {
+        return (x == 0 && y == 0 ? Frac.UNIT : Frac.div(x, getMagnitude()));
     }
     
     /**
@@ -233,8 +241,8 @@ public class CellVector {
      * this is equal to the negative sine of the angle.
      * @return The y-coordinate of this CellVector's angle
      */
-    public final double getAngleY() {
-        return (x == 0 && y == 0 ? 0 : y/Math.sqrt(x*x + y*y));
+    public final long getAngleY() {
+        return (x == 0 && y == 0 ? 0 : Frac.div(y, getMagnitude()));
     }
     
     /**
@@ -244,10 +252,10 @@ public class CellVector {
      * @return This CellVector
      */
     public final CellVector setAngle(double angle) {
-        double length = Math.sqrt(x*x + y*y);
+        long magnitude = getMagnitude();
         double radians = Math.toRadians(angle);
-        x = length*Math.cos(radians);
-        y = -length*Math.sin(radians);
+        x = Frac.mul(magnitude, Frac.units(Math.cos(radians)));
+        y = Frac.mul(magnitude, Frac.units(-Math.sin(radians)));
         return this;
     }
     
@@ -278,7 +286,7 @@ public class CellVector {
      * @param y The y-coordinate to be added
      * @return This CellVector
      */
-    public final CellVector add(double x, double y) {
+    public final CellVector add(long x, long y) {
         this.x += x;
         this.y += y;
         return this;
@@ -312,7 +320,7 @@ public class CellVector {
      * @param y The y-coordinate to be subtracted
      * @return This CellVector
      */
-    public final CellVector sub(double x, double y) {
+    public final CellVector sub(long x, long y) {
         this.x -= x;
         this.y -= y;
         return this;
@@ -330,23 +338,24 @@ public class CellVector {
     }
     
     /**
-     * Returns the dot product of this CellVector and the specified one.
+     * Returns the dot product in fracunits of this CellVector and the specified
+     * one.
      * @param vector The CellVector to take the dot product with
      * @return The dot product of this CellVector and the specified one
      */
-    public final double dot(CellVector vector) {
-        return x*vector.x + y*vector.y;
+    public final long dot(CellVector vector) {
+        return Frac.mul(x, vector.x) + Frac.mul(y, vector.y);
     }
     
     /**
-     * Returns the magnitude of the cross product of this CellVector and the
-     * specified one.
+     * Returns the magnitude in fracunits of the cross product of this
+     * CellVector and the specified one.
      * @param vector The CellVector to take the cross product with
      * @return The magnitude of the cross product of this CellVector and the
      * specified one
      */
-    public final double cross(CellVector vector) {
-        return x*vector.y - y*vector.x;
+    public final long cross(CellVector vector) {
+        return Frac.mul(x, vector.y) - Frac.mul(y, vector.x);
     }
     
     /**
@@ -379,7 +388,7 @@ public class CellVector {
      * @return The distance from this CellVector's point to that of the
      * specified CellVector
      */
-    public final double distanceTo(CellVector point) {
+    public final long distanceTo(CellVector point) {
         return distanceBetween(x, y, point.x, point.y);
     }
     
@@ -391,10 +400,10 @@ public class CellVector {
      * @param y2 The y-coordinate of the second point
      * @return The distance between (x1, y1) and (x2, y2)
      */
-    public static final double distanceBetween(double x1, double y1, double x2, double y2) {
-        double xDist = x2 - x1;
-        double yDist = y2 - y1;
-        return Math.sqrt(xDist*xDist + yDist*yDist);
+    public static final long distanceBetween(long x1, long y1, long x2, long y2) {
+        long xDist = x2 - x1;
+        long yDist = y2 - y1;
+        return Frac.sqrt(Frac.mul(xDist, xDist) + Frac.mul(yDist, yDist));
     }
     
     /**
@@ -420,7 +429,7 @@ public class CellVector {
      * @param y2 The y-coordinate of the second point
      * @return The angle from (x1, y1) to (x2, y2)
      */
-    public static final double angleBetween(double x1, double y1, double x2, double y2) {
+    public static final double angleBetween(long x1, long y1, long x2, long y2) {
         double angle = Math.toDegrees(Math.atan2(y1 - y2, x2 - x1)) % 360;
         if (angle < 0) {
             angle += 360;
@@ -429,7 +438,7 @@ public class CellVector {
     }
     
     private static boolean segBoxesIntersect(CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
-        double minX1, maxX1, minX2, maxX2;
+        long minX1, maxX1, minX2, maxX2;
         if (diff1.x > 0) {
             minX1 = start1.x;
             maxX1 = minX1 + diff1.x;
@@ -447,7 +456,7 @@ public class CellVector {
         if (minX2 >= maxX1 || minX1 >= maxX2) {
             return false;
         }
-        double minY1, maxY1, minY2, maxY2;
+        long minY1, maxY1, minY2, maxY2;
         if (diff1.y > 0) {
             minY1 = start1.y;
             maxY1 = minY1 + diff1.y;
@@ -483,21 +492,21 @@ public class CellVector {
         CellVector start2MinusStart1 = CellVector.sub(start2, start1);
         if (diff1.cross(diff2) == 0) {
             if (start2MinusStart1.cross(diff1) == 0) {
-                double diff1Dot = diff1.dot(diff1);
-                double t0 = start2MinusStart1.dot(diff1)/diff1Dot;
-                double diff2DotDiff1 = diff2.dot(diff1);
-                double t1 = diff2DotDiff1/diff1Dot;
+                long diff1Dot = diff1.dot(diff1);
+                long t0 = Frac.div(start2MinusStart1.dot(diff1), diff1Dot);
+                long diff2DotDiff1 = diff2.dot(diff1);
+                long t1 = Frac.div(diff2DotDiff1, diff1Dot);
                 if (diff2DotDiff1 < 0) {
-                    return t1 > 0 || t0 < 1;
+                    return t1 > 0 || t0 < Frac.UNIT;
                 }
-                return t0 > 0 || t1 < 1;
+                return t0 > 0 || t1 < Frac.UNIT;
             }
             return false;
         }
-        double diff1CrossDiff2 = diff1.cross(diff2);
-        double t = start2MinusStart1.cross(diff2)/diff1CrossDiff2;
-        double u = start2MinusStart1.cross(diff1)/diff1CrossDiff2;
-        return t > 0 && t < 1 && u > 0 && u < 1;
+        long diff1CrossDiff2 = diff1.cross(diff2);
+        long t = Frac.div(start2MinusStart1.cross(diff2), diff1CrossDiff2);
+        long u = Frac.div(start2MinusStart1.cross(diff1), diff1CrossDiff2);
+        return t > 0 && t < Frac.UNIT && u > 0 && u < Frac.UNIT;
     }
     
     /**
@@ -515,10 +524,10 @@ public class CellVector {
             return null;
         }
         CellVector start2MinusStart1 = CellVector.sub(start2, start1);
-        double diff1CrossDiff2 = diff1.cross(diff2);
-        double t = start2MinusStart1.cross(diff2)/diff1CrossDiff2;
-        double u = start2MinusStart1.cross(diff1)/diff1CrossDiff2;
-        if (t > 0 && t < 1 && u > 0 && u < 1) {
+        long diff1CrossDiff2 = diff1.cross(diff2);
+        long t = Frac.div(start2MinusStart1.cross(diff2), diff1CrossDiff2);
+        long u = Frac.div(start2MinusStart1.cross(diff1), diff1CrossDiff2);
+        if (t > 0 && t < Frac.UNIT && u > 0 && u < Frac.UNIT) {
             return CellVector.add(start1, new CellVector(diff1).scale(t));
         }
         return null;

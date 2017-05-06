@@ -8,7 +8,6 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Vector2f;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
@@ -273,7 +272,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     @Override
-    public final double getFrameDuration(int index) {
+    public final long getFrameDuration(int index) {
         return 0;
     }
     
@@ -363,10 +362,8 @@ public class Sprite implements Animatable, Drawable {
     public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom) {
         if (!blank && loaded && right > left && bottom > top) {
             left += originX;
-            right += originX;
             top += originY;
-            bottom += originY;
-            draw(g, x + left, y + top, left, right, top, bottom, 1, false, false, 0, 1, null);
+            draw(g, x + left, y + top, left, right + originX, top, bottom + originY, 1, false, false, 0, 1, null);
         }
     }
     
@@ -388,8 +385,8 @@ public class Sprite implements Animatable, Drawable {
             right += originX;
             top += originY;
             bottom += originY;
-            Vector2f vector = new Vector2f(left, top).sub(angle);
-            draw(g, x + Math.round(vector.getX()), y + Math.round(vector.getY()),
+            CellVector vector = new CellVector(left*Frac.UNIT, top*Frac.UNIT).changeAngle(angle);
+            draw(g, x + Frac.toInt(vector.getX()), y + Frac.toInt(vector.getY()),
                     left, right, top, bottom, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
         }
     }
@@ -420,7 +417,7 @@ public class Sprite implements Animatable, Drawable {
     private void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             float scale, boolean xFlip, boolean yFlip, float angle, float alpha, Filter filter) {
         int index = 0;
-        float xOffset, yOffset;
+        int xOffset, yOffset;
         if (xFlip) {
             index += 1;
             xOffset = -this.right;
@@ -444,7 +441,7 @@ public class Sprite implements Animatable, Drawable {
         }
         image.setRotation(-angle);
         image.setAlpha(alpha);
-        g.drawImage(image, x, y, x + (right - left)*scale, y + (bottom - top)*scale, left, top, right, bottom);
+        g.drawImage(image, x, y, x + Math.round((right - left)*scale), y + Math.round((bottom - top)*scale), left, top, right, bottom);
     }
     
 }

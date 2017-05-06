@@ -16,7 +16,7 @@ import cell2d.CellVector;
  */
 public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
     
-    private double relLeft, relRight, relTop, relBottom, absLeft, absRight, absTop, absBottom;
+    private long relLeft, relRight, relTop, relBottom, absLeft, absRight, absTop, absBottom;
     
     /**
      * Creates a new RectangleHitbox with the specified relative position and
@@ -31,7 +31,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relBottom The difference of the y-coordinates of this
      * RectangleHitbox's relative bottom edge and relative position
      */
-    public RectangleHitbox(CellVector relPosition, double relLeft, double relRight, double relTop, double relBottom) {
+    public RectangleHitbox(CellVector relPosition, long relLeft, long relRight, long relTop, long relBottom) {
         this(relPosition.getX(), relPosition.getY(), relLeft, relRight, relTop, relBottom);
     }
     
@@ -49,7 +49,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relBottom The difference of the y-coordinates of this
      * RectangleHitbox's relative bottom edge and relative position
      */
-    public RectangleHitbox(double relX, double relY, double relLeft, double relRight, double relTop, double relBottom) {
+    public RectangleHitbox(long relX, long relY, long relLeft, long relRight, long relTop, long relBottom) {
         super(relX, relY);
         if (relLeft > relRight) {
             throw new RuntimeException("Attempted to give a RectangleHitbox a negative width");
@@ -77,7 +77,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * relative left edge and relative position.
      * @return This RectangleHitbox's relative left-side difference
      */
-    public final double getRelLeft() {
+    public final long getRelLeft() {
         return relLeft;
     }
     
@@ -88,7 +88,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relLeft The new relative left-side difference
      * @return Whether the change occurred
      */
-    public final boolean setRelLeft(double relLeft) {
+    public final boolean setRelLeft(long relLeft) {
         if (relLeft <= relRight) {
             this.relLeft = relLeft;
             if (getAbsXFlip()) {
@@ -107,7 +107,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * absolute left edge and absolute position.
      * @return This RectangleHitbox's absolute left-side difference
      */
-    public final double getAbsLeft() {
+    public final long getAbsLeft() {
         return absLeft;
     }
     
@@ -116,7 +116,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * relative right edge and relative position.
      * @return This RectangleHitbox's relative right-side difference
      */
-    public final double getRelRight() {
+    public final long getRelRight() {
         return relRight;
     }
     
@@ -127,7 +127,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relRight The new relative right-side difference
      * @return Whether the change occurred
      */
-    public final boolean setRelRight(double relRight) {
+    public final boolean setRelRight(long relRight) {
         if (relLeft <= relRight) {
             this.relRight = relRight;
             if (getAbsXFlip()) {
@@ -146,7 +146,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * absolute right edge and absolute position.
      * @return This RectangleHitbox's absolute right-side difference
      */
-    public final double getAbsRight() {
+    public final long getAbsRight() {
         return absRight;
     }
     
@@ -155,7 +155,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * relative top edge and relative position.
      * @return This RectangleHitbox's relative top-side difference
      */
-    public final double getRelTop() {
+    public final long getRelTop() {
         return relTop;
     }
     
@@ -166,7 +166,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relTop The new relative top-side difference
      * @return Whether the change occurred
      */
-    public final boolean setRelTop(double relTop) {
+    public final boolean setRelTop(long relTop) {
         if (relTop <= relBottom) {
             this.relTop = relTop;
             if (getAbsYFlip()) {
@@ -185,7 +185,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * absolute top edge and absolute position.
      * @return This RectangleHitbox's absolute top-side difference
      */
-    public final double getAbsTop() {
+    public final long getAbsTop() {
         return absTop;
     }
     
@@ -194,7 +194,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * relative bottom edge and relative position.
      * @return This RectangleHitbox's relative bottom-side difference
      */
-    public final double getRelBottom() {
+    public final long getRelBottom() {
         return relBottom;
     }
     
@@ -205,7 +205,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relBottom The new relative bottom-side difference
      * @return Whether the change occurred
      */
-    public final boolean setRelBottom(double relBottom) {
+    public final boolean setRelBottom(long relBottom) {
         if (relTop <= relBottom) {
             this.relBottom = relBottom;
             if (getAbsYFlip()) {
@@ -224,7 +224,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * absolute bottom edge and absolute position.
      * @return This RectangleHitbox's absolute bottom-side difference
      */
-    public final double getAbsBottom() {
+    public final long getAbsBottom() {
         return absBottom;
     }
     
@@ -232,7 +232,7 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns this RectangleHitbox's width.
      * @return This RectangleHitbox's width
      */
-    public final double getWidth() {
+    public final long getWidth() {
         return absRight - absLeft;
     }
     
@@ -240,27 +240,27 @@ public class RectangleHitbox<T extends CellGame> extends Hitbox<T> {
      * Returns this RectangleHitbox's height.
      * @return This RectangleHitbox's height
      */
-    public final double getHeight() {
+    public final long getHeight() {
         return absBottom - absTop;
     }
     
     @Override
-    public final double getLeftEdge() {
+    public final long getLeftEdge() {
         return getAbsX() + absLeft;
     }
     
     @Override
-    public final double getRightEdge() {
+    public final long getRightEdge() {
         return getAbsX() + absRight;
     }
     
     @Override
-    public final double getTopEdge() {
+    public final long getTopEdge() {
         return getAbsY() + absTop;
     }
     
     @Override
-    public final double getBottomEdge() {
+    public final long getBottomEdge() {
         return getAbsY() + absBottom;
     }
     

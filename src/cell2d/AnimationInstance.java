@@ -13,11 +13,11 @@ import org.newdawn.slick.Graphics;
  * 
  * <p>At each of its levels, an AnimationInstance has an index of its current
  * position in that level of the Animation, as well as a speed that represents
- * how fast, in frame duration units per time unit, it advances through that
- * level. If a level's speed is negative, the AnimationInstance will cycle
- * through the Animation at that level backward. If an AnimationInstance moves
- * forward past a level's end or backward past its beginning, it will loop back
- * to the beginning or end, respectively.</p>
+ * how fast, in fracunits per time unit, it advances through that level. If a
+ * level's speed is negative, the AnimationInstance will cycle through the
+ * Animation at that level backward. If an AnimationInstance moves forward past
+ * a level's end or backward past its beginning, it will loop back to the
+ * beginning or end, respectively.</p>
  * 
  * <p>When an AnimationInstance is drawn, it will appear as the Sprite in its
  * Animation that its current indices specify. The Filters that can be
@@ -26,14 +26,14 @@ import org.newdawn.slick.Graphics;
  * </p>
  * 
  * <p>AnimationInstances keep track of time by being added to one CellGameState
- * each. An AnimationInstance's time factor represents how many time units the
- * AnimationInstance will experience every frame while assigned to an active
- * CellGameState. If its own time factor is negative, an AnimationInstance will
- * use its assigned CellGameState's time factor instead. If an AnimationInstance
- * is assigned to an inactive CellGameState or none at all, time will not pass
- * for it. AnimationInstances assigned to the active CellGameState update their
- * indices at the beginning of each frame, before Thinkers' timeUnitActions()
- * are taken.</p>
+ * each. An AnimationInstance's time factor represents the average number of
+ * discrete time units the AnimationInstance will experience every frame while
+ * assigned to an active CellGameState. If its own time factor is negative, an
+ * AnimationInstance will use its assigned CellGameState's time factor instead.
+ * If an AnimationInstance is assigned to an inactive CellGameState or none at
+ * all, time will not pass for it. AnimationInstances assigned to the active
+ * CellGameState update their indices at the beginning of each frame, before
+ * Thinkers' timeUnitActions() are taken.</p>
  * @author Andrew Heyman
  */
 public class AnimationInstance implements Drawable {
@@ -45,12 +45,12 @@ public class AnimationInstance implements Drawable {
     
     private final boolean blank;
     CellGameState state = null;
-    private double timeFactor = -1;
+    private long timeFactor = -1;
     private final Animation animation;
     private final int level;
     private final int[] indices;
-    private final double[] indexChanges;
-    private final double[] speeds;
+    private final long[] indexChanges;
+    private final long[] speeds;
     private Sprite currentSprite;
     
     private AnimationInstance() {
@@ -58,8 +58,8 @@ public class AnimationInstance implements Drawable {
         this.animation = Animation.BLANK;
         level = 1;
         indices = new int[1];
-        indexChanges = new double[1];
-        speeds = new double[1];
+        indexChanges = new long[1];
+        speeds = new long[1];
         currentSprite = Sprite.BLANK;
     }
     
@@ -73,8 +73,8 @@ public class AnimationInstance implements Drawable {
         this.animation = animation;
         level = animation.getLevel();
         indices = new int[level];
-        indexChanges = new double[level];
-        speeds = new double[level];
+        indexChanges = new long[level];
+        speeds = new long[level];
         updateCurrentSprite();
     }
     
@@ -129,17 +129,17 @@ public class AnimationInstance implements Drawable {
      * Returns this AnimationInstance's time factor.
      * @return This AnimationInstance's time factor
      */
-    public final double getTimeFactor() {
+    public final long getTimeFactor() {
         return timeFactor;
     }
     
     /**
-     * Returns this AnimationInstance's effective time factor; that is, how many
-     * time units it experiences every frame. If it is not assigned to a
-     * CellGameState, this will be 0.
+     * Returns this AnimationInstance's effective time factor; that is, the
+     * average number of time units it experiences every frame. If it is not
+     * assigned to a CellGameState, this will be 0.
      * @return This AnimationInstance's effective time factor
      */
-    public final double getEffectiveTimeFactor() {
+    public final long getEffectiveTimeFactor() {
         return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
     }
     
@@ -147,7 +147,7 @@ public class AnimationInstance implements Drawable {
      * Sets this AnimationInstance's time factor to the specified value.
      * @param timeFactor The new time factor
      */
-    public final void setTimeFactor(double timeFactor) {
+    public final void setTimeFactor(long timeFactor) {
         if (!blank) {
             this.timeFactor = timeFactor;
         }
@@ -180,7 +180,7 @@ public class AnimationInstance implements Drawable {
         return (level >= 0 && level < indices.length ? indices[level] : -1);
     }
     
-    private double setIndex(int level, Animatable frame, int index, boolean resetLowerIndices) {
+    private long setIndex(int level, Animatable frame, int index, boolean resetLowerIndices) {
         int length = frame.getNumFrames();
         index %= length;
         if (index < 0) {
@@ -193,7 +193,7 @@ public class AnimationInstance implements Drawable {
             }
         }
         indices[level] = index;
-        double duration = frame.getFrameDuration(index);
+        long duration = frame.getFrameDuration(index);
         if (duration <= 0) {
             indexChanges[level] = 0;
         }
@@ -245,7 +245,7 @@ public class AnimationInstance implements Drawable {
      * AnimationInstance has only one level, this will be its only speed.
      * @return This AnimationInstance's speed at its highest level
      */
-    public final double getSpeed() {
+    public final long getSpeed() {
         return speeds[speeds.length - 1];
     }
     
@@ -255,7 +255,7 @@ public class AnimationInstance implements Drawable {
      * @param level The level of the speed to be returned
      * @return The speed at the specified level
      */
-    public final double getSpeed(int level) {
+    public final long getSpeed(int level) {
         return (level >= 0 && level < speeds.length ? speeds[level] : 0);
     }
     
@@ -265,7 +265,7 @@ public class AnimationInstance implements Drawable {
      * only speed.
      * @param speed The value to which the speed will be set
      */
-    public final void setSpeed(double speed) {
+    public final void setSpeed(long speed) {
         if (!blank) {
             speeds[indices.length - 1] = speed;
         }
@@ -277,7 +277,7 @@ public class AnimationInstance implements Drawable {
      * @param level The level of the speed to be set
      * @param speed The value to which the speed will be set
      */
-    public final void setSpeed(int level, double speed) {
+    public final void setSpeed(int level, long speed) {
         if (!blank && level >= 0 && level < speeds.length) {
             speeds[level] = speed;
         }
@@ -287,7 +287,7 @@ public class AnimationInstance implements Drawable {
         if (blank) {
             return;
         }
-        double time = getEffectiveTimeFactor();
+        long time = getEffectiveTimeFactor();
         if (time == 0) {
             return;
         }
@@ -295,9 +295,9 @@ public class AnimationInstance implements Drawable {
         Animatable frame = animation;
         for (int i = indices.length - 1; i >= 0; i--) {
             if (speeds[i] != 0) {
-                double duration = frame.getFrameDuration(indices[i]);
+                long duration = frame.getFrameDuration(indices[i]);
                 if (duration > 0) {
-                    indexChanges[i] += time*speeds[i];
+                    indexChanges[i] += Frac.mul(time, speeds[i]);
                     if (speeds[i] > 0) {
                         while (indexChanges[i] >= duration) {
                             spriteChanged = true;

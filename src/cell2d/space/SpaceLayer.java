@@ -34,6 +34,6 @@ public abstract class SpaceLayer<T extends CellGame> extends SpaceThinker<T> {
      * Graphics context
      */
     public abstract void renderActions(T game, SpaceState<T> state,
-            Graphics g, double x, double y, int x1, int y1, int x2, int y2);
+            Graphics g, long x, long y, int x1, int y1, int x2, int y2);
     
 }

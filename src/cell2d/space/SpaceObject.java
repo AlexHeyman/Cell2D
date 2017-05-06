@@ -19,11 +19,11 @@ import org.newdawn.slick.Graphics;
  * may be assigned to one SpaceState each in much the same way that Thinkers are
  * assigned to CellGameStates. A SpaceObject's assigned SpaceState will keep
  * track of time for it and its AnimationInstances. A SpaceObject's time factor
- * represents how many time units the SpaceObject will experience every frame
- * while assigned to an active SpaceState. If its own time factor is negative,
- * a SpaceObject will use its assigned SpaceState's time factor instead. If a
- * SpaceObject is assigned to an inactive SpaceState or none at all, time will
- * not pass for it.</p>
+ * represents the average number of discrete time units the SpaceObject will
+ * experience every frame while assigned to an active SpaceState. If its own
+ * time factor is negative, a SpaceObject will use its assigned SpaceState's
+ * time factor instead. If a SpaceObject is assigned to an inactive SpaceState
+ * or none at all, time will not pass for it.</p>
  * 
  * <p>A SpaceObject inherits the position, flipped status, angle of rotation,
  * and rectangular bounding box of a locator Hitbox that is relative to no other
@@ -72,13 +72,13 @@ public abstract class SpaceObject<T extends CellGame> {
     final long id;
     SpaceState<T> state = null;
     SpaceState<T> newState = null;
-    private double timeFactor = -1;
+    private long timeFactor = -1;
     private Hitbox<T> locatorHitbox = null;
     private final Hitbox<T> centerHitbox;
     private Hitbox<T> overlapHitbox = null;
     private Hitbox<T> solidHitbox = null;
-    Double solidFactor = null;
-    Double collisionFactor = null;
+    boolean solidEvent = false;
+    boolean moved = false;
     private int drawPriority = 0;
     private Drawable appearance = Sprite.BLANK;
     private final Map<Integer,AnimationInstance> animInstances = new HashMap<>();
@@ -195,17 +195,17 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns this SpaceObject's time factor.
      * @return This SpaceObject's time factor
      */
-    public final double getTimeFactor() {
+    public final long getTimeFactor() {
         return timeFactor;
     }
     
     /**
-     * Returns this SpaceObject's effective time factor; that is, how many time
-     * units it experiences every frame. If it is not assigned to a SpaceState,
- this will be 0.
+     * Returns this SpaceObject's effective time factor; that is, the average
+     * number of time units it experiences every frame. If it is not assigned to
+     * a SpaceState, this will be 0.
      * @return This SpaceObject's effective time factor
      */
-    public final double getEffectiveTimeFactor() {
+    public final long getEffectiveTimeFactor() {
         return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
     }
     
@@ -213,12 +213,12 @@ public abstract class SpaceObject<T extends CellGame> {
      * Sets this SpaceObject's time factor to the specified value.
      * @param timeFactor The new time factor
      */
-    public final void setTimeFactor(double timeFactor) {
+    public final void setTimeFactor(long timeFactor) {
         this.timeFactor = timeFactor;
         setTimeFactorActions(timeFactor);
     }
     
-    void setTimeFactorActions(double timeFactor) {
+    void setTimeFactorActions(long timeFactor) {
         if (!animInstances.isEmpty()) {
             for (AnimationInstance instance : animInstances.values()) {
                 instance.setTimeFactor(timeFactor);
@@ -286,7 +286,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the x-coordinate of this SpaceObject's position.
      * @return The x-coordinate of this SpaceObject's position
      */
-    public final double getX() {
+    public final long getX() {
         return locatorHitbox.getRelX();
     }
     
@@ -294,7 +294,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the y-coordinate of this SpaceObject's position.
      * @return The y-coordinate of this SpaceObject's position
      */
-    public final double getY() {
+    public final long getY() {
         return locatorHitbox.getRelY();
     }
     
@@ -311,7 +311,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param x The x-coordinate of the new position
      * @param y The y-coordinate of the new position
      */
-    public final void setPosition(double x, double y) {
+    public final void setPosition(long x, long y) {
         locatorHitbox.setRelPosition(x, y);
     }
     
@@ -320,7 +320,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * value.
      * @param x The x-coordinate of the new position
      */
-    public final void setX(double x) {
+    public final void setX(long x) {
         locatorHitbox.setRelX(x);
     }
     
@@ -329,7 +329,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * value.
      * @param y The y-coordinate of the new position
      */
-    public final void setY(double y) {
+    public final void setY(long y) {
         locatorHitbox.setRelY(y);
     }
     
@@ -347,7 +347,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param changeX The amount to change the position's x-coordinate by
      * @param changeY The amount to change the position's y-coordinate by
      */
-    public final void changePosition(double changeX, double changeY) {
+    public final void changePosition(long changeX, long changeY) {
         locatorHitbox.changeRelPosition(changeX, changeY);
     }
     
@@ -356,7 +356,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * amount.
      * @param changeX The amount to change the position's x-coordinate by
      */
-    public final void changeX(double changeX) {
+    public final void changeX(long changeX) {
         locatorHitbox.changeRelX(changeX);
     }
     
@@ -365,7 +365,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * amount.
      * @param changeY The amount to change the position's y-coordinate by
      */
-    public final void changeY(double changeY) {
+    public final void changeY(long changeY) {
         locatorHitbox.changeRelY(changeY);
     }
     
@@ -448,7 +448,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * the angle.
      * @return The x-coordinate of this SpaceObject's angle of rotation
      */
-    public final double getAngleX() {
+    public final long getAngleX() {
         return locatorHitbox.getRelAngleX();
     }
     
@@ -458,7 +458,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * going downward, this is equal to the negative sine of the angle.
      * @return The y-coordinate of this SpaceObject's angle of rotation
      */
-    public final double getAngleY() {
+    public final long getAngleY() {
         return locatorHitbox.getRelAngleY();
     }
     
@@ -482,7 +482,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the x-coordinate of this SpaceObject's absolute left boundary.
      * @return The x-coordinate of this SpaceObject's absolute left boundary
      */
-    public final double getLeftEdge() {
+    public final long getLeftEdge() {
         return locatorHitbox.getLeftEdge();
     }
     
@@ -490,7 +490,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the x-coordinate of this SpaceObject's absolute right boundary.
      * @return The x-coordinate of this SpaceObject's absolute right boundary
      */
-    public final double getRightEdge() {
+    public final long getRightEdge() {
         return locatorHitbox.getRightEdge();
     }
     
@@ -498,7 +498,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the y-coordinate of this SpaceObject's absolute top boundary.
      * @return The y-coordinate of this SpaceObject's absolute top boundary
      */
-    public final double getTopEdge() {
+    public final long getTopEdge() {
         return locatorHitbox.getTopEdge();
     }
     
@@ -506,7 +506,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the y-coordinate of this SpaceObject's absolute bottom boundary.
      * @return The y-coordinate of this SpaceObject's absolute bottom boundary
      */
-    public final double getBottomEdge() {
+    public final long getBottomEdge() {
         return locatorHitbox.getBottomEdge();
     }
     
@@ -522,7 +522,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the x-coordinate of this SpaceObject's center's offset.
      * @return The x-coordinate of this SpaceObject's center's offset
      */
-    public final double getCenterOffsetX() {
+    public final long getCenterOffsetX() {
         return centerHitbox.getRelX();
     }
     
@@ -530,7 +530,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the y-coordinate of this SpaceObject's center's offset.
      * @return The y-coordinate of this SpaceObject's center's offset
      */
-    public final double getCenterOffsetY() {
+    public final long getCenterOffsetY() {
         return centerHitbox.getRelY();
     }
     
@@ -548,7 +548,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param x The new x-coordinate of this SpaceObject's center's offset
      * @param y The new y-coordinate of this SpaceObject's center's offset
      */
-    public final void setCenterOffset(double x, double y) {
+    public final void setCenterOffset(long x, long y) {
         centerHitbox.setRelPosition(x, y);
     }
     
@@ -557,7 +557,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * specified value.
      * @param x The new x-coordinate of this SpaceObject's center's offset
      */
-    public final void setCenterOffsetX(double x) {
+    public final void setCenterOffsetX(long x) {
         centerHitbox.setRelX(x);
     }
     
@@ -566,7 +566,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * specified value.
      * @param y The new y-coordinate of this SpaceObject's center's offset
      */
-    public final void setCenterOffsetY(double y) {
+    public final void setCenterOffsetY(long y) {
         centerHitbox.setRelY(y);
     }
     
@@ -582,7 +582,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the absolute x-coordinate of this SpaceObject's center.
      * @return The absolute x-coordinate of this SpaceObject's center
      */
-    public final double getCenterX() {
+    public final long getCenterX() {
         return centerHitbox.getAbsX();
     }
     
@@ -590,7 +590,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Returns the absolute y-coordinate of this SpaceObject's center.
      * @return The absolute y-coordinate of this SpaceObject's center
      */
-    public final double getCenterY() {
+    public final long getCenterY() {
         return centerHitbox.getAbsY();
     }
     
@@ -601,7 +601,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The distance from this SpaceObject's center to the specified
      * SpaceObject's center
      */
-    public final double distanceTo(SpaceObject object) {
+    public final long distanceTo(SpaceObject object) {
         return centerHitbox.distanceTo(object.centerHitbox);
     }
     
@@ -641,7 +641,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(double x1, double y1, double x2, double y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(long x1, long y1, long x2, long y2, Class<O> cls) {
         return (state == null ? null : state.nearestObjectWithinRectangle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), x1, y1, x2, y2, cls));
     }
     
@@ -655,7 +655,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(CellVector center, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(CellVector center, long radius, Class<O> cls) {
         return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), center.getX(), center.getY(), radius, cls));
     }
     
@@ -670,7 +670,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(double centerX, double centerY, double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(long centerX, long centerY, long radius, Class<O> cls) {
         return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerX, centerY, radius, cls));
     }
     
@@ -696,7 +696,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified radius of this SpaceObject
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinRadius(double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean objectIsWithinRadius(long radius, Class<O> cls) {
         return (state == null ? false : state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls) != null);
     }
     
@@ -709,7 +709,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return A SpaceObject of the specified class within the specified radius
      * of this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O objectWithinRadius(double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O objectWithinRadius(long radius, Class<O> cls) {
         return (state == null ? null : state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
@@ -722,7 +722,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return All of the SpaceObjects of the specified class within the
      * specified radius of this SpaceObject
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinRadius(double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> objectsWithinRadius(long radius, Class<O> cls) {
         return (state == null ? new ArrayList<>() : state.objectsWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
@@ -735,7 +735,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * radius of this SpaceObject that is nearest to it
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRadius(double radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinRadius(long radius, Class<O> cls) {
         return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     

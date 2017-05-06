@@ -2,6 +2,7 @@ package cell2d.space;
 
 import cell2d.CellGame;
 import cell2d.CellVector;
+import cell2d.Frac;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,8 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * but may not always be. Hitboxes can be rotated around their positions and
  * flipped across horizontal and vertical axes through their positions. Rotating
  * a Hitbox will also rotate the axes along which it is flipped. As with
- * CellVectors, Hitbox angles are measured in degrees going counterclockwise
- * from directly right and are normalized to be between 0 and 360.</p>
+ * CellVectors, Hitboxes measure angles in degrees going counterclockwise from
+ * directly right and normalize them to be between 0 and 360.</p>
  * 
  * <p>If a Hitbox is a component of a CompositeHitbox, its position, flipped
  * status, and angle of rotation are all relative to those of the
@@ -57,11 +58,11 @@ public abstract class Hitbox<T extends CellGame> {
     private boolean relYFlip = false;
     private boolean absYFlip = false;
     private double relAngle = 0;
-    private double relAngleX = 1;
-    private double relAngleY = 0;
+    private long relAngleX = Frac.UNIT;
+    private long relAngleY = 0;
     private double absAngle = 0;
-    private double absAngleX = 1;
-    private double absAngleY = 0;
+    private long absAngleX = Frac.UNIT;
+    private long absAngleY = 0;
     
     /**
      * Creates a new Hitbox with the specified relative position.
@@ -78,7 +79,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param relX The x-coordinate of this Hitbox's relative position
      * @param relY The y-coordinate of this Hitbox's relative position
      */
-    public Hitbox(double relX, double relY) {
+    public Hitbox(long relX, long relY) {
         id = getNextID();
         this.relPosition = new CellVector(relX, relY);
         absPosition = new CellVector(relPosition);
@@ -401,7 +402,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns the x-coordinate of this Hitbox's relative position.
      * @return The x-coordinate of this Hitbox's relative position
      */
-    public final double getRelX() {
+    public final long getRelX() {
         return relPosition.getX();
     }
     
@@ -409,7 +410,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns the y-coordinate of this Hitbox's relative position.
      * @return The y-coordinate of this Hitbox's relative position
      */
-    public final double getRelY() {
+    public final long getRelY() {
         return relPosition.getY();
     }
     
@@ -427,7 +428,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param relX The x-coordinate of the new relative position
      * @param relY The y-coordinate of the new relative position
      */
-    public final void setRelPosition(double relX, double relY) {
+    public final void setRelPosition(long relX, long relY) {
         relPosition.setCoordinates(relX, relY);
         recursivelyUpdateAbsPosition();
     }
@@ -437,7 +438,7 @@ public abstract class Hitbox<T extends CellGame> {
      * value.
      * @param relX The x-coordinate of the new relative position
      */
-    public final void setRelX(double relX) {
+    public final void setRelX(long relX) {
         relPosition.setX(relX);
         recursivelyUpdateAbsPosition();
     }
@@ -447,7 +448,7 @@ public abstract class Hitbox<T extends CellGame> {
      * value.
      * @param relY The y-coordinate of the new relative position
      */
-    public final void setRelY(double relY) {
+    public final void setRelY(long relY) {
         relPosition.setY(relY);
         recursivelyUpdateAbsPosition();
     }
@@ -469,7 +470,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param changeY The amount to change the relative position's y-coordinate
      * by
      */
-    public final void changeRelPosition(double changeX, double changeY) {
+    public final void changeRelPosition(long changeX, long changeY) {
         relPosition.add(changeX, changeY);
         recursivelyUpdateAbsPosition();
     }
@@ -480,7 +481,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param changeX The amount to change the relative position's x-coordinate
      * by
      */
-    public final void changeRelX(double changeX) {
+    public final void changeRelX(long changeX) {
         relPosition.setX(relPosition.getX() + changeX);
         recursivelyUpdateAbsPosition();
     }
@@ -491,7 +492,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param changeY The amount to change the relative position's y-coordinate
      * by
      */
-    public final void changeRelY(double changeY) {
+    public final void changeRelY(long changeY) {
         relPosition.setY(relPosition.getY() + changeY);
         recursivelyUpdateAbsPosition();
     }
@@ -508,7 +509,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns the x-coordinate of this Hitbox's absolute position.
      * @return The x-coordinate of this Hitbox's absolute position
      */
-    public final double getAbsX() {
+    public final long getAbsX() {
         return absPosition.getX();
     }
     
@@ -516,7 +517,7 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns the y-coordinate of this Hitbox's absolute position.
      * @return The y-coordinate of this Hitbox's absolute position
      */
-    public final double getAbsY() {
+    public final long getAbsY() {
         return absPosition.getY();
     }
     
@@ -712,7 +713,7 @@ public abstract class Hitbox<T extends CellGame> {
      * of the angle.
      * @return The x-coordinate of this Hitbox's relative angle of rotation
      */
-    public final double getRelAngleX() {
+    public final long getRelAngleX() {
         return relAngleX;
     }
     
@@ -722,7 +723,7 @@ public abstract class Hitbox<T extends CellGame> {
      * going downward, this is equal to the negative sine of the angle.
      * @return The y-coordinate of this Hitbox's relative angle of rotation
      */
-    public final double getRelAngleY() {
+    public final long getRelAngleY() {
         return relAngleY;
     }
     
@@ -736,8 +737,8 @@ public abstract class Hitbox<T extends CellGame> {
             this.relAngle += 360;
         }
         double radians = Math.toRadians(relAngle);
-        relAngleX = Math.cos(radians);
-        relAngleY = -Math.sin(radians);
+        relAngleX = Frac.units(Math.cos(radians));
+        relAngleY = Frac.units(-Math.sin(radians));
         updateAbsAngle();
         if (!children.isEmpty()) {
             for (Hitbox<T> child : children) {
@@ -769,7 +770,7 @@ public abstract class Hitbox<T extends CellGame> {
      * of the angle.
      * @return The x-coordinate of this Hitbox's absolute angle of rotation
      */
-    public final double getAbsAngleX() {
+    public final long getAbsAngleX() {
         return absAngleX;
     }
     
@@ -779,7 +780,7 @@ public abstract class Hitbox<T extends CellGame> {
      * going downward, this is equal to the negative sine of the angle.
      * @return The y-coordinate of this Hitbox's absolute angle of rotation
      */
-    public final double getAbsAngleY() {
+    public final long getAbsAngleY() {
         return absAngleY;
     }
     
@@ -800,8 +801,8 @@ public abstract class Hitbox<T extends CellGame> {
             }
         }
         double radians = Math.toRadians(absAngle);
-        absAngleX = Math.cos(radians);
-        absAngleY = -Math.sin(radians);
+        absAngleX = Frac.units(Math.cos(radians));
+        absAngleY = Frac.units(-Math.sin(radians));
     }
     
     void updateAbsAngleActions() {}
@@ -821,25 +822,25 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns the x-coordinate of this Hitbox's absolute left boundary.
      * @return The x-coordinate of this Hitbox's absolute left boundary
      */
-    public abstract double getLeftEdge();
+    public abstract long getLeftEdge();
     
     /**
      * Returns the x-coordinate of this Hitbox's absolute right boundary.
      * @return The x-coordinate of this Hitbox's absolute right boundary
      */
-    public abstract double getRightEdge();
+    public abstract long getRightEdge();
     
     /**
      * Returns the y-coordinate of this Hitbox's absolute top boundary.
      * @return The y-coordinate of this Hitbox's absolute top boundary
      */
-    public abstract double getTopEdge();
+    public abstract long getTopEdge();
     
     /**
      * Returns the y-coordinate of this Hitbox's absolute bottom boundary.
      * @return The y-coordinate of this Hitbox's absolute bottom boundary
      */
-    public abstract double getBottomEdge();
+    public abstract long getBottomEdge();
     
     /**
      * Returns the absolute distance from this Hitbox's position to the
@@ -848,7 +849,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @return The absolute distance from this Hitbox's position to the
      * specified Hitbox's position
      */
-    public final double distanceTo(Hitbox hitbox) {
+    public final long distanceTo(Hitbox hitbox) {
         return CellVector.distanceBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
@@ -863,29 +864,29 @@ public abstract class Hitbox<T extends CellGame> {
         return CellVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
-    private static boolean circleEdgeIntersectsSeg(CellVector center, double radius, CellVector start, CellVector diff) {
+    private static boolean circleEdgeIntersectsSeg(CellVector center, long radius, CellVector start, CellVector diff) {
         //Credit to bobobobo of StackOverflow for the algorithm.
         CellVector f = CellVector.sub(start, center);
-        double a = diff.dot(diff);
-        double b = 2*f.dot(diff);
-        double c = f.dot(f) - radius*radius;
-        double disc = b*b - 4*a*c;
+        long a = diff.dot(diff);
+        long b = 2*f.dot(diff);
+        long c = f.dot(f) - Frac.mul(radius, radius);
+        long disc = Frac.mul(b, b) - 4*Frac.mul(a, c);
         if (disc < 0) {
             return false;
         }
-        disc = Math.sqrt(disc);
-        double t1 = (-b - disc)/(2*a);
-        double t2 = (-b + disc)/(2*a);
-        return (t1 > 0 && t1 < 1) || (t2 > 0 && t2 < 1);
+        disc = Frac.sqrt(disc);
+        long t1 = Frac.div(-b - disc, 2*a);
+        long t2 = Frac.div(-b + disc, 2*a);
+        return (t1 > 0 && t1 < Frac.UNIT) || (t2 > 0 && t2 < Frac.UNIT);
     }
     
-    private static boolean circleIntersectsLineSegment(CellVector center, double radius, CellVector start, CellVector diff) {
+    private static boolean circleIntersectsLineSegment(CellVector center, long radius, CellVector start, CellVector diff) {
         return center.distanceTo(start) < radius
                 || center.distanceTo(CellVector.add(start, diff)) < radius
                 || circleEdgeIntersectsSeg(center, radius, start, diff);
     }
     
-    private static boolean circleIntersectsPolygon(CellVector center, double radius, PolygonHitbox polygon) {
+    private static boolean circleIntersectsPolygon(CellVector center, long radius, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
             return center.distanceTo(polygon.getAbsPosition()) < radius;
@@ -921,16 +922,16 @@ public abstract class Hitbox<T extends CellGame> {
         return pointIntersectsPolygon(center, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     
-    private static boolean circleIntersectsOrthogonalLine(double cu, double cv, double radius, double u1, double u2, double v) {
+    private static boolean circleIntersectsOrthogonalLine(long cu, long cv, long radius, long u1, long u2, long v) {
         v -= cv;
         if (Math.abs(v) < radius) {
-            double rangeRadius = Math.sqrt(radius*radius - v*v);
+            long rangeRadius = Frac.sqrt(Frac.mul(radius, radius) - Frac.mul(v, v));
             return u1 < cu + rangeRadius && u2 > cu - rangeRadius;
         }
         return false;
     }
     
-    private static boolean circleIntersectsRectangle(double cx, double cy, double radius, double x1, double y1, double x2, double y2) {
+    private static boolean circleIntersectsRectangle(long cx, long cy, long radius, long x1, long y1, long x2, long y2) {
         if (cx > x1 && cx < x2 && cy > y1 && cy < y2) {
             return true;
         }
@@ -1001,12 +1002,12 @@ public abstract class Hitbox<T extends CellGame> {
         return pointIntersectsPolygon(start, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     
-    private static boolean lineSegmentIntersectsRectangle(CellVector start, CellVector diff, double x1, double y1, double x2, double y2) {
+    private static boolean lineSegmentIntersectsRectangle(CellVector start, CellVector diff, long x1, long y1, long x2, long y2) {
         if (start.getX() > x1 && start.getX() < x2 && start.getY() > y1 && start.getY() < y2) {
             return true;
         }
-        double lineX2 = start.getX() + diff.getX();
-        double lineY2 = start.getY() + diff.getY();
+        long lineX2 = start.getX() + diff.getX();
+        long lineY2 = start.getY() + diff.getY();
         if (lineX2 > x1 && lineX2 < x2 && lineY2 > y1 && lineY2 < y2) {
             return true;
         }
@@ -1041,7 +1042,7 @@ public abstract class Hitbox<T extends CellGame> {
     */
     //Credit to Mecki of StackOverflow for the point-polygon intersection algorithm.
     
-    private static boolean pointIntersectsPolygon(CellVector point, double startX, CellVector[] vertices, CellVector[] diffs) {
+    private static boolean pointIntersectsPolygon(CellVector point, long startX, CellVector[] vertices, CellVector[] diffs) {
         CellVector start = new CellVector(startX, point.getY());
         CellVector diff = new CellVector(point.getX() - startX, 0);
         boolean intersects = false;
@@ -1066,7 +1067,7 @@ public abstract class Hitbox<T extends CellGame> {
         if (numVertices == 2) {
             return lineSegmentIntersectsPoint(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), point);
         }
-        double startX = polygon.getLeftEdge() - 1;
+        long startX = polygon.getLeftEdge() - 1;
         CellVector start = new CellVector(startX, point.getY());
         CellVector diff = new CellVector(point.getX() - startX, 0);
         CellVector lastVertex = firstVertex;
@@ -1084,7 +1085,7 @@ public abstract class Hitbox<T extends CellGame> {
         return intersects;
     }
     
-    private static boolean pointIntersectsRectangle(CellVector point, double x1, double y1, double x2, double y2) {
+    private static boolean pointIntersectsRectangle(CellVector point, long x1, long y1, long x2, long y2) {
         return point.getX() > x1 && point.getX() < x2
                 && point.getY() > y1 && point.getY() < y2;
     }
@@ -1168,7 +1169,7 @@ public abstract class Hitbox<T extends CellGame> {
                 || pointIntersectsPolygon(firstVertex2, polygon1.getLeftEdge() - 1, vertices1, diffs1);
     }
     
-    private static boolean polygonIntersectsRectangle(PolygonHitbox polygon, double x1, double y1, double x2, double y2) {
+    private static boolean polygonIntersectsRectangle(PolygonHitbox polygon, long x1, long y1, long x2, long y2) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) {
             return pointIntersectsRectangle(polygon.getAbsPosition(), x1, y1, x2, y2);
@@ -1260,7 +1261,7 @@ public abstract class Hitbox<T extends CellGame> {
                 || pointIntersectsPolygon(slopeVertices[0], polygon.getLeftEdge() - 1, vertices, diffs);
     }
     */
-    private static boolean rectanglesIntersect(double x1_1, double y1_1, double x2_1, double y2_1, double x1_2, double y1_2, double x2_2, double y2_2) {
+    private static boolean rectanglesIntersect(long x1_1, long y1_1, long x2_1, long y2_1, long x1_2, long y1_2, long x2_2, long y2_2) {
         return x2_1 > x1_2 && x1_1 < x2_2 && y2_1 > y1_2 && y1_1 < y2_2;
     }
     /*

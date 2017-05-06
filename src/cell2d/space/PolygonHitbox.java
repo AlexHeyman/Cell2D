@@ -33,7 +33,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     private final List<RelAbsPair> vertices;
-    private double left, right, top, bottom;
+    private long left, right, top, bottom;
     
     /**
      * Creates a new PolygonHitbox with the specified relative position and
@@ -52,7 +52,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relY The y-coordinate of this PolygonHitbox's relative position
      * @param relVertices This PolygonHitbox's relative vertices
      */
-    public PolygonHitbox(double relX, double relY, CellVector[] relVertices) {
+    public PolygonHitbox(long relX, long relY, CellVector[] relVertices) {
         super(relX, relY);
         vertices = new ArrayList<>(relVertices.length);
         for (CellVector relVertex : relVertices) {
@@ -76,13 +76,13 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relX The x-coordinate of this PolygonHitbox's relative position
      * @param relY The y-coordinate of this PolygonHitbox's relative position
      */
-    public PolygonHitbox(double relX, double relY) {
+    public PolygonHitbox(long relX, long relY) {
         super(relX, relY);
         vertices = new ArrayList<>();
         updateData();
     }
     
-    private PolygonHitbox(double relX, double relY, List<RelAbsPair> vertices) {
+    private PolygonHitbox(long relX, long relY, List<RelAbsPair> vertices) {
         super(relX, relY);
         this.vertices = vertices;
         updateData();
@@ -100,8 +100,8 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * relative vertex
      * @return The new PolygonHitbox
      */
-    public static final PolygonHitbox regularPolygon(double relX, double relY,
-            int numVertices, double radius, double angle) {
+    public static final PolygonHitbox regularPolygon(long relX, long relY,
+            int numVertices, long radius, double angle) {
         if (numVertices < 3) {
             throw new RuntimeException("Attempted to make a regular polygon with fewer than 3 vertices");
         }
@@ -202,7 +202,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param index The index of the relative vertex
      * @return The x-coordinate of the relative vertex at the specified index
      */
-    public final double getRelVertexX(int index) {
+    public final long getRelVertexX(int index) {
         return vertices.get(index).rel.getX();
     }
     
@@ -212,7 +212,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param index The index of the relative vertex
      * @return The y-coordinate of the relative vertex at the specified index
      */
-    public final double getRelVertexY(int index) {
+    public final long getRelVertexY(int index) {
         return vertices.get(index).rel.getY();
     }
     
@@ -231,7 +231,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param index The index of the absolute vertex
      * @return The x-coordinate of the absolute vertex at the specified index
      */
-    public final double getAbsVertexX(int index) {
+    public final long getAbsVertexX(int index) {
         return vertices.get(index).abs.getX();
     }
     
@@ -241,7 +241,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param index The index of the absolute vertex
      * @return The y-coordinate of the absolute vertex at the specified index
      */
-    public final double getAbsVertexY(int index) {
+    public final long getAbsVertexY(int index) {
         return vertices.get(index).abs.getY();
     }
     
@@ -261,7 +261,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relX The x-coordinate of the new relative vertex
      * @param relY The y-coordinate of the new relative vertex
      */
-    public final void addVertex(double relX, double relY) {
+    public final void addVertex(long relX, long relY) {
         vertices.add(new RelAbsPair(new CellVector(relX, relY), null));
         updateData();
     }
@@ -284,7 +284,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relX The x-coordinate of the new relative vertex
      * @param relY The y-coordinate of the new relative vertex
      */
-    public final void addRelVertex(int index, double relX, double relY) {
+    public final void addRelVertex(int index, long relX, long relY) {
         vertices.add(index, new RelAbsPair(new CellVector(relX, relY), null));
         updateData();
     }
@@ -307,7 +307,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relX The x-coordinate of the new relative vertex
      * @param relY The y-coordinate of the new relative vertex
      */
-    public final void setRelVertex(int index, double relX, double relY) {
+    public final void setRelVertex(int index, long relX, long relY) {
         vertices.set(index, new RelAbsPair(new CellVector(relX, relY), null));
         updateData();
     }
@@ -318,7 +318,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param index The index of the relative vertex to be changed
      * @param relX The relative vertex's new x-coordinate
      */
-    public final void setRelVertexX(int index, double relX) {
+    public final void setRelVertexX(int index, long relX) {
         vertices.get(index).rel.setX(relX);
         updateData();
     }
@@ -329,7 +329,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param index The index of the relative vertex to be changed
      * @param relY The relative vertex's new y-coordinate
      */
-    public final void setRelVertexY(int index, double relY) {
+    public final void setRelVertexY(int index, long relY) {
         vertices.get(index).rel.setY(relY);
         updateData();
     }
@@ -356,7 +356,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * vertices by the specified factor.
      * @param scaleFactor The factor by which to scale this PolygonHitbox
      */
-    public final void scale(double scaleFactor) {
+    public final void scale(long scaleFactor) {
         for (RelAbsPair vertex : vertices) {
             vertex.rel.scale(scaleFactor);
         }
@@ -364,22 +364,22 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public final double getLeftEdge() {
+    public final long getLeftEdge() {
         return getAbsX() + left;
     }
     
     @Override
-    public final double getRightEdge() {
+    public final long getRightEdge() {
         return getAbsX() + right;
     }
     
     @Override
-    public final double getTopEdge() {
+    public final long getTopEdge() {
         return getAbsY() + top;
     }
     
     @Override
-    public final double getBottomEdge() {
+    public final long getBottomEdge() {
         return getAbsY() + bottom;
     }
     

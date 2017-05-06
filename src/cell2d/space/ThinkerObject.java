@@ -27,11 +27,11 @@ import java.util.Set;
  * ThinkerObject with no collision Hitbox cannot collide with solid surfaces,
  * even if collision is enabled for it.</p>
  * 
- * <p>A ThinkerObject may have a pressing angle that causes it to behave during
- * movement as if it were pressing in the angle's direction while moving
- * perpendicularly to that direction. The pressing angle is specified as
- * relative (to the ThinkerObject's flipped status and angle of rotation) or
- * absolute.</p>
+ * <p>A ThinkerObject may have a pressing angle that causes it to press against
+ * and collide with solid surfaces in the angle's direction during movement, as
+ * long as it is touching them and not moving away from them. The pressing angle
+ * is specified as relative (to the ThinkerObject's flipped status and angle of
+ * rotation) or absolute.</p>
  * 
  * <p>A ThinkerObject may have one or more ThinkerObject followers, and if it
  * does, it is called those followers' leader. When a ThinkerObject moves, all
@@ -41,12 +41,14 @@ import java.util.Set;
  * 
  * <p>A ThinkerObject has a velocity, as well as a vector called a step that
  * acts as a short-term adjustment to its velocity, both in pixels per time
- * unit. Every frame, between its beforeMovementActions() and
- * afterMovementActions(), a ThinkerObject assigned to an active SpaceState
- * moves by the sum of its velocity and step multiplied by its time factor, then
- * resets its step to (0, 0). A ThinkerObject's movement priority determines
- * when it will move relative to other ThinkerObjects. ThinkerObjects with
- * higher movement priorities move before those with lower ones.</p>
+ * unit. Every frame, between its frameActions() and afterMovementActions(), a
+ * ThinkerObject assigned to an active SpaceState moves by the sum of its
+ * velocity and step multiplied by its time factor, then resets its step to (0,
+ * 0). A ThinkerObject's movement priority determines when it will move relative
+ * to other ThinkerObjects. ThinkerObjects with higher movement priorities move
+ * before those with lower ones. Also, if two solid ThinkerObjects would
+ * otherwise collide with each other, the one with the higher movement priority
+ * will push the other one along with it.</p>
  * 
  * <p>Every time a ThinkerObject moves, it records the SpaceObjects whose solid
  * surfaces it collided with and the Directions of the surfaces relative to it
@@ -71,11 +73,6 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         @Override
         public final void frameActions(T game, SpaceState<T> levelState) {
             ThinkerObject.this.frameActions(game, levelState);
-        }
-        
-        @Override
-        public final void beforeMovementActions(T game, SpaceState<T> levelState) {
-            ThinkerObject.this.beforeMovementActions(game, levelState);
         }
         
         @Override
@@ -156,7 +153,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     }
     
     @Override
-    void setTimeFactorActions(double timeFactor) {
+    void setTimeFactorActions(long timeFactor) {
         super.setTimeFactorActions(timeFactor);
         thinker.setTimeFactor(timeFactor);
     }
@@ -279,15 +276,6 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param state This ThinkerObject's SpaceState
      */
     public void frameActions(T game, SpaceState<T> state) {}
-    
-    /**
-     * Actions for this ThinkerObject to take once every frame, after
-     * SpaceThinkers take their frameActions() but before its SpaceState moves
-     * its assigned ThinkerObjects.
-     * @param game This ThinkerObject's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void beforeMovementActions(T game, SpaceState<T> state) {}
     
     /**
      * Actions for this ThinkerObject to take once every frame, after its
@@ -630,8 +618,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * ThinkerObject (false by default)
      */
     public final void setPosition(CellVector position, boolean bringFollowers) {
-        double changeX = position.getX() - getX();
-        double changeY = position.getY() - getY();
+        long changeX = position.getX() - getX();
+        long changeY = position.getY() - getY();
         setPosition(position);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -648,9 +636,9 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject (false by default)
      */
-    public final void setPosition(double x, double y, boolean bringFollowers) {
-        double changeX = x - getX();
-        double changeY = y - getY();
+    public final void setPosition(long x, long y, boolean bringFollowers) {
+        long changeX = x - getX();
+        long changeY = y - getY();
         setPosition(x, y);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -667,8 +655,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject (false by default)
      */
-    public final void setX(double x, boolean bringFollowers) {
-        double changeX = x - getX();
+    public final void setX(long x, boolean bringFollowers) {
+        long changeX = x - getX();
         setX(x);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -685,8 +673,8 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject (false by default)
      */
-    public final void setY(double y, boolean bringFollowers) {
-        double changeY = y - getY();
+    public final void setY(long y, boolean bringFollowers) {
+        long changeY = y - getY();
         setY(y);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -720,7 +708,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject (false by default)
      */
-    public final void changePosition(double changeX, double changeY, boolean bringFollowers) {
+    public final void changePosition(long changeX, long changeY, boolean bringFollowers) {
         changePosition(changeX, changeY);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -737,7 +725,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject (false by default)
      */
-    public final void changeX(double changeX, boolean bringFollowers) {
+    public final void changeX(long changeX, boolean bringFollowers) {
         changeX(changeX);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -754,7 +742,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * sub-followers will change their positions by the same amount as this
      * ThinkerObject (false by default)
      */
-    public final void changeY(double changeY, boolean bringFollowers) {
+    public final void changeY(long changeY, boolean bringFollowers) {
         changeY(changeY);
         if (bringFollowers && !followers.isEmpty()) {
             for (ThinkerObject follower : followers) {
@@ -782,7 +770,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param changeY The amount by which this ThinkerObject should move along
      * the y-axis
      */
-    public final void doMovement(double changeX, double changeY) {
+    public final void doMovement(long changeX, long changeY) {
         if (state == null) {
             if (changeX != 0 || changeY != 0) {
                 setPosition(getX() + changeX, getY() + changeY);
@@ -878,7 +866,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Returns the x-component of this ThinkerObject's velocity.
      * @return The x-component of this ThinkerObject's velocity
      */
-    public final double getVelocityX() {
+    public final long getVelocityX() {
         return velocity.getX();
     }
     
@@ -886,7 +874,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Returns the y-component of this ThinkerObject's velocity.
      * @return The y-component of this ThinkerObject's velocity
      */
-    public final double getVelocityY() {
+    public final long getVelocityY() {
         return velocity.getY();
     }
     
@@ -894,7 +882,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Returns this ThinkerObject's speed, the magnitude of its velocity.
      * @return This ThinkerObject's speed
      */
-    public final double getSpeed() {
+    public final long getSpeed() {
         return velocity.getMagnitude();
     }
     
@@ -911,7 +899,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param velocityX The new x-component of the velocity
      * @param velocityY The new y-component of the velocity
      */
-    public final void setVelocity(double velocityX, double velocityY) {
+    public final void setVelocity(long velocityX, long velocityY) {
         velocity.setCoordinates(velocityX, velocityY);
     }
     
@@ -920,7 +908,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * value.
      * @param velocityX The new x-component of the velocity
      */
-    public final void setVelocityX(double velocityX) {
+    public final void setVelocityX(long velocityX) {
         velocity.setX(velocityX);
     }
     
@@ -929,7 +917,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * value.
      * @param velocityY The new y-component of the velocity
      */
-    public final void setVelocityY(double velocityY) {
+    public final void setVelocityY(long velocityY) {
         velocity.setY(velocityY);
     }
     
@@ -938,7 +926,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * specified value.
      * @param speed The new speed
      */
-    public final void setSpeed(double speed) {
+    public final void setSpeed(long speed) {
         velocity.setMagnitude(speed);
     }
     
@@ -948,7 +936,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param point The point that this ThinkerObject should move toward
      * @param speed The speed that this ThinkerObject should move at
      */
-    public final void moveToward(CellVector point, double speed) {
+    public final void moveToward(CellVector point, long speed) {
         setVelocity(point.getX() - getX(), point.getY() - getY());
         setSpeed(speed);
     }
@@ -962,7 +950,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * move toward
      * @param speed The speed that this ThinkerObject should move at
      */
-    public final void moveToward(double x, double y, double speed) {
+    public final void moveToward(long x, long y, long speed) {
         setVelocity(x - getX(), y - getY());
         setSpeed(speed);
     }
@@ -979,7 +967,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Returns the x-component of this ThinkerObject's step.
      * @return The x-component of this ThinkerObject's step
      */
-    public final double getStepX() {
+    public final long getStepX() {
         return step.getX();
     }
     
@@ -987,7 +975,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Returns the y-component of this ThinkerObject's step.
      * @return The y-component of this ThinkerObject's step
      */
-    public final double getStepY() {
+    public final long getStepY() {
         return step.getY();
     }
     
@@ -995,7 +983,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Returns the length of this ThinkerObject's step.
      * @return The length of this ThinkerObject's step
      */
-    public final double getStepLength() {
+    public final long getStepLength() {
         return step.getMagnitude();
     }
     
@@ -1012,7 +1000,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param stepX The x-component of the new step
      * @param stepY The y-component of the new step
      */
-    public final void setStep(double stepX, double stepY) {
+    public final void setStep(long stepX, long stepY) {
         step.setCoordinates(stepX, stepY);
     }
     
@@ -1020,7 +1008,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Sets the x-component of this ThinkerObject's step to the specified value.
      * @param stepX The new x-component of the step
      */
-    public final void setStepX(double stepX) {
+    public final void setStepX(long stepX) {
         step.setX(stepX);
     }
     
@@ -1028,7 +1016,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Sets the y-component of this ThinkerObject's step to the specified value.
      * @param stepY The new y-component of the step
      */
-    public final void setStepY(double stepY) {
+    public final void setStepY(long stepY) {
         step.setY(stepY);
     }
     
@@ -1036,7 +1024,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * Sets the length of this ThinkerObject's step to the specified value.
      * @param length The new step length
      */
-    public final void setStepLength(double length) {
+    public final void setStepLength(long length) {
         step.setMagnitude(length);
     }
     
@@ -1053,7 +1041,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param changeX The amount to change the step's x-component by
      * @param changeY The amount to change the step's y-component by
      */
-    public final void changeStep(double changeX, double changeY) {
+    public final void changeStep(long changeX, long changeY) {
         step.add(changeX, changeY);
     }
     
@@ -1062,7 +1050,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * amount.
      * @param changeX The amount to change the step's x-component by
      */
-    public final void changeStepX(double changeX) {
+    public final void changeStepX(long changeX) {
         step.add(changeX, 0);
     }
     
@@ -1071,7 +1059,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * amount.
      * @param changeY The amount to change the step's y-component by
      */
-    public final void changeStepY(double changeY) {
+    public final void changeStepY(long changeY) {
         step.add(0, changeY);
     }
     
@@ -1089,7 +1077,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @return The x-component of this ThinkerObject's displacement during its
      * last movement
      */
-    public final double getDisplacementX() {
+    public final long getDisplacementX() {
         return displacement.getX();
     }
     
@@ -1099,7 +1087,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @return The y-component of this ThinkerObject's displacement during its
      * last movement
      */
-    public final double getDisplacementY() {
+    public final long getDisplacementY() {
         return displacement.getY();
     }
     
@@ -1109,7 +1097,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @return The length of this ThinkerObject's displacement during its last
      * movement
      */
-    public final double getDisplacementLength() {
+    public final long getDisplacementLength() {
         return displacement.getMagnitude();
     }
     

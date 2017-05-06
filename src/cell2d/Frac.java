@@ -4,15 +4,15 @@ import java.math.BigInteger;
 
 /**
  * <p>The Frac class contains constants and methods related to fracunits.
- * Fracunits are a unit of distance used by CellVectors, SpaceStates, and their
- * associated classes. Typically, one fracunit corresponds to one pixel on the
- * screen. Fracunits are units of the primitive type <code>long</code>, and one
- * fracunit is equal to 2 to the power of 32, or 4294967296. In other words,
- * fracunit arithmetic is fixed-point number arithmetic in which numbers have 32
- * bits after the decimal point. Numbers in fracunit scale may be correctly
- * added and subtracted with the + and - operators, but multiplication,
- * division, and square root operations require the use of the Frac class'
- * mul(), div(), and sqrt() methods, respectively.</p>
+ * Fracunits are Cell2D's units of "continuous" length and time. Typically, one
+ * fracunit of length corresponds to one pixel on the screen, and one fracunit
+ * of time corresponds to one frame. Fracunits are units of the primitive type
+ * <code>long</code>, and one fracunit is equal to 2 to the power of 32, or
+ * 4294967296. In other words, fracunit arithmetic is fixed-point number
+ * arithmetic in which numbers have 32 bits after the decimal point.
+ * Fracunit-scale numbers may be correctly added and subtracted with the + and -
+ * operators, but other operations require the use of their respective methods
+ * in the Frac class.</p>
  * @author Andrew Heyman
  */
 public class Frac {
@@ -42,19 +42,41 @@ public class Frac {
     }
     
     /**
-     * Returns the equivalent of the specified number in fracunit scale as a
-     * <code>double</code>.
-     * @param a The number in fracunit scale to be converted to a <code>double
+     * Returns the specified number rounded to the nearest fracunit.
+     * @param a The number
+     * @return The number rounded to the nearest fracunit
+     */
+    public static final long round(long a) {
+        long diff = a & (Frac.UNIT - 1);
+        return (diff < Frac.UNIT/2 ? a - diff : a + Frac.UNIT - diff);
+    }
+    
+    /**
+     * Returns the equivalent of the specified fracunit-scale number, rounded to
+     * the nearest fracunit, as an <code>int</code>.
+     * @param a The fracunit-scale number to be rounded and converted to an
+     * <code>int</code>
+     * @return The equivalent of the specified fracunit-scale number, rounded to
+     * the nearest fracunit, as an <code>int</code>
+     */
+    public static final int toInt(long a) {
+        return (int)(Frac.round(a) >> Frac.BITS);
+    }
+    
+    /**
+     * Returns the equivalent of the specified fracunit-scale number as a <code>
+     * double</code>.
+     * @param a The fracunit-scale number to be converted to a <code>double
      * </code>
-     * @return The equivalent of the specified number in fracunit scale as a
-     * <code>double</code>
+     * @return The equivalent of the specified fracunit-scale number as a <code>
+     * double</code>
      */
     public static final double toDouble(long a) {
         return ((double)a)/UNIT;
     }
     
     /**
-     * Returns the product of the two specified numbers in fracunit scale.
+     * Returns the product of the two specified fracunit-scale numbers.
      * @param a The first number
      * @param b The second number
      * @return The product of the two numbers
@@ -64,8 +86,7 @@ public class Frac {
     }
     
     /**
-     * Returns the first specified number in fracunit scale divided by the
-     * second.
+     * Returns the first specified fracunit-scale number divided by the second.
      * @param a The first number
      * @param b The second number
      * @return The first number divided by the second
@@ -75,7 +96,7 @@ public class Frac {
     }
     
     /**
-     * Returns the square root of the specified number in fracunit scale.
+     * Returns the square root of the specified fracunit-scale number.
      * @param a The number
      * @return The number's square root
      */

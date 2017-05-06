@@ -5,9 +5,9 @@ package cell2d;
  * one of its frames. For simplicity's sake, all Animatable objects, not just
  * Animations, may be treated as consisting of one or more Animatable frames,
  * indexed by the integers from 0 to getNumFrames() - 1 inclusive, each with its
- * own duration. Durations of 0 or less are interpreted as infinite. An
- * Animatable object that is not an Animation has exactly one frame, namely
- * itself, with a duration of 0.</p>
+ * own duration in fracunits. Durations of 0 or less are interpreted as
+ * infinite. An Animatable object that is not an Animation has exactly one
+ * frame, namely itself, with a duration of 0.</p>
  * @author Andrew Heyman
  */
 public interface Animatable {
@@ -40,7 +40,7 @@ public interface Animatable {
      * @param index The index of the frame whose duration is to be returned
      * @return The duration of the frame at the specified index
      */
-    public double getFrameDuration(int index);
+    public long getFrameDuration(int index);
     
     /**
      * Returns whether the two frames at the specified indices are compatible

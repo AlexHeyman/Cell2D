@@ -20,10 +20,10 @@ import java.util.Map;
 public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
     
     final Map<Integer,Hitbox<T>> components = new HashMap<>();
-    private double left = 0;
-    private double right = 0;
-    private double top = 0;
-    private double bottom = 0;
+    private long left = 0;
+    private long right = 0;
+    private long top = 0;
+    private long bottom = 0;
     
     /**
      * Creates a new CompositeHitbox with the specified relative position.
@@ -38,7 +38,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relX The x-coordinate of this CompositeHitbox's relative position
      * @param relY The y-coordinate of this CompositeHitbox's relative position
      */
-    public CompositeHitbox(double relX, double relY) {
+    public CompositeHitbox(long relX, long relY) {
         super(relX, relY);
     }
     
@@ -65,10 +65,10 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
             bottom = 0;
         } else {
             boolean compare = false;
-            double newLeft = 0;
-            double newRight = 0;
-            double newTop = 0;
-            double newBottom = 0;
+            long newLeft = 0;
+            long newRight = 0;
+            long newTop = 0;
+            long newBottom = 0;
             for (Hitbox component : components.values()) {
                 if (compare) {
                     newLeft = Math.min(newLeft, component.getLeftEdge());
@@ -83,8 +83,8 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
                 }
                 compare = true;
             }
-            double x = getAbsX();
-            double y = getAbsY();
+            long x = getAbsX();
+            long y = getAbsY();
             left = newLeft - x;
             right = newRight - x;
             top = newTop - y;
@@ -140,8 +140,8 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
             hitbox.componentOf = this;
             Hitbox<T> oldHitbox = components.put(id, hitbox);
             if (oldHitbox == null) {
-                double x = getAbsX();
-                double y = getAbsY();
+                long x = getAbsX();
+                long y = getAbsY();
                 left = Math.min(left, hitbox.getLeftEdge() - x);
                 right = Math.max(right, hitbox.getRightEdge() - x);
                 top = Math.min(top, hitbox.getTopEdge() - y);
@@ -168,22 +168,22 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public final double getLeftEdge() {
+    public final long getLeftEdge() {
         return getAbsX() + left;
     }
     
     @Override
-    public final double getRightEdge() {
+    public final long getRightEdge() {
         return getAbsX() + right;
     }
     
     @Override
-    public final double getTopEdge() {
+    public final long getTopEdge() {
         return getAbsY() + top;
     }
     
     @Override
-    public final double getBottomEdge() {
+    public final long getBottomEdge() {
         return getAbsY() + bottom;
     }
     

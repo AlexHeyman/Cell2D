@@ -25,7 +25,7 @@ public class PointHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relX The x-coordinate of this PointHitbox's relative position
      * @param relY The y-coordinate of this PointHitbox's relative position
      */
-    public PointHitbox(double relX, double relY) {
+    public PointHitbox(long relX, long relY) {
         super(relX, relY);
     }
     
@@ -35,22 +35,22 @@ public class PointHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public final double getLeftEdge() {
+    public final long getLeftEdge() {
         return getAbsX();
     }
     
     @Override
-    public final double getRightEdge() {
+    public final long getRightEdge() {
         return getAbsX();
     }
     
     @Override
-    public final double getTopEdge() {
+    public final long getTopEdge() {
         return getAbsY();
     }
     
     @Override
-    public final double getBottomEdge() {
+    public final long getBottomEdge() {
         return getAbsY();
     }
     

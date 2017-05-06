@@ -69,8 +69,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     private T game;
     private int id;
     boolean active = false;
-    private double timeFactor = 1;
-    private boolean takingFrameActions = false;
+    private long timeFactor = Frac.UNIT;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
     private final SortedSet<V> thinkers = new TreeSet<>(actionPriorityComparator);
@@ -131,11 +130,11 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     }
     
     /**
-     * Returns this CellGameState's time factor; that is, how many time units it
-     * experiences every frame.
+     * Returns this CellGameState's time factor; that is, the average number of
+     * discrete time units it experiences every frame.
      * @return This CellGameState's time factor
      */
-    public final double getTimeFactor() {
+    public final long getTimeFactor() {
         return timeFactor;
     }
     
@@ -143,7 +142,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * Sets this CellGameState's time factor to the specified value.
      * @param timeFactor The new time factor
      */
-    public final void setTimeFactor(double timeFactor) {
+    public final void setTimeFactor(long timeFactor) {
         if (timeFactor < 0) {
             throw new RuntimeException("Attempted to give a CellGameState a negative time factor");
         }
@@ -471,9 +470,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         thinker.addActions();
         thinker.addedActions(game, thisState);
         addThinkerActions(game, thinker);
-        if (takingFrameActions) {
-            thinker.doFrame(game, thisState);
-        }
     }
     
     /**
@@ -548,13 +544,11 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
                 iterator.next().update(game);
             }
         }
-        takingFrameActions = true;
         Iterator<V> iterator = thinkerIterator();
         while (iterator.hasNext()) {
             iterator.next().doFrame(game, thisState);
         }
         frameActions(game);
-        takingFrameActions = false;
     }
     
     /**
