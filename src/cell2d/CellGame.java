@@ -75,9 +75,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.2.0.
+     * The version number of Cell2D, currently 1.2.1.
      */
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.2.1";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED

@@ -42,16 +42,6 @@ public class Frac {
     }
     
     /**
-     * Returns the specified number rounded to the nearest fracunit.
-     * @param a The number
-     * @return The number rounded to the nearest fracunit
-     */
-    public static final long round(long a) {
-        long diff = a & (Frac.UNIT - 1);
-        return (diff < Frac.UNIT/2 ? a - diff : a + Frac.UNIT - diff);
-    }
-    
-    /**
      * Returns the equivalent of the specified fracunit-scale number, rounded to
      * the nearest fracunit, as an <code>int</code>.
      * @param a The fracunit-scale number to be rounded and converted to an
@@ -102,6 +92,16 @@ public class Frac {
      */
     public static final long sqrt(long a) {
         return units(Math.sqrt(toDouble(a)));
+    }
+    
+    /**
+     * Returns the specified number rounded to the nearest fracunit.
+     * @param a The number
+     * @return The number rounded to the nearest fracunit
+     */
+    public static final long round(long a) {
+        long diff = a & (Frac.UNIT - 1);
+        return (diff < Frac.UNIT/2 ? a - diff : a + Frac.UNIT - diff);
     }
     
 }
