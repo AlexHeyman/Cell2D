@@ -3276,7 +3276,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     int bottom = ry + viewport.bottom;
                     int xOffset = vx1 - left;
                     int yOffset = vy1 - top;
-                    int[] cellRange = getCellRangeExclusive(left, top, right, bottom);
+                    int[] cellRange = getCellRangeExclusive(left*Frac.UNIT, top*Frac.UNIT, right*Frac.UNIT, bottom*Frac.UNIT);
                     if (drawMode == DrawMode.FLAT) {
                         if (cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
                             for (Hitbox<T> locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).locatorHitboxes) {
