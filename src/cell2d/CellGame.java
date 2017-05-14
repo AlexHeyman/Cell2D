@@ -609,9 +609,8 @@ public abstract class CellGame {
      * Actions for this CellGame to take when initializing itself before
      * entering its first state. This should include creating at least one
      * CellGameState for it, binding default controls to its commands, loading
-     * assets and adding them to the Assets class, etc. enterState() must be
-     * called during this method to tell the CellGame which CellGameState to
-     * start out in, or the game will crash.
+     * assets, etc. enterState() must be called during this method to tell the
+     * CellGame which CellGameState to start out in, or the game will crash.
      */
     public abstract void initActions();
     
