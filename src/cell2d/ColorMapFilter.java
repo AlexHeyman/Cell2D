@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.SlickException;
 
 /**
  * <p>A ColorMapFilter is a Filter that uses a Map&lt;Color,Color&gt; to replace
@@ -37,8 +36,8 @@ public class ColorMapFilter extends Filter {
     }
     
     @Override
-    final GameImage getFilteredImage(BufferedImage bufferedImage) throws SlickException {
-        return Assets.getRecoloredImage(bufferedImage, colorMap);
+    final GameImage getFilteredImage(BufferedImage bufferedImage) {
+        return GameImage.getRecoloredImage(bufferedImage, colorMap);
     }
     
 }

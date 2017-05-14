@@ -69,7 +69,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param relPosition This Hitbox's relative position
      */
     public Hitbox(CellVector relPosition) {
-        id = getNextID();
+        id = idCounter.getAndIncrement();
         this.relPosition = new CellVector(relPosition);
         absPosition = new CellVector(relPosition);
     }
@@ -80,7 +80,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param relY The y-coordinate of this Hitbox's relative position
      */
     public Hitbox(long relX, long relY) {
-        id = getNextID();
+        id = idCounter.getAndIncrement();
         this.relPosition = new CellVector(relX, relY);
         absPosition = new CellVector(relPosition);
     }
@@ -91,10 +91,6 @@ public abstract class Hitbox<T extends CellGame> {
      * @return A copy of this Hitbox
      */
     public abstract Hitbox<T> getCopy();
-    
-    private static long getNextID() {
-        return idCounter.getAndIncrement();
-    }
     
     final Hitbox<T> getParent() {
         return parent;

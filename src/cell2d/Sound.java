@@ -1,7 +1,5 @@
 package cell2d;
 
-import org.newdawn.slick.SlickException;
-
 /**
  * <p>A Sound is a sound effect. Like Sprites, SpriteSheets, and Music tracks,
  * Sounds can be manually loaded and unloaded into and out of memory. Loading
@@ -12,17 +10,15 @@ public class Sound {
     
     private boolean loaded = false;
     private final String path;
-    private org.newdawn.slick.Sound sound = null;
+    private Audio audio = null;
     
     /**
-     * Creates a new Sound from an audio file. Files of WAV, OGG, MOD, and XM
+     * Creates a new Sound from an audio file. Files of WAV, OGG, and AIF(F)
      * formats are supported.
      * @param path The relative path to the audio file
      * @param load Whether this Sound should load upon creation
-     * @throws SlickException If the Sound could not be properly loaded from the
-     * specified path
      */
-    public Sound(String path, boolean load) throws SlickException {
+    public Sound(String path, boolean load) {
         this.path = path;
         if (load) {
             load();
@@ -40,12 +36,11 @@ public class Sound {
     /**
      * Loads this Sound if it is not already loaded.
      * @return Whether the loading occurred
-     * @throws SlickException If the Sound could not be properly loaded
      */
-    public final boolean load() throws SlickException {
+    public final boolean load() {
         if (!loaded) {
             loaded = true;
-            sound = new org.newdawn.slick.Sound(path);
+            audio = new Audio(path);
             return true;
         }
         return false;
@@ -58,8 +53,8 @@ public class Sound {
     public final boolean unload() {
         if (loaded) {
             loaded = false;
-            sound.stop();
-            sound = null;
+            audio.unload();
+            audio = null;
             return true;
         }
         return false;
@@ -70,7 +65,7 @@ public class Sound {
      * @return Whether this Sound is currently playing
      */
     public final boolean isPlaying() {
-        return loaded && sound.playing();
+        return loaded && audio.isPlaying();
     }
     
     /**
@@ -89,7 +84,7 @@ public class Sound {
      */
     public final void play(double pitch, double volume) {
         if (loaded) {
-            sound.play((float)pitch, (float)volume);
+            audio.play((float)pitch, (float)volume, false);
         }
     }
     
@@ -109,7 +104,7 @@ public class Sound {
      */
     public final void loop(double pitch, double volume) {
         if (loaded) {
-            sound.loop((float)pitch, (float)volume);
+            audio.play((float)pitch, (float)volume, true);
         }
     }
     
@@ -118,7 +113,7 @@ public class Sound {
      */
     public final void stop() {
         if (loaded) {
-            sound.stop();
+            audio.stop();
         }
     }
     

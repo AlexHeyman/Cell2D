@@ -1,7 +1,5 @@
 package cell2d;
 
-import org.newdawn.slick.SlickException;
-
 /**
  * <p>A Music track is a piece of music that can be played in the background of
  * a CellGame. Because a CellGame must ensure that it is never playing more than
@@ -23,7 +21,7 @@ public class Music {
     private final boolean blank;
     private boolean loaded = false;
     private final String path;
-    private org.newdawn.slick.Music music = null;
+    private Audio audio = null;
     
     private Music() {
         blank = true;
@@ -32,14 +30,12 @@ public class Music {
     }
     
     /**
-     * Creates a new Music track from an audio file. Files of WAV, OGG, MOD, and
-     * XM formats are supported.
+     * Creates a new Music track from an audio file. Files of WAV, OGG, and
+     * AIF(F) formats are supported.
      * @param path The relative path to the audio file
      * @param load Whether this Music track should load upon creation
-     * @throws SlickException If the Music track could not be properly loaded
-     * from the specified path
      */
-    public Music(String path, boolean load) throws SlickException {
+    public Music(String path, boolean load) {
         blank = false;
         this.path = path;
         if (load) {
@@ -58,16 +54,15 @@ public class Music {
     /**
      * Loads this Music track if it is not already loaded.
      * @return Whether the loading occurred
-     * @throws SlickException If the Music track could not be properly loaded
      */
-    public final boolean load() throws SlickException {
+    public final boolean load() {
         if (blank) {
             return true;
         } else if (loaded) {
             return false;
         }
         loaded = true;
-        music = new org.newdawn.slick.Music(path);
+        audio = new Audio(path);
         return true;
     }
     
@@ -82,50 +77,46 @@ public class Music {
             return false;
         }
         loaded = false;
-        music.stop();
-        music = null;
+        audio.unload();
+        audio = null;
         return true;
     }
     
     final boolean isPlaying() {
-        return (blank ? true : loaded && music.playing());
+        return (blank ? true : loaded && audio.isPlaying());
     }
     
     final void play(double pitch, double volume) {
-        if (music != null) {
-            music.play((float)pitch, (float)volume);
+        if (audio != null) {
+            audio.play((float)pitch, (float)volume, false);
         }
     }
     
     final void loop(double pitch, double volume) {
-        if (music != null) {
-            music.loop((float)pitch, (float)volume);
+        if (audio != null) {
+            audio.play((float)pitch, (float)volume, true);
         }
     }
     
     final void stop() {
-        if (music != null) {
-            music.stop();
+        if (audio != null) {
+            audio.stop();
         }
     }
     
-    final float getPosition() {
-        return (music == null ? 0 : music.getPosition());
+    final double getPosition() {
+        return (audio == null ? 0 : audio.getPosition());
     }
     
     final void setPosition(double position) {
-        if (music != null) {
-            music.setPosition((float)position);
+        if (audio != null) {
+            audio.setPosition((float)position);
         }
     }
     
-    final float getVolume() {
-        return (music == null ? 0 : music.getVolume());
-    }
-    
     final void setVolume(double volume) {
-        if (music != null) {
-            music.setVolume((float)volume);
+        if (audio != null) {
+            audio.setVolume((float)volume);
         }
     }
     

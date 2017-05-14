@@ -95,11 +95,7 @@ public abstract class SpaceObject<T extends CellGame> {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a SpaceObject with an invalid locator hitbox");
         }
-        id = getNextID();
-    }
-    
-    private static long getNextID() {
-        return idCounter.getAndIncrement();
+        id = idCounter.getAndIncrement();
     }
     
     /**

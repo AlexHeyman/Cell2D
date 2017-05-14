@@ -1,7 +1,6 @@
 package cell2d;
 
 import java.awt.image.BufferedImage;
-import org.newdawn.slick.SlickException;
 
 /**
  * <p>A Filter represents an operation that transforms an image, such as
@@ -14,6 +13,6 @@ import org.newdawn.slick.SlickException;
  */
 public abstract class Filter {
     
-    abstract GameImage getFilteredImage(BufferedImage bufferedImage) throws SlickException;
+    abstract GameImage getFilteredImage(BufferedImage bufferedImage);
     
 }

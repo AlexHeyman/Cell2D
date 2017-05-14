@@ -2,7 +2,6 @@ package cell2d;
 
 import java.awt.image.BufferedImage;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.SlickException;
 
 /**
  * <p>A ColorFilter is a Filter that replaces the RGB value of every pixel in
@@ -44,8 +43,8 @@ public class ColorFilter extends Filter {
     }
     
     @Override
-    final GameImage getFilteredImage(BufferedImage bufferedImage) throws SlickException {
-        return Assets.getRecoloredImage(bufferedImage, color);
+    final GameImage getFilteredImage(BufferedImage bufferedImage) {
+        return GameImage.getRecoloredImage(bufferedImage, color);
     }
     
 }

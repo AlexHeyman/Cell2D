@@ -7,7 +7,6 @@ import java.util.Set;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
@@ -76,10 +75,8 @@ public class Sprite implements Animatable, Drawable {
      * @param filters The Set of Filters that will have an effect on this Sprite
      * when applied to it with draw()
      * @param load Whether this Sprite should load upon creation
-     * @throws SlickException If the Sprite could not be properly loaded from
-     * the specified path
      */
-    public Sprite(String path, int originX, int originY, Set<Filter> filters, boolean load) throws SlickException {
+    public Sprite(String path, int originX, int originY, Set<Filter> filters, boolean load) {
         this(path, originX, originY, null, filters, load);
     }
     
@@ -93,11 +90,9 @@ public class Sprite implements Animatable, Drawable {
      * @param filters The Set of Filters that will have an effect on this Sprite
      * when applied to it with draw()
      * @param load Whether this Sprite should load upon creation
-     * @throws SlickException If the Sprite could not be properly loaded from
-     * the specified path
      */
     public Sprite(String path, int originX, int originY,
-            Color transColor, Set<Filter> filters, boolean load) throws SlickException {
+            Color transColor, Set<Filter> filters, boolean load) {
         blank = false;
         loaded = false;
         basedOn = null;
@@ -124,11 +119,9 @@ public class Sprite implements Animatable, Drawable {
      * @param filters The Set of Filters that will have an effect on this Sprite
      * when applied to it with draw()
      * @param load Whether this Sprite should load upon creation
-     * @throws SlickException If the Sprite could not be properly loaded from
-     * the specified path
      */
     public Sprite(String path, int originX, int originY,
-            int transR, int transG, int transB, Set<Filter> filters, boolean load) throws SlickException {
+            int transR, int transG, int transB, Set<Filter> filters, boolean load) {
         this(path, originX, originY,  new Color(transR, transG, transB), filters, load);
     }
     
@@ -140,9 +133,8 @@ public class Sprite implements Animatable, Drawable {
      * @param sprite The Sprite to create this Sprite from
      * @param filter The Filter to apply to the existing Sprite
      * @param load Whether this Sprite should load upon creation
-     * @throws SlickException If the Sprite could not be properly loaded
      */
-    public Sprite(Sprite sprite, Filter filter, boolean load) throws SlickException {
+    public Sprite(Sprite sprite, Filter filter, boolean load) {
         if (sprite.bufferedImage == null) {
             throw new RuntimeException("Attempted to create a Sprite from part of a SpriteSheet");
         }
@@ -174,9 +166,8 @@ public class Sprite implements Animatable, Drawable {
      * from another Sprite or is part of a SpriteSheet, that other Sprite or
      * SpriteSheet will be loaded as well.
      * @return Whether the loading occurred
-     * @throws SlickException If the Sprite could not be properly loaded
      */
-    public final boolean load() throws SlickException {
+    public final boolean load() {
         if (blank) {
             return true;
         } else if (loaded) {
@@ -186,7 +177,7 @@ public class Sprite implements Animatable, Drawable {
         if (spriteSheet == null) {
             GameImage gameImage;
             if (basedOn == null) {
-                gameImage = Assets.getTransparentImage(path, transColor);
+                gameImage = GameImage.getTransparentImage(path, transColor);
             } else {
                 basedOn.load();
                 gameImage = basedFilter.getFilteredImage(basedOn.bufferedImage);

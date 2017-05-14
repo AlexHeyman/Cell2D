@@ -75,9 +75,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.2.1.
+     * The version number of Cell2D, currently 1.3.0.
      */
-    public static final String VERSION = "1.2.1";
+    public static final String VERSION = "1.3.0";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -99,16 +99,18 @@ public abstract class CellGame {
      * Starts a CellGame. Once the started CellGame is closed, the program will
      * end.
      * @param game The CellGame to start
-     * @throws SlickException If something goes wrong with Slick2D's
-     * initialization of the game
      */
-    public static final void startGame(CellGame game) throws SlickException {
+    public static final void startGame(CellGame game) {
         Log.info("Cell2D Version: " + VERSION);
-        AppGameContainer container = new AppGameContainer(game.game);
-        game.updateScreen(container);
-        container.setTargetFrameRate(game.getFPS());
-        container.setShowFPS(false);
-        container.start();
+        try {
+            AppGameContainer container = new AppGameContainer(game.game);
+            game.updateScreen(container);
+            container.setTargetFrameRate(game.getFPS());
+            container.setShowFPS(false);
+            container.start();
+        } catch (SlickException e) {
+            throw new RuntimeException("Failed to start a CellGame");
+        }
     }
     
     private boolean closeRequested = false;
@@ -149,7 +151,7 @@ public abstract class CellGame {
     private final SortedMap<Integer,MusicInstance> musicStack = new TreeMap<>();
     private boolean stackOverridden = false;
     private boolean musicPaused = false;
-    private float musicPosition = 0;
+    private double musicPosition = 0;
     private int musicFadeType = 0;
     private double fadeStartVolume = 0;
     private double fadeEndVolume = 0;
@@ -172,11 +174,9 @@ public abstract class CellGame {
      * @param loadingImagePath The relative path to the image that this CellGame
      * will display while loading before the first CellGameState is entered. If
      * this is null, no loading image will be displayed.
-     * @throws SlickException If the loading image itself fails to load
      */
-    public CellGame(String gamename, int numCommands, int fps,
-            int screenWidth, int screenHeight, double scaleFactor,
-            boolean fullscreen, String loadingImagePath) throws SlickException {
+    public CellGame(String gamename, int numCommands, int fps, int screenWidth,
+            int screenHeight, double scaleFactor, boolean fullscreen, String loadingImagePath) {
         game = new Game(gamename);
         if (numCommands < 0) {
             throw new RuntimeException("Attempted to create a CellGame with a negative number of controls");
@@ -194,14 +194,18 @@ public abstract class CellGame {
         try {
             displayModes = Display.getAvailableDisplayModes();
         } catch (LWJGLException e) {
-            throw new RuntimeException(e.toString());
+            throw new RuntimeException(e);
         }
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         setScaleFactor(scaleFactor);
         this.fullscreen = fullscreen;
         if (loadingImagePath != null) {
-            loadingImage = new Image(loadingImagePath);
+            try {
+                loadingImage = new Image(loadingImagePath);
+            } catch (SlickException e) {
+                throw new RuntimeException("Failed to load a CellGame's loading image");
+            }
         }
     }
     
@@ -608,10 +612,8 @@ public abstract class CellGame {
      * assets and adding them to the Assets class, etc. enterState() must be
      * called during this method to tell the CellGame which CellGameState to
      * start out in, or the game will crash.
-     * @throws SlickException If something that involves Slick2D's features goes
-     * wrong
      */
-    public abstract void initActions() throws SlickException;
+    public abstract void initActions();
     
     /**
      * Actions for this CellGame to take each frame after its current
@@ -1260,9 +1262,9 @@ public abstract class CellGame {
         if (musicPaused) {
             if (currentMusic.music != null) {
                 if (currentMusic.loop) {
-                    currentMusic.music.loop(currentMusic.pitch, currentMusic.music.getVolume());
+                    currentMusic.music.loop(currentMusic.pitch, currentMusic.volume);
                 } else {
-                    currentMusic.music.play(currentMusic.pitch, currentMusic.music.getVolume());
+                    currentMusic.music.play(currentMusic.pitch, currentMusic.volume);
                 }
                 currentMusic.music.setPosition(musicPosition);
             }
@@ -1297,7 +1299,7 @@ public abstract class CellGame {
      * @return The volume of the currently playing Music track
      */
     public final double getMusicVolume() {
-        return (currentMusic.music == null ? 0 : currentMusic.music.getVolume());
+        return (currentMusic.music == null ? 0 : currentMusic.volume);
     }
     
     /**
@@ -1309,10 +1311,8 @@ public abstract class CellGame {
     public final void setMusicVolume(double volume) {
         if (currentMusic.music != null) {
             currentMusic.volume = volume;
-            if (currentMusic.music != null) {
-                currentMusic.music.setVolume(volume);
-                musicFadeType = 0;
-            }
+            currentMusic.music.setVolume(volume);
+            musicFadeType = 0;
         }
     }
     
@@ -1325,13 +1325,11 @@ public abstract class CellGame {
      */
     public final void fadeMusicVolume(double volume, double duration) {
         if (currentMusic.music != null) {
-            if (currentMusic.music != null) {
-                musicFadeType = 1;
-                fadeStartVolume = currentMusic.music.getVolume();
-                fadeEndVolume = volume;
-                fadeDuration = duration*1000;
-                msFading = 0;
-            }
+            musicFadeType = 1;
+            fadeStartVolume = currentMusic.volume;
+            fadeEndVolume = volume;
+            fadeDuration = duration*1000;
+            msFading = 0;
             currentMusic.volume = volume;
         }
     }
@@ -1344,15 +1342,11 @@ public abstract class CellGame {
      */
     public final void fadeMusicOut(double duration) {
         if (currentMusic.music != null) {
-            if (currentMusic.music == null) {
-                stopMusic();
-            } else {
-                musicFadeType = 2;
-                fadeStartVolume = currentMusic.music.getVolume();
-                fadeEndVolume = 0;
-                fadeDuration = duration*1000;
-                msFading = 0;
-            }
+            musicFadeType = 2;
+            fadeStartVolume = currentMusic.volume;
+            fadeEndVolume = 0;
+            fadeDuration = duration*1000;
+            msFading = 0;
         }
     }
     

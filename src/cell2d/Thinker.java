@@ -78,13 +78,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      * Creates a new Thinker.
      */
     public Thinker() {
-        id = getNextID();
+        id = idCounter.getAndIncrement();
         thisThinker = getThis();
         initialized = true;
-    }
-    
-    private static long getNextID() {
-        return idCounter.getAndIncrement();
     }
     
     /**
