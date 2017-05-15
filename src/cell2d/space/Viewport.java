@@ -71,16 +71,16 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     @Override
-    public final void addedActions(T game, SpaceState<T> levelState) {
+    public final void addedActions(T game, SpaceState<T> state) {
         if (hud != null) {
-            levelState.addThinker(hud);
+            state.addThinker(hud);
         }
     }
     
     @Override
-    public final void removedActions(T game, SpaceState<T> levelState) {
+    public final void removedActions(T game, SpaceState<T> state) {
         if (hud != null) {
-            levelState.removeThinker(hud);
+            state.removeThinker(hud);
         }
     }
     

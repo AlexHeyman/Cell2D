@@ -760,7 +760,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     /**
      * Adds the specified SpaceObject to this SpaceState if it is not already
-     * assigned to a levelState.
+     * assigned to a SpaceState.
      * @param object The SpaceObject to be added
      * @return Whether the addition occurred
      */

@@ -66,28 +66,28 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     private final SpaceThinker<T> thinker = new SpaceThinker<T>() {
         
         @Override
-        public final void timeUnitActions(T game, SpaceState<T> levelState) {
-            ThinkerObject.this.timeUnitActions(game, levelState);
+        public final void timeUnitActions(T game, SpaceState<T> state) {
+            ThinkerObject.this.timeUnitActions(game, state);
         }
         
         @Override
-        public final void frameActions(T game, SpaceState<T> levelState) {
-            ThinkerObject.this.frameActions(game, levelState);
+        public final void frameActions(T game, SpaceState<T> state) {
+            ThinkerObject.this.frameActions(game, state);
         }
         
         @Override
-        public final void afterMovementActions(T game, SpaceState<T> levelState) {
-            ThinkerObject.this.afterMovementActions(game, levelState);
+        public final void afterMovementActions(T game, SpaceState<T> state) {
+            ThinkerObject.this.afterMovementActions(game, state);
         }
         
         @Override
-        public final void addedActions(T game, SpaceState<T> levelState) {
-            ThinkerObject.this.addedActions(game, levelState);
+        public final void addedActions(T game, SpaceState<T> state) {
+            ThinkerObject.this.addedActions(game, state);
         }
         
         @Override
-        public final void removedActions(T game, SpaceState<T> levelState) {
-            ThinkerObject.this.removedActions(game, levelState);
+        public final void removedActions(T game, SpaceState<T> state) {
+            ThinkerObject.this.removedActions(game, state);
         }
         
     };

@@ -23,10 +23,10 @@ public abstract class Area<T extends CellGame> {
      * positions of these SpaceObjects are relative to the origin point about
      * which this Area is being loaded.
      * @param game The CellGame of the SpaceState that is loading this Area
-     * @param levelState The SpaceState that is loading this Area
+     * @param state The SpaceState that is loading this Area
      * @return All of the SpaceObjects to be added to the SpaceState as part of
      * this Area
      */
-    public abstract Collection<SpaceObject<T>> load(T game, SpaceState<T> levelState);
+    public abstract Collection<SpaceObject<T>> load(T game, SpaceState<T> state);
     
 }
