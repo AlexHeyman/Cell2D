@@ -75,9 +75,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.3.0.
+     * The version number of Cell2D, currently 1.3.1.
      */
-    public static final String VERSION = "1.3.0";
+    public static final String VERSION = "1.3.1";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -204,7 +204,7 @@ public abstract class CellGame {
             try {
                 loadingImage = new Image(loadingImagePath);
             } catch (SlickException e) {
-                throw new RuntimeException("Failed to load a CellGame's loading image");
+                throw new RuntimeException("Failed to load a CellGame's loading image: " + loadingImagePath);
             }
         }
     }
@@ -1017,9 +1017,8 @@ public abstract class CellGame {
     /**
      * Returns the Music track in this CellGame's music stack at the specified
      * priority, or null if there is none.
-     * @param priority The priority in the music stack of the Music track to
-     * return
-     * @return The Music track in the music stack at the specified priority
+     * @param priority The priority of the Music track to return
+     * @return The Music track at the specified priority
      */
     public final Music getMusic(int priority) {
         MusicInstance instance = musicStack.get(priority);
@@ -1199,8 +1198,7 @@ public abstract class CellGame {
     /**
      * Stops the Music track in this CellGame's music stack at the specified
      * priority, if there is one.
-     * @param priority The priority in the music stack of the Music track to be
-     * stopped
+     * @param priority The priority of the Music track to be stopped
      */
     public final void stopMusic(int priority) {
         if (musicStack.isEmpty()) {
