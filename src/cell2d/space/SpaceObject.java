@@ -1064,6 +1064,17 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     /**
+     * Returns the AnimationInstance that is assigned to this SpaceObject with
+     * ID 0, or AnimationInstance.BLANK if there is none.
+     * @return The AnimationInstance that is assigned to this SpaceObject with
+     * ID 0
+     */
+    public final AnimationInstance getAnimInstance() {
+        AnimationInstance instance = animInstances.get(0);
+        return (instance == null ? AnimationInstance.BLANK : instance);
+    }
+    
+    /**
      * Sets both this SpaceObject's appearance and its AnimationInstance with ID
      * 0 to the specified AnimationInstance, if it is not already assigned to a
      * CellGameState.
@@ -1136,11 +1147,15 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     /**
-     * Sets both this SpaceObject's appearance and its AnimationInstance with ID
-     * 0 to a new AnimationInstance of the specified Animation, if there is not
-     * already an AnimationInstance of that Animation assigned with ID 0.
-     * @param animation The Animation to make the new AnimationInstance of
-     * @return Whether the change occurred
+     * Sets this SpaceObject's AnimationInstance with ID 0 to a new
+     * AnimationInstance of the specified Animation, if there is not already an
+     * AnimationInstance of that Animation assigned with ID 0, then sets this
+     * SpaceObject's appearance to its AnimationInstance with ID 0. Thus, this
+     * method guarantees that after it is executed, this SpaceObject's
+     * appearance and its AnimationInstance with ID 0 are both the same
+     * AnimationInstance of the specified Animation.
+     * @param animation The Animation to add a new AnimationInstance of
+     * @return The AnimationInstance assigned with ID 0
      */
     public final AnimationInstance setAnimation(Animation animation) {
         AnimationInstance instance = setAnimation(0, animation);
