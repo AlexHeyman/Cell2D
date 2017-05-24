@@ -73,7 +73,7 @@ public abstract class ThinkerState<T extends CellGame, U extends CellGameState<T
     public void enteredActions(CellGame game, U state) {}
     
     /**
-     * Actions for this ThinkerState to take before being left, and immediately
+     * Actions for this ThinkerState to take before being left and immediately
      * before getNextState() is called.
      * @param game This ThinkerState's Thinker's CellGame
      * @param state This ThinkerState's Thinker's CellGameState
