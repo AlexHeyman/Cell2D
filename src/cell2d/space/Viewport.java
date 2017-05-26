@@ -14,6 +14,12 @@ import cell2d.Frac;
  * same SpaceState as it. One pixel in a Viewport's rendering region on the
  * screen is equal to one fracunit in its SpaceState.</p>
  * 
+ * <p>While a Viewport is rendering visuals, the region of the Graphics context
+ * to which it is rendering that is outside its rendering region cannot be drawn
+ * to. When drawn to the Graphics context, shapes and Drawables will
+ * automatically be clipped so that they do not extend beyond the rendering
+ * region.</p>
+ * 
  * <p>HUDs may be assigned to one Viewport each. Only one HUD may be assigned
  * to a given Viewport at once. A Viewport's HUD uses the region of the screen
  * that the Viewport occupies as its rendering region.</p>
@@ -61,12 +67,12 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     private void updateXData() {
-        left = -(int)Math.round((roundX1 + roundX2)/2.0);
+        left = -(int)Math.round((roundX2 - roundX1)/2.0);
         right = left + roundX2 - roundX1;
     }
     
     private void updateYData() {
-        top = -(int)Math.round((roundY1 + roundY2)/2.0);
+        top = -(int)Math.round((roundY2 - roundY1)/2.0);
         bottom = top + roundY2 - roundY1;
     }
     

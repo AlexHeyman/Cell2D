@@ -45,13 +45,18 @@ import org.newdawn.slick.util.Log;
  * that another CellGameState of the same CellGame already has, the old
  * CellGameState is replaced and can no longer be entered.</p>
  * 
- * <p>A CellGame renders visuals on a rectangular grid of pixels called its screen.
- * Points on the screen have x-coordinates that increase from left to right, as
- * well as y-coordinates that increase from top to bottom. The dimensions of the
- * screen are not necessarily the same as the dimensions of the CellGame's
- * program window, as the screen may be scaled to different apparent sizes using
- * the CellGame's scale factor. A CellGame may be displayed in windowed or
- * fullscreen mode.</p>
+ * <p>A CellGame renders visuals on a rectangular grid of pixels called its
+ * screen. Points on the screen have x-coordinates that increase from left to
+ * right, as well as y-coordinates that increase from top to bottom. The
+ * dimensions of the screen are not necessarily the same as the dimensions of
+ * the CellGame's program window, as the screen may be scaled to different
+ * apparent sizes using the CellGame's scale factor. A CellGame may be displayed
+ * in windowed or fullscreen mode.</p>
+ * 
+ * <p>While a CellGame is rendering visuals, the region of the Graphics context
+ * to which it is rendering that is outside its screen cannot be drawn to. When
+ * drawn to the Graphics context, shapes and Drawables will automatically be
+ * clipped so that they do not extend beyond the screen.</p>
  * 
  * <p>A CellGame processes input in the form of a fixed number of binary
  * commands, numbered from 0 to getNumCommands() - 1 inclusive, as well as the
@@ -615,8 +620,8 @@ public abstract class CellGame {
     public abstract void initActions();
     
     /**
-     * Actions for this CellGame to take each frame after its current
-     * CellGameState has finished rendering.
+     * Actions for this CellGame to take each frame to render visuals after its
+     * current CellGameState has finished rendering.
      * @param g The Graphics context to which this CellGame is rendering its
      * visuals this frame
      * @param x1 The x-coordinate in pixels of the screen's left edge on the
