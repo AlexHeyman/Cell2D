@@ -197,12 +197,24 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         thinker.setActionPriority(actionPriority);
     }
     
+    public final SpaceThinkerState<T> getThinkerState(int level) {
+        return thinker.getThinkerState(level);
+    }
+    
     /**
      * Returns this ThinkerObject's current SpaceThinkerState.
      * @return This ThinkerObject's current SpaceThinkerState
      */
-    public final SpaceThinkerState getThinkerState() {
+    public final SpaceThinkerState<T> getThinkerState() {
         return thinker.getThinkerState();
+    }
+    
+    public final void setThinkerState(int level, SpaceThinkerState<T> thinkerState, boolean leaveLowerStates) {
+        thinker.setThinkerState(level, thinkerState, leaveLowerStates);
+    }
+    
+    public final void setThinkerState(int level, SpaceThinkerState<T> thinkerState) {
+        thinker.setThinkerState(level, thinkerState);
     }
     
     /**
@@ -212,8 +224,12 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * addedActions().
      * @param thinkerState The new SpaceThinkerState
      */
-    public final void setThinkerState(SpaceThinkerState thinkerState) {
+    public final void setThinkerState(SpaceThinkerState<T> thinkerState) {
         thinker.setThinkerState(thinkerState);
+    }
+    
+    public final int getThinkerStateDuration(int level) {
+        return thinker.getThinkerStateDuration(level);
     }
     
     /**
@@ -225,6 +241,10 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      */
     public final int getThinkerStateDuration() {
         return thinker.getThinkerStateDuration();
+    }
+    
+    public final void setThinkerStateDuration(int level, int duration) {
+        thinker.setThinkerStateDuration(level, duration);
     }
     
     /**
@@ -245,7 +265,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param timedEvent The TimedEvent whose timer value should be returned
      * @return The current value of the timer for the specified TimedEvent
      */
-    public final int getTimerValue(TimedEvent<SpaceState<T>> timedEvent) {
+    public final int getTimerValue(TimedEvent timedEvent) {
         return thinker.getTimerValue(timedEvent);
     }
     
@@ -255,7 +275,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param timedEvent The TimedEvent whose timer value should be set
      * @param value The new value of the specified TimedEvent's timer
      */
-    public final void setTimerValue(TimedEvent<SpaceState<T>> timedEvent, int value) {
+    public final void setTimerValue(TimedEvent timedEvent, int value) {
         thinker.setTimerValue(timedEvent, value);
     }
     

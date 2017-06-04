@@ -3324,8 +3324,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         } while (hitbox1 != null);
                                         break;
                                     } else {
-                                        double comparison = drawPriorityComparator.compare(hitbox1, hitbox2);
-                                        if (comparison > 0) {
+                                        if (drawPriorityComparator.compare(hitbox1, hitbox2) > 0) {
                                             if (hitbox1 != lastHitbox) {
                                                 if (Frac.toInt(hitbox1.getLeftEdge()) < right
                                                         && Frac.toInt(hitbox1.getRightEdge()) > left

@@ -1033,6 +1033,17 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     /**
+     * Returns the AnimationInstance that is assigned to this SpaceObject with
+     * ID 0, or AnimationInstance.BLANK if there is none.
+     * @return The AnimationInstance that is assigned to this SpaceObject with
+     * ID 0
+     */
+    public final AnimationInstance getAnimInstance() {
+        AnimationInstance instance = animInstances.get(0);
+        return (instance == null ? AnimationInstance.BLANK : instance);
+    }
+    
+    /**
      * Sets the AnimationInstance that is assigned to this SpaceObject with the
      * specified ID to the specified AnimationInstance, if it is not already
      * assigned to a CellGameState. If there is already an AnimationInstance
@@ -1064,17 +1075,6 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     /**
-     * Returns the AnimationInstance that is assigned to this SpaceObject with
-     * ID 0, or AnimationInstance.BLANK if there is none.
-     * @return The AnimationInstance that is assigned to this SpaceObject with
-     * ID 0
-     */
-    public final AnimationInstance getAnimInstance() {
-        AnimationInstance instance = animInstances.get(0);
-        return (instance == null ? AnimationInstance.BLANK : instance);
-    }
-    
-    /**
      * Sets both this SpaceObject's appearance and its AnimationInstance with ID
      * 0 to the specified AnimationInstance, if it is not already assigned to a
      * CellGameState.
@@ -1099,6 +1099,16 @@ public abstract class SpaceObject<T extends CellGame> {
      */
     public final Animation getAnimation(int id) {
         return getAnimInstance(id).getAnimation();
+    }
+    
+    /**
+     * Returns the Animation of the AnimationInstance assigned to this
+     * SpaceObject with ID 0, or Animation.BLANK if there is none.
+     * @return The Animation of the AnimationInstance assigned to this
+     * SpaceObject with ID 0
+     */
+    public final Animation getAnimation() {
+        return getAnimInstance(0).getAnimation();
     }
     
     /**
@@ -1134,16 +1144,6 @@ public abstract class SpaceObject<T extends CellGame> {
             }
         }
         return instance;
-    }
-    
-    /**
-     * Returns the Animation of the AnimationInstance assigned to this
-     * SpaceObject with ID 0, or Animation.BLANK if there is none.
-     * @return The Animation of the AnimationInstance assigned to this
-     * SpaceObject with ID 0
-     */
-    public final Animation getAnimation() {
-        return getAnimInstance(0).getAnimation();
     }
     
     /**

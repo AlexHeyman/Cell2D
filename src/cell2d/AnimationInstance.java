@@ -162,15 +162,6 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Returns this AnimationInstance's current index at its highest level. If
-     * this AnimationInstance has only one level, this will be its only index.
-     * @return This AnimationInstance's current index at its highest level
-     */
-    public final int getIndex() {
-        return indices[indices.length - 1];
-    }
-    
-    /**
      * Returns this AnimationInstance's current index at the specified level. If
      * the specified level is not valid, this method will return -1.
      * @param level The level of the index to be returned
@@ -178,6 +169,15 @@ public class AnimationInstance implements Drawable {
      */
     public final int getIndex(int level) {
         return (level >= 0 && level < indices.length ? indices[level] : -1);
+    }
+    
+    /**
+     * Returns this AnimationInstance's current index at its highest level. If
+     * this AnimationInstance has only one level, this will be its only index.
+     * @return This AnimationInstance's current index at its highest level
+     */
+    public final int getIndex() {
+        return indices[indices.length - 1];
     }
     
     private long setIndex(int level, Animatable frame, int index, boolean resetLowerIndices) {
@@ -201,26 +201,6 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Sets this AnimationInstance's index at its highest level to the specified
-     * value. If this AnimationInstance has only one level, this will be its
-     * only index.
-     * @param index The value to which the index will be set
-     */
-    public final void setIndex(int index) {
-        setIndex(indices.length - 1, index, true);
-    }
-    
-    /**
-     * Sets this AnimationInstance's index at the specified level to the
-     * specified value. All indices at lower levels will be reset to 0.
-     * @param level The level of the index to be set
-     * @param index The value to which the index will be set
-     */
-    public final void setIndex(int level, int index) {
-        setIndex(level, index, true);
-    }
-    
-    /**
      * Sets this AnimationInstance's index at the specified level to the
      * specified value.
      * @param level The level of the index to be set
@@ -241,12 +221,23 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Returns this AnimationInstance's speed at its highest level. If this
-     * AnimationInstance has only one level, this will be its only speed.
-     * @return This AnimationInstance's speed at its highest level
+     * Sets this AnimationInstance's index at the specified level to the
+     * specified value. All indices at lower levels will be reset to 0.
+     * @param level The level of the index to be set
+     * @param index The value to which the index will be set
      */
-    public final long getSpeed() {
-        return speeds[speeds.length - 1];
+    public final void setIndex(int level, int index) {
+        setIndex(level, index, true);
+    }
+    
+    /**
+     * Sets this AnimationInstance's index at its highest level to the specified
+     * value. If this AnimationInstance has only one level, this will be its
+     * only index. Otherwise, all indices at lower levels will be reset to 0.
+     * @param index The value to which the index will be set
+     */
+    public final void setIndex(int index) {
+        setIndex(indices.length - 1, index, true);
     }
     
     /**
@@ -260,15 +251,12 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Sets this AnimationInstance's speed at its highest level to the specified
-     * value. If this AnimationInstance has only one level, this will be its
-     * only speed.
-     * @param speed The value to which the speed will be set
+     * Returns this AnimationInstance's speed at its highest level. If this
+     * AnimationInstance has only one level, this will be its only speed.
+     * @return This AnimationInstance's speed at its highest level
      */
-    public final void setSpeed(long speed) {
-        if (!blank) {
-            speeds[indices.length - 1] = speed;
-        }
+    public final long getSpeed() {
+        return speeds[speeds.length - 1];
     }
     
     /**
@@ -280,6 +268,18 @@ public class AnimationInstance implements Drawable {
     public final void setSpeed(int level, long speed) {
         if (!blank && level >= 0 && level < speeds.length) {
             speeds[level] = speed;
+        }
+    }
+    
+    /**
+     * Sets this AnimationInstance's speed at its highest level to the specified
+     * value. If this AnimationInstance has only one level, this will be its
+     * only speed.
+     * @param speed The value to which the speed will be set
+     */
+    public final void setSpeed(long speed) {
+        if (!blank) {
+            speeds[indices.length - 1] = speed;
         }
     }
     

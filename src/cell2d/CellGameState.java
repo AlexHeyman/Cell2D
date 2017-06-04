@@ -50,7 +50,8 @@ import org.newdawn.slick.Graphics;
  * @param <W> The subclass of ThinkerState that this CellGameState's Thinkers
  * use
  */
-public abstract class CellGameState<T extends CellGame, U extends CellGameState<T,U,V,W>, V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
+public abstract class CellGameState<T extends CellGame, U extends CellGameState<T,U,V,W>,
+        V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
     
     private static abstract class StateComparator<T> implements Comparator<T>, Serializable {}
     
@@ -392,7 +393,8 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         return new ThinkerIterator();
     }
     
-    private static class ThinkerChangeData<T extends CellGame, U extends CellGameState<T,U,V,W>, V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
+    private static class ThinkerChangeData<T extends CellGame, U extends CellGameState<T,U,V,W>,
+            V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
         
         private boolean used = false;
         private final boolean changePriority;
@@ -511,9 +513,9 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
                             thinkers.add(data.thinker);
                         }
                     } else {
-                        CellGameState<T,U,V,W> thinkerState = data.thinker.state;
-                        if (thinkerState != null) {
-                            thinkerState.removeActions(data.thinker);
+                        CellGameState<T,U,V,W> currentState = data.thinker.state;
+                        if (currentState != null) {
+                            currentState.removeActions(data.thinker);
                         }
                         CellGameState<T,U,V,W> newState = data.newState;
                         if (newState != null) {
@@ -546,7 +548,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         }
         Iterator<V> iterator = thinkerIterator();
         while (iterator.hasNext()) {
-            iterator.next().doFrame(game, thisState);
+            iterator.next().doFrame(game);
         }
         frameActions(game);
     }

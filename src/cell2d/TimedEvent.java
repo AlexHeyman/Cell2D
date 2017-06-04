@@ -7,16 +7,12 @@ package cell2d;
  * eventActions() method when creating it, allowing that method to easily access
  * the internal fields and methods of the Thinker.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGameState that this TimedEvent's Thinker is
- * used by
  */
-public abstract class TimedEvent<T extends CellGameState> {
+public abstract class TimedEvent {
     
     /**
      * Actions for this TimedEvent to take when activated.
-     * @param game This TimedEvent's Thinker's CellGame
-     * @param state This TimedEvent's Thinker's CellGameState
      */
-    public abstract void eventActions(CellGame game, T state);
+    public abstract void eventActions();
     
 }
