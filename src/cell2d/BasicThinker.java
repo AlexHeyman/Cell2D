@@ -12,7 +12,7 @@ package cell2d;
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that this BasicThinker is used by
  */
-public abstract class BasicThinker<T extends CellGame> extends Thinker<T,BasicGameState<T>,BasicThinker<T>,BasicThinkerState<T>> {
+public abstract class BasicThinker<T extends CellGame> extends Thinker<T,BasicGameState<T>,BasicThinker<T>> {
     
     @Override
     public final BasicThinker<T> getThis() {

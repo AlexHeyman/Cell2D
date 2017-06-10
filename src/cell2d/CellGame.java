@@ -344,6 +344,7 @@ public abstract class CellGame {
                         currentState.frame();
                         msToRun -= msPerFrame;
                         if (closeRequested) {
+                            Audio.close();
                             container.exit();
                         } else if (updateScreen) {
                             updateScreen(container);
@@ -396,17 +397,17 @@ public abstract class CellGame {
                     if (typingString.length() > 0) {
                         char toDelete = typingString.charAt(typingString.length() - 1);
                         typingString = typingString.substring(0, typingString.length() - 1);
-                        currentState.charDeleted(toDelete);
+                        currentState.charDeletedActions(currentState.game, toDelete);
                     }
                 } else if (key == Input.KEY_DELETE) {
                     String s = typingString;
                     typingString = "";
-                    currentState.stringDeleted(s);
+                    currentState.stringDeletedActions(currentState.game, s);
                 } else if (key == Input.KEY_ENTER) {
                     finishTypingString();
                 } else if (c != '\u0000' && typingString.length() < maxTypingStringLength) {
                     typingString += c;
-                    currentState.charTyped(c);
+                    currentState.charTypedActions(currentState.game, c);
                 }
             } else if (commandToBind >= 0) {
                 finishBindToCommand(new KeyControl(key));
@@ -858,7 +859,7 @@ public abstract class CellGame {
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
         }
-        getCurrentState().stringBegan(initialString);
+        currentState.stringBeganActions(currentState.game, initialString);
     }
     
     /**
@@ -871,7 +872,7 @@ public abstract class CellGame {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            getCurrentState().stringFinished(s);
+            currentState.stringFinishedActions(currentState.game, s);
         }
     }
     
@@ -885,7 +886,7 @@ public abstract class CellGame {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            getCurrentState().stringCanceled(s);
+            currentState.stringCanceledActions(currentState.game, s);
         }
     }
     

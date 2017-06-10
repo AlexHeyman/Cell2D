@@ -287,8 +287,8 @@ public class AnimationInstance implements Drawable {
         if (blank) {
             return;
         }
-        long time = getEffectiveTimeFactor();
-        if (time == 0) {
+        long timeToRun = (timeFactor < 0 ? state.getTimeFactor() : timeFactor);
+        if (timeToRun == 0) {
             return;
         }
         boolean spriteChanged = false;
@@ -297,7 +297,7 @@ public class AnimationInstance implements Drawable {
             if (speeds[i] != 0) {
                 long duration = frame.getFrameDuration(indices[i]);
                 if (duration > 0) {
-                    indexChanges[i] += Frac.mul(time, speeds[i]);
+                    indexChanges[i] += Frac.mul(timeToRun, speeds[i]);
                     if (speeds[i] > 0) {
                         while (indexChanges[i] >= duration) {
                             spriteChanged = true;

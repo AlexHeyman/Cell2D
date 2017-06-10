@@ -70,6 +70,7 @@ public abstract class SpaceObject<T extends CellGame> {
     private static final AtomicLong idCounter = new AtomicLong(0);
     
     final long id;
+    T game = null;
     SpaceState<T> state = null;
     SpaceState<T> newState = null;
     private long timeFactor = -1;
@@ -113,6 +114,10 @@ public abstract class SpaceObject<T extends CellGame> {
         setAngle(creator.getAngle());
     }
     
+    public final T getGame() {
+        return game;
+    }
+    
     /**
      * Returns the SpaceState to which this SpaceObject is currently assigned,
      * or null if it is assigned to none.
@@ -142,15 +147,15 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param state The SpaceState to which this SpaceObject should be assigned
      */
     public final void setGameState(SpaceState<T> state) {
-        if (this.state != null) {
-            this.state.removeObject(this);
+        if (newState != null) {
+            newState.removeObject(this);
         }
         if (state != null) {
             state.addObject(this);
         }
     }
     
-    void addActions() {
+    void addNonCellData() {
         locatorHitbox.setGameState(state);
         if (!animInstances.isEmpty()) {
             for (AnimationInstance instance : animInstances.values()) {
@@ -170,7 +175,7 @@ public abstract class SpaceObject<T extends CellGame> {
         }
     }
     
-    void removeActions() {
+    void removeData() {
         locatorHitbox.setGameState(null);
         state.removeLocatorHitbox(locatorHitbox);
         state.removeCenterHitbox(centerHitbox);
@@ -259,15 +264,27 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     void removeNonLocatorHitboxes(Hitbox locatorHitbox) {
-        locatorHitbox.removeChild(centerHitbox);
-        locatorHitbox.removeChild(overlapHitbox);
-        locatorHitbox.removeChild(solidHitbox);
+        if (centerHitbox != null) {
+            locatorHitbox.removeChild(centerHitbox);
+        }
+        if (overlapHitbox != null) {
+            locatorHitbox.removeChild(overlapHitbox);
+        }
+        if (solidHitbox != null) {
+            locatorHitbox.removeChild(solidHitbox);
+        }
     }
     
     void addNonLocatorHitboxes(Hitbox locatorHitbox) {
-        locatorHitbox.addChild(centerHitbox);
-        locatorHitbox.addChild(overlapHitbox);
-        locatorHitbox.addChild(solidHitbox);
+        if (centerHitbox != null) {
+            locatorHitbox.addChild(centerHitbox);
+        }
+        if (overlapHitbox != null) {
+            locatorHitbox.addChild(overlapHitbox);
+        }
+        if (solidHitbox != null) {
+            locatorHitbox.addChild(solidHitbox);
+        }
     }
     
     /**

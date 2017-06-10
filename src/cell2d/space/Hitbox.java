@@ -97,15 +97,14 @@ public abstract class Hitbox<T extends CellGame> {
     }
     
     final boolean addChild(Hitbox<T> child) {
-        if (child != null && child != this
-                && child.parent == null && child.object == null) {
-            Hitbox<T> ancestor = parent;
-            while (ancestor != null) {
+        if (child.parent == null && child.object == null) {
+            Hitbox<T> ancestor = this;
+            do {
                 if (ancestor == child) {
                     return false;
                 }
                 ancestor = ancestor.parent;
-            }
+            } while (ancestor != null);
             children.add(child);
             child.parent = this;
             child.recursivelyUpdateData();
@@ -115,7 +114,7 @@ public abstract class Hitbox<T extends CellGame> {
     }
     
     final boolean removeChild(Hitbox<T> child) {
-        if (child != null && child.parent == this) {
+        if (child.parent == this) {
             children.remove(child);
             child.parent = null;
             child.recursivelyUpdateData();

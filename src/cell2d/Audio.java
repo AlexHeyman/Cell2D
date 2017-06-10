@@ -85,6 +85,12 @@ class Audio {
         timesSourcesPlayed = new long[numSources];
     }
     
+    static void close() {
+        if (initialized) {
+            AL.destroy();
+        }
+    }
+    
     void unload() {
         stop();
         AL10.alDeleteBuffers(buffer);

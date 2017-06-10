@@ -1,16 +1,10 @@
 package cell2d;
 
-import java.io.Serializable;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import org.newdawn.slick.Graphics;
 
 /**
@@ -47,36 +41,17 @@ import org.newdawn.slick.Graphics;
  * @param <T> The subclass of CellGame that uses this CellGameState
  * @param <U> The subclass of CellGameState that this CellGameState is
  * @param <V> The subclass of Thinker that this CellGameState uses
- * @param <W> The subclass of ThinkerState that this CellGameState's Thinkers
- * use
  */
-public abstract class CellGameState<T extends CellGame, U extends CellGameState<T,U,V,W>,
-        V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
+public abstract class CellGameState<T extends CellGame, U extends CellGameState<T,U,V>,
+        V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
     
-    private static abstract class StateComparator<T> implements Comparator<T>, Serializable {}
-    
-    private final Comparator<V> actionPriorityComparator = new StateComparator<V>() {
-        
-        @Override
-        public final int compare(V thinker1, V thinker2) {
-            int priorityDifference = thinker2.actionPriority - thinker1.actionPriority;
-            return (priorityDifference == 0 ? Long.signum(thinker2.id - thinker1.id) : priorityDifference);
-        }
-        
-    };
-    
-    private boolean initialized = false;
     private final U thisState;
-    private T game;
+    final T game;
     private int id;
     boolean active = false;
     private long timeFactor = Frac.UNIT;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
-    private final SortedSet<V> thinkers = new TreeSet<>(actionPriorityComparator);
-    private int thinkerIterators = 0;
-    private final Queue<ThinkerChangeData<T,U,V,W>> thinkerChanges = new LinkedList<>();
-    private boolean updatingThinkerList = false;
     
     /**
      * Creates a new CellGameState of the specified CellGame with the specified
@@ -93,7 +68,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         this.id = id;
         game.addState(this);
         thisState = getThis();
-        initialized = true;
     }
     
     /**
@@ -315,242 +289,35 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         IDInstances.clear();
     }
     
-    /**
-     * Returns the number of Thinkers that are currently assigned to this
-     * CellGameState.
-     * @return The number of Thinkers that are currently assigned to this
-     * CellGameState
-     */
-    public final int getNumThinkers() {
-        return thinkers.size();
-    }
-    
-    private class ThinkerIterator implements SafeIterator<V> {
-        
-        private boolean stopped = false;
-        private final Iterator<V> iterator = thinkers.iterator();
-        private V lastThinker = null;
-        
-        private ThinkerIterator() {
-            thinkerIterators++;
-        }
-        
-        @Override
-        public final boolean hasNext() {
-            if (stopped) {
-                return false;
-            }
-            boolean hasNext = iterator.hasNext();
-            if (!hasNext) {
-                stop();
-            }
-            return hasNext;
-        }
-        
-        @Override
-        public final V next() {
-            if (stopped) {
-                return null;
-            }
-            lastThinker = iterator.next();
-            return lastThinker;
-        }
-        
-        @Override
-        public final void remove() {
-            if (!stopped && lastThinker != null) {
-                removeThinker(lastThinker);
-                lastThinker = null;
-            }
-        }
-        
-        @Override
-        public final void stop() {
-            if (!stopped) {
-                stopped = true;
-                thinkerIterators--;
-                updateThinkerList();
-            }
-        }
-        
-    }
-    
-    /**
-     * Returns whether any Iterators over this CellGameState's list of Thinkers
-     * are currently in progress.
-     * @return Whether any Iterators over this CellGameState's list of Thinkers
-     * are currently in progress
-     */
-    public final boolean iteratingThroughThinkers() {
-        return thinkerIterators > 0;
-    }
-    
-    /**
-     * Returns a new Iterator over this CellGameState's list of Thinkers.
-     * @return A new Iterator over this CellGameState's list of Thinkers
-     */
-    public final SafeIterator<V> thinkerIterator() {
-        return new ThinkerIterator();
-    }
-    
-    private static class ThinkerChangeData<T extends CellGame, U extends CellGameState<T,U,V,W>,
-            V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
-        
-        private boolean used = false;
-        private final boolean changePriority;
-        private final V thinker;
-        private final U newState;
-        private final int actionPriority;
-        
-        private ThinkerChangeData(V thinker, U newState) {
-            changePriority = false;
-            this.thinker = thinker;
-            this.newState = newState;
-            actionPriority = 0;
-        }
-        
-        private ThinkerChangeData(V thinker, int actionPriority) {
-            changePriority = true;
-            this.thinker = thinker;
-            newState = null;
-            this.actionPriority = actionPriority;
-        }
-        
-    }
-    
-    /**
-     * Adds the specified Thinker to this CellGameState if it is not already
-     * assigned to a CellGameState.
-     * @param thinker The Thinker to be added
-     * @return Whether the addition occurred
-     */
-    public final boolean addThinker(V thinker) {
-        if (initialized && thinker.newState == null) {
-            addThinkerChangeData(thinker, thisState);
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Removes the specified Thinker from this CellGameState if it is currently
-     * assigned to it.
-     * @param thinker The Thinker to be removed
-     * @return Whether the removal occurred
-     */
-    public final boolean removeThinker(V thinker) {
-        if (initialized && thinker.newState == thisState) {
-            addThinkerChangeData(thinker, null);
-            return true;
-        }
-        return false;
-    }
-    
-    final void changeThinkerActionPriority(V thinker, int actionPriority) {
-        thinkerChanges.add(new ThinkerChangeData<>(thinker, actionPriority));
-        updateThinkerList();
-    }
-    
-    private void addThinkerChangeData(V thinker, U newState) {
-        thinker.newState = newState;
-        ThinkerChangeData<T,U,V,W> data = new ThinkerChangeData<>(thinker, newState);
-        if (thinker.state != null) {
-            CellGameState<T,U,V,W> state = thinker.state;
-            state.thinkerChanges.add(data);
-            state.updateThinkerList();
-        }
-        if (newState != null) {
-            CellGameState<T,U,V,W> state = newState;
-            state.thinkerChanges.add(data);
-            state.updateThinkerList();
-        }
-    }
-    
-    private void addActions(V thinker) {
-        thinkers.add(thinker);
-        thinker.state = thisState;
-        thinker.addActions();
-        thinker.addedActions(game, thisState);
+    @Override
+    public final void addThinkerActions(V thinker) {
+        thinker.setGameAndState(game, thisState);
         addThinkerActions(game, thinker);
     }
     
-    /**
-     * Actions for this CellGameState to take immediately after adding a Thinker
-     * to itself.
-     * @param game This CellGameState's CellGame
-     * @param thinker The Thinker that was added
-     */
-    public void addThinkerActions(T game, V thinker) {}
+    public final void addThinkerActions(T game, V thinker) {}
     
-    private void removeActions(V thinker) {
+    @Override
+    public final void removeThinkerActions(V thinker) {
         removeThinkerActions(game, thinker);
-        thinker.removedActions(game, thisState);
-        thinkers.remove(thinker);
-        thinker.state = null;
+        thinker.setGameAndState(null, null);
     }
     
-    /**
-     * Actions for this CellGameState to take immediately before removing a
-     * Thinker from itself.
-     * @param game This CellGameState's CellGame
-     * @param thinker The Thinker that is about to be removed
-     */
-    public void removeThinkerActions(T game, V thinker) {}
-    
-    private void updateThinkerList() {
-        if (thinkerIterators == 0 && !updatingThinkerList) {
-            updatingThinkerList = true;
-            while (!thinkerChanges.isEmpty()) {
-                ThinkerChangeData<T,U,V,W> data = thinkerChanges.remove();
-                if (!data.used) {
-                    data.used = true;
-                    if (data.changePriority) {
-                        if (data.thinker.state == null) {
-                            data.thinker.actionPriority = data.actionPriority;
-                        } else {
-                            thinkers.remove(data.thinker);
-                            data.thinker.actionPriority = data.actionPriority;
-                            thinkers.add(data.thinker);
-                        }
-                    } else {
-                        CellGameState<T,U,V,W> currentState = data.thinker.state;
-                        if (currentState != null) {
-                            currentState.removeActions(data.thinker);
-                        }
-                        CellGameState<T,U,V,W> newState = data.newState;
-                        if (newState != null) {
-                            newState.addActions(data.thinker);
-                        }
-                    }
-                }
-            }
-            updatingThinkerList = false;
-            updateThinkerListActions(game);
-        }
-    }
-    
-    /**
-     * Actions for this CellGameState to take immediately after updating its
-     * list of Thinkers.
-     * @param game This CellGameState's CellGame
-     */
-    public void updateThinkerListActions(T game) {}
+    public final void removeThinkerActions(T game, V thinker) {}
     
     final void frame() {
-        if (timeFactor > 0) {
-            for (AnimationInstance instance : animInstances) {
-                instance.update();
-            }
-            Iterator<V> iterator = thinkerIterator();
-            while (iterator.hasNext()) {
-                iterator.next().update(game);
-            }
+        for (AnimationInstance instance : animInstances) {
+            instance.update();
         }
         Iterator<V> iterator = thinkerIterator();
         while (iterator.hasNext()) {
-            iterator.next().doFrame(game);
+            iterator.next().update();
         }
         frameActions(game);
+        iterator = thinkerIterator();
+        while (iterator.hasNext()) {
+            iterator.next().frame();
+        }
     }
     
     /**
@@ -559,10 +326,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * @param game This CellGameState's CellGame
      */
     public void frameActions(T game) {}
-    
-    final void render(Graphics g, int x1, int y1, int x2, int y2) {
-        renderActions(game, g, x1, y1, x2, y2);
-    }
     
     /**
      * Actions for this CellGameState to take each frame to render its visuals.
@@ -580,29 +343,17 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      */
     public void renderActions(T game, Graphics g, int x1, int y1, int x2, int y2) {}
     
-    final void entered() {
-        enteredActions(game);
-    }
-    
     /**
      * Actions for this CellGameState to take immediately after being entered.
      * @param game This CellGameState's CellGame
      */
     public void enteredActions(T game) {}
     
-    final void left() {
-        leftActions(game);
-    }
-    
     /**
      * Actions for this CellGameState to take immediately before being exited.
      * @param game This CellGameState's CellGame
      */
     public void leftActions(T game) {}
-    
-    final void stringBegan(String s) {
-        stringBeganActions(game, s);
-    }
     
     /**
      * Actions for this CellGameState to take immediately after its CellGame
@@ -612,10 +363,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      */
     public void stringBeganActions(T game, String s) {}
     
-    final void charTyped(char c) {
-        charTypedActions(game, c);
-    }
-    
     /**
      * Actions for this CellGameState to take immediately after a character is
      * typed to its CellGame's typed String.
@@ -623,10 +370,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * @param c The character that was just typed
      */
     public void charTypedActions(T game, char c) {}
-    
-    final void charDeleted(char c) {
-        charDeletedActions(game, c);
-    }
     
     /**
      * Actions for this CellGameState to take immediately after a character is
@@ -636,10 +379,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      */
     public void charDeletedActions(T game, char c) {}
     
-    final void stringDeleted(String s) {
-        stringDeletedActions(game, s);
-    }
-    
     /**
      * Actions for this CellGameState to take immediately after its CellGame's
      * typed String is deleted and reset to the empty String.
@@ -648,10 +387,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      */
     public void stringDeletedActions(T game, String s) {}
     
-    final void stringFinished(String s) {
-        stringFinishedActions(game, s);
-    }
-    
     /**
      * Actions for this CellGameState to take immediately after its CellGame's
      * typed String is finished.
@@ -659,10 +394,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * @param s The String that was just finished
      */
     public void stringFinishedActions(T game, String s) {}
-    
-    final void stringCanceled(String s) {
-        stringCanceledActions(game, s);
-    }
     
     /**
      * Actions for this CellGameState to take immediately after its CellGame's

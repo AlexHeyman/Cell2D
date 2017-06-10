@@ -3,12 +3,8 @@ package cell2d;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -55,25 +51,23 @@ import java.util.concurrent.atomic.AtomicLong;
  * by
  * @param <U> The subclass of CellGameState that this Thinker is used by
  * @param <V> The subclass of Thinker that this Thinker is
- * @param <W> The subclass of ThinkerState that this Thinker uses
  */
-public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,W>,
-        V extends Thinker<T,U,V,W>, W extends ThinkerState<T,U,V,W>> {
+public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>,
+        V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
     
     private static final AtomicLong idCounter = new AtomicLong(0);
     
     final long id;
-    private boolean initialized = false;
     private final V thisThinker;
-    U state = null;
-    U newState = null;
+    ThinkerGroup<T,U,V> group = null;
+    ThinkerGroup<T,U,V> newGroup = null;
+    private T game = null;
+    private U state = null;
+    private V superThinker = null;
     private long timeFactor = -1;
     private long timeToRun = 0;
     int actionPriority = 0;
     int newActionPriority = 0;
-    private final SortedMap<Integer,TSData> thinkerStates = new TreeMap<>();
-    private final Queue<TSChangeData> thinkerStateChanges = new LinkedList<>();
-    private boolean updatingThinkerStates = false;
     private final Map<TimedEvent,Integer> timers = new HashMap<>();
     
     /**
@@ -82,7 +76,6 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
     public Thinker() {
         id = idCounter.getAndIncrement();
         thisThinker = getThis();
-        initialized = true;
     }
     
     /**
@@ -94,6 +87,33 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      */
     public abstract V getThis();
     
+    public final ThinkerGroup<T,U,V> getThinkerGroup() {
+        return group;
+    }
+    
+    public final ThinkerGroup<T,U,V> getNewThinkerGroup() {
+        return newGroup;
+    }
+    
+    /**
+     * Sets the CellGameState to which this Thinker is currently assigned. If it
+     * is set to a null CellGameState, this Thinker will be removed from its
+     * current CellGameState if it has one.
+     * @param group The CellGameState to which this Thinker should be assigned
+     */
+    public final void setThinkerGroup(ThinkerGroup<T,U,V> group) {
+        if (newGroup != null) {
+            newGroup.removeThinker(thisThinker);
+        }
+        if (group != null) {
+            group.addThinker(thisThinker);
+        }
+    }
+    
+    public final T getGame() {
+        return game;
+    }
+    
     /**
      * Returns the CellGameState to which this Thinker is currently assigned, or
      * null if it is assigned to none.
@@ -103,41 +123,19 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
         return state;
     }
     
-    /**
-     * Returns the CellGameState to which this Thinker is about to be assigned,
-     * but has not yet been due to one or more of the Thinker lists involved
-     * being iterated over. If this Thinker is about to be removed from its
-     * CellGameState without being added to a new one afterward, this will be
-     * null. If this Thinker is not about to change CellGameStates, this method
-     * will simply return its current CellGameState.
-     * @return The CellGameState to which this Thinker is about to be assigned
-     */
-    public final U getNewGameState() {
-        return newState;
-    }
-    
-    /**
-     * Sets the CellGameState to which this Thinker is currently assigned. If it
-     * is set to a null CellGameState, this Thinker will be removed from its
-     * current CellGameState if it has one.
-     * @param state The CellGameState to which this Thinker should be assigned
-     */
-    public final void setGameState(U state) {
-        if (!initialized) {
-            return;
-        }
-        if (this.state != null) {
-            this.state.removeThinker(thisThinker);
-        }
-        if (state != null) {
-            state.addThinker(thisThinker);
+    final void setGameAndState(T game, U state) {
+        this.game = game;
+        this.state = state;
+        if (getNumThinkers() > 0) {
+            Iterator<V> iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().setGameAndState(game, state);
+            }
         }
     }
     
-    void addActions() {
-        if (!thinkerStates.isEmpty()) {
-            endThinkerStates(state.getGame());
-        }
+    public final V getSuperThinker() {
+        return superThinker;
     }
     
     /**
@@ -155,7 +153,14 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      * @return This Thinker's effective time factor
      */
     public final long getEffectiveTimeFactor() {
-        return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
+        if (state == null) {
+            return 0;
+        }
+        Thinker<T,U,V> ancestor = this;
+        while (ancestor.superThinker != null) {
+            ancestor = ancestor.superThinker;
+        }
+        return (ancestor.timeFactor < 0 ? state.getTimeFactor() : ancestor.timeFactor);
     }
     
     /**
@@ -190,169 +195,12 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      * @param actionPriority The new action priority
      */
     public final void setActionPriority(int actionPriority) {
-        if (state == null) {
+        if (group == null) {
             newActionPriority = actionPriority;
             this.actionPriority = actionPriority;
         } else if (newActionPriority != actionPriority) {
             newActionPriority = actionPriority;
-            state.changeThinkerActionPriority(thisThinker, actionPriority);
-        }
-    }
-    
-    private class TSData {
-        
-        private final W state;
-        private int duration;
-        
-        private TSData(W state, int duration) {
-            this.state = state;
-            this.duration = duration;
-        }
-        
-    }
-    
-    private class TSChangeData {
-        
-        private final int level;
-        private final boolean useNextState;
-        private final W newState;
-        
-        private TSChangeData(int level, W newState) {
-            this.level = level;
-            useNextState = false;
-            this.newState = newState;
-        }
-        
-        private TSChangeData(int id) {
-            this.level = id;
-            useNextState = true;
-            this.newState = null;
-        }
-        
-    }
-    
-    /**
-     * Returns this Thinker's current ThinkerState.
-     * @param level
-     * @return This Thinker's current ThinkerState
-     */
-    public final W getThinkerState(int level) {
-        TSData data = thinkerStates.get(level);
-        return (data == null ? null : data.state);
-    }
-    
-    /**
-     * Returns this Thinker's current ThinkerState.
-     * @return This Thinker's current ThinkerState
-     */
-    public final W getThinkerState() {
-        TSData data = thinkerStates.get(0);
-        return (data == null ? null : data.state);
-    }
-    
-    public final void setThinkerState(int level, W thinkerState, boolean leaveLowerStates) {
-        if (leaveLowerStates) {
-            for (int lowerLevel : thinkerStates.headMap(level).keySet()) {
-                thinkerStateChanges.add(new TSChangeData(lowerLevel, null));
-            }
-        }
-        thinkerStateChanges.add(new TSChangeData(level, thinkerState));
-        if (state != null) {
-            updateThinkerStates(state.getGame());
-        }
-    }
-    
-    public final void setThinkerState(int level, W thinkerState) {
-        setThinkerState(level, thinkerState, false);
-    }
-    
-    /**
-     * Sets this Thinker's current ThinkerState to the specified one. If this
-     * Thinker is not assigned to a CellGameState, the change will not occur
-     * until it is added to one, immediately before it takes its addedActions().
-     * @param thinkerState The new ThinkerState
-     */
-    public final void setThinkerState(W thinkerState) {
-        setThinkerState(0, thinkerState, false);
-    }
-    
-    /**
-     * Returns the remaining duration in time units of this Thinker's current
-     * ThinkerState. A negative value indicates an infinite duration.
-     * @param level
-     * @return The remaining duration in time units of this Thinker's current
-     * ThinkerState
-     */
-    public final int getThinkerStateDuration(int level) {
-        TSData data = thinkerStates.get(level);
-        return (data == null ? -1 : data.duration);
-    }
-    
-    /**
-     * Returns the remaining duration in time units of this Thinker's current
-     * ThinkerState. A negative value indicates an infinite duration.
-     * @return The remaining duration in time units of this Thinker's current
-     * ThinkerState
-     */
-    public final int getThinkerStateDuration() {
-        TSData data = thinkerStates.get(0);
-        return (data == null ? -1 : data.duration);
-    }
-    
-    public final void setThinkerStateDuration(int level, int duration) {
-        TSData data = thinkerStates.get(level);
-        if (data != null) {
-            data.duration = (duration < 0 ? -1 : duration);
-            if (duration == 0 && state != null) {
-                thinkerStateChanges.add(new TSChangeData(level));
-                updateThinkerStates(state.getGame());
-            }
-        }
-    }
-    
-    /**
-     * Sets the remaining duration in time units of this Thinker's current
-     * ThinkerState to the specified value. A negative value indicates an
-     * infinite duration, and a value of 0 indicates that the ThinkerState
-     * should end as soon as possible.
-     * @param duration The new duration in time units of this Thinker's current
-     * ThinkerState
-     */
-    public final void setThinkerStateDuration(int duration) {
-        setThinkerStateDuration(0, duration);
-    }
-    
-    private void endThinkerStates(T game) {
-        for (Map.Entry<Integer,TSData> entry : thinkerStates.entrySet()) {
-            if (entry.getValue().duration == 0) {
-                thinkerStateChanges.add(new TSChangeData(entry.getKey()));
-            }
-        }
-        updateThinkerStates(game);
-    }
-    
-    private void updateThinkerStates(T game) {
-        if (!updatingThinkerStates) {
-            updatingThinkerStates = true;
-            while (!thinkerStateChanges.isEmpty()) {
-                TSChangeData data = thinkerStateChanges.remove();
-                W currentTS = thinkerStates.get(data.level).state;
-                W newTS = data.newState;
-                if (currentTS != null) {
-                    currentTS.leftActions(game, state);
-                    if (data.useNextState) {
-                        newTS = currentTS.getNextState();
-                    }
-                }
-                if (newTS == null) {
-                    thinkerStates.remove(data.level);
-                } else {
-                    thinkerStates.put(data.level, new TSData(newTS, -1));
-                    newTS.enteredActions(game, state);
-                    setThinkerStateDuration(data.level, newTS.getDuration());
-                }
-            }
-            updatingThinkerStates = false;
+            group.changeThinkerActionPriority(thisThinker, actionPriority);
         }
     }
     
@@ -384,6 +232,36 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
         }
     }
     
+    private void timeUnit() {
+        if (!timers.isEmpty()) {
+            List<TimedEvent> timedEventsToDo = new ArrayList<>();
+            Iterator<Map.Entry<TimedEvent,Integer>> iterator = timers.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<TimedEvent,Integer> entry = iterator.next();
+                int value = entry.getValue();
+                if (value == 0) {
+                    iterator.remove();
+                } else {
+                    if (value == 1) {
+                        timedEventsToDo.add(entry.getKey());
+                    }
+                    entry.setValue(value - 1);
+                }
+            }
+            for (TimedEvent timedEvent : timedEventsToDo) {
+                timedEvent.eventActions();
+            }
+        }
+        timeUnitActions(game, state);
+        if (getNumThinkers() > 0) {
+            Iterator<V> iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                Thinker<T,U,V> thinker = iterator.next();
+                thinker.timeUnit();
+            }
+        }
+    }
+    
     /**
      * Actions for this Thinker to take once every time unit, after
      * AnimationInstances update their indices but before Thinkers take their
@@ -393,13 +271,14 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      */
     public void timeUnitActions(T game, U state) {}
     
-    final void doFrame(T game) {
-        if (!thinkerStates.isEmpty()) {
-            for (TSData data : thinkerStates.values()) {
-                data.state.frameActions(game, state);
+    final void frame() {
+        frameActions(game, state);
+        if (getNumThinkers() > 0) {
+            Iterator<V> iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().frame();
             }
         }
-        frameActions(game, state);
     }
     
     /**
@@ -411,6 +290,10 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      */
     public void frameActions(T game, U state) {}
     
+    final void added() {
+        addedActions(game, state);
+    }
+    
     /**
      * Actions for this Thinker to take immediately after being added to a new
      * CellGameState.
@@ -418,6 +301,10 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      * @param state This Thinker's CellGameState
      */
     public void addedActions(T game, U state) {}
+    
+    final void removed() {
+        removedActions(game, state);
+    }
     
     /**
      * Actions for this Thinker to take immediately before being removed from
@@ -427,42 +314,28 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V,
      */
     public void removedActions(T game, U state) {}
     
-    final void update(T game) {
-        timeToRun += getEffectiveTimeFactor();
+    @Override
+    public final void addThinkerActions(V thinker) {
+        thinker.setGameAndState(game, state);
+        ((Thinker<T,U,V>)thinker).superThinker = thisThinker;
+        addThinkerActions(game, state, thinker);
+    }
+    
+    public final void addThinkerActions(T game, U state, V thinker) {}
+    
+    @Override
+    public final void removeThinkerActions(V thinker) {
+        removeThinkerActions(game, state, thinker);
+        thinker.setGameAndState(null, null);
+        ((Thinker<T,U,V>)thinker).superThinker = null;
+    }
+    
+    public final void removeThinkerActions(T game, U state, V thinker) {}
+    
+    final void update() {
+        timeToRun += (timeFactor < 0 ? state.getTimeFactor() : timeFactor);
         while (timeToRun >= Frac.UNIT) {
-            if (!thinkerStates.isEmpty()) {
-                for (TSData data : thinkerStates.values()) {
-                    if (data.duration >= 0) {
-                        data.duration--;
-                    }
-                }
-                endThinkerStates(game);
-            }
-            if (!timers.isEmpty()) {
-                List<TimedEvent> timedEventsToDo = new ArrayList<>();
-                Iterator<Map.Entry<TimedEvent,Integer>> iterator = timers.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    Map.Entry<TimedEvent,Integer> entry = iterator.next();
-                    int value = entry.getValue();
-                    if (value == 0) {
-                        iterator.remove();
-                    } else {
-                        if (value == 1) {
-                            timedEventsToDo.add(entry.getKey());
-                        }
-                        entry.setValue(value - 1);
-                    }
-                }
-                for (TimedEvent timedEvent : timedEventsToDo) {
-                    timedEvent.eventActions();
-                }
-            }
-            if (!thinkerStates.isEmpty()) {
-                for (TSData data : thinkerStates.values()) {
-                    data.state.timeUnitActions(game, state);
-                }
-            }
-            timeUnitActions(game, state);
+            timeUnit();
             timeToRun -= Frac.UNIT;
         }
     }

@@ -2,6 +2,7 @@ package cell2d.space;
 
 import cell2d.CellGame;
 import cell2d.Thinker;
+import java.util.Iterator;
 
 /**
  * <p>A SpaceThinker is the type of Thinker that is used by SpaceStates and uses
@@ -11,19 +12,21 @@ import cell2d.Thinker;
  * @param <T> The subclass of CellGame that this SpaceThinker's SpaceState is
  used by
  */
-public abstract class SpaceThinker<T extends CellGame> extends Thinker<T,SpaceState<T>,SpaceThinker<T>,SpaceThinkerState<T>> {
+public abstract class SpaceThinker<T extends CellGame> extends Thinker<T,SpaceState<T>,SpaceThinker<T>> {
     
     @Override
     public final SpaceThinker<T> getThis() {
         return this;
     }
     
-    final void afterMovement(T game, SpaceState<T> state) {
-        SpaceThinkerState<T> thinkerState = getThinkerState();
-        if (thinkerState != null) {
-            thinkerState.afterMovementActions(game, state);
+    final void beforeMovement() {
+        beforeMovementActions(getGame(), getGameState());
+        if (getNumThinkers() > 0) {
+            Iterator<SpaceThinker<T>> iterator = thinkerIterator();
+            while (iterator.hasNext()) {
+                iterator.next().beforeMovement();
+            }
         }
-        afterMovementActions(game, state);
     }
     
     /**
@@ -32,6 +35,6 @@ public abstract class SpaceThinker<T extends CellGame> extends Thinker<T,SpaceSt
      * @param game This SpaceThinker's CellGame
      * @param state This SpaceThinker's SpaceState
      */
-    public void afterMovementActions(T game, SpaceState<T> state) {}
+    public void beforeMovementActions(T game, SpaceState<T> state) {}
     
 }

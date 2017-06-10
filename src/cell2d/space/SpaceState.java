@@ -76,7 +76,7 @@ import org.newdawn.slick.Graphics;
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that uses this SpaceState
  */
-public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T>,SpaceThinker<T>,SpaceThinkerState<T>> {
+public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T>,SpaceThinker<T>> {
     
     private static abstract class SpaceComparator<T> implements Comparator<T>, Serializable {}
     
@@ -146,7 +146,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
     };
     
-    private final Set<SpaceObject<T>> levelObjects = new HashSet<>();
+    private final Set<SpaceObject<T>> spaceObjects = new HashSet<>();
     private int objectIterators = 0;
     private final Queue<ObjectChangeData<T>> objectChanges = new LinkedList<>();
     private boolean updatingObjectList = false;
@@ -160,7 +160,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     private int cellTop = 0;
     private int cellBottom = 0;
     private DrawMode drawMode;
-    private final SortedMap<Integer,SpaceLayer<T>> levelLayers = new TreeMap<>();
+    private final SortedMap<Integer,SpaceLayer<T>> spaceLayers = new TreeMap<>();
     private HUD<T> hud = null;
     private final Map<Integer,Viewport<T>> viewports = new HashMap<>();
     
@@ -388,8 +388,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         cells.clear();
         this.cellWidth = cellWidth;
         this.cellHeight = cellHeight;
-        if (!levelObjects.isEmpty()) {
-            for (SpaceObject<T> object : levelObjects) {
+        if (!spaceObjects.isEmpty()) {
+            for (SpaceObject<T> object : spaceObjects) {
                 object.addCellData();
             }
         }
@@ -663,7 +663,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     @Override
-    public final void updateThinkerListActions(T game) {
+    public final void updateThinkerListActions() {
         updateObjectList();
     }
     
@@ -674,13 +674,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * SpaceState
      */
     public final int getNumObjects() {
-        return levelObjects.size();
+        return spaceObjects.size();
     }
     
     private class ObjectIterator implements SafeIterator<SpaceObject<T>> {
         
         private boolean stopped = false;
-        private final Iterator<SpaceObject<T>> iterator = levelObjects.iterator();
+        private final Iterator<SpaceObject<T>> iterator = spaceObjects.iterator();
         private SpaceObject<T> lastObject = null;
         
         private ObjectIterator() {
@@ -786,58 +786,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return false;
     }
     
-    private void addObjectChangeData(SpaceObject<T> object, SpaceState<T> newState) {
-        object.newState = newState;
-        ObjectChangeData<T> data = new ObjectChangeData<>(object, newState);
-        if (object.state != null) {
-            object.state.objectChanges.add(data);
-            object.state.updateObjectList();
-        }
-        if (newState != null) {
-            newState.objectChanges.add(data);
-            newState.updateObjectList();
-        }
-    }
-    
-    private void addActions(SpaceObject<T> object) {
-        levelObjects.add(object);
-        object.state = this;
-        object.addCellData();
-        object.addActions();
-    }
-    
-    private void removeActions(SpaceObject<T> object) {
-        object.removeActions();
-        levelObjects.remove(object);
-        object.state = null;
-    }
-    
-    private void updateObjectList() {
-        if (objectIterators == 0 && thinkerObjectIterators == 0
-                && !iteratingThroughThinkers() && !updatingObjectList) {
-            updatingObjectList = true;
-            while (!objectChanges.isEmpty()) {
-                ObjectChangeData<T> data = objectChanges.remove();
-                if (!data.used) {
-                    data.used = true;
-                    if (data.object.state != null) {
-                        data.object.state.removeActions(data.object);
-                    }
-                    if (data.newState != null) {
-                        data.newState.addActions(data.object);
-                    }
-                }
-            }
-            updatingObjectList = false;
-        }
-    }
-    
     /**
      * Removes from this SpaceState all of the SpaceObjects that are currently
      * assigned to it.
      */
     public final void removeAllObjects() {
-        for (SpaceObject<T> object : levelObjects) {
+        for (SpaceObject<T> object : spaceObjects) {
             if (object.newState == this) {
                 object.newState = null;
                 objectChanges.add(new ObjectChangeData(object, null));
@@ -1018,6 +972,54 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         updateObjectList();
     }
     
+    private void addObjectChangeData(SpaceObject<T> object, SpaceState<T> newState) {
+        object.newState = newState;
+        ObjectChangeData<T> data = new ObjectChangeData<>(object, newState);
+        if (object.state != null) {
+            object.state.objectChanges.add(data);
+            object.state.updateObjectList();
+        }
+        if (newState != null) {
+            newState.objectChanges.add(data);
+            newState.updateObjectList();
+        }
+    }
+    
+    private void addActions(SpaceObject<T> object) {
+        spaceObjects.add(object);
+        object.game = getGame();
+        object.state = this;
+        object.addCellData();
+        object.addNonCellData();
+    }
+    
+    private void removeActions(SpaceObject<T> object) {
+        object.removeData();
+        spaceObjects.remove(object);
+        object.game = null;
+        object.state = null;
+    }
+    
+    private void updateObjectList() {
+        if (objectIterators == 0 && thinkerObjectIterators == 0
+                && !iteratingThroughThinkers() && !updatingObjectList) {
+            updatingObjectList = true;
+            while (!objectChanges.isEmpty()) {
+                ObjectChangeData<T> data = objectChanges.remove();
+                if (!data.used) {
+                    data.used = true;
+                    if (data.object.state != null) {
+                        data.object.state.removeActions(data.object);
+                    }
+                    if (data.newState != null) {
+                        data.newState.addActions(data.object);
+                    }
+                }
+            }
+            updatingObjectList = false;
+        }
+    }
+    
     /**
      * Returns the number of ThinkerObjects that are currently assigned to this
      * SpaceState.
@@ -1188,7 +1190,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     public final <O extends SpaceObject<T>> O nearestObject(long pointX, long pointY, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        for (SpaceObject<T> object : (ThinkerObject.class.isAssignableFrom(cls) ? thinkerObjects : levelObjects)) {
+        for (SpaceObject<T> object : (ThinkerObject.class.isAssignableFrom(cls) ? thinkerObjects : spaceObjects)) {
             if (cls.isAssignableFrom(object.getClass())) {
                 long distance = CellVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
                 if (nearestDistance < 0 || distance < nearestDistance) {
@@ -1912,7 +1914,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * SpaceState
      */
     public final int getNumLayers() {
-        return levelLayers.size();
+        return spaceLayers.size();
     }
     
     /**
@@ -1923,7 +1925,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * specified ID
      */
     public final SpaceLayer<T> getLayer(int id) {
-        return levelLayers.get(id);
+        return spaceLayers.get(id);
     }
     
     /**
@@ -1942,20 +1944,20 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             throw new RuntimeException("Attempted to set a SpaceLayer with an ID of 0");
         }
         if (layer == null) {
-            SpaceLayer<T> oldLayer = levelLayers.get(id);
+            SpaceLayer<T> oldLayer = spaceLayers.get(id);
             if (oldLayer != null) {
                 removeThinker(oldLayer);
-                levelLayers.remove(id);
+                spaceLayers.remove(id);
                 return true;
             }
             return false;
         }
         if (addThinker(layer)) {
-            SpaceLayer<T> oldLayer = levelLayers.get(id);
+            SpaceLayer<T> oldLayer = spaceLayers.get(id);
             if (oldLayer != null) {
                 removeThinker(oldLayer);
             }
-            levelLayers.put(id, layer);
+            spaceLayers.put(id, layer);
             return true;
         }
         return false;
@@ -1966,10 +1968,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * to it.
      */
     public final void clearLayers() {
-        for (SpaceLayer<T> layer : levelLayers.values()) {
+        for (SpaceLayer<T> layer : spaceLayers.values()) {
             removeThinker(layer);
         }
-        levelLayers.clear();
+        spaceLayers.clear();
     }
     
     /**
@@ -3218,25 +3220,23 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     @Override
     public final void frameActions(T game) {
-        if (getTimeFactor() > 0) {
-            for (ThinkerObject object : thinkerObjects) {
-                object.collisions.clear();
-                object.collisionDirections.clear();
-                object.displacement.clear();
-            }
-            Iterator<ThinkerObject<T>> iterator = thinkerObjectIterator();
-            while (iterator.hasNext()) {
-                ThinkerObject object = iterator.next();
-                long objectTimeFactor = object.getEffectiveTimeFactor();
-                long dx = Frac.mul(objectTimeFactor, object.getVelocityX() + object.getStepX());
-                long dy = Frac.mul(objectTimeFactor, object.getVelocityY() + object.getStepY());
-                object.setStep(0, 0);
-                object.displacement = move(object, dx, dy);
-            }
-            Iterator<SpaceThinker<T>> thinkerIterator = thinkerIterator();
-            while (thinkerIterator.hasNext()) {
-                thinkerIterator.next().afterMovement(game, this);
-            }
+        Iterator<SpaceThinker<T>> thinkerIterator = thinkerIterator();
+        while (thinkerIterator.hasNext()) {
+            thinkerIterator.next().beforeMovement();
+        }
+        for (ThinkerObject object : thinkerObjects) {
+            object.collisions.clear();
+            object.collisionDirections.clear();
+            object.displacement.clear();
+        }
+        Iterator<ThinkerObject<T>> iterator = thinkerObjectIterator();
+        while (iterator.hasNext()) {
+            ThinkerObject object = iterator.next();
+            long objectTimeFactor = object.getEffectiveTimeFactor();
+            long dx = Frac.mul(objectTimeFactor, object.getVelocityX() + object.getStepX());
+            long dy = Frac.mul(objectTimeFactor, object.getVelocityY() + object.getStepY());
+            object.setStep(0, 0);
+            object.displacement = move(object, dx, dy);
         }
     }
     
@@ -3257,7 +3257,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 if (viewport.getCamera() != null && viewport.getCamera().newState == this) {
                     long cx = viewport.getCamera().getCenterX();
                     long cy = viewport.getCamera().getCenterY();
-                    for (SpaceLayer layer : levelLayers.headMap(0).values()) {
+                    for (SpaceLayer layer : spaceLayers.headMap(0).values()) {
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                     int rx = Frac.toInt(cx);
@@ -3406,7 +3406,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                    for (SpaceLayer layer : levelLayers.tailMap(0).values()) {
+                    for (SpaceLayer layer : spaceLayers.tailMap(0).values()) {
                         layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
                     }
                 }

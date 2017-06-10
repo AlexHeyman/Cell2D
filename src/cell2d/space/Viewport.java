@@ -30,13 +30,12 @@ import cell2d.Frac;
 public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     
     private SpaceObject camera = null;
-    private HUD<T> hud;
+    private HUD<T> hud = null;
     private long x1, y1, x2, y2;
     int roundX1, roundY1, roundX2, roundY2, left, right, top, bottom;
     
     /**
      * Creates a new Viewport that occupies the specified region of the screen.
-     * @param hud This Viewport's HUD, or null if it should have none
      * @param x1 The x-coordinate in pixels of this Viewport's left edge on the
      * screen
      * @param y1 The y-coordinate in pixels of this Viewport's top edge on the
@@ -46,14 +45,13 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @param y2 The y-coordinate in pixels of this Viewport's bottom edge on
      * the screen
      */
-    public Viewport(HUD<T> hud, long x1, long y1, long x2, long y2) {
+    public Viewport(long x1, long y1, long x2, long y2) {
         if (x1 > x2) {
             throw new RuntimeException("Attempted to give a Viewport a negative width");
         }
         if (y1 > y2) {
             throw new RuntimeException("Attempted to give a Viewport a negative height");
         }
-        this.hud = (hud == null || hud.getNewGameState() == null ? hud : null);
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -74,20 +72,6 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     private void updateYData() {
         top = -(int)Math.round((roundY2 - roundY1)/2.0);
         bottom = top + roundY2 - roundY1;
-    }
-    
-    @Override
-    public final void addedActions(T game, SpaceState<T> state) {
-        if (hud != null) {
-            state.addThinker(hud);
-        }
-    }
-    
-    @Override
-    public final void removedActions(T game, SpaceState<T> state) {
-        if (hud != null) {
-            state.removeThinker(hud);
-        }
     }
     
     /**
@@ -126,15 +110,9 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @return Whether the addition occurred
      */
     public final boolean setHUD(HUD<T> hud) {
-        if (getNewGameState() == null) {
-            if (hud == null || hud.getNewGameState() == null) {
-                this.hud = hud;
-                return true;
-            }
-            return false;
-        } else if (hud == null || getNewGameState().addThinker(hud)) {
+        if (hud == null || addThinker(hud)) {
             if (this.hud != null) {
-                getNewGameState().removeThinker(this.hud);
+                removeThinker(this.hud);
             }
             this.hud = hud;
             return true;
@@ -313,7 +291,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * Viewport
      */
     public final boolean rectangleIsVisible(long x1, long y1, long x2, long y2) {
-        if (camera != null && camera.newState == getNewGameState()) {
+        if (camera != null && camera.newState == getNewThinkerGroup()) {
             int centerX = Frac.toInt(camera.getCenterX());
             int centerY = Frac.toInt(camera.getCenterY());
             return Frac.toInt(x1) < centerX + right && Frac.toInt(x2) > centerX + left
