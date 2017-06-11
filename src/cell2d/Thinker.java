@@ -47,9 +47,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * allows a Thinker's CellGameStates and ThinkerStates to interact with it in
  * ways unique to its subclass of Thinker.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that this Thinker's CellGameState is used
- * by
- * @param <U> The subclass of CellGameState that this Thinker is used by
+ * @param <T> The subclass of CellGame that uses this Thinker's CellGameStates
+ * @param <U> The subclass of CellGameState uses this Thinker
  * @param <V> The subclass of Thinker that this Thinker is
  */
 public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>,
@@ -63,7 +62,6 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     ThinkerGroup<T,U,V> newGroup = null;
     private T game = null;
     private U state = null;
-    private V superThinker = null;
     private long timeFactor = -1;
     private long timeToRun = 0;
     int actionPriority = 0;
@@ -80,7 +78,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     /**
      * A method which returns this Thinker as a V, rather than as a
-     * Thinker&lt;T,U,V,W&gt;. This must be implemented somewhere in the lineage
+     * Thinker&lt;T,U,V&gt;. This must be implemented somewhere in the lineage
      * of every subclass of Thinker in order to get around Java's limitations
      * with regard to generic types.
      * @return This Thinker as a V
@@ -134,10 +132,6 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
         }
     }
     
-    public final V getSuperThinker() {
-        return superThinker;
-    }
-    
     /**
      * Returns this Thinker's time factor.
      * @return This Thinker's time factor
@@ -148,17 +142,19 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     /**
      * Returns this Thinker's effective time factor; that is, the average number
-     * of time units it experiences every frame. If it is not assigned to a
-     * CellGameState, this will be 0.
+     * of time units it experiences every frame. If it is not directly or
+     * indirectly assigned to a CellGameState, this will be 0.
      * @return This Thinker's effective time factor
      */
     public final long getEffectiveTimeFactor() {
         if (state == null) {
             return 0;
         }
-        Thinker<T,U,V> ancestor = this;
-        while (ancestor.superThinker != null) {
-            ancestor = ancestor.superThinker;
+        Thinker ancestor = this;
+        ThinkerGroup ancestorGroup = group;
+        while (ancestorGroup != null && ancestorGroup instanceof Thinker) {
+            ancestor = (Thinker)ancestorGroup;
+            ancestorGroup = ancestor.group;
         }
         return (ancestor.timeFactor < 0 ? state.getTimeFactor() : ancestor.timeFactor);
     }
@@ -317,7 +313,6 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     @Override
     public final void addThinkerActions(V thinker) {
         thinker.setGameAndState(game, state);
-        ((Thinker<T,U,V>)thinker).superThinker = thisThinker;
         addThinkerActions(game, state, thinker);
     }
     
@@ -327,7 +322,6 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     public final void removeThinkerActions(V thinker) {
         removeThinkerActions(game, state, thinker);
         thinker.setGameAndState(null, null);
-        ((Thinker<T,U,V>)thinker).superThinker = null;
     }
     
     public final void removeThinkerActions(T game, U state, V thinker) {}

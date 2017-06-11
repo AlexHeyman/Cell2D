@@ -5,9 +5,9 @@ import cell2d.Thinker;
 import java.util.Iterator;
 
 /**
- * <p>A SpaceThinker is the type of Thinker that is used by SpaceStates and uses
- * SpaceThinkerStates. A SpaceThinker can take afterMovementActions() every
- * frame after its SpaceState moves its assigned ThinkerObjects.</p>
+ * <p>A SpaceThinker is the type of Thinker that is used by SpaceStates. A
+ * SpaceThinker can take beforeMovementActions() every frame before its
+ * SpaceState moves its assigned ThinkerObjects.</p>
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that this SpaceThinker's SpaceState is
  used by
@@ -30,9 +30,10 @@ public abstract class SpaceThinker<T extends CellGame> extends Thinker<T,SpaceSt
     }
     
     /**
-     * Actions for this SpaceThinker to take once every frame, after its
-     * SpaceState moves its assigned ThinkerObjects.
-     * @param game This SpaceThinker's CellGame
+     * Actions for this SpaceThinker to take once every frame, after
+     * SpaceThinkers take their timeUnitActions() but before its SpaceState
+     * moves its assigned ThinkerObjects.
+     * @param game This SpaceThinker's SpaceState's CellGame
      * @param state This SpaceThinker's SpaceState
      */
     public void beforeMovementActions(T game, SpaceState<T> state) {}

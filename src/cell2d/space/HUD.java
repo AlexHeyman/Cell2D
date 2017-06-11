@@ -5,10 +5,9 @@ import org.newdawn.slick.Graphics;
 
 /**
  * <p>An HUD (heads-up display) is a SpaceThinker that renders visuals in front
- * of those of the Viewport or SpaceState to which it is assigned. To render
- * visuals, an HUD must be assigned to a Viewport or SpaceState through its
- * setHUD() method. HUDs are intended to be used to display information about a
- * SpaceState's space, rather than physical objects in it.</p>
+ * of those of the Viewport or SpaceState to which it is assigned. HUDs are
+ * intended to be used to display information about a SpaceState's space, as
+ * opposed to displaying physical objects in it.</p>
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses the SpaceStates that this HUD can
  * be assigned to

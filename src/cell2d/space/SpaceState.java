@@ -66,9 +66,11 @@ import org.newdawn.slick.Graphics;
  * negative IDs are rendered behind its SpaceObjects. SpaceLayers may not be
  * added with an ID of 0.</p>
  * 
- * <p>HUDs may be assigned to one SpaceState each. Only one HUD may be assigned
- * to a given SpaceState at once. A SpaceState's HUD uses the entire screen as
- * its rendering region.</p>
+ * <p>HUDs may be assigned to one SpaceState each to render visuals in front of
+ * the SpaceState's own. To render visuals, an HUD must be assigned to a
+ * SpaceState through its setHUD() method. Only one HUD may be assigned to a
+ * given SpaceState in this way at once. A SpaceState's HUD uses the entire
+ * screen as its rendering region.</p>
  * 
  * <p>Viewports may be assigned to one SpaceState each with an integer ID in
  * the context of that SpaceState. Only one Viewport may be assigned to a
@@ -1931,13 +1933,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     /**
      * Sets the SpaceLayer that is assigned to this SpaceState with the
      * specified ID to the specified SpaceLayer, if it is not already assigned
-     * to a SpaceState. If there is already a SpaceLayer assigned with the
+     * to a ThinkerGroup. If there is already a SpaceLayer assigned with the
      * specified ID, it will be removed from this SpaceState. If the specified
      * SpaceLayer is null, the SpaceLayer with the specified ID will be removed
      * if there is one, but it will not be replaced with anything.
      * @param id The ID with which to assign the specified SpaceLayer
      * @param layer The SpaceLayer to add with the specified ID
-     * @return Whether the addition occurred
+     * @return Whether the change occurred
      */
     public final boolean setLayer(int id, SpaceLayer<T> layer) {
         if (id == 0) {
@@ -1985,12 +1987,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     /**
      * Sets the HUD that is assigned to this SpaceState to the specified HUD, if
-     * it is not already assigned to a SpaceState. If there is already an HUD
+     * it is not already assigned to a ThinkerGroup. If there is already an HUD
      * assigned to this SpaceState, it will be removed. If the specified HUD is
      * null, the current HUD will be removed if there is one, but it will not be
      * replaced with anything.
      * @param hud The HUD to add
-     * @return Whether the addition occurred
+     * @return Whether the change occurred
      */
     public final boolean setHUD(HUD<T> hud) {
         if (hud == null || addThinker(hud)) {

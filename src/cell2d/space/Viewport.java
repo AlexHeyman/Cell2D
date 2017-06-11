@@ -20,9 +20,11 @@ import cell2d.Frac;
  * automatically be clipped so that they do not extend beyond the rendering
  * region.</p>
  * 
- * <p>HUDs may be assigned to one Viewport each. Only one HUD may be assigned
- * to a given Viewport at once. A Viewport's HUD uses the region of the screen
- * that the Viewport occupies as its rendering region.</p>
+ * <p>HUDs may be assigned to Viewports to render visuals in front of the
+ * Viewport's own. To render visuals, an HUD must be assigned to a Viewport
+ * through its setHUD() method. Only one HUD may be assigned to a given Viewport
+ * in this way at once. A Viewport's HUD uses the region of the screen that the
+ * Viewport occupies as its rendering region.</p>
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses the SpaceStates that this Viewport
  * can be assigned to
@@ -102,12 +104,12 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     
     /**
      * Sets the HUD that is assigned to this Viewport to the specified HUD, if
-     * it is not already assigned to a SpaceState. If there is already an HUD
+     * it is not already assigned to a ThinkerGroup. If there is already an HUD
      * assigned to this Viewport, it will be removed. If the specified HUD is
      * null, the current HUD will be removed if there is one, but it will not be
      * replaced with anything.
      * @param hud The HUD to add
-     * @return Whether the addition occurred
+     * @return Whether the change occurred
      */
     public final boolean setHUD(HUD<T> hud) {
         if (hud == null || addThinker(hud)) {

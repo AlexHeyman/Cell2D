@@ -23,20 +23,14 @@ import org.newdawn.slick.Graphics;
  * integer ID in the context of that CellGameState. Only one AnimationInstance
  * may be assigned to a given CellGameState with a given ID at once.</p>
  * 
- * <p>Thinkers may be assigned to one CellGameState each. Because a
- * CellGameState's internal list of Thinkers cannot be modified while it is
- * being iterated through, the actual addition or removal of a Thinker to or
- * from a CellGameState is delayed until any and all current iterations through
- * its Thinkers, such as the periods during which Thinkers perform their
- * timeUnitActions() or frameActions(), have been completed. Multiple delayed
- * instructions may be successfully given to CellGameStates regarding the same
- * Thinker without having to wait until all iterations have finished.</p>
+ * <p>A CellGameState is also a ThinkerGroup, which means that Thinkers may be
+ * directly assigned to one CellGameState each.</p>
  * 
  * <p>The CellGameState class is intended to be directly extended by classes U
- * that extend CellGameState&lt;T,U,V,W&gt; and interact with Thinkers of class
- * V and ThinkerStates of class W. BasicGameState is an example of such a class.
- * This allows a CellGameState's Thinkers and their ThinkerStates to interact
- * with it in ways unique to its subclass of CellGameState.</p>
+ * that extend CellGameState&lt;T,U,V&gt; and interact with Thinkers of class V.
+ * BasicGameState is an example of such a class. This allows a CellGameState's
+ * Thinkers to interact with it in ways unique to its subclass of CellGameState.
+ * </p>
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that uses this CellGameState
  * @param <U> The subclass of CellGameState that this CellGameState is
@@ -72,7 +66,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     
     /**
      * A method which returns this CellGameState as a U, rather than as a
-     * CellGameState&lt;T,U,V,W&gt;. This must be implemented somewhere in the
+     * CellGameState&lt;T,U,V&gt;. This must be implemented somewhere in the
      * lineage of every subclass of CellGameState in order to get around Java's
      * limitations with regard to generic types.
      * @return This CellGameState as a U
@@ -295,6 +289,12 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         addThinkerActions(game, thinker);
     }
     
+    /**
+     * Actions for this CellGameState to take immediately after adding a Thinker
+     * to itself.
+     * @param game This CellGameState's CellGame
+     * @param thinker The Thinker that was added
+     */
     public final void addThinkerActions(T game, V thinker) {}
     
     @Override
@@ -303,6 +303,12 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         thinker.setGameAndState(null, null);
     }
     
+    /**
+     * Actions for this CellGameState to take immediately before removing a
+     * Thinker from itself.
+     * @param game This CellGameState's CellGame
+     * @param thinker The Thinker that is about to be removed
+     */
     public final void removeThinkerActions(T game, V thinker) {}
     
     final void frame() {
@@ -322,7 +328,8 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     
     /**
      * Actions for this CellGameState to take once every frame, after all of its
-     * Thinkers have taken their frameActions().
+     * Thinkers have taken their timeUnitActions() but before they take their
+     * frameActions().
      * @param game This CellGameState's CellGame
      */
     public void frameActions(T game) {}

@@ -10,6 +10,22 @@ import java.util.Queue;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * <p>A ThinkerGroup is a group of Thinkers that can be iterated over. Thinkers
+ * may be assigned to one ThinkerGroup each. Because a ThinkerGroup's internal
+ * list of Thinkers cannot be modified while it is being iterated over, the
+ * actual addition or removal of a Thinker to or from a ThinkerGroup is delayed
+ * until any and all current iterations over its Thinkers, such as the periods
+ * during which Thinkers perform their timeUnitActions() or frameActions(), have
+ * been completed. Multiple delayed instructions may be successfully given to
+ * ThinkerGroups regarding the same Thinker without having to wait until all
+ * iterations have finished.</p>
+ * @author Andrew Heyman
+ * @param <T> The subclass of CellGame that uses this ThinkerGroup's Thinkers'
+ * CellGameStates
+ * @param <U> The subclass of CellGameState uses this ThinkerGroup's Thinkers
+ * @param <V> The subclass of Thinker that this ThinkerGroup's Thinkers are
+ */
 public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T,U,V>, V extends Thinker<T,U,V>> {
     
     private static abstract class GroupComparator<T> implements Comparator<T>, Serializable {}
@@ -31,9 +47,9 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     
     /**
      * Returns the number of Thinkers that are currently assigned to this
-     * CellGameState.
+     * ThinkerGroup.
      * @return The number of Thinkers that are currently assigned to this
-     * CellGameState
+     * ThinkerGroup
      */
     public final int getNumThinkers() {
         return thinkers.size();
@@ -90,9 +106,9 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Returns whether any Iterators over this CellGameState's list of Thinkers
+     * Returns whether any Iterators over this ThinkerGroup's list of Thinkers
      * are currently in progress.
-     * @return Whether any Iterators over this CellGameState's list of Thinkers
+     * @return Whether any Iterators over this ThinkerGroup's list of Thinkers
      * are currently in progress
      */
     public final boolean iteratingThroughThinkers() {
@@ -100,8 +116,8 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Returns a new Iterator over this CellGameState's list of Thinkers.
-     * @return A new Iterator over this CellGameState's list of Thinkers
+     * Returns a new Iterator over this ThinkerGroup's list of Thinkers.
+     * @return A new Iterator over this ThinkerGroup's list of Thinkers
      */
     public final SafeIterator<V> thinkerIterator() {
         return new ThinkerIterator();
@@ -132,8 +148,10 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Adds the specified Thinker to this CellGameState if it is not already
-     * assigned to a CellGameState.
+     * Adds the specified Thinker to this ThinkerGroup if it is not already
+     * assigned to a ThinkerGroup, and if doing so would not create a loop of
+     * assignments in which Thinkers are directly or indirectly assigned to
+     * themselves.
      * @param thinker The Thinker to be added
      * @return Whether the addition occurred
      */
@@ -156,7 +174,7 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Removes the specified Thinker from this CellGameState if it is currently
+     * Removes the specified Thinker from this ThinkerGroup if it is currently
      * assigned to it.
      * @param thinker The Thinker to be removed
      * @return Whether the removal occurred
@@ -175,7 +193,7 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Removes from this SpaceState all of the SpaceObjects that are currently
+     * Removes from this ThinkerGroup all of the Thinkers that are currently
      * assigned to it.
      */
     public final void removeAllThinkers() {
@@ -188,6 +206,13 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
         updateThinkerList();
     }
     
+    /**
+     * Removes from their ThinkerGroups all of the Thinkers that are directly or
+     * indirectly assigned to this ThinkerGroup. For instance, if a Thinker is
+     * assigned to a Thinker that is assigned to this ThinkerGroup, the first
+     * Thinker will be removed from the second, and the second will be removed
+     * from this ThinkerGroup.
+     */
     public final void removeAllSubThinkers() {
         if (!thinkers.isEmpty()) {
             for (V thinker : thinkers) {
@@ -201,17 +226,33 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
         }
     }
     
+    /**
+     * Removes from their ThinkerGroups all of the Thinkers that are directly or
+     * indirectly assigned to this ThinkerGroup, and are either assigned to or
+     * assignees of the specified Thinker. For instance, if a Thinker is
+     * assigned to a Thinker that is assigned to a Thinker that is assigned to
+     * this ThinkerGroup, and the second Thinker is the specified Thinker, the
+     * first Thinker will be removed from the second, the second from the third,
+     * and the third from this ThinkerGroup. This method is useful for
+     * ThinkerGroups that use Thinkers to model a hierarchy of states in which
+     * they can exist.
+     * @param thinker The Thinker with which the removed Thinkers must share a
+     * lineage of assignments
+     * @return Whether any removals occurred
+     */
     public final boolean removeLineage(V thinker) {
         List<V> lineage = new ArrayList<>();
-        do {
-            V parent = thinker.getSuperThinker();
-            if ((parent == null && thinker.newGroup != this)
-                    || (parent != null && thinker.newGroup != parent)) {
+        while (true) {
+            lineage.add(thinker);
+            ThinkerGroup<T,U,V> group = thinker.newGroup;
+            if (group == this) {
+                break;
+            } else if (group instanceof Thinker) {
+                thinker = ((Thinker<T,U,V>)group).getThis();
+            } else {
                 return false;
             }
-            lineage.add(thinker);
-            thinker = parent;
-        } while (thinker != null && thinker != this);
+        }
         thinker = lineage.get(0);
         thinker.removeAllSubThinkers();
         for (int i = 1; i < lineage.size(); i++) {
@@ -244,7 +285,7 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Actions for this CellGameState to take immediately after adding a Thinker
+     * Actions for this ThinkerGroup to take immediately after adding a Thinker
      * to itself.
      * @param thinker The Thinker that was added
      */
@@ -258,7 +299,7 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Actions for this CellGameState to take immediately before removing a
+     * Actions for this ThinkerGroup to take immediately before removing a
      * Thinker from itself.
      * @param thinker The Thinker that is about to be removed
      */
@@ -296,8 +337,8 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     }
     
     /**
-     * Actions for this CellGameState to take immediately after updating its
-     * list of Thinkers.
+     * Actions for this ThinkerGroup to take immediately after updating its list
+     * of Thinkers.
      */
     public void updateThinkerListActions() {}
     

@@ -6,9 +6,8 @@ import org.newdawn.slick.Graphics;
 /**
  * <p>A SpaceLayer is a SpaceThinker that renders visuals either in front of or
  * behind those of the SpaceObjects in the SpaceState to which it is assigned.
- * To render visuals, a SpaceLayer must be assigned to a SpaceState through its
- * setLayer() method. SpaceLayers are intended to be used to display objects in
- * the foreground or background of a SpaceState's space.</p>
+ * SpaceLayers are intended to be used to display objects in the foreground or
+ * background of a SpaceState's space.</p>
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses the SpaceStates that this
  * SpaceLayer can be assigned to

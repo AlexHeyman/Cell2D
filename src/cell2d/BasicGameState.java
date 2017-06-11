@@ -1,13 +1,12 @@
 package cell2d;
 
 /**
- * <p>A BasicGameState is a type of CellGameState that uses BasicThinkers and
- * BasicThinkerStates, both of which have no special capabilities. It is
- * designed to be easily extended by types of CellGameStates that do not require
- * custom fields or methods to be automatically shared among themselves, their
- * Thinkers, and their ThinkerStates.</p>
+ * <p>A BasicGameState is a type of CellGameState that uses BasicThinkers, which
+ * have no special capabilities. It is designed to be easily extended by types
+ * of CellGameStates that do not require custom fields or methods to be
+ * automatically shared between themselves and their Thinkers.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that this BasicGameState is used by
+ * @param <T> The subclass of CellGame that uses this BasicGameState
  */
 public abstract class BasicGameState<T extends CellGame> extends CellGameState<T,BasicGameState<T>,BasicThinker<T>> {
     
