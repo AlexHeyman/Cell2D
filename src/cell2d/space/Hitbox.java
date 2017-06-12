@@ -212,9 +212,9 @@ public abstract class Hitbox<T extends CellGame> {
     }
     
     /**
-     * Returns the SpaceObject that is currently using this Hitbox, directly or
-     * indirectly as part of a CompositeHitbox, or null if it is not being used
-     * by a SpaceObject.
+     * Returns the SpaceObject that is using this Hitbox, directly or indirectly
+     * as part of a CompositeHitbox, or null if it is not being used by a
+     * SpaceObject.
      * @return This Hitbox's SpaceObject
      */
     public final SpaceObject<T> getObject() {
@@ -367,9 +367,9 @@ public abstract class Hitbox<T extends CellGame> {
     }
     
     /**
-     * Returns the SpaceState of the SpaceObject that is currently using this
-     * Hitbox, or null if either the SpaceObject is not assigned to a SpaceState
-     * or this Hitbox is not being used by a SpaceObject.
+     * Returns the SpaceState of the SpaceObject that is using this Hitbox, or
+     * null if either the SpaceObject is not assigned to a SpaceState or this
+     * Hitbox is not being used by a SpaceObject.
      * @return This Hitbox's SpaceObject's SpaceState
      */
     public final SpaceState<T> getGameState() {

@@ -100,19 +100,18 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Returns the CellGameState to which this AnimationInstance is currently
-     * assigned, or null if it is assigned to none.
-     * @return The CellGameState to which this AnimationInstance is currently
-     * assigned
+     * Returns the CellGameState to which this AnimationInstance is assigned, or
+     * null if it is not assigned to one.
+     * @return The CellGameState to which this AnimationInstance is assigned
      */
     public final CellGameState getGameState() {
         return state;
     }
     
     /**
-     * Sets the CellGameState to which this AnimationInstance is currently
-     * assigned. If it is set to a null CellGameState, this AnimationInstance
-     * will be removed from its current CellGameState if it has one.
+     * Sets the CellGameState to which this AnimationInstance is assigned. If it
+     * is set to a null CellGameState, this AnimationInstance will be removed
+     * from its current CellGameState if it has one.
      * @param state The CellGameState to which this AnimationInstance should be
      * assigned
      */

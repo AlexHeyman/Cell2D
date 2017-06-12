@@ -645,11 +645,10 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns all of the Controls that are currently bound to the specified
-     * command.
+     * Returns all of the Controls that are bound to the specified command.
      * @param command The number of the command whose controls are to be
      * returned
-     * @return The Controls that are currently bound to the specified command
+     * @return The Controls that are bound to the specified command
      */
     public final List<Control> getControlsFor(int command) {
         if (command < 0 || command >= commands.length) {
@@ -806,9 +805,9 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns the String that this CellGame is currently being used to type,
-     * or null if there is none.
-     * @return The String that this CellGame is currently being used to type
+     * Returns the String that this CellGame is being used to type, or null if
+     * there is none.
+     * @return The String that this CellGame is being used to type
      */
     public final String getTypingString() {
         return typingString;

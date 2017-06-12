@@ -9,43 +9,45 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>A Thinker is a collection of methods that contributes to the mechanics of
- * the CellGameState to which it is assigned. A Thinker's assigned CellGameState
- * will keep track of time for it, thus allowing it to take its own
- * time-dependent actions, while the CellGameState is active. A Thinker's time
- * factor represents the average number of discrete time units the Thinker will
- * experience every frame while assigned to an active CellGameState. If its own
- * time factor is negative, a Thinker will use its assigned CellGameState's time
- * factor instead. If a Thinker is assigned to an inactive CellGameState or none
+ * the CellGameState to which it is assigned. A Thinker is also a ThinkerGroup,
+ * which means that Thinkers may be directly assigned to one other Thinker each.
+ * A Thinker is considered indirectly assigned to a CellGameState if it is
+ * assigned to another Thinker that is itself assigned to the CellGameState,
+ * directly or indirectly.</p>
+ * 
+ * <p>A Thinker's assigned CellGameState will keep track of time for it, thus
+ * allowing it to take its own time-dependent actions, while the CellGameState
+ * is active. A Thinker's time factor represents the average number of discrete
+ * time units the Thinker will experience every frame while directly assigned to
+ * an active CellGameState. If its own time factor is negative, a Thinker will
+ * use its assigned CellGameState's time factor instead. If a Thinker is
+ * indirectly assigned to an active CellGameState, it will use the time factor
+ * of the Thinker that it is assigned to that is directly assigned to the
+ * CellGameState. If a Thinker is assigned to an inactive CellGameState or none
  * at all, time will not pass for it.</p>
  * 
- * <p>A Thinker's action priority determines when it will act relative to other
- * Thinkers. All of the Thinkers assigned to the active CellGameState will take
- * their timeUnitActions() and their frameActions() in order from highest to
- * lowest action priority.</p>
- * 
- * <p>A Thinker may occupy at most one ThinkerState at a time. ThinkerStates
- * take actions alongside their Thinker's own, as well as when entered and left
- * by a Thinker, and can help a Thinker keep track of its position in a
- * multi-frame procedure. A ThinkerState can have a limited duration in time
- * units, and at the beginning of the time unit when that duration is up, its
- * Thinker automatically transitions to its next ThinkerState.</p>
+ * <p>A Thinker's action priority determines when it will take time-dependent
+ * actions, such as timeUnitActions() or frameActions(), relative to the other
+ * Thinkers in its ThinkerGroup. All of the Thinkers assigned to a ThinkerGroup
+ * will take each type of time-dependent actions in order from highest to lowest
+ * action priority. A Thinker that is assigned to another Thinker will take each
+ * type of time-dependent actions after its assignee Thinker does, but before
+ * any of the other Thinkers in its assignee Thinker's ThinkerGroup do.</p>
  * 
  * <p>A Thinker has timers that can activate TimedEvents after a certain number
  * of time units. Timers have integer values, with a positive value x indicating
  * that the TimedEvent will be activated in x time units, a negative value
  * indicating that the timer is not running, and a value of 0 indicating that
  * either the TimedEvent was activated or the value was deliberately set to 0
- * this time unit. Each time unit, after a Thinker automatically changes
- * ThinkerStates (if it did) but before it and its ThinkerState (if it has one)
- * take their timeUnitActions(), its non-negative timers' values are decreased
- * by 1 and the TimedEvents whose timers have reached 0 are activated.
- * </p>
+ * this time unit. Each time unit, before a Thinker takes its timeUnitActions(),
+ * its non-negative timers' values are decreased by 1 and the TimedEvents whose
+ * timers have reached 0 are activated.</p>
  * 
  * <p>The Thinker class is intended to be directly extended by classes V that
- * extend Thinker&lt;T,U,V,W&gt; and interact with CellGameStates of class U and
- * ThinkerStates of class W. BasicThinker is an example of such a class. This
- * allows a Thinker's CellGameStates and ThinkerStates to interact with it in
- * ways unique to its subclass of Thinker.</p>
+ * extend Thinker&lt;T,U,V&gt; and interact with CellGameStates of class U.
+ * BasicThinker is an example of such a class. This allows a Thinker's
+ * CellGameStates to interact with it in ways unique to its subclass of Thinker.
+ * </p>
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that uses this Thinker's CellGameStates
  * @param <U> The subclass of CellGameState uses this Thinker
@@ -85,19 +87,33 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
      */
     public abstract V getThis();
     
+    /**
+     * Returns the ThinkerGroup to which this Thinker is assigned, or null if it
+     * is assigned to none.
+     * @return The ThinkerGroup to which this Thinker is assigned
+     */
     public final ThinkerGroup<T,U,V> getThinkerGroup() {
         return group;
     }
     
+    /**
+     * Returns the ThinkerGroup to which this Thinker is about to be assigned,
+     * but has not yet been due to one or more of the Thinker lists involved
+     * being iterated over. If this Thinker is about to be removed from its
+     * ThinkerGroup without being added to a new one afterward, this will be
+     * null. If this Thinker is not about to change ThinkerGroups, this method
+     * will simply return its current ThinkerGroup.
+     * @return The ThinkerGroup to which this Thinker is about to be assigned
+     */
     public final ThinkerGroup<T,U,V> getNewThinkerGroup() {
         return newGroup;
     }
     
     /**
-     * Sets the CellGameState to which this Thinker is currently assigned. If it
-     * is set to a null CellGameState, this Thinker will be removed from its
-     * current CellGameState if it has one.
-     * @param group The CellGameState to which this Thinker should be assigned
+     * Sets the ThinkerGroup to which this Thinker is assigned. If it is set to
+     * a null ThinkerGroup, this Thinker will be removed from its current
+     * ThinkerGroup if it has one.
+     * @param group The ThinkerGroup to which this Thinker should be assigned
      */
     public final void setThinkerGroup(ThinkerGroup<T,U,V> group) {
         if (newGroup != null) {
@@ -108,14 +124,20 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
         }
     }
     
+    /**
+     * Returns the CellGame of the CellGameState to which this Thinker is
+     * directly or indirectly assigned, or null if it is not assigned to a
+     * CellGameState.
+     * @return This Thinker's CellGameState's CellGame
+     */
     public final T getGame() {
         return game;
     }
     
     /**
-     * Returns the CellGameState to which this Thinker is currently assigned, or
-     * null if it is assigned to none.
-     * @return The CellGameState to which this Thinker is currently assigned
+     * Returns the CellGameState to which this Thinker is directly or indirectly
+     * assigned, or null if it is not assigned to one.
+     * @return The CellGameState to which this Thinker is assigned
      */
     public final U getGameState() {
         return state;
@@ -177,7 +199,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     /**
      * Returns the action priority that this Thinker is about to have, but does
-     * not yet have due to its CellGameState's Thinker list being iterated over.
+     * not yet have due to its ThinkerGroup's Thinker list being iterated over.
      * If this Thinker is not about to change its action priority, this method
      * will simply return its current action priority.
      * @return The action priority that this Thinker is about to have
@@ -260,9 +282,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     /**
      * Actions for this Thinker to take once every time unit, after
-     * AnimationInstances update their indices but before Thinkers take their
-     * frameActions().
-     * @param game This Thinker's CellGame
+     * AnimationInstances update their indices but before its CellGameState
+     * takes its frameActions().
+     * @param game This Thinker's CellGameState's CellGame
      * @param state This Thinker's CellGameState
      */
     public void timeUnitActions(T game, U state) {}
@@ -278,10 +300,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     }
     
     /**
-     * Actions for this Thinker to take once every frame, after Thinkers take
-     * their timeUnitActions() but before its CellGameState takes its own
-     * frameActions().
-     * @param game This Thinker's CellGame
+     * Actions for this Thinker to take once every frame after its CellGameState
+     * takes its own frameActions().
+     * @param game This Thinker's CellGameState's CellGame
      * @param state This Thinker's CellGameState
      */
     public void frameActions(T game, U state) {}
@@ -291,10 +312,11 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     }
     
     /**
-     * Actions for this Thinker to take immediately after being added to a new
-     * CellGameState.
-     * @param game This Thinker's CellGame
-     * @param state This Thinker's CellGameState
+     * Actions for this Thinker to take after being added to a new ThinkerGroup,
+     * immediately after the ThinkerGroup takes its addThinkerActions().
+     * @param game This Thinker's CellGameState's CellGame, or null if it has no
+     * CellGameState
+     * @param state This Thinker's CellGameState, or null if it has none
      */
     public void addedActions(T game, U state) {}
     
@@ -303,10 +325,12 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     }
     
     /**
-     * Actions for this Thinker to take immediately before being removed from
-     * its CellGameState.
-     * @param game This Thinker's CellGame
-     * @param state This Thinker's CellGameState
+     * Actions for this Thinker to take before being removed from its current
+     * ThinkerGroup, immediately before the ThinkerGroup takes its
+     * removeThinkerActions().
+     * @param game This Thinker's CellGameState's CellGame, or null if it has no
+     * CellGameState
+     * @param state This Thinker's CellGameState, or null if it has none
      */
     public void removedActions(T game, U state) {}
     
@@ -316,6 +340,14 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
         addThinkerActions(game, state, thinker);
     }
     
+    /**
+     * Actions for this Thinker to take immediately after adding a Thinker to
+     * itself, before the added Thinker takes its addedActions().
+     * @param game This Thinker's CellGameState's CellGame, or null if it has no
+     * CellGameState
+     * @param state This Thinker's CellGameState, or null if it has none
+     * @param thinker The Thinker that was added
+     */
     public final void addThinkerActions(T game, U state, V thinker) {}
     
     @Override
@@ -324,6 +356,15 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
         thinker.setGameAndState(null, null);
     }
     
+    /**
+     * Actions for this ThinkerGroup to take immediately before removing a
+     * Thinker from itself, after the soon-to-be-removed Thinker takes its
+     * removedActions().
+     * @param game This Thinker's CellGameState's CellGame, or null if it has no
+     * CellGameState
+     * @param state This Thinker's CellGameState, or null if it has none
+     * @param thinker The Thinker that is about to be removed
+     */
     public final void removeThinkerActions(T game, U state, V thinker) {}
     
     final void update() {

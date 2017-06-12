@@ -119,10 +119,10 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     }
     
     /**
-     * Returns the number of AnimationInstances that are currently assigned to
-     * this CellGameState.
-     * @return The number of AnimationInstances that are currently assigned to
-     * this CellGameState
+     * Returns the number of AnimationInstances that are assigned to this
+     * CellGameState.
+     * @return The number of AnimationInstances that are assigned to this
+     * CellGameState
      */
     public final int getNumAnimInstances() {
         return animInstances.size();
@@ -200,7 +200,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * CellGameState.
      * @param id The ID with which to assign the specified AnimationInstance
      * @param instance The AnimationInstance to add with the specified ID
-     * @return Whether the addition occurred
+     * @return Whether the change occurred
      */
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {

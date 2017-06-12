@@ -114,14 +114,19 @@ public abstract class SpaceObject<T extends CellGame> {
         setAngle(creator.getAngle());
     }
     
+    /**
+     * Returns the CellGame of the SpaceState to which this SpaceObject is
+     * assigned, or null if it is not assigned to a SpaceState.
+     * @return This SpaceObject's SpaceState's CellGame
+     */
     public final T getGame() {
         return game;
     }
     
     /**
-     * Returns the SpaceState to which this SpaceObject is currently assigned,
-     * or null if it is assigned to none.
-     * @return The SpaceState to which this SpaceObject is currently assigned
+     * Returns the SpaceState to which this SpaceObject is assigned, or null if
+     * it is not assigned to one.
+     * @return The SpaceState to which this SpaceObject is assigned
      */
     public final SpaceState<T> getGameState() {
         return state;
@@ -141,9 +146,9 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     /**
-     * Sets the SpaceState to which this SpaceObject is currently assigned. If
-     * it is set to a null SpaceState, this SpaceObject will be removed from its
-     * current SpaceState if it has one.
+     * Sets the SpaceState to which this SpaceObject is assigned. If it is set
+     * to a null SpaceState, this SpaceObject will be removed from its current
+     * SpaceState if it has one.
      * @param state The SpaceState to which this SpaceObject should be assigned
      */
     public final void setGameState(SpaceState<T> state) {
@@ -1067,7 +1072,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * assigned with the specified ID, it will be removed from this SpaceObject.
      * @param id The ID with which to assign the specified AnimationInstance
      * @param instance The AnimationInstance to add with the specified ID
-     * @return Whether the addition occurred
+     * @return Whether the change occurred
      */
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {

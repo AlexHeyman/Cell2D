@@ -94,8 +94,8 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
-     * Returns the HUD that is currently assigned to this Viewport, or null if
-     * there is none.
+     * Returns the HUD that is assigned to this Viewport, or null if there is
+     * none.
      * @return This Viewport's HUD
      */
     public final HUD<T> getHUD() {

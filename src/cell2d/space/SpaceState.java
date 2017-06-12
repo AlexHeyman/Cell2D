@@ -34,14 +34,14 @@ import org.newdawn.slick.Graphics;
  * enter where they would be if they existed.</p>
  * 
  * <p>SpaceObjects may be assigned to one SpaceState each in much the same way
- * that Thinkers are assigned to CellGameStates. Similarly to Thinkers, the
+ * that Thinkers are assigned to ThinkerGroups. Similarly to Thinkers, the
  * actual addition or removal of a SpaceObject to or from a SpaceState is
- * delayed until any and all current iterations through its SpaceThinkers,
+ * delayed until any and all current iterations over its SpaceThinkers,
  * SpaceObjects, or ThinkerObjects, such as the periods during which
- * ThinkerObjects move or SpaceThinkers perform their various types of actions,
- * have been completed. Multiple delayed instructions may be successfully given
- * to SpaceStates regarding the same SpaceObject without having to wait until
- * all iterations have finished.</p>
+ * ThinkerObjects move or SpaceThinkers take their time-dependent actions, have
+ * been completed. Multiple delayed instructions may be successfully given to
+ * SpaceStates regarding the same SpaceObject without having to wait until all
+ * iterations have finished.</p>
  * 
  * <p>SpaceStates use cells to organize SpaceObjects by location, improving the
  * efficiency of processes like ThinkerObject movement that are concerned only
@@ -51,7 +51,7 @@ import org.newdawn.slick.Graphics;
  * are in each cell at any one time.</p>
  * 
  * <p>Every frame, between the periods in which its SpaceThinkers perform their
- * frameActions() and afterMovementActions(), a SpaceState moves each of its
+ * beforeMovementActions() and frameActions(), a SpaceState moves each of its
  * ThinkerObjects by the sum of its velocity and step multiplied by its time
  * factor, then resets its step to (0, 0). This, along with manual calls to the
  * ThinkerObject's doMovement() method, is when the ThinkerObject interacts with
@@ -670,10 +670,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     /**
-     * Returns the number of SpaceObjects that are currently assigned to this
-     * SpaceState.
-     * @return The number of SpaceObjects that are currently assigned to this
-     * SpaceState
+     * Returns the number of SpaceObjects that are assigned to this SpaceState.
+     * @return The number of SpaceObjects that are assigned to this SpaceState
      */
     public final int getNumObjects() {
         return spaceObjects.size();
@@ -731,9 +729,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     /**
      * Returns whether any Iterators over this SpaceState's list of SpaceObjects
-     * are currently in progress.
+     * are in progress.
      * @return Whether any Iterators over this SpaceState's list of SpaceObjects
-     * are currently in progress
+     * are in progress
      */
     public final boolean iteratingThroughObjects() {
         return objectIterators > 0;
@@ -1023,10 +1021,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     /**
-     * Returns the number of ThinkerObjects that are currently assigned to this
+     * Returns the number of ThinkerObjects that are assigned to this
      * SpaceState.
-     * @return The number of ThinkerObjects that are currently assigned to this
-     * SpaceState
+     * @return The number of ThinkerObjects that are assigned to this SpaceState
      */
     public final int getNumThinkerObjects() {
         return thinkerObjects.size();
@@ -1084,9 +1081,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     /**
      * Returns whether any Iterators over this SpaceState's list of
-     * ThinkerObjects are currently in progress.
+     * ThinkerObjects are in progress.
      * @return Whether any Iterators over this SpaceState's list of
-     * ThinkerObjects are currently in progress
+     * ThinkerObjects are in progress
      */
     public final boolean iteratingThroughThinkerObjects() {
         return thinkerObjectIterators > 0;
@@ -1910,10 +1907,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     /**
-     * Returns the number of SpaceLayers that are currently assigned to this
-     * SpaceState.
-     * @return The number of SpaceLayers that are currently assigned to this
-     * SpaceState
+     * Returns the number of SpaceLayers that are assigned to this SpaceState.
+     * @return The number of SpaceLayers that are assigned to this SpaceState
      */
     public final int getNumLayers() {
         return spaceLayers.size();
@@ -1977,8 +1972,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     /**
-     * Returns the HUD that is currently assigned to this SpaceState, or null if
-     * there is none.
+     * Returns the HUD that is assigned to this SpaceState, or null if there is
+     * none.
      * @return This SpaceState's HUD
      */
     public final HUD<T> getHUD() {
@@ -2006,10 +2001,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     /**
-     * Returns the number of Viewports that are currently assigned to this
-     * SpaceState.
-     * @return The number of Viewports that are currently assigned to this
-     * SpaceState
+     * Returns the number of Viewports that are assigned to this SpaceState.
+     * @return The number of Viewports that are assigned to this SpaceState
      */
     public final int getNumViewports() {
         return viewports.size();

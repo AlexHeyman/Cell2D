@@ -46,10 +46,8 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     private boolean updatingThinkerList = false;
     
     /**
-     * Returns the number of Thinkers that are currently assigned to this
-     * ThinkerGroup.
-     * @return The number of Thinkers that are currently assigned to this
-     * ThinkerGroup
+     * Returns the number of Thinkers that are assigned to this ThinkerGroup.
+     * @return The number of Thinkers that are assigned to this ThinkerGroup
      */
     public final int getNumThinkers() {
         return thinkers.size();
@@ -107,9 +105,9 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     
     /**
      * Returns whether any Iterators over this ThinkerGroup's list of Thinkers
-     * are currently in progress.
+     * are in progress.
      * @return Whether any Iterators over this ThinkerGroup's list of Thinkers
-     * are currently in progress
+     * are in progress
      */
     public final boolean iteratingThroughThinkers() {
         return thinkerIterators > 0;
@@ -286,7 +284,7 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     
     /**
      * Actions for this ThinkerGroup to take immediately after adding a Thinker
-     * to itself.
+     * to itself, before the Thinker takes its addedActions().
      * @param thinker The Thinker that was added
      */
     public void addThinkerActions(V thinker) {}
@@ -300,7 +298,7 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
     
     /**
      * Actions for this ThinkerGroup to take immediately before removing a
-     * Thinker from itself.
+     * Thinker from itself, after the Thinker takes its removedActions().
      * @param thinker The Thinker that is about to be removed
      */
     public void removeThinkerActions(V thinker) {}
