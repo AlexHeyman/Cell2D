@@ -133,9 +133,10 @@ public class SpriteSheet {
         spriteList = new Sprite[width*height];
         int i = 0;
         for (int x = 0; x < sprites.length; x++) {
-            for (int y = 0; y < sprites[x].length; y++) {
+            Sprite[] column = sprites[x];
+            for (int y = 0; y < column.length; y++) {
                 spriteList[i] = new Sprite(this);
-                sprites[x][y] = spriteList[i];
+                column[y] = spriteList[i];
                 i++;
             }
         }
@@ -186,8 +187,9 @@ public class SpriteSheet {
     private void loadFilter(Filter filter, Image image) {
         org.newdawn.slick.SpriteSheet spriteSheet = new org.newdawn.slick.SpriteSheet(image, spriteWidth, spriteHeight, spriteSpacing);
         for (int x = 0; x < sprites.length; x++) {
-            for (int y = 0; y < sprites[x].length; y++) {
-                sprites[x][y].loadFilter(filter, spriteSheet.getSubImage(x, y), null);
+            Sprite[] column = sprites[x];
+            for (int y = 0; y < column.length; y++) {
+                column[y].loadFilter(filter, spriteSheet.getSubImage(x, y), null);
             }
         }
     }
