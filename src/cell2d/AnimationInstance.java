@@ -216,6 +216,7 @@ public class AnimationInstance implements Drawable {
             }
             setIndex(level, frame, index, resetLowerIndices);
             indexChanges[level] = 0;
+            updateCurrentSprite();
         }
     }
     
