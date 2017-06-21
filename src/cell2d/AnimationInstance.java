@@ -192,11 +192,7 @@ public class AnimationInstance implements Drawable {
             }
         }
         indices[level] = index;
-        long duration = frame.getFrameDuration(index);
-        if (duration <= 0) {
-            indexChanges[level] = 0;
-        }
-        return duration;
+        return frame.getFrameDuration(index);
     }
     
     /**
@@ -304,6 +300,7 @@ public class AnimationInstance implements Drawable {
                             indexChanges[i] -= duration;
                             duration = setIndex(i, frame, indices[i] + 1, false);
                             if (duration <= 0) {
+                                indexChanges[i] = 0;
                                 break;
                             }
                         }
@@ -312,6 +309,7 @@ public class AnimationInstance implements Drawable {
                             spriteChanged = true;
                             duration = setIndex(i, frame, indices[i] - 1, false);
                             if (duration <= 0) {
+                                indexChanges[i] = 0;
                                 break;
                             }
                             indexChanges[i] -= duration;
