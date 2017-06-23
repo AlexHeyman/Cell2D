@@ -105,7 +105,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     final Set<Direction> collisionDirections = EnumSet.noneOf(Direction.class);
     private final CellVector velocity = new CellVector();
     private final CellVector step = new CellVector();
-    CellVector displacement = new CellVector();
+    final CellVector displacement = new CellVector();
     
     /**
      * Creates a new ThinkerObject with the specified locator Hitbox.
@@ -828,7 +828,7 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
             collisions.clear();
             collisionDirections.clear();
             displacement.clear();
-            displacement = state.move(this, changeX, changeY);
+            displacement.setCoordinates(state.move(this, changeX, changeY));
         }
     }
     

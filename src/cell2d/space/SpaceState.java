@@ -3231,7 +3231,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             long dx = Frac.mul(objectTimeFactor, object.getVelocityX() + object.getStepX());
             long dy = Frac.mul(objectTimeFactor, object.getVelocityY() + object.getStepY());
             object.setStep(0, 0);
-            object.displacement = move(object, dx, dy);
+            object.displacement.setCoordinates(move(object, dx, dy));
         }
     }
     
