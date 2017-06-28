@@ -900,7 +900,7 @@ public abstract class CellGame {
     /**
      * Sets the number of frames that this CellGame executes per second to the
      * specified value.
-     * @param fps The value to which the number of frames per second will be set
+     * @param fps The new number of frames per second
      */
     public final void setFPS(int fps) {
         if (fps <= 0) {
@@ -915,7 +915,7 @@ public abstract class CellGame {
     
     /**
      * Returns the width in pixels of this CellGame's screen.
-     * @return The width in pixels of this CellGame's screen.
+     * @return The width in pixels of this CellGame's screen
      */
     public final int getScreenWidth() {
         return screenWidth;
@@ -924,7 +924,7 @@ public abstract class CellGame {
     /**
      * Sets the width in pixels of this CellGame's screen to the specified
      * value.
-     * @param screenWidth The value to which the screen width will be set
+     * @param screenWidth The new screen width
      */
     public final void setScreenWidth(int screenWidth) {
         if (screenWidth <= 0) {
@@ -945,7 +945,7 @@ public abstract class CellGame {
     /**
      * Sets the height in pixels of this CellGame's screen to the specified
      * value.
-     * @param screenHeight The value to which the screen height will be set
+     * @param screenHeight The new screen height
      */
     public final void setScreenHeight(int screenHeight) {
         if (screenHeight <= 0) {
@@ -967,7 +967,7 @@ public abstract class CellGame {
     /**
      * Sets the factor by which this CellGame's screen is scaled to make the
      * size of the program window to the specified value.
-     * @param scaleFactor The value to which the scale factor will be set
+     * @param scaleFactor The new screen scale factor
      */
     public final void setScaleFactor(double scaleFactor) {
         if (scaleFactor <= 0) {
