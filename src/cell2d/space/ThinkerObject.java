@@ -68,6 +68,16 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     private final SpaceThinker<T> thinker = new SpaceThinker<T>() {
         
         @Override
+        public final void addedActions(T game, SpaceState<T> state) {
+            ThinkerObject.this.addedActions(game, state);
+        }
+        
+        @Override
+        public final void removedActions(T game, SpaceState<T> state) {
+            ThinkerObject.this.removedActions(game, state);
+        }
+        
+        @Override
         public final void timeUnitActions(T game, SpaceState<T> state) {
             ThinkerObject.this.timeUnitActions(game, state);
         }
@@ -80,16 +90,6 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
         @Override
         public final void frameActions(T game, SpaceState<T> state) {
             ThinkerObject.this.frameActions(game, state);
-        }
-        
-        @Override
-        public final void addedActions(T game, SpaceState<T> state) {
-            ThinkerObject.this.addedActions(game, state);
-        }
-        
-        @Override
-        public final void removedActions(T game, SpaceState<T> state) {
-            ThinkerObject.this.removedActions(game, state);
         }
         
     };
@@ -309,6 +309,22 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
     }
     
     /**
+     * Actions for this ThinkerObject to take immediately after being added to a
+     * new SpaceState.
+     * @param game This ThinkerObject's SpaceState's CellGame
+     * @param state This ThinkerObject's SpaceState
+     */
+    public void addedActions(T game, SpaceState<T> state) {}
+    
+    /**
+     * Actions for this ThinkerObject to take immediately before being removed
+     * from its current SpaceState.
+     * @param game This ThinkerObject's SpaceState's CellGame
+     * @param state This ThinkerObject's SpaceState
+     */
+    public void removedActions(T game, SpaceState<T> state) {}
+    
+    /**
      * Actions for this ThinkerObject to take once every time unit, after
      * AnimationInstances update their indices but before SpaceThinkers take
      * their beforeMovementActions().
@@ -333,22 +349,6 @@ public abstract class ThinkerObject<T extends CellGame> extends SpaceObject<T> {
      * @param state This ThinkerObject's SpaceState
      */
     public void frameActions(T game, SpaceState<T> state) {}
-    
-    /**
-     * Actions for this ThinkerObject to take immediately after being added to a
-     * new SpaceState.
-     * @param game This ThinkerObject's SpaceState's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void addedActions(T game, SpaceState<T> state) {}
-    
-    /**
-     * Actions for this ThinkerObject to take immediately before being removed
-     * from its current SpaceState.
-     * @param game This ThinkerObject's SpaceState's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void removedActions(T game, SpaceState<T> state) {}
     
     /**
      * Returns this ThinkerObject's movement priority.

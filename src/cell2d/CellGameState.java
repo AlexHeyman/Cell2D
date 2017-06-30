@@ -283,6 +283,18 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
         IDInstances.clear();
     }
     
+    /**
+     * Actions for this CellGameState to take immediately after being entered.
+     * @param game This CellGameState's CellGame
+     */
+    public void enteredActions(T game) {}
+    
+    /**
+     * Actions for this CellGameState to take immediately before being exited.
+     * @param game This CellGameState's CellGame
+     */
+    public void leftActions(T game) {}
+    
     @Override
     public final void addThinkerActions(V thinker) {
         thinker.setGameAndState(game, thisState);
@@ -349,18 +361,6 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * Graphics context
      */
     public void renderActions(T game, Graphics g, int x1, int y1, int x2, int y2) {}
-    
-    /**
-     * Actions for this CellGameState to take immediately after being entered.
-     * @param game This CellGameState's CellGame
-     */
-    public void enteredActions(T game) {}
-    
-    /**
-     * Actions for this CellGameState to take immediately before being exited.
-     * @param game This CellGameState's CellGame
-     */
-    public void leftActions(T game) {}
     
     /**
      * Actions for this CellGameState to take immediately after its CellGame

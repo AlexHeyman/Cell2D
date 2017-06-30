@@ -250,6 +250,33 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
         }
     }
     
+    final void added() {
+        addedActions(game, state);
+    }
+    
+    /**
+     * Actions for this Thinker to take after being added to a new ThinkerGroup,
+     * immediately after the ThinkerGroup takes its addThinkerActions().
+     * @param game This Thinker's CellGameState's CellGame, or null if it has no
+     * CellGameState
+     * @param state This Thinker's CellGameState, or null if it has none
+     */
+    public void addedActions(T game, U state) {}
+    
+    final void removed() {
+        removedActions(game, state);
+    }
+    
+    /**
+     * Actions for this Thinker to take before being removed from its current
+     * ThinkerGroup, immediately before the ThinkerGroup takes its
+     * removeThinkerActions().
+     * @param game This Thinker's CellGameState's CellGame, or null if it has no
+     * CellGameState
+     * @param state This Thinker's CellGameState, or null if it has none
+     */
+    public void removedActions(T game, U state) {}
+    
     private void timeUnit() {
         if (!timers.isEmpty()) {
             List<TimedEvent> timedEventsToDo = new ArrayList<>();
@@ -306,33 +333,6 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
      * @param state This Thinker's CellGameState
      */
     public void frameActions(T game, U state) {}
-    
-    final void added() {
-        addedActions(game, state);
-    }
-    
-    /**
-     * Actions for this Thinker to take after being added to a new ThinkerGroup,
-     * immediately after the ThinkerGroup takes its addThinkerActions().
-     * @param game This Thinker's CellGameState's CellGame, or null if it has no
-     * CellGameState
-     * @param state This Thinker's CellGameState, or null if it has none
-     */
-    public void addedActions(T game, U state) {}
-    
-    final void removed() {
-        removedActions(game, state);
-    }
-    
-    /**
-     * Actions for this Thinker to take before being removed from its current
-     * ThinkerGroup, immediately before the ThinkerGroup takes its
-     * removeThinkerActions().
-     * @param game This Thinker's CellGameState's CellGame, or null if it has no
-     * CellGameState
-     * @param state This Thinker's CellGameState, or null if it has none
-     */
-    public void removedActions(T game, U state) {}
     
     @Override
     public final void addThinkerActions(V thinker) {
