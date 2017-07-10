@@ -305,12 +305,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             return nextCell != null;
         }
         
         @Override
-        public Cell next() {
+        public final Cell next() {
             Cell next = nextCell;
             advance();
             return next;
@@ -330,12 +330,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             return yPos <= cellRange[3];
         }
         
         @Override
-        public Cell next() {
+        public final Cell next() {
             Cell next = getCell(new Point(xPos, yPos));
             if (xPos == cellRange[2]) {
                 xPos = cellRange[0];
