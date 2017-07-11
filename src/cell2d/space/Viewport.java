@@ -31,7 +31,7 @@ import cell2d.Frac;
  */
 public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     
-    private SpaceObject camera = null;
+    private SpaceObject<T> camera = null;
     private HUD<T> hud = null;
     private long x1, y1, x2, y2;
     int roundX1, roundY1, roundX2, roundY2, left, right, top, bottom;
@@ -80,7 +80,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * Returns this Viewport's camera, or null if it has none.
      * @return This Viewport's camera
      */
-    public final SpaceObject getCamera() {
+    public final SpaceObject<T> getCamera() {
         return camera;
     }
     
@@ -89,7 +89,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * the specified SpaceObject is null.
      * @param camera The new camera
      */
-    public final void setCamera(SpaceObject camera) {
+    public final void setCamera(SpaceObject<T> camera) {
         this.camera = camera;
     }
     
