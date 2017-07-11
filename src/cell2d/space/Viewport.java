@@ -284,6 +284,42 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
+     * Returns the difference of the x-coordinates in pixels of this Viewport's
+     * left edge and the position of its camera on the screen.
+     * @return This Viewport's left-side difference
+     */
+    public final int getLeft() {
+        return left;
+    }
+    
+    /**
+     * Returns the difference of the x-coordinates in pixels of this Viewport's
+     * right edge and the position of its camera on the screen.
+     * @return This Viewport's right-side difference
+     */
+    public final int getRight() {
+        return right;
+    }
+    
+    /**
+     * Returns the difference of the y-coordinates in pixels of this Viewport's
+     * top edge and the position of its camera on the screen.
+     * @return This Viewport's top-side difference
+     */
+    public final int getTop() {
+        return top;
+    }
+    
+    /**
+     * Returns the difference of the y-coordinates in pixels of this Viewport's
+     * bottom edge and the position of its camera on the screen.
+     * @return This Viewport's bottom-side difference
+     */
+    public final int getBottom() {
+        return bottom;
+    }
+    
+    /**
      * Returns whether any part of the specified rectangular region is visible
      * through this Viewport.
      * @param x1 The x-coordinate of the region's left edge
