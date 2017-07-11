@@ -123,19 +123,19 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
-     * Returns the x-coordinate in pixels of this Viewport's left edge on the
+     * Returns the x-coordinate in fracunits of this Viewport's left edge on the
      * screen.
-     * @return The x-coordinate in pixels of this Viewport's left edge
+     * @return The x-coordinate in fracunits of this Viewport's left edge
      */
     public final long getX1() {
         return x1;
     }
     
     /**
-     * Sets the x-coordinate in pixels of this Viewport's left edge on the
+     * Sets the x-coordinate in fracunits of this Viewport's left edge on the
      * screen to the specified value, if doing so would not cause this
      * Viewport's width to be negative.
-     * @param x1 The new x-coordinate in pixels of this Viewport's left edge
+     * @param x1 The new x-coordinate in fracunits of this Viewport's left edge
      * @return Whether the change occurred
      */
     public final boolean setX1(long x1) {
@@ -149,19 +149,19 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
-     * Returns the y-coordinate in pixels of this Viewport's top edge on the
+     * Returns the y-coordinate in fracunits of this Viewport's top edge on the
      * screen.
-     * @return The y-coordinate in pixels of this Viewport's top edge
+     * @return The y-coordinate in fracunits of this Viewport's top edge
      */
     public final long getY1() {
         return y1;
     }
     
     /**
-     * Sets the y-coordinate in pixels of this Viewport's top edge on the screen
-     * to the specified value, if doing so would not cause this Viewport's
-     * height to be negative.
-     * @param y1 The new y-coordinate in pixels of this Viewport's top edge
+     * Sets the y-coordinate in fracunits of this Viewport's top edge on the
+     * screen to the specified value, if doing so would not cause this
+     * Viewport's height to be negative.
+     * @param y1 The new y-coordinate in fracunits of this Viewport's top edge
      * @return Whether the change occurred
      */
     public final boolean setY1(long y1) {
@@ -175,19 +175,19 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
-     * Returns the x-coordinate in pixels of this Viewport's right edge on the
-     * screen.
-     * @return The x-coordinate in pixels of this Viewport's right edge
+     * Returns the x-coordinate in fracunits of this Viewport's right edge on
+     * the screen.
+     * @return The x-coordinate in fracunits of this Viewport's right edge
      */
     public final long getX2() {
         return x2;
     }
     
     /**
-     * Sets the x-coordinate in pixels of this Viewport's right edge on the
+     * Sets the x-coordinate in fracunits of this Viewport's right edge on the
      * screen to the specified value, if doing so would not cause this
      * Viewport's width to be negative.
-     * @param x2 The new x-coordinate in pixels of this Viewport's right edge
+     * @param x2 The new x-coordinate in fracunits of this Viewport's right edge
      * @return Whether the change occurred
      */
     public final boolean setX2(long x2) {
@@ -201,19 +201,20 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
-     * Returns the y-coordinate in pixels of this Viewport's bottom edge on the
-     * screen.
-     * @return The y-coordinate in pixels of this Viewport's bottom edge
+     * Returns the y-coordinate in fracunits of this Viewport's bottom edge on
+     * the screen.
+     * @return The y-coordinate in fracunits of this Viewport's bottom edge
      */
     public final long getY2() {
         return y2;
     }
     
     /**
-     * Sets the y-coordinate in pixels of this Viewport's bottom edge on the
+     * Sets the y-coordinate in fracunits of this Viewport's bottom edge on the
      * screen to the specified value, if doing so would not cause this
      * Viewport's height to be negative.
-     * @param y2 The new y-coordinate in pixels of this Viewport's bottom edge
+     * @param y2 The new y-coordinate in fracunits of this Viewport's bottom
+     * edge
      * @return Whether the change occurred
      */
     public final boolean setY2(long y2) {
@@ -227,19 +228,19 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
-     * Returns this Viewport's width in pixels on the screen.
-     * @return This Viewport's width in pixels
+     * Returns this Viewport's width in fracunits on the screen.
+     * @return This Viewport's width in fracunits
      */
     public final long getWidth() {
-        return right - left;
+        return x2 - x1;
     }
     
     /**
-     * Returns this Viewport's height in pixels on the screen.
-     * @return This Viewport's height in pixels
+     * Returns this Viewport's height in fracunits on the screen.
+     * @return This Viewport's height in fracunits
      */
     public final long getHeight() {
-        return bottom - top;
+        return y2 - y1;
     }
     
     /**
@@ -249,7 +250,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual left edge
      */
     public final int getLeftEdge() {
-        return Frac.toInt(camera.getCenterX()) + left;
+        return roundX1;
     }
     
     /**
@@ -259,7 +260,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual right edge
      */
     public final int getRightEdge() {
-        return Frac.toInt(camera.getCenterX()) + right;
+        return roundX2;
     }
     
     /**
@@ -269,7 +270,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual top edge
      */
     public final int getTopEdge() {
-        return Frac.toInt(camera.getCenterY()) + top;
+        return roundY1;
     }
     
     /**
@@ -279,7 +280,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * actual bottom edge
      */
     public final int getBottomEdge() {
-        return Frac.toInt(camera.getCenterY()) + bottom;
+        return roundY2;
     }
     
     /**
