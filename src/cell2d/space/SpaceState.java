@@ -665,7 +665,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     @Override
-    public final void updateThinkerListActions() {
+    public void updateThinkerListActions() {
         updateObjectList();
     }
     
@@ -3214,7 +3214,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     @Override
-    public final void frameActions(T game) {
+    public void frameActions(T game) {
         Iterator<SpaceThinker<T>> thinkerIterator = thinkerIterator();
         while (thinkerIterator.hasNext()) {
             thinkerIterator.next().beforeMovement();
