@@ -6,7 +6,7 @@ import cell2d.Frac;
 /**
  * <p>A Viewport is a SpaceThinker that represents a rectangular region of the
  * screen through which the space of the SpaceState to which it is assigned can
- * be viewed. The center of a Viewport's rectangular field of view in its
+ * be viewed. The center of a Viewport's rectangular field of view in a
  * SpaceState is marked by a SpaceObject called the Viewport's camera. To render
  * any visuals, including its HUD if it has one, a Viewport must be assigned to
  * a SpaceState through its setViewport() method. To render the region of its
@@ -244,46 +244,6 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
-     * Returns the x-coordinate in pixels of this Viewport's rendering region's
-     * actual left edge on the screen.
-     * @return The x-coordinate in pixels of this Viewport's rendering region's
-     * actual left edge
-     */
-    public final int getLeftEdge() {
-        return roundX1;
-    }
-    
-    /**
-     * Returns the x-coordinate in pixels of this Viewport's rendering region's
-     * actual right edge on the screen.
-     * @return The x-coordinate in pixels of this Viewport's rendering region's
-     * actual right edge
-     */
-    public final int getRightEdge() {
-        return roundX2;
-    }
-    
-    /**
-     * Returns the y-coordinate in pixels of this Viewport's rendering region's
-     * actual top edge on the screen.
-     * @return The y-coordinate in pixels of this Viewport's rendering region's
-     * actual top edge
-     */
-    public final int getTopEdge() {
-        return roundY1;
-    }
-    
-    /**
-     * Returns the y-coordinate in pixels of this Viewport's rendering region's
-     * actual bottom edge on the screen.
-     * @return The y-coordinate in pixels of this Viewport's rendering region's
-     * actual bottom edge
-     */
-    public final int getBottomEdge() {
-        return roundY2;
-    }
-    
-    /**
      * Returns the difference of the x-coordinates in pixels of this Viewport's
      * left edge and the position of its camera on the screen.
      * @return This Viewport's left-side difference
@@ -317,6 +277,46 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      */
     public final int getBottom() {
         return bottom;
+    }
+    
+    /**
+     * Returns the x-coordinate of the left edge of this Viewport's field of
+     * view in a SpaceState.
+     * @return The x-coordinate of this Viewport's field of view's left edge
+     * @throws NullPointerException If this Viewport has no camera
+     */
+    public final long getLeftEdge() throws NullPointerException {
+        return (Frac.toInt(camera.getCenterX()) + left)*Frac.UNIT;
+    }
+    
+    /**
+     * Returns the x-coordinate of the right edge of this Viewport's field of
+     * view in a SpaceState.
+     * @return The x-coordinate of this Viewport's field of view's right edge
+     * @throws NullPointerException If this Viewport has no camera
+     */
+    public final long getRightEdge() throws NullPointerException {
+        return (Frac.toInt(camera.getCenterX()) + right)*Frac.UNIT;
+    }
+    
+    /**
+     * Returns the y-coordinate of the top edge of this Viewport's field of view
+     * in a SpaceState.
+     * @return The y-coordinate of this Viewport's field of view's top edge
+     * @throws NullPointerException If this Viewport has no camera
+     */
+    public final long getTopEdge() throws NullPointerException {
+        return (Frac.toInt(camera.getCenterY()) + top)*Frac.UNIT;
+    }
+    
+    /**
+     * Returns the y-coordinate of the bottom edge of this Viewport's field of
+     * view in a SpaceState.
+     * @return The y-coordinate of this Viewport's field of view's bottom edge
+     * @throws NullPointerException If this Viewport has no camera
+     */
+    public final long getBottomEdge() throws NullPointerException {
+        return (Frac.toInt(camera.getCenterY()) + bottom)*Frac.UNIT;
     }
     
     /**
