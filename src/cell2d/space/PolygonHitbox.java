@@ -272,7 +272,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param index The index at which to add the new relative vertex
      * @param relVertex The new relative vertex
      */
-    public final void addRelVertex(int index, CellVector relVertex) {
+    public final void addVertex(int index, CellVector relVertex) {
         vertices.add(index, new RelAbsPair(new CellVector(relVertex), null));
         updateData();
     }
@@ -284,7 +284,7 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * @param relX The x-coordinate of the new relative vertex
      * @param relY The y-coordinate of the new relative vertex
      */
-    public final void addRelVertex(int index, long relX, long relY) {
+    public final void addVertex(int index, long relX, long relY) {
         vertices.add(index, new RelAbsPair(new CellVector(relX, relY), null));
         updateData();
     }
