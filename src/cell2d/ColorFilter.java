@@ -4,11 +4,13 @@ import java.awt.image.BufferedImage;
 import org.newdawn.slick.Color;
 
 /**
- * <p>A ColorFilter is a Filter that replaces the RGB value of every pixel in
- * the original image with that of the one Color that it uses, thus turning the
- * filtered image into a colored silhouette. The alpha value of the
- * ColorFilter's Color is irrelevant to its behavior, and the alpha values of
- * the original image's pixels are left unchanged in the filtered image.</p>
+ * <p>A ColorFilter is a Filter that blends the RGB value of each pixel in the
+ * original image with that of a single Color that it uses. The alpha value of
+ * the ColorFilter's Color is proportional to the strength of its influence on
+ * the filtered image's RGB values. An alpha value of 0 has no effect, and an
+ * alpha value of 255 completely replaces the original image's RGB values, thus
+ * turning the filtered image into a colored silhouette. The alpha values of the
+ * original image's pixels are left unchanged in the filtered image.</p>
  * @author Andrew Heyman
  */
 public class ColorFilter extends Filter {
@@ -21,6 +23,18 @@ public class ColorFilter extends Filter {
      */
     public ColorFilter(Color color) {
         this.color = color;
+    }
+    
+    /**
+     * Creates a new ColorFilter that uses a Color with the specified RGBA
+     * value.
+     * @param colorR The R value (0-255) of the used Color
+     * @param colorG The G value (0-255) of the used Color
+     * @param colorB The B value (0-255) of the used Color
+     * @param colorA The alpha value (0-255) of the used Color
+     */
+    public ColorFilter(int colorR, int colorG, int colorB, int colorA) {
+        this(new Color(colorR, colorG, colorB, colorA));
     }
     
     /**
