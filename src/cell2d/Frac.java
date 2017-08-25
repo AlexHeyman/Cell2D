@@ -50,7 +50,7 @@ public class Frac {
      * the nearest fracunit, as an <code>int</code>
      */
     public static final int toInt(long a) {
-        return (int)(Frac.round(a) >> Frac.BITS);
+        return (int)(round(a) >> BITS);
     }
     
     /**
@@ -100,8 +100,8 @@ public class Frac {
      * @return The number rounded to the nearest fracunit
      */
     public static final long round(long a) {
-        long diff = a & (Frac.UNIT - 1);
-        return (diff < Frac.UNIT/2 ? a - diff : a + Frac.UNIT - diff);
+        long diff = a & (UNIT - 1);
+        return (diff < UNIT/2 ? a - diff : a + UNIT - diff);
     }
     
 }
