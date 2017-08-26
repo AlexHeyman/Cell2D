@@ -1,5 +1,6 @@
 package cell2d;
 
+import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -771,6 +772,16 @@ public abstract class CellGame {
         return commandStates[command] == CommandState.RELEASED
                 || commandStates[command] == CommandState.TAPPED
                 || commandStates[command] == CommandState.UNTAPPED;
+    }
+    
+    /**
+     * Returns the position in pixels of the mouse cursor on this CellGame's
+     * screen.
+     * @return The position in pixels of the mouse cursor on this CellGame's
+     * screen
+     */
+    public final Point getMousePosition() {
+        return new Point(adjustedMouseX, adjustedMouseY);
     }
     
     /**

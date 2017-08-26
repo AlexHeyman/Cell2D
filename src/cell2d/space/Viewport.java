@@ -1,7 +1,9 @@
 package cell2d.space;
 
 import cell2d.CellGame;
+import cell2d.CellVector;
 import cell2d.Frac;
+import java.awt.Point;
 
 /**
  * <p>A Viewport is a SpaceThinker that represents a rectangular region of the
@@ -317,6 +319,28 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      */
     public final long getBottomEdge() throws NullPointerException {
         return (Frac.toInt(camera.getCenterY()) + bottom)*Frac.UNIT;
+    }
+    
+    /**
+     * Returns the point on the screen that corresponds to the specified point
+     * in a SpaceState as seen through this Viewport, or null if the specified
+     * point is not visible through this Viewport.
+     * @param spacePoint The SpaceState point
+     * @return The screen point that corresponds to the specified SpaceState
+     * point as seen through this Viewport
+     */
+    public final Point getScreenPoint(CellVector spacePoint) {
+        if (camera == null) {
+            return null;
+        }
+        int x = Frac.toInt(spacePoint.getX());
+        int y = Frac.toInt(spacePoint.getY());
+        int centerX = Frac.toInt(camera.getCenterX());
+        int centerY = Frac.toInt(camera.getCenterY());
+        if (x < centerX + left || x > centerX + right || y < centerY + top || y > centerY + bottom) {
+            return null;
+        }
+        return new Point(x + roundX1 - centerX - left, y + roundY1 - centerY - top);
     }
     
     /**
