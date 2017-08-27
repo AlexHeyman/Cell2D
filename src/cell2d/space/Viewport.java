@@ -288,7 +288,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getLeftEdge() throws NullPointerException {
-        return (Frac.toInt(camera.getCenterX()) + left)*Frac.UNIT;
+        return ((long)Frac.toInt(camera.getCenterX()) + left) << Frac.BITS;
     }
     
     /**
@@ -298,7 +298,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getRightEdge() throws NullPointerException {
-        return (Frac.toInt(camera.getCenterX()) + right)*Frac.UNIT;
+        return ((long)Frac.toInt(camera.getCenterX()) + right) << Frac.BITS;
     }
     
     /**
@@ -308,7 +308,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getTopEdge() throws NullPointerException {
-        return (Frac.toInt(camera.getCenterY()) + top)*Frac.UNIT;
+        return ((long)Frac.toInt(camera.getCenterY()) + top) << Frac.BITS;
     }
     
     /**
@@ -318,47 +318,67 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getBottomEdge() throws NullPointerException {
-        return (Frac.toInt(camera.getCenterY()) + bottom)*Frac.UNIT;
+        return ((long)Frac.toInt(camera.getCenterY()) + bottom) << Frac.BITS;
     }
     
     /**
-     * Returns the point on the screen that corresponds to the specified point
-     * in a SpaceState as seen through this Viewport, or null if the specified
-     * point is not visible through this Viewport.
+     * Returns the point in pixels on the screen that corresponds to the
+     * specified point in a SpaceState as seen through this Viewport. If the
+     * specified point is not visible through this Viewport, this method will
+     * return null.
      * @param spacePoint The SpaceState point
      * @return The screen point that corresponds to the specified SpaceState
      * point as seen through this Viewport
      */
     public final Point getScreenPoint(CellVector spacePoint) {
-        if (camera == null) {
-            return null;
+        if (camera != null) {
+            int x = Frac.intFloor(spacePoint.getX());
+            int y = Frac.intFloor(spacePoint.getY());
+            int centerX = Frac.toInt(camera.getCenterX());
+            int centerY = Frac.toInt(camera.getCenterY());
+            if (x >= centerX + left && x < centerX + right && y >= centerY + top && y < centerY + bottom) {
+                return new Point(x + roundX1 - centerX - left, y + roundY1 - centerY - top);
+            }
         }
-        int x = Frac.toInt(spacePoint.getX());
-        int y = Frac.toInt(spacePoint.getY());
-        int centerX = Frac.toInt(camera.getCenterX());
-        int centerY = Frac.toInt(camera.getCenterY());
-        if (x < centerX + left || x > centerX + right || y < centerY + top || y > centerY + bottom) {
-            return null;
-        }
-        return new Point(x + roundX1 - centerX - left, y + roundY1 - centerY - top);
+        return null;
     }
     
     /**
-     * Returns whether any part of the specified rectangular region is visible
-     * through this Viewport.
+     * Returns the point in a SpaceState, as seen through this Viewport, that
+     * corresponds to the specified point in pixels in this Viewport's on-screen
+     * rendering region. If the specified point is not in this Viewport's
+     * rendering region or this Viewport has no camera, this method will return
+     * null.
+     * @param screenPoint The screen point
+     * @return The SpaceState point that corresponds to the specified screen
+     * point
+     */
+    public final CellVector getSpacePoint(Point screenPoint) {
+        int x = (int)screenPoint.getX();
+        int y = (int)screenPoint.getY();
+        if (camera != null && x >= roundX1 && x < roundX2 && y >= roundY1 && y < roundY2) {
+            return new CellVector(getLeftEdge() + (long)(x - roundX1) << Frac.BITS,
+                    getTopEdge() + (long)(y - roundY1) << Frac.BITS);
+        }
+        return null;
+    }
+    
+    /**
+     * Returns whether any part of the specified rectangular region of a
+     * SpaceState's space is visible through this Viewport.
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
-     * @return Whether the specified rectangular region is visible through this
-     * Viewport
+     * @return Whether the specified rectangular region of a SpaceState's space
+     * is visible through this Viewport
      */
     public final boolean rectangleIsVisible(long x1, long y1, long x2, long y2) {
-        if (camera != null && camera.newState == getNewThinkerGroup()) {
+        if (camera != null) {
             int centerX = Frac.toInt(camera.getCenterX());
             int centerY = Frac.toInt(camera.getCenterY());
-            return Frac.toInt(x1) < centerX + right && Frac.toInt(x2) > centerX + left
-                    && Frac.toInt(y1) < centerY + bottom && Frac.toInt(y2) > centerY + top;
+            return Frac.intFloor(x1) < centerX + right && Frac.intCeil(x2) > centerX + left
+                    && Frac.intFloor(y1) < centerY + bottom && Frac.intCeil(y2) > centerY + top;
         }
         return false;
     }

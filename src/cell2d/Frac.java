@@ -104,4 +104,46 @@ public class Frac {
         return (diff < UNIT/2 ? a - diff : a + UNIT - diff);
     }
     
+    /**
+     * Returns the smallest fracunit-scale integer that is greater than or equal
+     * to the specified fracunit-scale number.
+     * @param a The number
+     * @return The smallest fracunit-scale integer that is greater than or equal
+     * to the number
+     */
+    public static final long ceil(long a) {
+        return -((-a >> BITS) << BITS);
+    }
+    
+    /**
+     * Returns the smallest integer that is greater than or equal to the
+     * specified fracunit-scale number.
+     * @param a The number
+     * @return The smallest integer that is greater than or equal to the number
+     */
+    public static final int intCeil(long a) {
+        return (int)(-(-a >> BITS));
+    }
+    
+    /**
+     * Returns the largest fracunit-scale integer that is less than or equal to
+     * the specified fracunit-scale number.
+     * @param a The number
+     * @return The largest fracunit-scale integer that is less than or equal to
+     * the number
+     */
+    public static final long floor(long a) {
+        return (a >> BITS) << BITS;
+    }
+    
+    /**
+     * Returns the largest integer that is less than or equal to the specified
+     * fracunit-scale number.
+     * @param a The number
+     * @return The largest integer that is less than or equal to the number
+     */
+    public static final int intFloor(long a) {
+        return (int)(a >> BITS);
+    }
+    
 }

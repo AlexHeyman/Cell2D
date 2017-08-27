@@ -376,7 +376,7 @@ public class Sprite implements Animatable, Drawable {
             right += originX;
             top += originY;
             bottom += originY;
-            CellVector vector = new CellVector(left*Frac.UNIT, top*Frac.UNIT).changeAngle(angle);
+            CellVector vector = new CellVector((long)left << Frac.BITS, (long)top << Frac.BITS).changeAngle(angle);
             draw(g, x + Frac.toInt(vector.getX()), y + Frac.toInt(vector.getY()),
                     left, right, top, bottom, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
         }

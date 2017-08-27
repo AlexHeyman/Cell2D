@@ -2063,26 +2063,50 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     /**
-     * Returns whether any part of the specified rectangular region is visible
-     * through any of this SpaceState's Viewports.
+     * Returns the point in this SpaceState, as seen through one of its
+     * Viewports, that corresponds to the specified point in pixels on the
+     * screen. If the specified point is not in the rendering region of one of
+     * this SpaceState's Viewports with its camera in this SpaceState, this
+     * method will return null.
+     * @param screenPoint The screen point
+     * @return The SpaceState point that corresponds to the specified screen
+     * point
+     */
+    public final CellVector getSpacePoint(Point screenPoint) {
+        int x = (int)screenPoint.getX();
+        int y = (int)screenPoint.getY();
+        for (Viewport viewport : viewports.values()) {
+            if (viewport.getCamera() != null && viewport.getCamera().newState == this
+                    && x >= viewport.roundX1 && x < viewport.roundX2
+                    && y >= viewport.roundY1 && y < viewport.roundY2) {
+                return new CellVector(viewport.getLeftEdge() + (long)(x - viewport.roundX1) << Frac.BITS,
+                        viewport.getTopEdge() + (long)(y - viewport.roundY1) << Frac.BITS);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Returns whether any part of the specified rectangular region of this
+     * SpaceState's space is visible through any of its Viewports.
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
      * @param y2 The y-coordinate of the region's bottom edge
-     * @return Whether the specified rectangular region is visible through any
-     * of this SpaceState's Viewports
+     * @return Whether the specified rectangular region of this SpaceState's
+     * space is visible through any of its Viewports
      */
     public final boolean rectangleIsVisible(long x1, long y1, long x2, long y2) {
-        x1 = Frac.round(x1);
-        y1 = Frac.round(y1);
-        x2 = Frac.round(x2);
-        y2 = Frac.round(y2);
+        int rx1 = Frac.intFloor(x1);
+        int ry1 = Frac.intFloor(y1);
+        int rx2 = Frac.intCeil(x2);
+        int ry2 = Frac.intCeil(y2);
         for (Viewport viewport : viewports.values()) {
             if (viewport.getCamera() != null && viewport.getCamera().newState == this) {
-                long centerX = Frac.round(viewport.getCamera().getCenterX());
-                long centerY = Frac.round(viewport.getCamera().getCenterY());
-                if (x1 < centerX + viewport.right && x2 > centerX + viewport.left
-                        && y1 < centerY + viewport.bottom && y2 > centerY + viewport.top) {
+                int centerX = Frac.toInt(viewport.getCamera().getCenterX());
+                int centerY = Frac.toInt(viewport.getCamera().getCenterY());
+                if (rx1 < centerX + viewport.right && rx2 > centerX + viewport.left
+                        && ry1 < centerY + viewport.bottom && ry2 > centerY + viewport.top) {
                     return true;
                 }
             }
@@ -3263,14 +3287,15 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     int bottom = ry + viewport.bottom;
                     int xOffset = vx1 - left;
                     int yOffset = vy1 - top;
-                    int[] cellRange = getCellRangeExclusive(left*Frac.UNIT, top*Frac.UNIT, right*Frac.UNIT, bottom*Frac.UNIT);
+                    int[] cellRange = getCellRangeExclusive((long)left << Frac.BITS, (long)top << Frac.BITS,
+                            (long)right << Frac.BITS, (long)bottom << Frac.BITS);
                     if (drawMode == DrawMode.FLAT) {
                         if (cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
                             for (Hitbox<T> locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).locatorHitboxes) {
-                                if (Frac.toInt(locatorHitbox.getLeftEdge()) < right
-                                        && Frac.toInt(locatorHitbox.getRightEdge()) > left
-                                        && Frac.toInt(locatorHitbox.getTopEdge()) < bottom
-                                        && Frac.toInt(locatorHitbox.getBottomEdge()) > top) {
+                                if (Frac.intFloor(locatorHitbox.getLeftEdge()) < right
+                                        && Frac.intCeil(locatorHitbox.getRightEdge()) > left
+                                        && Frac.intFloor(locatorHitbox.getTopEdge()) < bottom
+                                        && Frac.intCeil(locatorHitbox.getBottomEdge()) > top) {
                                     locatorHitbox.getObject().draw(g,
                                             Frac.toInt(locatorHitbox.getAbsX()) + xOffset,
                                             Frac.toInt(locatorHitbox.getAbsY()) + yOffset,
@@ -3292,10 +3317,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 while (hitbox1 != null || hitbox2 != null) {
                                     if (hitbox1 == null) {
                                         do {
-                                            if (Frac.toInt(hitbox2.getLeftEdge()) < right
-                                                    && Frac.toInt(hitbox2.getRightEdge()) > left
-                                                    && Frac.toInt(hitbox2.getTopEdge()) < bottom
-                                                    && Frac.toInt(hitbox2.getBottomEdge()) > top) {
+                                            if (Frac.intFloor(hitbox2.getLeftEdge()) < right
+                                                    && Frac.intCeil(hitbox2.getRightEdge()) > left
+                                                    && Frac.intFloor(hitbox2.getTopEdge()) < bottom
+                                                    && Frac.intCeil(hitbox2.getBottomEdge()) > top) {
                                                 hitbox2.getObject().draw(g,
                                                         Frac.toInt(hitbox2.getAbsX()) + xOffset,
                                                         Frac.toInt(hitbox2.getAbsY()) + yOffset,
@@ -3306,10 +3331,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         break;
                                     } else if (hitbox2 == null) {
                                         do {
-                                            if (Frac.toInt(hitbox1.getLeftEdge()) < right
-                                                    && Frac.toInt(hitbox1.getRightEdge()) > left
-                                                    && Frac.toInt(hitbox1.getTopEdge()) < bottom
-                                                    && Frac.toInt(hitbox1.getBottomEdge()) > top) {
+                                            if (Frac.intFloor(hitbox1.getLeftEdge()) < right
+                                                    && Frac.intCeil(hitbox1.getRightEdge()) > left
+                                                    && Frac.intFloor(hitbox1.getTopEdge()) < bottom
+                                                    && Frac.intCeil(hitbox1.getBottomEdge()) > top) {
                                                 hitbox1.getObject().draw(g,
                                                         Frac.toInt(hitbox1.getAbsX()) + xOffset,
                                                         Frac.toInt(hitbox1.getAbsY()) + yOffset,
@@ -3321,10 +3346,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                     } else {
                                         if (drawPriorityComparator.compare(hitbox1, hitbox2) > 0) {
                                             if (hitbox1 != lastHitbox) {
-                                                if (Frac.toInt(hitbox1.getLeftEdge()) < right
-                                                        && Frac.toInt(hitbox1.getRightEdge()) > left
-                                                        && Frac.toInt(hitbox1.getTopEdge()) < bottom
-                                                        && Frac.toInt(hitbox1.getBottomEdge()) > top) {
+                                                if (Frac.intFloor(hitbox1.getLeftEdge()) < right
+                                                        && Frac.intCeil(hitbox1.getRightEdge()) > left
+                                                        && Frac.intFloor(hitbox1.getTopEdge()) < bottom
+                                                        && Frac.intCeil(hitbox1.getBottomEdge()) > top) {
                                                     hitbox1.getObject().draw(g,
                                                             Frac.toInt(hitbox1.getAbsX()) + xOffset,
                                                             Frac.toInt(hitbox1.getAbsY()) + yOffset,
@@ -3335,10 +3360,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                             hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
                                         } else {
                                             if (hitbox2 != lastHitbox) {
-                                                if (Frac.toInt(hitbox2.getLeftEdge()) < right
-                                                        && Frac.toInt(hitbox2.getRightEdge()) > left
-                                                        && Frac.toInt(hitbox2.getTopEdge()) < bottom
-                                                        && Frac.toInt(hitbox2.getBottomEdge()) > top) {
+                                                if (Frac.intFloor(hitbox2.getLeftEdge()) < right
+                                                        && Frac.intCeil(hitbox2.getRightEdge()) > left
+                                                        && Frac.intFloor(hitbox2.getTopEdge()) < bottom
+                                                        && Frac.intCeil(hitbox2.getBottomEdge()) > top) {
                                                     hitbox2.getObject().draw(g,
                                                             Frac.toInt(hitbox2.getAbsX()) + xOffset,
                                                             Frac.toInt(hitbox2.getAbsY()) + yOffset,
@@ -3363,10 +3388,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                     Pair<Hitbox<T>,Iterator<Hitbox<T>>> pair = queue.poll();
                                     Hitbox<T> locatorHitbox = pair.getKey();
                                     if (locatorHitbox != lastHitbox) {
-                                        if (Frac.toInt(locatorHitbox.getLeftEdge()) < right
-                                                && Frac.toInt(locatorHitbox.getRightEdge()) > left
-                                                && Frac.toInt(locatorHitbox.getTopEdge()) < bottom
-                                                && Frac.toInt(locatorHitbox.getBottomEdge()) > top) {
+                                        if (Frac.intFloor(locatorHitbox.getLeftEdge()) < right
+                                                && Frac.intCeil(locatorHitbox.getRightEdge()) > left
+                                                && Frac.intFloor(locatorHitbox.getTopEdge()) < bottom
+                                                && Frac.intCeil(locatorHitbox.getBottomEdge()) > top) {
                                             locatorHitbox.getObject().draw(g,
                                                     Frac.toInt(locatorHitbox.getAbsX()) + xOffset,
                                                     Frac.toInt(locatorHitbox.getAbsY()) + yOffset,
@@ -3390,10 +3415,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                         for (Hitbox<T> locatorHitbox : toDraw) {
-                            if (Frac.toInt(locatorHitbox.getLeftEdge()) < right
-                                    && Frac.toInt(locatorHitbox.getRightEdge()) > left
-                                    && Frac.toInt(locatorHitbox.getTopEdge()) < bottom
-                                    && Frac.toInt(locatorHitbox.getBottomEdge()) > top) {
+                            if (Frac.intFloor(locatorHitbox.getLeftEdge()) < right
+                                    && Frac.intCeil(locatorHitbox.getRightEdge()) > left
+                                    && Frac.intFloor(locatorHitbox.getTopEdge()) < bottom
+                                    && Frac.intCeil(locatorHitbox.getBottomEdge()) > top) {
                                 locatorHitbox.getObject().draw(g,
                                         Frac.toInt(locatorHitbox.getAbsX()) + xOffset,
                                         Frac.toInt(locatorHitbox.getAbsY()) + yOffset,
