@@ -2,6 +2,7 @@ package cell2d;
 
 import java.awt.Point;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -98,6 +99,13 @@ public abstract class CellGame {
      */
     public static final void loadNatives(String path) {
         System.setProperty("java.library.path", path);
+        try {
+            Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+            fieldSysPath.setAccessible(true);
+            fieldSysPath.set(null, null);
+        } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
+            throw new RuntimeException("Failed to load native libraries");
+        }
         System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
     }
     
@@ -111,8 +119,8 @@ public abstract class CellGame {
         try {
             AppGameContainer container = new AppGameContainer(game.game);
             game.updateScreen(container);
-            container.setTargetFrameRate(game.getFPS());
-            container.setShowFPS(false);
+            container.setTargetFrameRate(game.fps);
+            container.setShowFPS(game.showFPS);
             container.start();
         } catch (SlickException e) {
             throw new RuntimeException("Failed to start a CellGame");
@@ -140,6 +148,7 @@ public abstract class CellGame {
     private String typingString = null;
     private int maxTypingStringLength = 0;
     private int fps;
+    private boolean showFPS = false;
     private double msPerFrame;
     private double msToRun;
     private final DisplayMode[] displayModes;
@@ -300,9 +309,6 @@ public abstract class CellGame {
             new LoadingState();
             negativeIDsOffLimits = true;
         }
-        
-        @Override
-        public final void preUpdateState(GameContainer container, int delta) {}
         
         @Override
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
@@ -921,6 +927,29 @@ public abstract class CellGame {
         msPerFrame = 1000/((double)fps);
         if (game.getContainer() != null) {
             game.getContainer().setTargetFrameRate(fps);
+        }
+    }
+    
+    /**
+     * Returns whether this CellGame displays on its screen the number of frames
+     * that it executes per second.
+     * @return Whether this CellGame displays the number of frames that it
+     * executes per second
+     */
+    public final boolean isShowingFPS() {
+        return showFPS;
+    }
+    
+    /**
+     * Sets whether this CellGame displays on its screen the number of frames
+     * that it executes per second.
+     * @param showFPS Whether this CellGame should display the number of frames
+     * that it executes per second
+     */
+    public final void setShowFPS(boolean showFPS) {
+        this.showFPS = showFPS;
+        if (game.getContainer() != null) {
+            game.getContainer().setShowFPS(showFPS);
         }
     }
     
