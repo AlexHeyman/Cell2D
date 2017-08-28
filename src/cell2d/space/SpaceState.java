@@ -2068,20 +2068,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * screen. If the specified point is not in the rendering region of one of
      * this SpaceState's Viewports with its camera in this SpaceState, this
      * method will return null.
-     * @param screenPoint The screen point
-     * @return The SpaceState point that corresponds to the specified screen
-     * point
-     */
-    public final CellVector getSpacePoint(Point screenPoint) {
-        return getSpacePoint((int)screenPoint.getX(), (int)screenPoint.getY());
-    }
-    
-    /**
-     * Returns the point in this SpaceState, as seen through one of its
-     * Viewports, that corresponds to the specified point in pixels on the
-     * screen. If the specified point is not in the rendering region of one of
-     * this SpaceState's Viewports with its camera in this SpaceState, this
-     * method will return null.
      * @param x The x-coordinate of the screen point
      * @param y The y-coordinate of the screen point
      * @return The SpaceState point that corresponds to the specified screen
