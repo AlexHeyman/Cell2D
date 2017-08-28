@@ -253,7 +253,7 @@ public abstract class CellGame {
                         modeXOffset = (int)((modeWidth/modeScale - screenWidth)/2);
                     }
                     int modeArea = modeWidth*modeHeight - (int)(screenWidth*screenHeight*modeScale*modeScale);
-                    if (modeArea < wastedArea || wastedArea == -1) {
+                    if (modeArea < wastedArea || wastedArea < 0) {
                         wastedArea = modeArea;
                         newWidth = modeWidth;
                         newHeight = modeHeight;
@@ -262,7 +262,7 @@ public abstract class CellGame {
                         newYOffset = modeYOffset;
                     }
                 }
-                if (wastedArea != -1) {
+                if (wastedArea >= 0) {
                     effectiveScaleFactor = newScale;
                     screenXOffset = newXOffset;
                     screenYOffset = newYOffset;
@@ -356,6 +356,9 @@ public abstract class CellGame {
                         } else if (updateScreen) {
                             updateScreen(container);
                         }
+                        if (commandToBind == -2) {
+                            commandToBind = -1;
+                        }
                     }
                 } else {
                     provider = new InputProvider(container.getInput());
@@ -397,7 +400,9 @@ public abstract class CellGame {
         
         @Override
         public final void keyPressed(int key, char c) {
-            if (typingString != null) {
+            if (commandToBind >= 0) {
+                finishBindToCommand(new KeyControl(key));
+            } else if (typingString != null) {
                 if (key == Input.KEY_ESCAPE) {
                     cancelTypingString();
                 } else if (key == Input.KEY_BACK) {
@@ -416,8 +421,6 @@ public abstract class CellGame {
                     typingString += c;
                     currentState.charTypedActions(currentState.game, c);
                 }
-            } else if (commandToBind >= 0) {
-                finishBindToCommand(new KeyControl(key));
             }
         }
         
@@ -465,32 +468,34 @@ public abstract class CellGame {
         
         @Override
         public final void controlPressed(Command command) {
-            if (commandToBind >= 0 || typingString != null) {
-                return;
-            }
-            int i = Arrays.asList(commands).indexOf(command);
-            if (i >= 0) {
-                if (commandChanges[i] == CommandState.NOTHELD
-                        || commandChanges[i] == CommandState.TAPPED) {
-                    commandChanges[i] = CommandState.PRESSED;
-                } else if (commandChanges[i] == CommandState.RELEASED) {
-                    commandChanges[i] = CommandState.UNTAPPED;
+            if (typingString == null) {
+                if (commandToBind == -1) {
+                    int i = Arrays.asList(commands).indexOf(command);
+                    if (i >= 0) {
+                        if (commandChanges[i] == CommandState.NOTHELD
+                                || commandChanges[i] == CommandState.TAPPED) {
+                            commandChanges[i] = CommandState.PRESSED;
+                        } else if (commandChanges[i] == CommandState.RELEASED) {
+                            commandChanges[i] = CommandState.UNTAPPED;
+                        }
+                    }
+                } else if (commandToBind == -2) {
+                    commandToBind = -1;
                 }
             }
         }
         
         @Override
         public final void controlReleased(Command command) {
-            if (commandToBind >= 0 || typingString != null) {
-                return;
-            }
-            int i = Arrays.asList(commands).indexOf(command);
-            if (i >= 0) {
-                if (commandChanges[i] == CommandState.HELD
-                        || commandChanges[i] == CommandState.UNTAPPED) {
-                    commandChanges[i] = CommandState.RELEASED;
-                } else if (commandChanges[i] == CommandState.PRESSED) {
-                    commandChanges[i] = CommandState.TAPPED;
+            if (commandToBind == -1 && typingString == null) {
+                int i = Arrays.asList(commands).indexOf(command);
+                if (i >= 0) {
+                    if (commandChanges[i] == CommandState.HELD
+                            || commandChanges[i] == CommandState.UNTAPPED) {
+                        commandChanges[i] = CommandState.RELEASED;
+                    } else if (commandChanges[i] == CommandState.PRESSED) {
+                        commandChanges[i] = CommandState.TAPPED;
+                    }
                 }
             }
         }
@@ -734,7 +739,7 @@ public abstract class CellGame {
     
     private void finishBindToCommand(Control control) {
         bindControl(commandToBind, control);
-        commandToBind = -1;
+        commandToBind = -2;
     }
     
     /**
