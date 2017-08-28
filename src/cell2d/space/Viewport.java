@@ -331,13 +331,27 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * point as seen through this Viewport
      */
     public final Point getScreenPoint(CellVector spacePoint) {
+        return getScreenPoint(spacePoint.getX(), spacePoint.getY());
+    }
+    
+    /**
+     * Returns the point in pixels on the screen that corresponds to the
+     * specified point in a SpaceState as seen through this Viewport. If the
+     * specified point is not visible through this Viewport, this method will
+     * return null.
+     * @param x The x-coordinate of the SpaceState point
+     * @param y The y-coordinate of the SpaceState point
+     * @return The screen point that corresponds to the specified SpaceState
+     * point as seen through this Viewport
+     */
+    public final Point getScreenPoint(long x, long y) {
         if (camera != null) {
-            int x = Frac.intFloor(spacePoint.getX());
-            int y = Frac.intFloor(spacePoint.getY());
+            int fx = Frac.intFloor(x);
+            int fy = Frac.intFloor(y);
             int centerX = Frac.toInt(camera.getCenterX());
             int centerY = Frac.toInt(camera.getCenterY());
-            if (x >= centerX + left && x < centerX + right && y >= centerY + top && y < centerY + bottom) {
-                return new Point(x + roundX1 - centerX - left, y + roundY1 - centerY - top);
+            if (fx >= centerX + left && fx < centerX + right && fy >= centerY + top && fy < centerY + bottom) {
+                return new Point(fx + roundX1 - centerX - left, fy + roundY1 - centerY - top);
             }
         }
         return null;
@@ -354,8 +368,21 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * point
      */
     public final CellVector getSpacePoint(Point screenPoint) {
-        int x = (int)screenPoint.getX();
-        int y = (int)screenPoint.getY();
+        return getSpacePoint((int)screenPoint.getX(), (int)screenPoint.getY());
+    }
+    
+    /**
+     * Returns the point in a SpaceState, as seen through this Viewport, that
+     * corresponds to the specified point in pixels in this Viewport's on-screen
+     * rendering region. If the specified point is not in this Viewport's
+     * rendering region or this Viewport has no camera, this method will return
+     * null.
+     * @param x The x-coordinate of the screen point
+     * @param y The y-coordinate of the screen point
+     * @return The SpaceState point that corresponds to the specified screen
+     * point
+     */
+    public final CellVector getSpacePoint(int x, int y) {
         if (camera != null && x >= roundX1 && x < roundX2 && y >= roundY1 && y < roundY2) {
             return new CellVector(getLeftEdge() + (long)(x - roundX1) << Frac.BITS,
                     getTopEdge() + (long)(y - roundY1) << Frac.BITS);
