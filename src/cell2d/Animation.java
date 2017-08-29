@@ -71,7 +71,7 @@ public class Animation implements Animatable {
     
     /**
      * Creates a new Animation with the Animatable objects in the specified
-     * array as its frames. Each frame will have a duration of 1.
+     * array as its frames. Each frame will have a duration of one fracunit.
      * @param frames The array of the Animation's frames
      */
     public Animation(Animatable[] frames) {
