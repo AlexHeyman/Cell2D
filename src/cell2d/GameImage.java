@@ -39,7 +39,7 @@ class GameImage {
     }
     
     private static Color intToColor(int color) {
-        return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, (color >> 24) & 0xFF);
+        return new Color((color >> 16) & 255, (color >> 8) & 255, color & 255, (color >> 24) & 255);
     }
     
     static final GameImage getTransparentImage(String path, Color transColor) {
