@@ -96,12 +96,16 @@ class Audio {
         AL10.alDeleteBuffers(buffer);
     }
     
+    double getLength() {
+        return length;
+    }
+    
     boolean isPlaying() {
         return (index < 0 ? false : timesSourcePlayed == timesSourcesPlayed[index]
                 && AL10.alGetSourcei(sources.get(index), AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING);
     }
     
-    void play(float pitch, float volume, boolean loop) {
+    void play(double pitch, double volume, boolean loop) {
         int freeIndex = -1;
         for (int i = 0; i < numSources; i++) {
             int state = AL10.alGetSourcei(sources.get(i), AL10.AL_SOURCE_STATE);
@@ -118,8 +122,8 @@ class Audio {
             int source = sources.get(freeIndex);
             AL10.alSourceStop(source);
             AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
-            AL10.alSourcef(source, AL10.AL_PITCH, pitch);
-            AL10.alSourcef(source, AL10.AL_GAIN, volume); 
+            AL10.alSourcef(source, AL10.AL_PITCH, (float)pitch);
+            AL10.alSourcef(source, AL10.AL_GAIN, (float)volume); 
             AL10.alSourcei(source, AL10.AL_LOOPING, loop ? AL10.AL_TRUE : AL10.AL_FALSE);
             AL10.alSourcePlay(source);
         }
@@ -132,27 +136,27 @@ class Audio {
         index = -1;
     }
     
-    float getPosition() {
+    double getPosition() {
         return (index < 0 ? 0 : AL10.alGetSourcef(sources.get(index), AL11.AL_SEC_OFFSET));
     }
     
-    void setPosition(float position) {
+    void setPosition(double position) {
         if (index >= 0) {
             position %= length;
             if (position < 0) {
                 position += length;
             }
-            AL10.alSourcef(sources.get(index), AL11.AL_SEC_OFFSET, position);
+            AL10.alSourcef(sources.get(index), AL11.AL_SEC_OFFSET, (float)position);
         }
     }
     
-    float getVolume() {
+    double getVolume() {
         return (index < 0 ? 0 : AL10.alGetSourcef(sources.get(index), AL10.AL_GAIN));
     }
     
-    void setVolume(float volume) {
+    void setVolume(double volume) {
         if (index >= 0) {
-            AL10.alSourcef(sources.get(index), AL10.AL_GAIN, Math.min(Math.max(volume, 0), 1));
+            AL10.alSourcef(sources.get(index), AL10.AL_GAIN, (float)Math.min(Math.max(volume, 0), 1));
         }
     }
     

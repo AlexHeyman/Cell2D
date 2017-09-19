@@ -84,7 +84,7 @@ public class Sound {
      */
     public final void play(double pitch, double volume) {
         if (loaded) {
-            audio.play((float)pitch, (float)volume, false);
+            audio.play(pitch, volume, false);
         }
     }
     
@@ -104,7 +104,7 @@ public class Sound {
      */
     public final void loop(double pitch, double volume) {
         if (loaded) {
-            audio.play((float)pitch, (float)volume, true);
+            audio.play(pitch, volume, true);
         }
     }
     
