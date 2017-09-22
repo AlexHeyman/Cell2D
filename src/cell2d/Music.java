@@ -118,6 +118,10 @@ public class Music {
         }
     }
     
+    final double getVolume() {
+        return (audio == null ? 0 : audio.getVolume());
+    }
+    
     final void setVolume(double volume) {
         if (audio != null) {
             audio.setVolume(volume);

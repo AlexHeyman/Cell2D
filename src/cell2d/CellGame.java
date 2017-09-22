@@ -161,7 +161,7 @@ public abstract class CellGame {
     private boolean updateScreen = true;
     private Image loadingImage = null;
     private boolean loadingScreenRenderedOnce = false;
-    private MusicInstance currentMusic = new MusicInstance(null, 0, 0, false);
+    private MusicInstance currentMusic = null;
     private final SortedMap<Integer,MusicInstance> musicStack = new TreeMap<>();
     private boolean stackOverridden = false;
     private boolean musicPaused = false;
@@ -315,7 +315,7 @@ public abstract class CellGame {
                 if (loaded) {
                     double timeElapsed = Math.min(delta, msPerFrame);
                     msToRun += timeElapsed;
-                    if (currentMusic.music != null && !musicPaused) {
+                    if (currentMusic != null && !musicPaused) {
                         if (musicFadeType != 0) {
                             msFading = Math.min(msFading + timeElapsed, fadeDuration);
                             if (msFading == fadeDuration) {
@@ -1050,7 +1050,7 @@ public abstract class CellGame {
      * @return The Music track that this CellGame is currently playing
      */
     public final Music getCurrentMusic() {
-        return currentMusic.music;
+        return (currentMusic == null ? null : currentMusic.music);
     }
     
     /**
@@ -1066,10 +1066,10 @@ public abstract class CellGame {
     
     private void changeMusic(MusicInstance instance) {
         if (!musicPaused) {
-            if (currentMusic.music != null) {
+            if (currentMusic != null) {
                 currentMusic.music.stop();
             }
-            if (instance.music != null) {
+            if (instance != null) {
                 if (instance.loop) {
                     instance.music.loop(instance.pitch, instance.volume);
                 } else {
@@ -1209,14 +1209,14 @@ public abstract class CellGame {
      */
     public final void stopMusic() {
         if (musicStack.isEmpty()) {
-            changeMusic(new MusicInstance(null, 0, 0, false));
+            changeMusic(null);
             stackOverridden = false;
             return;
         }
         if (!stackOverridden) {
             musicStack.remove(musicStack.lastKey());
             if (musicStack.isEmpty()) {
-                changeMusic(new MusicInstance(null, 0, 0, false));
+                changeMusic(null);
                 return;
             }
         }
@@ -1229,7 +1229,7 @@ public abstract class CellGame {
      * @param music The Music track to be stopped
      */
     public final void stopMusic(Music music) {
-        if (currentMusic.music != null && currentMusic.music == music) {
+        if (currentMusic != null && currentMusic.music == music) {
             stopMusic();
         }
     }
@@ -1283,7 +1283,7 @@ public abstract class CellGame {
      */
     public final void pauseMusic() {
         if (!musicPaused) {
-            if (currentMusic.music != null) {
+            if (currentMusic != null) {
                 musicPosition = currentMusic.music.getPosition();
                 currentMusic.music.stop();
             }
@@ -1296,7 +1296,7 @@ public abstract class CellGame {
      */
     public final void resumeMusic() {
         if (musicPaused) {
-            if (currentMusic.music != null) {
+            if (currentMusic != null) {
                 if (currentMusic.loop) {
                     currentMusic.music.loop(currentMusic.pitch, currentMusic.volume);
                 } else {
@@ -1315,7 +1315,7 @@ public abstract class CellGame {
      * Music track
      */
     public final double getMusicPosition() {
-        return (currentMusic.music == null ? 0 : currentMusic.music.getPosition());
+        return (currentMusic == null ? 0 : currentMusic.music.getPosition());
     }
     
     /**
@@ -1324,7 +1324,7 @@ public abstract class CellGame {
      * @param position The music player's new position in seconds
      */
     public final void setMusicPosition(double position) {
-        if (currentMusic.music != null) {
+        if (currentMusic != null) {
             currentMusic.music.setPosition(position);
         }
     }
@@ -1335,7 +1335,7 @@ public abstract class CellGame {
      * @return The volume of the currently playing Music track
      */
     public final double getMusicVolume() {
-        return (currentMusic.music == null ? 0 : currentMusic.volume);
+        return (currentMusic == null ? 0 : currentMusic.music.getVolume());
     }
     
     /**
@@ -1345,7 +1345,7 @@ public abstract class CellGame {
      * @param volume The volume of the currently playing Music track
      */
     public final void setMusicVolume(double volume) {
-        if (currentMusic.music != null) {
+        if (currentMusic != null) {
             currentMusic.volume = volume;
             currentMusic.music.setVolume(volume);
             musicFadeType = 0;
@@ -1360,7 +1360,7 @@ public abstract class CellGame {
      * @param duration The duration in seconds of the fade
      */
     public final void fadeMusicVolume(double volume, double duration) {
-        if (currentMusic.music != null) {
+        if (currentMusic != null) {
             musicFadeType = 1;
             fadeStartVolume = currentMusic.volume;
             fadeEndVolume = volume;
@@ -1377,12 +1377,13 @@ public abstract class CellGame {
      * @param duration The duration in seconds of the fade-out
      */
     public final void fadeMusicOut(double duration) {
-        if (currentMusic.music != null) {
+        if (currentMusic != null) {
             musicFadeType = 2;
             fadeStartVolume = currentMusic.volume;
             fadeEndVolume = 0;
             fadeDuration = duration*1000;
             msFading = 0;
+            currentMusic.volume = 0;
         }
     }
     
