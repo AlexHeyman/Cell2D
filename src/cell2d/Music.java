@@ -87,18 +87,18 @@ public class Music {
      * @return Whether this Music track is currently playing
      */
     public final boolean isPlaying() {
-        return (blank ? true : loaded && audio.isPlaying());
+        return (blank ? true : audio != null && audio.isPlaying());
     }
     
-    final void play(double pitch, double volume) {
+    final void play(double speed, double volume) {
         if (audio != null) {
-            audio.play(pitch, volume, false);
+            audio.play(speed, volume, false);
         }
     }
     
-    final void loop(double pitch, double volume) {
+    final void loop(double speed, double volume) {
         if (audio != null) {
-            audio.play(pitch, volume, true);
+            audio.play(speed, volume, true);
         }
     }
     
@@ -115,6 +115,16 @@ public class Music {
     final void setPosition(double position) {
         if (audio != null) {
             audio.setPosition(position);
+        }
+    }
+    
+    final double getSpeed() {
+        return (audio == null ? 0 : audio.getSpeed());
+    }
+    
+    final void setSpeed(double speed) {
+        if (audio != null) {
+            audio.setSpeed(speed);
         }
     }
     

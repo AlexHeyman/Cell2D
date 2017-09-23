@@ -65,7 +65,7 @@ public class Sound {
      * @return Whether this Sound is currently playing
      */
     public final boolean isPlaying() {
-        return loaded && audio.isPlaying();
+        return audio != null && audio.isPlaying();
     }
     
     /**
@@ -76,15 +76,15 @@ public class Sound {
     }
     
     /**
-     * Plays this Sound once at the specified pitch and volume.
-     * @param pitch The pitch at which to play this Sound, with 1 representing
-     * no pitch change
+     * Plays this Sound once at the specified speed and volume.
+     * @param speed The speed at which to play this Sound, with 1 representing
+     * no speed change
      * @param volume The volume at which to play this Sound, with 1 representing
      * no volume change
      */
-    public final void play(double pitch, double volume) {
+    public final void play(double speed, double volume) {
         if (loaded) {
-            audio.play(pitch, volume, false);
+            audio.play(speed, volume, false);
         }
     }
     
@@ -96,15 +96,15 @@ public class Sound {
     }
     
     /**
-     * Loops this Sound indefinitely at the specified pitch and volume.
-     * @param pitch The pitch at which to play this Sound, with 1 representing
-     * no pitch change
+     * Loops this Sound indefinitely at the specified speed and volume.
+     * @param speed The speed at which to play this Sound, with 1 representing
+     * no speed change
      * @param volume The volume at which to play this Sound, with 1 representing
      * no volume change
      */
-    public final void loop(double pitch, double volume) {
+    public final void loop(double speed, double volume) {
         if (loaded) {
-            audio.play(pitch, volume, true);
+            audio.play(speed, volume, true);
         }
     }
     

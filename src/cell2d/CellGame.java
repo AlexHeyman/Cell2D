@@ -149,7 +149,7 @@ public abstract class CellGame {
     private int fps;
     private boolean showFPS = false;
     private double msPerFrame;
-    private double msToRun;
+    private double msToRun = 0;
     private final DisplayMode[] displayModes;
     private int screenWidth;
     private int screenHeight;
@@ -204,7 +204,6 @@ public abstract class CellGame {
             commandChanges[i] = CommandState.NOTHELD;
         }
         setFPS(fps);
-        msToRun = 0;
         try {
             displayModes = Display.getAvailableDisplayModes();
         } catch (LWJGLException e) {
@@ -314,7 +313,6 @@ public abstract class CellGame {
             if (loadingScreenRenderedOnce) {
                 if (loaded) {
                     double timeElapsed = Math.min(delta, msPerFrame);
-                    msToRun += timeElapsed;
                     if (currentMusic != null && !musicPaused) {
                         if (musicFadeType != 0) {
                             msFading = Math.min(msFading + timeElapsed, fadeDuration);
@@ -332,6 +330,7 @@ public abstract class CellGame {
                             stopMusic();
                         }
                     }
+                    msToRun += timeElapsed;
                     if (msToRun >= msPerFrame) {
                         for (int i = 0; i < commandChanges.length; i++) {
                             commandStates[i] = commandChanges[i];
@@ -1031,13 +1030,13 @@ public abstract class CellGame {
     private class MusicInstance {
         
         private final Music music;
-        private final double pitch;
+        private final double speed;
         private double volume;
         private final boolean loop;
         
-        private MusicInstance(Music music, double pitch, double volume, boolean loop) {
+        private MusicInstance(Music music, double speed, double volume, boolean loop) {
             this.music = music;
-            this.pitch = pitch;
+            this.speed = speed;
             this.volume = volume;
             this.loop = loop;
         }
@@ -1071,9 +1070,9 @@ public abstract class CellGame {
             }
             if (instance != null) {
                 if (instance.loop) {
-                    instance.music.loop(instance.pitch, instance.volume);
+                    instance.music.loop(instance.speed, instance.volume);
                 } else {
-                    instance.music.play(instance.pitch, instance.volume);
+                    instance.music.play(instance.speed, instance.volume);
                 }
             }
         }
@@ -1082,7 +1081,7 @@ public abstract class CellGame {
         musicFadeType = 0;
     }
     
-    private void startMusic(Music music, double pitch, double volume, boolean loop) {
+    private void startMusic(Music music, double speed, double volume, boolean loop) {
         if (music == null) {
             stopMusic();
             return;
@@ -1090,16 +1089,16 @@ public abstract class CellGame {
         if (musicFadeType == 2 && !musicStack.isEmpty() && !stackOverridden) {
             musicStack.remove(musicStack.lastKey());
         }
-        changeMusic(new MusicInstance(music, pitch, volume, loop));
+        changeMusic(new MusicInstance(music, speed, volume, loop));
         stackOverridden = true;
     }
     
-    private void addMusicToStack(int priority, Music music, double pitch, double volume, boolean loop) {
+    private void addMusicToStack(int priority, Music music, double speed, double volume, boolean loop) {
         if (music == null) {
             stopMusic(priority);
             return;
         }
-        MusicInstance instance = new MusicInstance(music, pitch, volume, loop);
+        MusicInstance instance = new MusicInstance(music, speed, volume, loop);
         if ((musicStack.isEmpty() || priority >= musicStack.lastKey()) && !stackOverridden) {
             if (musicFadeType == 2 && !musicStack.isEmpty() && priority > musicStack.lastKey()) {
                 musicStack.remove(musicStack.lastKey());
@@ -1119,17 +1118,17 @@ public abstract class CellGame {
     }
     
     /**
-     * Plays the specified Music track once at the specified pitch and volume.
+     * Plays the specified Music track once at the specified speed and volume.
      * The track will be treated as having a higher priority than any of those
      * in the music stack.
      * @param music The Music track to play
-     * @param pitch The pitch at which to play the specified Music track, with 1
-     * representing no pitch change
+     * @param speed The speed at which to play the specified Music track, with 1
+     * representing no speed change
      * @param volume The volume at which to play the specified Music track, with
      * 1 representing no volume change
      */
-    public final void playMusic(Music music, double pitch, double volume) {
-        startMusic(music, pitch, volume, false);
+    public final void playMusic(Music music, double speed, double volume) {
+        startMusic(music, speed, volume, false);
     }
     
     /**
@@ -1144,16 +1143,16 @@ public abstract class CellGame {
     
     /**
      * Plays the specified Music track once in this CellGame's music stack at
-     * the specified priority, pitch, and volume.
+     * the specified priority, speed, and volume.
      * @param priority The priority at which to play the specified Music track
      * @param music The Music track to play
-     * @param pitch The pitch at which to play the specified Music track, with 1
-     * representing no pitch change
+     * @param speed The speed at which to play the specified Music track, with 1
+     * representing no speed change
      * @param volume The volume at which to play the specified Music track, with
      * 1 representing no volume change
      */
-    public final void playMusic(int priority, Music music, double pitch, double volume) {
-        addMusicToStack(priority, music, pitch, volume, false);
+    public final void playMusic(int priority, Music music, double speed, double volume) {
+        addMusicToStack(priority, music, speed, volume, false);
     }
     
     /**
@@ -1166,17 +1165,17 @@ public abstract class CellGame {
     }
     
     /**
-     * Loops the specified Music track indefinitely at the specified pitch and
+     * Loops the specified Music track indefinitely at the specified speed and
      * volume. The track will be treated as having a higher priority than any of
      * those in the music stack.
      * @param music The Music track to loop
-     * @param pitch The pitch at which to play the specified Music track, with 1
-     * representing no pitch change
+     * @param speed The speed at which to play the specified Music track, with 1
+     * representing no speed change
      * @param volume The volume at which to play the specified Music track, with
      * 1 representing no volume change
      */
-    public final void loopMusic(Music music, double pitch, double volume) {
-        startMusic(music, pitch, volume, true);
+    public final void loopMusic(Music music, double speed, double volume) {
+        startMusic(music, speed, volume, true);
     }
     
     /**
@@ -1191,16 +1190,16 @@ public abstract class CellGame {
     
     /**
      * Loops the specified Music track indefinitely in this CellGame's music
-     * stack at the specified priority, pitch, and volume.
+     * stack at the specified priority, speed, and volume.
      * @param priority The priority at which to play the specified Music track
      * @param music The Music track to loop
-     * @param pitch The pitch at which to play the specified Music track, with 1
-     * representing no pitch change
+     * @param speed The speed at which to play the specified Music track, with 1
+     * representing no speed change
      * @param volume The volume at which to play the specified Music track, with
      * 1 representing no volume change
      */
-    public final void loopMusic(int priority, Music music, double pitch, double volume) {
-        addMusicToStack(priority, music, pitch, volume, true);
+    public final void loopMusic(int priority, Music music, double speed, double volume) {
+        addMusicToStack(priority, music, speed, volume, true);
     }
     
     /**
@@ -1298,9 +1297,9 @@ public abstract class CellGame {
         if (musicPaused) {
             if (currentMusic != null) {
                 if (currentMusic.loop) {
-                    currentMusic.music.loop(currentMusic.pitch, currentMusic.volume);
+                    currentMusic.music.loop(currentMusic.speed, currentMusic.volume);
                 } else {
-                    currentMusic.music.play(currentMusic.pitch, currentMusic.volume);
+                    currentMusic.music.play(currentMusic.speed, currentMusic.volume);
                 }
                 currentMusic.music.setPosition(musicPosition);
             }

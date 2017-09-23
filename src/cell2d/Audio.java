@@ -105,7 +105,7 @@ class Audio {
                 && AL10.alGetSourcei(sources.get(index), AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING);
     }
     
-    void play(double pitch, double volume, boolean loop) {
+    void play(double speed, double volume, boolean loop) {
         int freeIndex = -1;
         for (int i = 0; i < numSources; i++) {
             int state = AL10.alGetSourcei(sources.get(i), AL10.AL_SOURCE_STATE);
@@ -122,7 +122,7 @@ class Audio {
             int source = sources.get(freeIndex);
             AL10.alSourceStop(source);
             AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
-            AL10.alSourcef(source, AL10.AL_PITCH, (float)pitch);
+            AL10.alSourcef(source, AL10.AL_PITCH, (float)speed);
             AL10.alSourcef(source, AL10.AL_GAIN, (float)volume); 
             AL10.alSourcei(source, AL10.AL_LOOPING, loop ? AL10.AL_TRUE : AL10.AL_FALSE);
             AL10.alSourcePlay(source);
@@ -147,6 +147,16 @@ class Audio {
                 position += length;
             }
             AL10.alSourcef(sources.get(index), AL11.AL_SEC_OFFSET, (float)position);
+        }
+    }
+    
+    double getSpeed() {
+        return (index < 0 ? 0 : AL10.alGetSourcef(sources.get(index), AL10.AL_PITCH));
+    }
+    
+    void setSpeed(double speed) {
+        if (index >= 0) {
+            AL10.alSourcef(sources.get(index), AL10.AL_PITCH, (float)Math.max(speed, 0));
         }
     }
     
