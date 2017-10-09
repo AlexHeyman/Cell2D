@@ -101,8 +101,8 @@ class Audio {
     }
     
     boolean isPlaying() {
-        return (index < 0 ? false : timesSourcePlayed == timesSourcesPlayed[index]
-                && AL10.alGetSourcei(sources.get(index), AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING);
+        return index >= 0 && timesSourcePlayed == timesSourcesPlayed[index]
+                && AL10.alGetSourcei(sources.get(index), AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
     }
     
     void play(double speed, double volume, boolean loop) {
@@ -137,11 +137,11 @@ class Audio {
     }
     
     double getPosition() {
-        return (index < 0 ? 0 : AL10.alGetSourcef(sources.get(index), AL11.AL_SEC_OFFSET));
+        return (isPlaying() ? AL10.alGetSourcef(sources.get(index), AL11.AL_SEC_OFFSET) : 0);
     }
     
     void setPosition(double position) {
-        if (index >= 0) {
+        if (isPlaying()) {
             position %= length;
             if (position < 0) {
                 position += length;
@@ -151,22 +151,28 @@ class Audio {
     }
     
     double getSpeed() {
-        return (index < 0 ? 0 : AL10.alGetSourcef(sources.get(index), AL10.AL_PITCH));
+        return (isPlaying() ? AL10.alGetSourcef(sources.get(index), AL10.AL_PITCH) : 0);
     }
     
     void setSpeed(double speed) {
-        if (index >= 0) {
+        if (isPlaying()) {
             AL10.alSourcef(sources.get(index), AL10.AL_PITCH, (float)Math.max(speed, 0));
         }
     }
     
     double getVolume() {
-        return (index < 0 ? 0 : AL10.alGetSourcef(sources.get(index), AL10.AL_GAIN));
+        return (isPlaying() ? AL10.alGetSourcef(sources.get(index), AL10.AL_GAIN) : 0);
     }
     
     void setVolume(double volume) {
-        if (index >= 0) {
+        if (isPlaying()) {
             AL10.alSourcef(sources.get(index), AL10.AL_GAIN, (float)Math.min(Math.max(volume, 0), 1));
+        }
+    }
+    
+    void setLooping(boolean loop) {
+        if (isPlaying()) {
+            AL10.alSourcei(sources.get(index), AL10.AL_LOOPING, loop ? AL10.AL_TRUE : AL10.AL_FALSE);
         }
     }
     

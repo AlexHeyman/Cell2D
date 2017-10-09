@@ -168,9 +168,7 @@ public class Sprite implements Animatable, Drawable {
      * @return Whether the loading occurred
      */
     public final boolean load() {
-        if (blank) {
-            return true;
-        } else if (loaded) {
+        if (loaded) {
             return false;
         }
         loaded = true;
@@ -223,9 +221,7 @@ public class Sprite implements Animatable, Drawable {
      * @return Whether the unloading occurred
      */
     public final boolean unload() {
-        if (blank) {
-            return true;
-        } else if (loaded) {
+        if (blank || !loaded) {
             return false;
         }
         loaded = false;

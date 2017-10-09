@@ -36,7 +36,8 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     private SpaceObject<T> camera = null;
     private HUD<T> hud = null;
     private long x1, y1, x2, y2;
-    int roundX1, roundY1, roundX2, roundY2, left, right, top, bottom;
+    int roundX1, roundY1, roundX2, roundY2;
+    private int left, right, top, bottom;
     
     /**
      * Creates a new Viewport that occupies the specified region of the screen.
@@ -288,7 +289,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getLeftEdge() throws NullPointerException {
-        return ((long)Frac.toInt(camera.getCenterX()) + left) << Frac.BITS;
+        return (long)(Frac.toInt(camera.getCenterX()) + left) << Frac.BITS;
     }
     
     /**
@@ -298,7 +299,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getRightEdge() throws NullPointerException {
-        return ((long)Frac.toInt(camera.getCenterX()) + right) << Frac.BITS;
+        return (long)(Frac.toInt(camera.getCenterX()) + right) << Frac.BITS;
     }
     
     /**
@@ -308,7 +309,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getTopEdge() throws NullPointerException {
-        return ((long)Frac.toInt(camera.getCenterY()) + top) << Frac.BITS;
+        return (long)(Frac.toInt(camera.getCenterY()) + top) << Frac.BITS;
     }
     
     /**
@@ -318,7 +319,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getBottomEdge() throws NullPointerException {
-        return ((long)Frac.toInt(camera.getCenterY()) + bottom) << Frac.BITS;
+        return (long)(Frac.toInt(camera.getCenterY()) + bottom) << Frac.BITS;
     }
     
     /**
@@ -334,8 +335,8 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      */
     public final CellVector getSpacePoint(int x, int y) {
         if (camera != null && x >= roundX1 && x < roundX2 && y >= roundY1 && y < roundY2) {
-            return new CellVector(getLeftEdge() + (long)(x - roundX1) << Frac.BITS,
-                    getTopEdge() + (long)(y - roundY1) << Frac.BITS);
+            return new CellVector(getLeftEdge() + ((long)(x - roundX1) << Frac.BITS),
+                    getTopEdge() + ((long)(y - roundY1) << Frac.BITS));
         }
         return null;
     }

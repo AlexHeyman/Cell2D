@@ -2078,8 +2078,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             if (viewport.getCamera() != null && viewport.getCamera().newState == this
                     && x >= viewport.roundX1 && x < viewport.roundX2
                     && y >= viewport.roundY1 && y < viewport.roundY2) {
-                return new CellVector(viewport.getLeftEdge() + (long)(x - viewport.roundX1) << Frac.BITS,
-                        viewport.getTopEdge() + (long)(y - viewport.roundY1) << Frac.BITS);
+                return new CellVector(viewport.getLeftEdge() + ((long)(x - viewport.roundX1) << Frac.BITS),
+                        viewport.getTopEdge() + ((long)(y - viewport.roundY1) << Frac.BITS));
             }
         }
         return null;
@@ -2104,8 +2104,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             if (viewport.getCamera() != null && viewport.getCamera().newState == this) {
                 int centerX = Frac.toInt(viewport.getCamera().getCenterX());
                 int centerY = Frac.toInt(viewport.getCamera().getCenterY());
-                if (rx1 < centerX + viewport.right && rx2 > centerX + viewport.left
-                        && ry1 < centerY + viewport.bottom && ry2 > centerY + viewport.top) {
+                if (rx1 < centerX + viewport.getRight() && rx2 > centerX + viewport.getLeft()
+                        && ry1 < centerY + viewport.getBottom() && ry2 > centerY + viewport.getTop()) {
                     return true;
                 }
             }
@@ -3280,10 +3280,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                     int rx = Frac.toInt(cx);
                     int ry = Frac.toInt(cy);
-                    int left = rx + viewport.left;
-                    int right = rx + viewport.right;
-                    int top = ry + viewport.top;
-                    int bottom = ry + viewport.bottom;
+                    int left = rx + viewport.getLeft();
+                    int right = rx + viewport.getRight();
+                    int top = ry + viewport.getTop();
+                    int bottom = ry + viewport.getBottom();
                     int xOffset = vx1 - left;
                     int yOffset = vy1 - top;
                     int[] cellRange = getCellRangeExclusive((long)left << Frac.BITS, (long)top << Frac.BITS,

@@ -5,8 +5,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.lwjgl.LWJGLException;
@@ -69,21 +72,20 @@ import org.newdawn.slick.util.Log;
  * input as assignments of Controls to specific commands, or as the typing of
  * text to a specific String.</p>
  * 
- * <p>A CellGame also controls the playing, looping, stopping, pausing, and
- * fading of Music tracks. It contains a data structure called a music stack in
- * which Music tracks may be assigned to different integer priority values. Only
- * the Music track with the greatest priority will play; all others will be
- * paused. If the currently playing Music track finishes, it will automatically
- * be removed from the music stack and the Music track with the next greatest
- * priority will begin playing.</p>
+ * <p>A CellGame also controls the playing and stopping of Music tracks. It
+ * contains a data structure called a music stack in which different integer
+ * priority values may be assigned one or more Music tracks each. Only the Music
+ * tracks assigned to the greatest priority in the stack will play at any given
+ * time. If a currently playing Music track finishes, it will automatically be
+ * removed from the top of the music stack.</p>
  * @author Andrew Heyman
  */
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.4.2.
+     * The version number of Cell2D, currently 1.5.0.
      */
-    public static final String VERSION = "1.4.2";
+    public static final String VERSION = "1.5.0";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -161,16 +163,7 @@ public abstract class CellGame {
     private boolean updateScreen = true;
     private Image loadingImage = null;
     private boolean loadingScreenRenderedOnce = false;
-    private MusicInstance currentMusic = null;
-    private final SortedMap<Integer,MusicInstance> musicStack = new TreeMap<>();
-    private boolean stackOverridden = false;
-    private boolean musicPaused = false;
-    private double musicPosition = 0;
-    private int musicFadeType = 0;
-    private double fadeStartVolume = 0;
-    private double fadeEndVolume = 0;
-    private double fadeDuration = 0;
-    private double msFading = 0;
+    private final SortedMap<Integer,Map<Music,MusicInstance>> musicStack = new TreeMap<>();
     
     /**
      * Creates a new CellGame.
@@ -312,25 +305,28 @@ public abstract class CellGame {
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
             if (loadingScreenRenderedOnce) {
                 if (loaded) {
-                    double timeElapsed = Math.min(delta, msPerFrame);
-                    if (currentMusic != null && !musicPaused) {
-                        if (musicFadeType != 0) {
-                            msFading = Math.min(msFading + timeElapsed, fadeDuration);
-                            if (msFading == fadeDuration) {
-                                currentMusic.music.setVolume(fadeEndVolume);
-                                if (musicFadeType == 2) {
-                                    currentMusic.music.stop();
-                                }
-                                musicFadeType = 0;
-                            } else {
-                                currentMusic.music.setVolume(fadeStartVolume + (msFading/fadeDuration)*(fadeEndVolume - fadeStartVolume));
+                    double msElapsed = Math.min(delta, msPerFrame);
+                    if (!musicStack.isEmpty()) {
+                        int top = musicStack.lastKey();
+                        Map<Music,MusicInstance> musics = musicStack.get(top);
+                        Iterator<Music> iterator = musics.keySet().iterator();
+                        while (iterator.hasNext()) {
+                            Music music = iterator.next();
+                            if (music.update(msElapsed)) {
+                                iterator.remove();
                             }
                         }
-                        if (!currentMusic.music.isPlaying()) {
-                            stopMusic();
+                        if (musics.isEmpty()) {
+                            musicStack.remove(top);
+                            if (!musicStack.isEmpty()) {
+                                for (Map.Entry<Music,MusicInstance> entry
+                                        : musicStack.get(musicStack.lastKey()).entrySet()) {
+                                    entry.getKey().play(entry.getValue());
+                                }
+                            }
                         }
                     }
-                    msToRun += timeElapsed;
+                    msToRun += msElapsed;
                     if (msToRun >= msPerFrame) {
                         for (int i = 0; i < commandChanges.length; i++) {
                             commandStates[i] = commandChanges[i];
@@ -342,8 +338,10 @@ public abstract class CellGame {
                                 commandChanges[i] = CommandState.NOTHELD;
                             }
                         }
-                        adjustedMouseX = Math.min(Math.max((int)(newMouseX/effectiveScaleFactor) - screenXOffset, 0), screenWidth - 1);
-                        adjustedMouseY = Math.min(Math.max((int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
+                        adjustedMouseX = Math.min(Math.max(
+                                (int)(newMouseX/effectiveScaleFactor) - screenXOffset, 0), screenWidth - 1);
+                        adjustedMouseY = Math.min(Math.max(
+                                (int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
                         mouseWheelChange = newMouseWheelChange;
                         newMouseWheelChange = 0;
                         currentState.frame();
@@ -1027,362 +1025,311 @@ public abstract class CellGame {
         updateScreen = true;
     }
     
-    private class MusicInstance {
-        
-        private final Music music;
-        private final double speed;
-        private double volume;
-        private final boolean loop;
-        
-        private MusicInstance(Music music, double speed, double volume, boolean loop) {
-            this.music = music;
-            this.speed = speed;
-            this.volume = volume;
-            this.loop = loop;
-        }
-        
-    }
-    
     /**
-     * Returns the Music track that this CellGame is currently playing, or null
-     * if there is none.
-     * @return The Music track that this CellGame is currently playing
+     * Returns the greatest priority in this CellGame's music stack to which any
+     * Music tracks are assigned, or 0 if the music stack is empty. The Music
+     * tracks assigned to this priority are those that are currently playing.
+     * @return The greatest music stack priority to which any Music tracks are
+     * assigned
      */
-    public final Music getCurrentMusic() {
-        return (currentMusic == null ? null : currentMusic.music);
+    public final int getMusicStackTop() {
+        return (musicStack.isEmpty() ? 0 : musicStack.lastKey());
     }
     
     /**
-     * Returns the Music track in this CellGame's music stack at the specified
-     * priority, or null if there is none.
+     * Returns the Set of Music tracks that are assigned to the specified
+     * priority in this CellGame's music stack, or an empty Set if the music
+     * stack is empty. Changes to the returned Set will not be reflected in the
+     * music stack.
+     * @param priority The priority of the Music tracks to return
+     * @return The Set of Music tracks assigned to the specified priority
+     */
+    public final Set<Music> getMusicTracks(int priority) {
+        Map<Music,MusicInstance> musics = musicStack.get(priority);
+        return (musics == null ? new HashSet<>() : new HashSet<>(musics.keySet()));
+    }
+    
+    /**
+     * Returns the Set of Music tracks that are assigned to the greatest
+     * priority in this CellGame's music stack, or an empty Set if the music
+     * stack is empty. These Music tracks are those that are currently playing.
+     * Changes to the returned Set will not be reflected in the music stack.
+     * @return The Set of Music tracks assigned to the music stack's greatest
+     * priority
+     */
+    public final Set<Music> getMusicTracks() {
+        return getMusicTracks(getMusicStackTop());
+    }
+    
+    /**
+     * Returns the Music track assigned to the specified priority in this
+     * CellGame's music stack, if there is exactly one such Music track, or null
+     * otherwise.
      * @param priority The priority of the Music track to return
-     * @return The Music track at the specified priority
+     * @return The Music track assigned to the specified priority
      */
     public final Music getMusic(int priority) {
-        MusicInstance instance = musicStack.get(priority);
-        return (instance == null ? null : instance.music);
+        Map<Music,MusicInstance> musics = musicStack.get(priority);
+        if (musics != null && musics.size() == 1) {
+            for (Music music : musics.keySet()) {
+                return music;
+            }
+        }
+        return null;
     }
     
-    private void changeMusic(MusicInstance instance) {
-        if (!musicPaused) {
-            if (currentMusic != null) {
-                currentMusic.music.stop();
-            }
-            if (instance != null) {
-                if (instance.loop) {
-                    instance.music.loop(instance.speed, instance.volume);
-                } else {
-                    instance.music.play(instance.speed, instance.volume);
+    /**
+     * Returns the Music track assigned to the greatest priority in this
+     * CellGame's music stack, if the music stack is not empty and there is
+     * exactly one such Music track, or null otherwise.
+     * @return The Music track assigned to the music stack's greatest priority
+     */
+    public final Music getMusic() {
+        return getMusic(getMusicStackTop());
+    }
+    
+    /**
+     * Returns whether the specified Music track is assigned to the specified
+     * priority in this CellGame's music stack.
+     * @param priority The priority to examine
+     * @param music The Music track to search for
+     * @return Whether the specified Music track is assigned to the specified
+     * priority in the music stack
+     */
+    public final boolean musicIsAtPriority(int priority, Music music) {
+        Map<Music,MusicInstance> musics = musicStack.get(priority);
+        return musics != null && musics.containsKey(music);
+    }
+    
+    /**
+     * Adds the specified Music track to the specified priority in this
+     * CellGame's music stack. If that priority is the music stack's greatest,
+     * the Music track will automatically begin playing.
+     * @param priority The priority to assign the specified Music track to
+     * @param music The Music track to add
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
+     * @param replace If true, all other Music tracks assigned to the specified
+     * priority will be removed from it
+     */
+    public final void addMusic(int priority, Music music, boolean loop, boolean replace) {
+        addMusic(priority, music, 1, 1, loop, replace);
+    }
+    
+    /**
+     * Adds the specified Music track to the specified priority in this
+     * CellGame's music stack. If that priority is the music stack's greatest,
+     * the Music track will automatically begin playing.
+     * @param priority The priority to assign the specified Music track to
+     * @param music The Music track to add
+     * @param speed The speed at which to play the specified Music track when it
+     * plays, with 1 representing no speed change
+     * @param volume The volume at which to play the specified Music track when
+     * it plays, with 1 representing no volume change
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
+     * @param replace If true, all other Music tracks assigned to the specified
+     * priority will be removed from it
+     */
+    public final void addMusic(int priority, Music music,
+            double speed, double volume, boolean loop, boolean replace) {
+        if (!musicStack.isEmpty()) {
+            int top = musicStack.lastKey();
+            if (priority > top || (replace && priority == top)) {
+                Map<Music,MusicInstance> topMusics = musicStack.get(top);
+                for (Music topMusic : topMusics.keySet()) {
+                    topMusic.stop();
                 }
             }
         }
-        currentMusic = instance;
-        musicPosition = 0;
-        musicFadeType = 0;
-    }
-    
-    private void startMusic(Music music, double speed, double volume, boolean loop) {
-        if (music == null) {
-            stopMusic();
-            return;
+        Map<Music,MusicInstance> currentMusics = musicStack.get(priority);
+        if (currentMusics == null) {
+            currentMusics = new HashMap<>();
+            musicStack.put(priority, currentMusics);
+        } else if (replace) {
+            currentMusics.clear();
         }
-        if (musicFadeType == 2 && !musicStack.isEmpty() && !stackOverridden) {
-            musicStack.remove(musicStack.lastKey());
-        }
-        changeMusic(new MusicInstance(music, speed, volume, loop));
-        stackOverridden = true;
-    }
-    
-    private void addMusicToStack(int priority, Music music, double speed, double volume, boolean loop) {
-        if (music == null) {
-            stopMusic(priority);
-            return;
-        }
-        MusicInstance instance = new MusicInstance(music, speed, volume, loop);
-        if ((musicStack.isEmpty() || priority >= musicStack.lastKey()) && !stackOverridden) {
-            if (musicFadeType == 2 && !musicStack.isEmpty() && priority > musicStack.lastKey()) {
-                musicStack.remove(musicStack.lastKey());
-            }
-            changeMusic(instance);
-        }
-        musicStack.put(priority, instance);
-    }
-    
-    /**
-     * Plays the specified Music track once. The track will be treated as having
-     * a higher priority than any of those in the music stack.
-     * @param music The Music track to play
-     */
-    public final void playMusic(Music music) {
-        startMusic(music, 1, 1, false);
-    }
-    
-    /**
-     * Plays the specified Music track once at the specified speed and volume.
-     * The track will be treated as having a higher priority than any of those
-     * in the music stack.
-     * @param music The Music track to play
-     * @param speed The speed at which to play the specified Music track, with 1
-     * representing no speed change
-     * @param volume The volume at which to play the specified Music track, with
-     * 1 representing no volume change
-     */
-    public final void playMusic(Music music, double speed, double volume) {
-        startMusic(music, speed, volume, false);
-    }
-    
-    /**
-     * Plays the specified Music track once in this CellGame's music stack at
-     * the specified priority.
-     * @param priority The priority at which to play the specified Music track
-     * @param music The Music track to play
-     */
-    public final void playMusic(int priority, Music music) {
-        addMusicToStack(priority, music, 1, 1, false);
-    }
-    
-    /**
-     * Plays the specified Music track once in this CellGame's music stack at
-     * the specified priority, speed, and volume.
-     * @param priority The priority at which to play the specified Music track
-     * @param music The Music track to play
-     * @param speed The speed at which to play the specified Music track, with 1
-     * representing no speed change
-     * @param volume The volume at which to play the specified Music track, with
-     * 1 representing no volume change
-     */
-    public final void playMusic(int priority, Music music, double speed, double volume) {
-        addMusicToStack(priority, music, speed, volume, false);
-    }
-    
-    /**
-     * Loops the specified Music track indefinitely. The track will be treated
-     * as having a higher priority than any of those in the music stack.
-     * @param music The Music track to loop
-     */
-    public final void loopMusic(Music music) {
-        startMusic(music, 1, 1, true);
-    }
-    
-    /**
-     * Loops the specified Music track indefinitely at the specified speed and
-     * volume. The track will be treated as having a higher priority than any of
-     * those in the music stack.
-     * @param music The Music track to loop
-     * @param speed The speed at which to play the specified Music track, with 1
-     * representing no speed change
-     * @param volume The volume at which to play the specified Music track, with
-     * 1 representing no volume change
-     */
-    public final void loopMusic(Music music, double speed, double volume) {
-        startMusic(music, speed, volume, true);
-    }
-    
-    /**
-     * Loops the specified Music track indefinitely in this CellGame's music
-     * stack at the specified priority.
-     * @param priority The priority at which to play the specified Music track
-     * @param music The Music track to loop
-     */
-    public final void loopMusic(int priority, Music music) {
-        addMusicToStack(priority, music, 1, 1, true);
-    }
-    
-    /**
-     * Loops the specified Music track indefinitely in this CellGame's music
-     * stack at the specified priority, speed, and volume.
-     * @param priority The priority at which to play the specified Music track
-     * @param music The Music track to loop
-     * @param speed The speed at which to play the specified Music track, with 1
-     * representing no speed change
-     * @param volume The volume at which to play the specified Music track, with
-     * 1 representing no volume change
-     */
-    public final void loopMusic(int priority, Music music, double speed, double volume) {
-        addMusicToStack(priority, music, speed, volume, true);
-    }
-    
-    /**
-     * Stops the Music track that this CellGame is currently playing, if there
-     * is one.
-     */
-    public final void stopMusic() {
-        if (musicStack.isEmpty()) {
-            changeMusic(null);
-            stackOverridden = false;
-            return;
-        }
-        if (!stackOverridden) {
-            musicStack.remove(musicStack.lastKey());
-            if (musicStack.isEmpty()) {
-                changeMusic(null);
-                return;
-            }
-        }
-        changeMusic(musicStack.get(musicStack.lastKey()));
-        stackOverridden = false;
-    }
-    
-    /**
-     * Stops the specified Music track if this CellGame is currently playing it.
-     * @param music The Music track to be stopped
-     */
-    public final void stopMusic(Music music) {
-        if (currentMusic != null && currentMusic.music == music) {
-            stopMusic();
+        MusicInstance instance = new MusicInstance(speed, volume, loop);
+        currentMusics.put(music, instance);
+        if (priority == musicStack.lastKey()) {
+            music.play(instance);
         }
     }
     
     /**
-     * Stops the Music track in this CellGame's music stack at the specified
-     * priority, if there is one.
-     * @param priority The priority of the Music track to be stopped
+     * Adds the specified Music track to the specified priority in this
+     * CellGame's music stack, replacing and removing all other Music tracks
+     * assigned to that priority. If that priority is the music stack's
+     * greatest, the Music track will automatically begin playing.
+     * @param priority The priority to assign the specified Music track to
+     * @param music The Music track to add
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
      */
-    public final void stopMusic(int priority) {
-        if (musicStack.isEmpty()) {
-            return;
-        }
-        if (priority == musicStack.lastKey() && !stackOverridden) {
-            stopMusic();
-        } else {
-            musicStack.remove(priority);
-        }
+    public final void addMusic(int priority, Music music, boolean loop) {
+        addMusic(priority, music, 1, 1, loop, true);
     }
     
     /**
-     * Stops the specified Music track in this CellGame's music stack at the
-     * specified priority if it is currently playing there.
-     * @param priority The priority of the Music track to be stopped
-     * @param music The Music track to be stopped
+     * Adds the specified Music track to the specified priority in this
+     * CellGame's music stack, replacing and removing all other Music tracks
+     * assigned to that priority. If that priority is the music stack's
+     * greatest, the Music track will automatically begin playing.
+     * @param priority The priority to assign the specified Music track to
+     * @param music The Music track to add
+     * @param speed The speed at which to play the specified Music track when it
+     * plays, with 1 representing no speed change
+     * @param volume The volume at which to play the specified Music track when
+     * it plays, with 1 representing no volume change
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
      */
-    public final void stopMusic(int priority, Music music) {
-        if (musicStack.isEmpty()) {
-            return;
-        }
-        MusicInstance instance = musicStack.get(priority);
-        if (instance != null && instance.music != null && instance.music == music) {
-            if (priority == musicStack.lastKey() && !stackOverridden) {
-                stopMusic();
-            } else {
-                musicStack.remove(priority);
+    public final void addMusic(int priority, Music music, double speed, double volume, boolean loop) {
+        addMusic(priority, music, speed, volume, loop, true);
+    }
+    
+    /**
+     * Adds the specified Music track to the greatest priority in this
+     * CellGame's music stack, or to priority 0 if the music stack is empty. The
+     * Music track will automatically begin playing.
+     * @param music The Music track to add
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
+     * @param replace If true, all other Music tracks assigned to the specified
+     * priority will be removed from it
+     */
+    public final void addMusic(Music music, boolean loop, boolean replace) {
+        addMusic(getMusicStackTop(), music, 1, 1, loop, replace);
+    }
+    
+    /**
+     * Adds the specified Music track to the greatest priority in this
+     * CellGame's music stack, or to priority 0 if the music stack is empty. The
+     * Music track will automatically begin playing.
+     * @param music The Music track to add
+     * @param speed The speed at which to play the specified Music track when it
+     * plays, with 1 representing no speed change
+     * @param volume The volume at which to play the specified Music track when
+     * it plays, with 1 representing no volume change
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
+     * @param replace If true, all other Music tracks assigned to the specified
+     * priority will be removed from it
+     */
+    public final void addMusic(Music music, double speed, double volume, boolean loop, boolean replace) {
+        addMusic(getMusicStackTop(), music, speed, volume, loop, replace);
+    }
+    
+    /**
+     * Adds the specified Music track to the greatest priority in this
+     * CellGame's music stack, replacing and removing all other Music tracks
+     * assigned to that priority, or to priority 0 if the music stack is empty.
+     * The Music track will automatically begin playing.
+     * @param music The Music track to add
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
+     */
+    public final void addMusic(Music music, boolean loop) {
+        addMusic(getMusicStackTop(), music, 1, 1, loop, true);
+    }
+    
+    /**
+     * Adds the specified Music track to the greatest priority in this
+     * CellGame's music stack, replacing and removing all other Music tracks
+     * assigned to that priority, or to priority 0 if the music stack is empty.
+     * The Music track will automatically begin playing.
+     * @param music The Music track to add
+     * @param speed The speed at which to play the specified Music track when it
+     * plays, with 1 representing no speed change
+     * @param volume The volume at which to play the specified Music track when
+     * it plays, with 1 representing no volume change
+     * @param loop If true, the Music track will loop indefinitely until
+     * stopped when it plays; otherwise, it will play once
+     */
+    public final void addMusic(Music music, double speed, double volume, boolean loop) {
+        addMusic(getMusicStackTop(), music, speed, volume, loop, true);
+    }
+    
+    private void removeMusicPriority(int priority) {
+        int oldTop = musicStack.lastKey();
+        musicStack.remove(priority);
+        if (priority == oldTop && !musicStack.isEmpty()) {
+            for (Map.Entry<Music,MusicInstance> entry : musicStack.get(musicStack.lastKey()).entrySet()) {
+                entry.getKey().play(entry.getValue());
             }
         }
     }
     
     /**
-     * Returns whether this CellGame's music is paused.
-     * @return Whether this CellGame's music is paused
+     * Removes the specified Music track from the specified priority in this
+     * CellGame's music stack if it is currently assigned to that priority. If
+     * that priority is the music stack's greatest, the specified Music track
+     * will automatically stop.
+     * @param priority The priority from which to remove the specified Music
+     * track
+     * @param music The Music track to remove
      */
-    public final boolean musicIsPaused() {
-        return musicPaused;
-    }
-    
-    /**
-     * Pauses this CellGame's music if it is not already paused.
-     */
-    public final void pauseMusic() {
-        if (!musicPaused) {
-            if (currentMusic != null) {
-                musicPosition = currentMusic.music.getPosition();
-                currentMusic.music.stop();
-            }
-            musicPaused = true;
-        }
-    }
-    
-    /**
-     * Resumes this CellGame's music if it is paused.
-     */
-    public final void resumeMusic() {
-        if (musicPaused) {
-            if (currentMusic != null) {
-                if (currentMusic.loop) {
-                    currentMusic.music.loop(currentMusic.speed, currentMusic.volume);
-                } else {
-                    currentMusic.music.play(currentMusic.speed, currentMusic.volume);
+    public final void removeMusic(int priority, Music music) {
+        if (!musicStack.isEmpty()) {
+            Map<Music,MusicInstance> musics = musicStack.get(priority);
+            if (musics != null && musics.containsKey(music)) {
+                music.stop();
+                musics.remove(music);
+                if (musics.isEmpty()) {
+                    removeMusicPriority(priority);
                 }
-                currentMusic.music.setPosition(musicPosition);
             }
-            musicPaused = false;
         }
     }
     
     /**
-     * Returns the music player's position in seconds in the currently playing
-     * Music track, or 0 if no Music track is currently playing.
-     * @return The music player's position in seconds in the currently playing
-     * Music track
+     * Removes from the specified priority in this CellGame's music stack all of
+     * the Music tracks currently assigned to it. If that priority is the music
+     * stack's greatest, the removed Music tracks will automatically stop.
+     * @param priority The priority from which to remove all Music tracks
      */
-    public final double getMusicPosition() {
-        return (currentMusic == null ? 0 : currentMusic.music.getPosition());
-    }
-    
-    /**
-     * Sets the music player's position in seconds in the currently playing
-     * Music track, if there is one.
-     * @param position The music player's new position in seconds
-     */
-    public final void setMusicPosition(double position) {
-        if (currentMusic != null) {
-            currentMusic.music.setPosition(position);
+    public final void removeMusic(int priority) {
+        if (!musicStack.isEmpty()) {
+            Map<Music,MusicInstance> musics = musicStack.get(priority);
+            if (musics != null) {
+                for (Music music : musics.keySet()) {
+                    music.stop();
+                }
+                removeMusicPriority(priority);
+            }
         }
     }
     
     /**
-     * Returns the volume of the currently playing Music track, with 1
-     * representing no volume change, or 0 if there is no Music track playing.
-     * @return The volume of the currently playing Music track
+     * Removes the specified Music track from the greatest priority in this
+     * CellGame's music stack if it is currently assigned to that priority. The
+     * specified Music track will automatically stop.
+     * @param music The Music track to remove
      */
-    public final double getMusicVolume() {
-        return (currentMusic == null ? 0 : currentMusic.music.getVolume());
+    public final void removeMusic(Music music) {
+        removeMusic(getMusicStackTop(), music);
     }
     
     /**
-     * Sets the volume of the currently playing Music track, with 1 representing
-     * no volume change, if a Music track is currently playing. This will
-     * cancel any active volume fades.
-     * @param volume The volume of the currently playing Music track
+     * Removes from the greatest priority in this CellGame's music stack all of
+     * the Music tracks currently assigned to it, if the music stack is not
+     * empty. The removed Music tracks will automatically stop.
      */
-    public final void setMusicVolume(double volume) {
-        if (currentMusic != null) {
-            currentMusic.volume = volume;
-            currentMusic.music.setVolume(volume);
-            musicFadeType = 0;
-        }
+    public final void removeMusic() {
+        removeMusic(getMusicStackTop());
     }
     
     /**
-     * Instructs the music player to gradually fade the volume of the currently
-     * playing Music track to the specified volume over the specified duration,
-     * if a Music track is currently playing.
-     * @param volume The eventual volume of the Music track
-     * @param duration The duration in seconds of the fade
+     * Removes from this CellGame's music stack all Music tracks assigned to any
+     * priority.
      */
-    public final void fadeMusicVolume(double volume, double duration) {
-        if (currentMusic != null) {
-            musicFadeType = 1;
-            fadeStartVolume = currentMusic.volume;
-            fadeEndVolume = volume;
-            fadeDuration = duration*1000;
-            msFading = 0;
-            currentMusic.volume = volume;
-        }
-    }
-    
-    /**
-     * Instructs the music player to gradually fade the volume of the currently
-     * playing music track to 0 over the specified duration, stopping the Music
-     * track once it is silent, if a Music track is currently playing.
-     * @param duration The duration in seconds of the fade-out
-     */
-    public final void fadeMusicOut(double duration) {
-        if (currentMusic != null) {
-            musicFadeType = 2;
-            fadeStartVolume = currentMusic.volume;
-            fadeEndVolume = 0;
-            fadeDuration = duration*1000;
-            msFading = 0;
-            currentMusic.volume = 0;
+    public final void removeAllMusic() {
+        if (!musicStack.isEmpty()) {
+            Map<Music,MusicInstance> musics = musicStack.get(getMusicStackTop());
+            for (Music music : musics.keySet()) {
+                music.stop();
+            }
+            musicStack.clear();
         }
     }
     

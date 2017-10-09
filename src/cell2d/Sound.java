@@ -65,14 +65,38 @@ public class Sound {
      * @return Whether this Sound is currently playing
      */
     public final boolean isPlaying() {
-        return audio != null && audio.isPlaying();
+        return loaded && audio.isPlaying();
+    }
+    
+    /**
+     * Plays this Sound.
+     * @param loop If true, this Sound will loop indefinitely until stopped;
+     * otherwise, it will play once
+     */
+    public final void play(boolean loop) {
+        play(1, 1, loop);
+    }
+    
+    /**
+     * Plays this Sound at the specified speed and volume.
+     * @param speed The speed at which to play this Sound, with 1 representing
+     * no speed change
+     * @param volume The volume at which to play this Sound, with 1 representing
+     * no volume change
+     * @param loop If true, this Sound will loop indefinitely until stopped;
+     * otherwise, it will play once
+     */
+    public final void play(double speed, double volume, boolean loop) {
+        if (loaded) {
+            audio.play(speed, volume, loop);
+        }
     }
     
     /**
      * Plays this Sound once.
      */
     public final void play() {
-        play(1, 1);
+        play(1, 1, false);
     }
     
     /**
@@ -83,29 +107,7 @@ public class Sound {
      * no volume change
      */
     public final void play(double speed, double volume) {
-        if (loaded) {
-            audio.play(speed, volume, false);
-        }
-    }
-    
-    /**
-     * Loops this Sound indefinitely.
-     */
-    public final void loop() {
-        loop(1, 1);
-    }
-    
-    /**
-     * Loops this Sound indefinitely at the specified speed and volume.
-     * @param speed The speed at which to play this Sound, with 1 representing
-     * no speed change
-     * @param volume The volume at which to play this Sound, with 1 representing
-     * no volume change
-     */
-    public final void loop(double speed, double volume) {
-        if (loaded) {
-            audio.play(speed, volume, true);
-        }
+        play(speed, volume, false);
     }
     
     /**
