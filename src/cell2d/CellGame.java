@@ -153,8 +153,7 @@ public abstract class CellGame {
     private double msPerFrame;
     private double msToRun = 0;
     private final DisplayMode[] displayModes;
-    private int screenWidth;
-    private int screenHeight;
+    private int screenWidth, screenHeight;
     private double scaleFactor;
     private double effectiveScaleFactor = 1;
     private int screenXOffset = 0;

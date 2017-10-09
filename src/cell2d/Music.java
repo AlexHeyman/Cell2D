@@ -27,11 +27,12 @@ public class Music {
     private final boolean blank;
     private boolean loaded = false;
     private final String path;
+    private final double loopStart, loopEnd;
     private Audio audio = null;
     private MusicInstance instance = null;
+    private double speed;
+    private double volume;
     private double pausePosition;
-    private double pauseSpeed = 0;
-    private double pauseVolume = 0;
     private FadeType speedFadeType;
     private double speedFadeStart = 0;
     private double speedFadeDuration = 0;
@@ -43,6 +44,8 @@ public class Music {
     
     private Music() {
         blank = true;
+        loopStart = 0;
+        loopEnd = -1;
         loaded = true;
         path = null;
         resetPlayData();
@@ -50,13 +53,38 @@ public class Music {
     
     /**
      * Creates a new Music track from an audio file. Files of WAV, OGG, and
-     * AIF(F) formats are supported.
+     * AIF(F) formats are supported. When this Music track is looping, it will
+     * return to the start of the track once it reaches the end.
      * @param path The relative path to the audio file
      * @param load Whether this Music track should load upon creation
      */
     public Music(String path, boolean load) {
+        this(path, 0, -1, load);
+    }
+    
+    /**
+     * Creates a new Music track from an audio file. Files of WAV, OGG, and
+     * AIF(F) formats are supported.
+     * @param path The relative path to the audio file
+     * @param loopStart The position in seconds in this Music track to which it
+     * should return at the start of a loop
+     * @param loopEnd The position in seconds in this Music track that, when
+     * reached, causes it to start a new loop if it is looping. If this is
+     * negative, this Music track will start a new loop when it reaches the end
+     * of the track.
+     * @param load Whether this Music track should load upon creation
+     */
+    public Music(String path, double loopStart, double loopEnd, boolean load) {
+        if (loopStart < 0) {
+            throw new RuntimeException("Attempted to give a Music track a negative loop start position");
+        } else if (loopEnd >= 0 && loopStart >= loopEnd) {
+            throw new RuntimeException("Attempted to give a Music track a loop start position after or "
+                    + "equal to its loop end position");
+        }
         blank = false;
         this.path = path;
+        this.loopStart = loopStart;
+        this.loopEnd = loopEnd;
         if (load) {
             load();
         }
@@ -64,6 +92,8 @@ public class Music {
     }
     
     final void resetPlayData() {
+        speed = 0;
+        volume = 0;
         pausePosition = -1;
         speedFadeType = FadeType.NONE;
         volumeFadeType = FadeType.NONE;
@@ -117,9 +147,13 @@ public class Music {
     final boolean play(MusicInstance instance) {
         if (loaded) {
             this.instance = instance;
-            resetPlayData();
+            pausePosition = -1;
+            speedFadeType = FadeType.NONE;
+            volumeFadeType = FadeType.NONE;
             if (!blank) {
-                audio.play(instance.destSpeed, instance.destVolume, instance.loop);
+                speed = instance.destSpeed;
+                volume = instance.destVolume;
+                audio.play(speed, volume, false);
             }
             return true;
         }
@@ -150,8 +184,6 @@ public class Music {
     public final void pause() {
         if (!blank && instance != null && pausePosition < 0) {
             pausePosition = audio.getPosition();
-            pauseSpeed = audio.getSpeed();
-            pauseVolume = audio.getVolume();
             audio.stop();
         }
     }
@@ -161,7 +193,7 @@ public class Music {
      */
     public final void resume() {
         if (!blank && instance != null && pausePosition >= 0) {
-            audio.play(pauseSpeed, pauseVolume, instance.loop);
+            audio.play(speed, volume, instance.loop);
             audio.setPosition(pausePosition);
             pausePosition = -1;
         }
@@ -202,7 +234,7 @@ public class Music {
      * @return The speed at which this Music track is playing
      */
     public final double getSpeed() {
-        return (audio == null ? 0 : (pausePosition < 0 ? audio.getSpeed() : pauseSpeed));
+        return speed;
     }
     
     /**
@@ -215,10 +247,9 @@ public class Music {
         if (!blank && instance != null) {
             speedFadeType = FadeType.NONE;
             instance.destSpeed = speed;
+            this.speed = speed;
             if (pausePosition < 0) {
                 audio.setSpeed(speed);
-            } else {
-                pauseSpeed = speed;
             }
         }
     }
@@ -233,7 +264,7 @@ public class Music {
     public final void fadeSpeed(double speed, double duration) {
         if (!blank && instance != null) {
             speedFadeType = FadeType.TO;
-            speedFadeStart = (pausePosition < 0 ? audio.getSpeed() : pauseSpeed);
+            speedFadeStart = this.speed;
             instance.destSpeed = speed;
             speedFadeDuration = duration*1000;
             speedMSFading = 0;
@@ -246,7 +277,7 @@ public class Music {
      * @return The volume at which this Music track is playing
      */
     public final double getVolume() {
-        return (audio == null ? 0 : (pausePosition < 0 ? audio.getVolume() : pauseVolume));
+        return volume;
     }
     
     /**
@@ -259,10 +290,9 @@ public class Music {
         if (!blank && instance != null) {
             volumeFadeType = FadeType.NONE;
             instance.destVolume = volume;
+            this.volume = volume;
             if (pausePosition < 0) {
                 audio.setVolume(volume);
-            } else {
-                pauseVolume = volume;
             }
         }
     }
@@ -277,7 +307,7 @@ public class Music {
     public final void fadeVolume(double volume, double duration) {
         if (!blank && instance != null) {
             volumeFadeType = FadeType.TO;
-            volumeFadeStart = (pausePosition < 0 ? audio.getVolume() : pauseVolume);
+            volumeFadeStart = this.volume;
             instance.destVolume = volume;
             volumeFadeDuration = duration*1000;
             volumeMSFading = 0;
@@ -295,7 +325,7 @@ public class Music {
             stop();
         } else if (instance != null) {
             volumeFadeType = FadeType.OUT;
-            volumeFadeStart = (pausePosition < 0 ? audio.getVolume() : pauseVolume);
+            volumeFadeStart = this.volume;
             instance.destVolume = 0;
             volumeFadeDuration = duration*1000;
             volumeMSFading = 0;
@@ -318,33 +348,40 @@ public class Music {
     public final void setLooping(boolean loop) {
         if (!blank && instance != null) {
             instance.loop = loop;
-            if (pausePosition < 0) {
-                audio.setLooping(loop);
-            }
         }
     }
     
     final boolean update(double msElapsed) {
-        if (instance == null) {
-            return true;
-        } else if (!blank && pausePosition < 0) {
+        if (!blank && pausePosition < 0) {
             if (!audio.isPlaying()) {
-                return true;
+                if (instance.loop) {
+                    audio.play(speed, volume, false);
+                    audio.setPosition(loopStart);
+                } else {
+                    instance = null;
+                    resetPlayData();
+                    return true;
+                }
+            } else if (loopEnd >= 0 && instance.loop && audio.getPosition() >= loopEnd) {
+                audio.setPosition(loopStart + ((audio.getPosition() - loopStart) % (loopEnd - loopStart)));
             }
             if (speedFadeType != FadeType.NONE) {
                 speedMSFading = Math.min(speedMSFading + msElapsed, speedFadeDuration);
                 if (speedMSFading == speedFadeDuration) {
-                    audio.setSpeed(instance.destSpeed);
+                    speed = instance.destSpeed;
+                    audio.setSpeed(speed);
                     speedFadeType = FadeType.NONE;
                 } else {
-                    audio.setSpeed(speedFadeStart
-                            + (speedMSFading/speedFadeDuration)*(instance.destSpeed - speedFadeStart));
+                    speed = speedFadeStart
+                            + (speedMSFading/speedFadeDuration)*(instance.destSpeed - speedFadeStart);
+                    audio.setSpeed(speed);
                 }
             }
             if (volumeFadeType != FadeType.NONE) {
                 volumeMSFading = Math.min(volumeMSFading + msElapsed, volumeFadeDuration);
                 if (volumeMSFading == volumeFadeDuration) {
-                    audio.setVolume(instance.destVolume);
+                    volume = instance.destVolume;
+                    audio.setVolume(volume);
                     if (volumeFadeType == FadeType.OUT) {
                         instance = null;
                         resetPlayData();
@@ -353,8 +390,9 @@ public class Music {
                     }
                     volumeFadeType = FadeType.NONE;
                 } else {
-                    audio.setVolume(volumeFadeStart
-                            + (volumeMSFading/volumeFadeDuration)*(instance.destVolume - volumeFadeStart));
+                    volume = volumeFadeStart
+                            + (volumeMSFading/volumeFadeDuration)*(instance.destVolume - volumeFadeStart);
+                    audio.setVolume(volume);
                 }
             }
         }

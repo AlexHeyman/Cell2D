@@ -150,29 +150,15 @@ class Audio {
         }
     }
     
-    double getSpeed() {
-        return (isPlaying() ? AL10.alGetSourcef(sources.get(index), AL10.AL_PITCH) : 0);
-    }
-    
     void setSpeed(double speed) {
         if (isPlaying()) {
             AL10.alSourcef(sources.get(index), AL10.AL_PITCH, (float)Math.max(speed, 0));
         }
     }
     
-    double getVolume() {
-        return (isPlaying() ? AL10.alGetSourcef(sources.get(index), AL10.AL_GAIN) : 0);
-    }
-    
     void setVolume(double volume) {
         if (isPlaying()) {
             AL10.alSourcef(sources.get(index), AL10.AL_GAIN, (float)Math.min(Math.max(volume, 0), 1));
-        }
-    }
-    
-    void setLooping(boolean loop) {
-        if (isPlaying()) {
-            AL10.alSourcei(sources.get(index), AL10.AL_LOOPING, loop ? AL10.AL_TRUE : AL10.AL_FALSE);
         }
     }
     
