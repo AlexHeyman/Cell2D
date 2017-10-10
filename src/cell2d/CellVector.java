@@ -477,8 +477,8 @@ public class CellVector {
     //Credit to Gareth Rees of StackOverflow for the line segment intersection algorithm.
     
     /**
-     * Returns whether the two specified open-ended line segments share any
-     * points.
+     * Returns whether the two specified line segments share any points. The
+     * line segments do not contain their own endpoints.
      * @param start1 One of the first line segment's endpoints
      * @param diff1 The difference of the first line segment's endpoints
      * @param start2 One of the second line segment's endpoints
@@ -510,9 +510,9 @@ public class CellVector {
     }
     
     /**
-     * Returns the single point at which the two specified open-ended line
-     * segments intersect, or null if they intersect at no points or at an
-     * infinity of points.
+     * Returns the single point at which the two specified line segments
+     * intersect, or null if they intersect at no points or at an infinity of
+     * points. The line segments do not contain their own endpoints.
      * @param start1 One of the first line segment's endpoints
      * @param diff1 The difference of the first line segment's endpoints
      * @param start2 One of the second line segment's endpoints
