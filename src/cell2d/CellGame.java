@@ -18,7 +18,6 @@ import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.command.BasicCommand;
@@ -559,14 +558,6 @@ public abstract class CellGame {
      */
     public final CellGameState getCurrentState() {
         return currentState;
-    }
-    
-    /**
-     * Returns the ID of this CellGame's current CellGameState.
-     * @return The ID of this CellGame's current CellGameState
-     */
-    public final int getCurrentStateID() {
-        return currentState.getID();
     }
     
     final void addState(CellGameState state) {
