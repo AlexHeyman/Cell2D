@@ -72,8 +72,9 @@ public class Sprite implements Animatable, Drawable {
      * @param path The relative path to the image file
      * @param originX The x-coordinate in pixels of the origin on the image
      * @param originY The y-coordinate in pixels of the origin on the image
-     * @param filters The Set of Filters that will have an effect on this Sprite
-     * when applied to it with draw()
+     * @param filters The Set of Filters that should have an effect on this
+     * Sprite when applied to it with draw(), or null if no Filters should have
+     * an effect
      * @param load Whether this Sprite should load upon creation
      */
     public Sprite(String path, int originX, int originY, Set<Filter> filters, boolean load) {
@@ -87,8 +88,9 @@ public class Sprite implements Animatable, Drawable {
      * @param originY The y-coordinate in pixels of the origin on the image
      * @param transColor This Sprite's transparent color, or null if there
      * should be none
-     * @param filters The Set of Filters that will have an effect on this Sprite
-     * when applied to it with draw()
+     * @param filters The Set of Filters that should have an effect on this
+     * Sprite when applied to it with draw(), or null if no Filters should have
+     * an effect
      * @param load Whether this Sprite should load upon creation
      */
     public Sprite(String path, int originX, int originY,
@@ -116,8 +118,9 @@ public class Sprite implements Animatable, Drawable {
      * @param transR The R value (0-255) of this Sprite's transparent color
      * @param transG The G value (0-255) of this Sprite's transparent color
      * @param transB The B value (0-255) of this Sprite's transparent color
-     * @param filters The Set of Filters that will have an effect on this Sprite
-     * when applied to it with draw()
+     * @param filters The Set of Filters that should have an effect on this
+     * Sprite when applied to it with draw(), or null if no Filters should have
+     * an effect
      * @param load Whether this Sprite should load upon creation
      */
     public Sprite(String path, int originX, int originY,
