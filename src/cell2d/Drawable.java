@@ -36,7 +36,8 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn image, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y, boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter);
+    public abstract void draw(Graphics g, int x, int y,
+            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter);
     
     /**
      * Draws this Drawable to the specified Graphics context.
@@ -53,7 +54,8 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn image, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y, double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter);
+    public abstract void draw(Graphics g, int x, int y, double scale,
+            boolean xFlip, boolean yFlip, double alpha, Filter filter);
     
     /**
      * Draws a rectangular region of this Drawable to the specified Graphics
@@ -96,7 +98,8 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn region, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y, int left, int right, int top, int bottom, boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter);
+    public abstract void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter);
     
     /**
      * Draws a rectangular region of this Drawable to the specified Graphics
@@ -122,6 +125,7 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn region, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y, int left, int right, int top, int bottom, double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter);
+    public abstract void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+            double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter);
     
 }

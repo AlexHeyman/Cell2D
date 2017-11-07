@@ -330,12 +330,14 @@ public class AnimationInstance implements Drawable {
     }
     
     @Override
-    public final void draw(Graphics g, int x, int y, boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
+    public final void draw(Graphics g, int x, int y,
+            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
         currentSprite.draw(g, x, y, xFlip, yFlip, angle, alpha, filter);
     }
     
     @Override
-    public final void draw(Graphics g, int x, int y, double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter) {
+    public final void draw(Graphics g, int x, int y, double scale,
+            boolean xFlip, boolean yFlip, double alpha, Filter filter) {
         currentSprite.draw(g, x, y, scale, xFlip, yFlip, alpha, filter);
     }
     
@@ -345,12 +347,14 @@ public class AnimationInstance implements Drawable {
     }
     
     @Override
-    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom, boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
         currentSprite.draw(g, x, y, left, right, top, bottom, xFlip, yFlip, angle, alpha, filter);
     }
     
     @Override
-    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom, double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter) {
+    public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+            double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter) {
         currentSprite.draw(g, x, y, left, right, top, bottom, scale, xFlip, yFlip, alpha, filter);
     }
     
