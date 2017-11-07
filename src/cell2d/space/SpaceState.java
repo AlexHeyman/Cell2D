@@ -2136,9 +2136,11 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         private final int type;
         private final SpaceObject<T> object;
         private final Direction direction;
-        private final long metric, diffX, diffY;
+        private final long metric;
+        private final long diffX, diffY;
         
-        private MoveEvent(int type, SpaceObject<T> object, Direction direction, long metric, long diffX, long diffY) {
+        private MoveEvent(int type, SpaceObject<T> object,
+                Direction direction, long metric, long diffX, long diffY) {
             this.type = type;
             this.object = object;
             this.direction = direction;

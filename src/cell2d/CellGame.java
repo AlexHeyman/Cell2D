@@ -160,8 +160,7 @@ public abstract class CellGame {
     private int screenYOffset = 0;
     private boolean fullscreen;
     private boolean updateScreen = true;
-    private Image loadingImage = null;
-    private boolean loadingScreenRenderedOnce = false;
+    private boolean loadingVisualsRenderedOnce = false;
     private final SortedMap<Integer,Map<Music,MusicInstance>> musicStack = new TreeMap<>();
     
     /**
@@ -177,12 +176,9 @@ public abstract class CellGame {
      * @param scaleFactor The initial factor by which the screen should be
      * scaled to make the size of the program window
      * @param fullscreen Whether this CellGame should start in fullscreen mode
-     * @param loadingImagePath The relative path to the image that this CellGame
-     * will display while loading before the first CellGameState is entered. If
-     * this is null, no loading image will be displayed.
      */
-    public CellGame(String gamename, int numCommands, int fps, int screenWidth,
-            int screenHeight, double scaleFactor, boolean fullscreen, String loadingImagePath) {
+    public CellGame(String gamename, int numCommands, int fps,
+            int screenWidth, int screenHeight, double scaleFactor, boolean fullscreen) {
         game = new Game(gamename);
         if (numCommands < 0) {
             throw new RuntimeException("Attempted to create a CellGame with a negative number of controls");
@@ -205,13 +201,6 @@ public abstract class CellGame {
         this.screenHeight = screenHeight;
         setScaleFactor(scaleFactor);
         this.fullscreen = fullscreen;
-        if (loadingImagePath != null) {
-            try {
-                loadingImage = new Image(loadingImagePath);
-            } catch (SlickException e) {
-                throw new RuntimeException("Failed to load a CellGame's loading image: " + loadingImagePath);
-            }
-        }
     }
     
     private void updateScreen(GameContainer container) throws SlickException {
@@ -302,7 +291,7 @@ public abstract class CellGame {
         
         @Override
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
-            if (loadingScreenRenderedOnce) {
+            if (loadingVisualsRenderedOnce) {
                 if (loaded) {
                     double msElapsed = Math.min(delta, msPerFrame);
                     if (!musicStack.isEmpty()) {
@@ -377,7 +366,8 @@ public abstract class CellGame {
         @Override
         public final void postRenderState(GameContainer container, Graphics g) throws SlickException {
             if (loaded) {
-                renderActions(g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
+                renderActions(g, screenXOffset, screenYOffset,
+                        screenXOffset + screenWidth, screenYOffset + screenHeight);
             }
             g.clearWorldClip();
         }
@@ -518,7 +508,8 @@ public abstract class CellGame {
         
         @Override
         public final void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-            state.renderActions(state.getGame(), g, screenXOffset, screenYOffset, screenXOffset + screenWidth, screenYOffset + screenHeight);
+            state.renderActions(state.getGame(), g, screenXOffset, screenYOffset,
+                    screenXOffset + screenWidth, screenYOffset + screenHeight);
         }
         
         @Override
@@ -543,10 +534,10 @@ public abstract class CellGame {
         
         @Override
         public final void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {
-            if (loadingImage != null) {
-                loadingImage.draw((x1 + x2 - loadingImage.getWidth())/2, (y1 + y2 - loadingImage.getHeight())/2);
+            if (!loadingVisualsRenderedOnce) {
+                renderLoadingVisuals(g, x1, y1, x2, y2);
+                loadingVisualsRenderedOnce = true;
             }
-            loadingScreenRenderedOnce = true;
         }
         
     }
@@ -617,6 +608,24 @@ public abstract class CellGame {
             game.enterState(id, leave, enter);
         }
     }
+    
+    /**
+     * Renders the visuals that this CellGame will display while its
+     * initActions() are in progress. This method is called automatically before
+     * initActions() is, so it cannot employ assets that are first loaded in
+     * initActions().
+     * @param g The Graphics context to which this CellGame is rendering the
+     * loading visuals
+     * @param x1 The x-coordinate in pixels of the screen's left edge on the
+     * Graphics context
+     * @param y1 The y-coordinate in pixels of the screen's top edge on the
+     * Graphics context
+     * @param x2 The x-coordinate in pixels of the screen's right edge on the
+     * screen on the Graphics context
+     * @param y2 The y-coordinate in pixels of the screen's bottom edge on the
+     * Graphics context
+     */
+    public void renderLoadingVisuals(Graphics g, int x1, int y1, int x2, int y2) {}
     
     /**
      * Actions for this CellGame to take when initializing itself before

@@ -922,7 +922,7 @@ public abstract class Hitbox<T extends CellGame> {
         return pointIntersectsPolygon(center, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     
-    private static boolean circleIntersectsOrthogonalLine(
+    private static boolean circleIntersectsOrthogonalSeg(
             long cu, long cv, long radius, long u1, long u2, long v) {
         v -= cv;
         if (Math.abs(v) < radius) {
@@ -937,11 +937,15 @@ public abstract class Hitbox<T extends CellGame> {
         if (cx > x1 && cx < x2 && cy > y1 && cy < y2) { //Circle's center is in rectangle
             return true;
         }
+        //Rectangle's top left vertex is in circle
+        if (CellVector.distanceBetween(cx, cy, x1, y1) < radius) {
+            return true;
+        }
         //Any of rectangle's edges intersect circle
-        return circleIntersectsOrthogonalLine(cx, cy, radius, x1, x2, y1)
-                || circleIntersectsOrthogonalLine(cx, cy, radius, x1, x2, y2)
-                || circleIntersectsOrthogonalLine(cy, cx, radius, y1, y2, x1)
-                || circleIntersectsOrthogonalLine(cy, cx, radius, y1, y2, x2);
+        return circleIntersectsOrthogonalSeg(cx, cy, radius, x1, x2, y1)
+                || circleIntersectsOrthogonalSeg(cx, cy, radius, x1, x2, y2)
+                || circleIntersectsOrthogonalSeg(cy, cx, radius, y1, y2, x1)
+                || circleIntersectsOrthogonalSeg(cy, cx, radius, y1, y2, x2);
     }
     
     private static boolean lineSegmentIntersectsPoint(CellVector start, CellVector diff, CellVector point) {
@@ -1001,9 +1005,9 @@ public abstract class Hitbox<T extends CellGame> {
         if (lineX2 > x1 && lineX2 < x2 && lineY2 > y1 && lineY2 < y2) {
             return true;
         }
+        CellVector topLeft = new CellVector(x1, y1);
         CellVector horizontalDiff = new CellVector(x2 - x1, 0);
         CellVector verticalDiff = new CellVector(0, y2 - y1);
-        CellVector topLeft = new CellVector(x1, y1);
         //Any of rectangle's edges intersect segment
         return CellVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
                 || CellVector.lineSegmentsIntersect(start, diff, new CellVector(x1, y2), horizontalDiff)
@@ -1011,16 +1015,44 @@ public abstract class Hitbox<T extends CellGame> {
                 || CellVector.lineSegmentsIntersect(start, diff, new CellVector(x2, y1), verticalDiff);
     }
     
+    private static boolean segIntersectsHorizontalSeg(
+            CellVector start, CellVector diff, long x1, long x2, long y, boolean closed) {
+        //Segment is half-closed at start; horizontal segment may be half-closed at x2
+        if (diff.getY() == 0) { //Segment is horizontal
+            //Segment is on same line as horizontal segment and intersects it horizontally
+            if (start.getY() != y) {
+                return false;
+            }
+            if (diff.getX() > 0) {
+                return (closed ? start.getX() <= x2 : start.getX() < x2)
+                        && start.getX() + diff.getX() > x1;
+            }
+            return start.getX() > x1 && start.getX() + diff.getX() < x2;
+        } else if (diff.getY() > 0) { //Segment goes downward
+            //Segment overlaps with horizontal segment vertically
+            if (start.getY() > y || start.getY() + diff.getY() <= y) {
+                return false;
+            }
+        } else if (diff.getY() < 0) { //Segment goes upward
+            //Segment overlaps with horizontal segment vertically
+            if (start.getY() < y || start.getY() + diff.getY() >= y) {
+                return false;
+            }
+        }
+        long x = start.getX() + Frac.div(Frac.mul(y - start.getY(), diff.getX()), diff.getY());
+        //Segment's point at horizontal segment's y is on horizontal segment
+        return x > x1 && (closed ? x <= x2 : x < x2);
+    }
+    
     //Credit to Mecki of StackOverflow for the point-polygon intersection algorithm.
     
     private static boolean pointIntersectsPolygon(CellVector point,
             long startX, CellVector[] vertices, CellVector[] diffs) {
-        CellVector start = new CellVector(startX, point.getY());
-        CellVector diff = new CellVector(point.getX() - startX, 0);
         //Line segment entering polygon to point crosses polygon's edges an odd number of times
         boolean intersects = false;
         for (int i = 0; i < vertices.length; i++) {
-            if (CellVector.lineSegmentsIntersect(start, diff, vertices[i], diffs[i])) {
+            if (segIntersectsHorizontalSeg(vertices[i], diffs[i],
+                    startX, point.getX(), point.getY(), intersects)) {
                 intersects = !intersects;
             }
         }
@@ -1044,19 +1076,19 @@ public abstract class Hitbox<T extends CellGame> {
             return lineSegmentIntersectsPoint(firstVertex, polygon.getAbsVertex(1).sub(firstVertex), point);
         }
         long startX = polygon.getLeftEdge() - 1;
-        CellVector start = new CellVector(startX, point.getY());
-        CellVector diff = new CellVector(point.getX() - startX, 0);
         CellVector lastVertex = firstVertex;
         //Line segment entering polygon to point crosses polygon's edges an odd number of times
         boolean intersects = false;
         for (int i = 1; i < numVertices; i++) {
             CellVector vertex = polygon.getAbsVertex(i);
-            if (CellVector.lineSegmentsIntersect(start, diff, lastVertex, CellVector.sub(vertex, lastVertex))) {
+            if (segIntersectsHorizontalSeg(lastVertex, CellVector.sub(vertex, lastVertex),
+                    startX, point.getX(), point.getY(), intersects)) {
                 intersects = !intersects;
             }
             lastVertex = vertex;
         }
-        if (CellVector.lineSegmentsIntersect(start, diff, lastVertex, CellVector.sub(firstVertex, lastVertex))) {
+        if (segIntersectsHorizontalSeg(lastVertex, CellVector.sub(firstVertex, lastVertex),
+                startX, point.getX(), point.getY(), intersects)) {
             intersects = !intersects;
         }
         return intersects;
@@ -1185,7 +1217,7 @@ public abstract class Hitbox<T extends CellGame> {
                 || CellVector.lineSegmentsIntersect(start, diff, topRight, verticalDiff)) {
             return true;
         }
-        //Rectangle's top left corner is in polygon
+        //Rectangle's top left vertex is in polygon
         return pointIntersectsPolygon(topLeft, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     

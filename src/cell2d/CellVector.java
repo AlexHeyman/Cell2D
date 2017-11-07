@@ -437,7 +437,8 @@ public class CellVector {
         return angle;
     }
     
-    private static boolean segBoxesIntersect(CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
+    private static boolean segBoxesIntersect(
+            CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
         long minX1, maxX1, minX2, maxX2;
         if (diff1.x > 0) {
             minX1 = start1.x;
@@ -485,7 +486,8 @@ public class CellVector {
      * @param diff2 The difference of the second line segment's endpoints
      * @return Whether the two line segments intersect
      */
-    public static final boolean lineSegmentsIntersect(CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
+    public static final boolean lineSegmentsIntersect(
+            CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
         if (!segBoxesIntersect(start1, diff1, start2, diff2)) {
             return false;
         }
@@ -496,10 +498,7 @@ public class CellVector {
                 long t0 = Frac.div(start2MinusStart1.dot(diff1), diff1Dot);
                 long diff2DotDiff1 = diff2.dot(diff1);
                 long t1 = Frac.div(diff2DotDiff1, diff1Dot);
-                if (diff2DotDiff1 < 0) {
-                    return t1 > 0 || t0 < Frac.UNIT;
-                }
-                return t0 > 0 || t1 < Frac.UNIT;
+                return (diff2DotDiff1 < 0 ? (t1 > 0 || t0 < Frac.UNIT) : (t0 > 0 || t1 < Frac.UNIT));
             }
             return false;
         }
@@ -519,7 +518,8 @@ public class CellVector {
      * @param diff2 The difference of the second line segment's endpoints
      * @return The point at which the two line segments intersect
      */
-    public static final CellVector lineSegmentsIntersectionPoint(CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
+    public static final CellVector lineSegmentsIntersectionPoint(
+            CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
         if (!segBoxesIntersect(start1, diff1, start2, diff2) || diff1.cross(diff2) == 0) {
             return null;
         }

@@ -207,7 +207,7 @@ public class AnimationInstance implements Drawable {
     public final void setIndex(int level, int index, boolean resetLowerIndices) {
         if (!blank && level >= 0 && level < indices.length) {
             Animatable frame = animation;
-            for (int i = indices.length - 1; i > level; i++) {
+            for (int i = indices.length - 1; i > level; i--) {
                 frame = frame.getFrame(indices[i]);
             }
             setIndex(level, frame, index, resetLowerIndices);
