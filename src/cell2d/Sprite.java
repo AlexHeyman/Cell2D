@@ -198,6 +198,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     final void loadFilter(Filter filter, Image image, BufferedImage bufferedImage) {
+        image.getWidth(); //Prompt the image to initialize itself if it hasn't already
         Image[] imageArray = new Image[4];
         imageArray[0] = image;
         imageArray[0].setCenterOfRotation(originX, originY);
@@ -404,10 +405,10 @@ public class Sprite implements Animatable, Drawable {
         }
     }
     
-    private void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+    private void draw(Graphics g, float x, float y, int left, int right, int top, int bottom,
             float scale, boolean xFlip, boolean yFlip, float angle, float alpha, Filter filter) {
         int index = 0;
-        int xOffset, yOffset;
+        float xOffset, yOffset;
         if (xFlip) {
             index += 1;
             xOffset = -this.right;
@@ -420,8 +421,8 @@ public class Sprite implements Animatable, Drawable {
         } else {
             yOffset = -originY;
         }
-        x += Math.round(xOffset*scale);
-        y += Math.round(yOffset*scale);
+        x += xOffset*scale;
+        y += yOffset*scale;
         Image image;
         if (filter == null) {
             image = defaultImages[index];
@@ -431,7 +432,7 @@ public class Sprite implements Animatable, Drawable {
         }
         image.setRotation(-angle);
         image.setAlpha(alpha);
-        g.drawImage(image, x, y, x + Math.round((right - left)*scale), y + Math.round((bottom - top)*scale), left, top, right, bottom);
+        g.drawImage(image, x, y, x + (right - left)*scale, y + (bottom - top)*scale, left, top, right, bottom);
     }
     
 }

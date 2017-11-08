@@ -49,7 +49,8 @@ public class SpriteSheet {
      */
     public SpriteSheet(String path, int width, int height, int spriteWidth, int spriteHeight,
             int spriteSpacing, int originX, int originY, Set<Filter> filters, boolean load) {
-        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, null, (filters == null ? null : new HashSet<>(filters)), load);
+        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing,
+                originX, originY, null, (filters == null ? null : new HashSet<>(filters)), load);
     }
     
     /**
@@ -72,7 +73,8 @@ public class SpriteSheet {
     public SpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
             int originY, Color transColor, Set<Filter> filters, boolean load) {
-        this(null, null, path, transColor, (filters == null ? null : new HashSet<>(filters)), width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, load);
+        this(null, null, path, transColor, (filters == null ? null : new HashSet<>(filters)),
+                width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, load);
     }
     
     /**
@@ -99,7 +101,8 @@ public class SpriteSheet {
     public SpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
             int originY, int transR, int transG, int transB, Set<Filter> filters, boolean load) {
-        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, new Color(transR, transG, transB), (filters == null ? null : new HashSet<>(filters)), load);
+        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY,
+                new Color(transR, transG, transB), (filters == null ? null : new HashSet<>(filters)), load);
     }
     
     /**
@@ -111,14 +114,16 @@ public class SpriteSheet {
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(SpriteSheet spriteSheet, Filter filter, boolean load) {
-        this(spriteSheet, filter, null, null, spriteSheet.filters, spriteSheet.width, spriteSheet.height, spriteSheet.spriteWidth, spriteSheet.spriteHeight, spriteSheet.spriteSpacing, spriteSheet.originX, spriteSheet.originY, load);
+        this(spriteSheet, filter, null, null, spriteSheet.filters, spriteSheet.width, spriteSheet.height,
+                spriteSheet.spriteWidth, spriteSheet.spriteHeight, spriteSheet.spriteSpacing,
+                spriteSheet.originX, spriteSheet.originY, load);
     }
     
-    private SpriteSheet(SpriteSheet recolorOf, Filter recolorFilter, String path,
+    private SpriteSheet(SpriteSheet basedOn, Filter basedFilter, String path,
             Color transColor, Set<Filter> filters, int width, int height,
             int spriteWidth, int spriteHeight, int spriteSpacing, int originX, int originY, boolean load) {
-        this.basedOn = recolorOf;
-        this.basedFilter = recolorFilter;
+        this.basedOn = basedOn;
+        this.basedFilter = basedFilter;
         this.path = path;
         this.transColor = transColor;
         this.filters = filters;
@@ -185,7 +190,8 @@ public class SpriteSheet {
     }
     
     private void loadFilter(Filter filter, Image image) {
-        org.newdawn.slick.SpriteSheet spriteSheet = new org.newdawn.slick.SpriteSheet(image, spriteWidth, spriteHeight, spriteSpacing);
+        org.newdawn.slick.SpriteSheet spriteSheet = new org.newdawn.slick.SpriteSheet(
+                image, spriteWidth, spriteHeight, spriteSpacing);
         for (int x = 0; x < sprites.length; x++) {
             Sprite[] column = sprites[x];
             for (int y = 0; y < column.length; y++) {
