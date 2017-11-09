@@ -20,7 +20,8 @@ import org.newdawn.slick.Image;
 public class Sprite implements Animatable, Drawable {
     
     /**
-     * A blank Sprite with no appearance.
+     * A blank Sprite with no appearance. It is considered to always be loaded
+     * and cannot be unloaded.
      */
     public static final Sprite BLANK = new Sprite();
     
@@ -138,7 +139,7 @@ public class Sprite implements Animatable, Drawable {
      * @param load Whether this Sprite should load upon creation
      */
     public Sprite(Sprite sprite, Filter filter, boolean load) {
-        if (sprite.bufferedImage == null) {
+        if (sprite.spriteSheet != null) {
             throw new RuntimeException("Attempted to create a Sprite from part of a SpriteSheet");
         }
         blank = false;

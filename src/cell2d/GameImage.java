@@ -9,6 +9,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.opengl.pbuffer.GraphicsFactory;
 
 /**
  * @author Andrew Heyman
@@ -89,7 +90,11 @@ class GameImage {
                     graphics.fillRect(x, y, 1, 1);
                 }
             }
-            graphics.flush();
+            try {
+                GraphicsFactory.releaseGraphicsForImage(image);
+            } catch (SlickException e) {
+                throw new RuntimeException(e.toString());
+            }
         }
         image.setFilter(Image.FILTER_NEAREST);
         return new GameImage(image, bufferedImage);
@@ -149,7 +154,11 @@ class GameImage {
                 graphics.fillRect(x, y, 1, 1);
             }
         }
-        graphics.flush();
+        try {
+            GraphicsFactory.releaseGraphicsForImage(image);
+        } catch (SlickException e) {
+            throw new RuntimeException(e.toString());
+        }
         return new GameImage(image, newImage);
     }
     
@@ -199,7 +208,11 @@ class GameImage {
                 }
             }
         }
-        graphics.flush();
+        try {
+            GraphicsFactory.releaseGraphicsForImage(image);
+        } catch (SlickException e) {
+            throw new RuntimeException(e.toString());
+        }
         return new GameImage(image, newImage);
     }
     
