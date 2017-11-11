@@ -788,7 +788,7 @@ public abstract class Hitbox<T extends CellGame> {
                 angle = 180 - angle;
             }
             if (parent.absYFlip) {
-                angle = 360 - angle;
+                angle = -angle;
             }
             absAngle = (parent.absAngle + angle) % 360;
             if (absAngle < 0) {
@@ -859,7 +859,8 @@ public abstract class Hitbox<T extends CellGame> {
         return CellVector.angleBetween(getAbsX(), getAbsY(), hitbox.getAbsX(), hitbox.getAbsY());
     }
     
-    private static boolean circleEdgeIntersectsSeg(CellVector center, long radius, CellVector start, CellVector diff) {
+    private static boolean circleEdgeIntersectsSeg(
+            CellVector center, long radius, CellVector start, CellVector diff) {
         //Credit to bobobobo of StackOverflow for the algorithm.
         CellVector f = CellVector.sub(start, center);
         long a = diff.dot(diff);
@@ -875,10 +876,29 @@ public abstract class Hitbox<T extends CellGame> {
         return (t1 > 0 && t1 < Frac.UNIT) || (t2 > 0 && t2 < Frac.UNIT);
     }
     
-    private static boolean circleIntersectsLineSegment(CellVector center, long radius, CellVector start, CellVector diff) {
+    private static boolean circleIntersectsLineSegment(
+            CellVector center, long radius, CellVector start, CellVector diff) {
         return center.distanceTo(start) < radius //Segment's first endpoint is in circle
                 || center.distanceTo(CellVector.add(start, diff)) < radius //Segment's second endpoint is in circle
                 || circleEdgeIntersectsSeg(center, radius, start, diff); //Segment intersects circle's edge
+    }
+    
+    private static boolean angleImpalesVertex(double angle, CellVector diff1, CellVector diff2) {
+        double angle1 = (diff1.getAngle() + 180 - angle) % 360;
+        if (angle1 < 0) {
+            angle1 += 360;
+        }
+        double angle2 = diff2.getAngle() - angle;
+        if (angle2 < 0) {
+            angle2 += 360;
+        }
+        return (angle1 < 180 && angle2 > 180) || (angle2 < 180 && angle1 > 180);
+    }
+    
+    private static boolean circleImpalesVertex(
+            CellVector center, long radius, CellVector diff1, CellVector vertex, CellVector diff2) {
+        return center.distanceTo(vertex) == radius
+                && angleImpalesVertex((center.angleTo(vertex) + 90) % 360, diff1, diff2);
     }
     
     private static boolean circleIntersectsPolygon(CellVector center, long radius, PolygonHitbox polygon) {
@@ -917,6 +937,15 @@ public abstract class Hitbox<T extends CellGame> {
         diffs[numVertices - 1] = CellVector.sub(firstVertex, vertices[numVertices - 1]);
         if (circleEdgeIntersectsSeg(center, radius, vertices[numVertices - 1], diffs[numVertices - 1])) {
             return true;
+        }
+        //Circle impales any of polygon's vertices
+        if (circleImpalesVertex(center, radius, diffs[numVertices - 1], vertices[0], diffs[0])) {
+            return true;
+        }
+        for (int i = 1; i < numVertices; i++) {
+            if (circleImpalesVertex(center, radius, diffs[i - 1], vertices[i], diffs[i])) {
+                return true;
+            }
         }
         //Circle's center is in polygon
         return pointIntersectsPolygon(center, polygon.getLeftEdge() - 1, vertices, diffs);
@@ -960,6 +989,25 @@ public abstract class Hitbox<T extends CellGame> {
                 && Math.abs(relPoint.getX()) < Math.abs(diff.getX());
     }
     
+    private static boolean lineSegmentImpalesVertex(
+            CellVector start, CellVector diff, CellVector diff1, CellVector vertex, CellVector diff2) {
+        return lineSegmentIntersectsPoint(start, diff, vertex)
+                && angleImpalesVertex(diff.getAngle(), diff1, diff2);
+    }
+    
+    private static boolean lineSegmentImpalesPolygonVertices(
+            CellVector start, CellVector diff, CellVector[] vertices, CellVector[] diffs) {
+        if (lineSegmentImpalesVertex(start, diff, diffs[vertices.length - 1], vertices[0], diffs[0])) {
+            return true;
+        }
+        for (int i = 1; i < vertices.length; i++) {
+            if (lineSegmentImpalesVertex(start, diff, diffs[i - 1], vertices[i], diffs[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private static boolean lineSegmentIntersectsPolygon(
             CellVector start, CellVector diff, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
@@ -989,6 +1037,10 @@ public abstract class Hitbox<T extends CellGame> {
         if (CellVector.lineSegmentsIntersect(start, diff, vertices[numVertices - 1], diffs[numVertices - 1])) {
             return true;
         }
+        //Segment impales any of polygon's vertices
+        if (lineSegmentImpalesPolygonVertices(start, diff, vertices, diffs)) {
+            return true;
+        }
         //One of segment's endpoints is in polygon
         return pointIntersectsPolygon(start, polygon.getLeftEdge() - 1, vertices, diffs);
     }
@@ -1009,10 +1061,23 @@ public abstract class Hitbox<T extends CellGame> {
         CellVector horizontalDiff = new CellVector(x2 - x1, 0);
         CellVector verticalDiff = new CellVector(0, y2 - y1);
         //Any of rectangle's edges intersect segment
-        return CellVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
+        if (CellVector.lineSegmentsIntersect(start, diff, topLeft, horizontalDiff)
                 || CellVector.lineSegmentsIntersect(start, diff, new CellVector(x1, y2), horizontalDiff)
                 || CellVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
-                || CellVector.lineSegmentsIntersect(start, diff, new CellVector(x2, y1), verticalDiff);
+                || CellVector.lineSegmentsIntersect(start, diff, new CellVector(x2, y1), verticalDiff)) {
+            return true;
+        }
+        //Segment impales any of rectangle's vertices
+        if (lineSegmentImpalesVertex(start, diff, horizontalDiff, new CellVector(x2, y1), verticalDiff)) {
+            return true;
+        }
+        CellVector leftEdge = new CellVector(0, y1 - y2);
+        if (lineSegmentImpalesVertex(start, diff, leftEdge, topLeft, horizontalDiff)) {
+            return true;
+        }
+        CellVector bottomEdge = new CellVector(x1 - x2, 0);
+        return lineSegmentImpalesVertex(start, diff, verticalDiff, new CellVector(x2, y2), bottomEdge)
+                || lineSegmentImpalesVertex(start, diff, bottomEdge, new CellVector(x1, y2), leftEdge);
     }
     
     private static boolean segIntersectsHorizontalSeg(
@@ -1162,6 +1227,18 @@ public abstract class Hitbox<T extends CellGame> {
                 return true;
             }
         }
+        //Any of polygon 1's edges impale any of polygon 2's vertices
+        for (int i = 0; i < numVertices1; i++) {
+            if (lineSegmentImpalesPolygonVertices(vertices1[i], diffs1[i], vertices2, diffs2)) {
+                return true;
+            }
+        }
+        //Any of polygon 2's edges impale any of polygon 1's vertices
+        for (int i = 0; i < numVertices2; i++) {
+            if (lineSegmentImpalesPolygonVertices(vertices2[i], diffs2[i], vertices1, diffs1)) {
+                return true;
+            }
+        }
         //Polygon 1's first vertex is in polygon 2, or polygon 2's first vertex is in polygon 1
         return pointIntersectsPolygon(firstVertex1, polygon2.getLeftEdge() - 1, vertices2, diffs2)
                 || pointIntersectsPolygon(firstVertex2, polygon1.getLeftEdge() - 1, vertices1, diffs1);
@@ -1216,6 +1293,33 @@ public abstract class Hitbox<T extends CellGame> {
                 || CellVector.lineSegmentsIntersect(start, diff, topLeft, verticalDiff)
                 || CellVector.lineSegmentsIntersect(start, diff, topRight, verticalDiff)) {
             return true;
+        }
+        //Any of rectangle's edges impale any of polygon's vertices
+        if (lineSegmentImpalesVertex(topLeft, horizontalDiff, diffs[numVertices - 1], vertices[0], diffs[0])
+                || lineSegmentImpalesVertex(bottomLeft, horizontalDiff, diffs[numVertices - 1], vertices[0], diffs[0])
+                || lineSegmentImpalesVertex(topLeft, verticalDiff, diffs[numVertices - 1], vertices[0], diffs[0])
+                || lineSegmentImpalesVertex(topRight, verticalDiff, diffs[numVertices - 1], vertices[0], diffs[0])) {
+            return true;
+        }
+        for (int i = 1; i < numVertices; i++) {
+            if (lineSegmentImpalesVertex(topLeft, horizontalDiff, diffs[i - 1], vertices[i], diffs[i])
+                    || lineSegmentImpalesVertex(bottomLeft, horizontalDiff, diffs[i - 1], vertices[i], diffs[i])
+                    || lineSegmentImpalesVertex(topLeft, verticalDiff, diffs[i - 1], vertices[i], diffs[i])
+                    || lineSegmentImpalesVertex(topRight, verticalDiff, diffs[i - 1], vertices[i], diffs[i])) {
+                return true;
+            }
+        }
+        //Any of polygon's edges impale any of rectangle's vertices
+        CellVector bottomRight = new CellVector(x2, y2);
+        CellVector bottomEdge = new CellVector(x1 - x2, 0);
+        CellVector leftEdge = new CellVector(0, y1 - y2);
+        for (int i = 0; i < numVertices; i++) {
+            if (lineSegmentImpalesVertex(vertices[i], diffs[i], leftEdge, topLeft, horizontalDiff)
+                    || lineSegmentImpalesVertex(vertices[i], diffs[i], horizontalDiff, topRight, verticalDiff)
+                    || lineSegmentImpalesVertex(vertices[i], diffs[i], verticalDiff, bottomRight, bottomEdge)
+                    || lineSegmentImpalesVertex(vertices[i], diffs[i], bottomEdge, bottomLeft, leftEdge)) {
+                return true;
+            }
         }
         //Rectangle's top left vertex is in polygon
         return pointIntersectsPolygon(topLeft, polygon.getLeftEdge() - 1, vertices, diffs);
