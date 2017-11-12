@@ -581,10 +581,10 @@ public abstract class CellGame {
     
     /**
      * Instructs this CellGame to enter its CellGameState with the specified ID,
-     * using the specified Transitions when leaving the current CellGameState
-     * and entering the new one, at the end of the current frame. If this
-     * CellGame has no CellGameState with the specified ID, this method will do
-     * nothing.
+     * using the specified Slick2D Transitions when leaving the current
+     * CellGameState and entering the new one, at the end of the current frame.
+     * If this CellGame has no CellGameState with the specified ID, this method
+     * will do nothing.
      * @param id The ID of the CellGameState to enter
      * @param leave The Transition to use when leaving the current CellGameState
      * @param enter The Transition to use when entering the new CellGameState

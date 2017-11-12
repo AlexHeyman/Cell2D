@@ -64,8 +64,8 @@ public class Sprite implements Animatable, Drawable {
         path = null;
         transColor = null;
         filters = null;
-        this.originX = spriteSheet.getOriginX();
-        this.originY = spriteSheet.getOriginY();
+        originX = spriteSheet.getOriginX();
+        originY = spriteSheet.getOriginY();
     }
     
     /**
@@ -130,6 +130,28 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
+     * Creates a new Sprite from a Slick2D Image. This Sprite will be considered
+     * to always be loaded and cannot be unloaded. It will also be considered
+     * non-copyable, which means that no new Sprites can be created from it. No
+     * Filters will have an effect on this Sprite when applied to it with
+     * draw().
+     * @param image The Image to create this Sprite from
+     */
+    public Sprite(Image image) {
+        blank = false;
+        loaded = true;
+        basedOn = null;
+        basedFilter = null;
+        spriteSheet = null;
+        path = null;
+        transColor = null;
+        filters = null;
+        originX = (int)Math.round(image.getCenterOfRotationX());
+        originY = (int)Math.round(image.getCenterOfRotationY());
+        loadFilter(null, image.copy(), null);
+    }
+    
+    /**
      * Creates a new Sprite from an existing Sprite with a Filter applied to it.
      * The existing Sprite must have been created as an individual Sprite rather
      * than as part of a SpriteSheet. The new Sprite will have the same Set of
@@ -141,17 +163,19 @@ public class Sprite implements Animatable, Drawable {
     public Sprite(Sprite sprite, Filter filter, boolean load) {
         if (sprite.spriteSheet != null) {
             throw new RuntimeException("Attempted to create a Sprite from part of a SpriteSheet");
+        } else if (sprite.bufferedImage == null) {
+            throw new RuntimeException("Attempted to create a Sprite from a non-copyable Sprite");
         }
         blank = false;
         loaded = false;
         basedOn = sprite;
         basedFilter = filter;
         spriteSheet = null;
-        this.path = null;
-        this.transColor = null;
-        this.filters = sprite.filters;
-        this.originX = sprite.originX;
-        this.originY = sprite.originY;
+        path = null;
+        transColor = null;
+        filters = sprite.filters;
+        originX = sprite.originX;
+        originY = sprite.originY;
         if (load) {
             load();
         }
@@ -228,13 +252,14 @@ public class Sprite implements Animatable, Drawable {
     public final boolean unload() {
         if (blank || !loaded) {
             return false;
-        }
-        loaded = false;
-        if (spriteSheet == null) {
+        } else if (spriteSheet != null) {
+            spriteSheet.tryUnload();
+        } else if (bufferedImage != null) {
             clear();
         } else {
-            spriteSheet.tryUnload();
+            return false;
         }
+        loaded = false;
         return true;
     }
     
@@ -294,6 +319,22 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
+     * Returns the x-coordinate in pixels of this Sprite's origin.
+     * @return The x-coordinate in pixels of this Sprite's origin
+     */
+    public final int getOriginX() {
+        return originX;
+    }
+    
+    /**
+     * Returns the y-coordinate in pixels of this Sprite's origin.
+     * @return The y-coordinate in pixels of this Sprite's origin
+     */
+    public final int getOriginY() {
+        return originY;
+    }
+    
+    /**
      * Returns this Sprite's width in pixels. If the Sprite is not loaded, this
      * method will return 0.
      * @return This Sprite's width in pixels
@@ -309,22 +350,6 @@ public class Sprite implements Animatable, Drawable {
      */
     public final int getHeight() {
         return height;
-    }
-    
-    /**
-     * Returns the x-coordinate in pixels of this Sprite's origin.
-     * @return The x-coordinate in pixels of this Sprite's origin
-     */
-    public final int getOriginX() {
-        return originX;
-    }
-    
-    /**
-     * Returns the y-coordinate in pixels of this Sprite's origin.
-     * @return The y-coordinate in pixels of this Sprite's origin
-     */
-    public final int getOriginY() {
-        return originY;
     }
     
     @Override
@@ -378,7 +403,7 @@ public class Sprite implements Animatable, Drawable {
             top += originY;
             bottom += originY;
             CellVector vector = new CellVector((long)left << Frac.BITS, (long)top << Frac.BITS).changeAngle(angle);
-            draw(g, x + Frac.toInt(vector.getX()), y + Frac.toInt(vector.getY()),
+            draw(g, x + (float)Frac.toDouble(vector.getX()), y + (float)Frac.toDouble(vector.getY()),
                     left, right, top, bottom, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
         }
     }
@@ -401,7 +426,7 @@ public class Sprite implements Animatable, Drawable {
             right += originX;
             top += originY;
             bottom += originY;
-            draw(g, (int)(x + Math.round(left*scale)), (int)(y + Math.round(top*scale)),
+            draw(g, x + (float)(left*scale), y + (float)(top*scale),
                     left, right, top, bottom, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
     }
