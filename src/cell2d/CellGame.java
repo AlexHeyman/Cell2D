@@ -886,39 +886,6 @@ public abstract class CellGame {
 	putKeycodeName(Input.KEY_SLEEP, "Sleep");
     }
     
-    private Pair<Integer,Integer> getDirectionControlData(ControllerDirectionControl control) {
-        for (int i = 0; i < MAX_CONTROLLERS; i++) {
-            if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.UP))) {
-                return new Pair<>(i, 0);
-            } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.DOWN))) {
-                return new Pair<>(i, 1);
-            } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.LEFT))) {
-                return new Pair<>(i, 2);
-            } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.RIGHT))) {
-                return new Pair<>(i, 3);
-            }
-        }
-        return null;
-    }
-    
-    private Pair<Integer,Integer> getButtonControlData(ControllerButtonControl control) {
-        for (int i = 0; i < MAX_CONTROLLERS; i++) {
-            for (int j = 1; j <= NORMAL_CTLR_BUTTONS; j++) {
-                if (control.equals(new ControllerButtonControl(i, j))) {
-                    return new Pair<>(i, j);
-                }
-            }
-        }
-        for (int i = 0; i < MAX_CONTROLLERS; i++) {
-            for (int j = NORMAL_CTLR_BUTTONS + 1; j <= MAX_CTLR_BUTTONS; j++) {
-                if (control.equals(new ControllerButtonControl(i, j))) {
-                    return new Pair<>(i, j);
-                }
-            }
-        }
-        return null;
-    }
-    
     public final String getControlName(Control control) {
         if (control instanceof KeyControl) {
             if (KEYCODE_NAMES == null) {
@@ -938,23 +905,31 @@ public abstract class CellGame {
                     return null;
             }
         } else if (control instanceof ControllerDirectionControl) {
-            Pair<Integer,Integer> controlData = getDirectionControlData((ControllerDirectionControl)control);
-            if (controlData != null) {
-                switch (controlData.getValue()) {
-                    case 0:
-                        return "C" + controlData.getKey() + "UP";
-                    case 1:
-                        return "C" + controlData.getKey() + "DWN";
-                    case 2:
-                        return "C" + controlData.getKey() + "LFT";
-                    case 3:
-                        return "C" + controlData.getKey() + "RGT";
+            for (int i = 0; i < MAX_CONTROLLERS; i++) {
+                if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.UP))) {
+                    return "C" + i + "UP";
+                } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.DOWN))) {
+                    return "C" + i + "DWN";
+                } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.LEFT))) {
+                    return "C" + i + "LFT";
+                } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.RIGHT))) {
+                    return "C" + i + "RGT";
                 }
             }
         } else if (control instanceof ControllerButtonControl) {
-            Pair<Integer,Integer> controlData = getButtonControlData((ControllerButtonControl)control);
-            if (controlData != null) {
-                return "C" + controlData.getKey() + "B" + controlData.getValue();
+            for (int i = 0; i < MAX_CONTROLLERS; i++) {
+                for (int j = 1; j <= NORMAL_CTLR_BUTTONS; j++) {
+                    if (control.equals(new ControllerButtonControl(i, j))) {
+                        return "C" + i + "B" + j;
+                    }
+                }
+            }
+            for (int i = 0; i < MAX_CONTROLLERS; i++) {
+                for (int j = NORMAL_CTLR_BUTTONS + 1; j <= MAX_CTLR_BUTTONS; j++) {
+                    if (control.equals(new ControllerButtonControl(i, j))) {
+                        return "C" + i + "B" + j;
+                    }
+                }
             }
         }
         return null;
