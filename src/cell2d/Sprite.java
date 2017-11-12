@@ -130,11 +130,12 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Creates a new Sprite from a Slick2D Image. This Sprite will be considered
-     * to always be loaded and cannot be unloaded. It will also be considered
-     * non-copyable, which means that no new Sprites can be created from it. No
-     * Filters will have an effect on this Sprite when applied to it with
-     * draw().
+     * Creates a new Sprite from a Slick2D Image. This Sprite's origin will be
+     * the Image's center of rotation with its coordinates rounded to the
+     * nearest integer. This Sprite will be considered to always be loaded and
+     * cannot be unloaded. It will also be considered non-copyable, which means
+     * that no new Sprites can be created from it. No Filters will have an
+     * effect on this Sprite when applied to it with draw().
      * @param image The Image to create this Sprite from
      */
     public Sprite(Image image) {
