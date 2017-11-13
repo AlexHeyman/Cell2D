@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import javafx.util.Pair;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -94,7 +93,7 @@ public abstract class CellGame {
     private static Map<Integer,String> KEYCODE_NAMES = null;
     private static Map<String,Integer> NAME_KEYCODES = null;
     private static final int MAX_CONTROLLERS = 16;
-    private static final int NORMAL_CTLR_BUTTONS = 12;
+    private static final int NORMAL_CTLR_BUTTONS = 16;
     private static final int MAX_CTLR_BUTTONS = 100;
     
     /**
@@ -901,8 +900,6 @@ public abstract class CellGame {
                     return "RMB";
                 case Input.MOUSE_MIDDLE_BUTTON:
                     return "MMB";
-                default:
-                    return null;
             }
         } else if (control instanceof ControllerDirectionControl) {
             for (int i = 0; i < MAX_CONTROLLERS; i++) {
@@ -918,14 +915,14 @@ public abstract class CellGame {
             }
         } else if (control instanceof ControllerButtonControl) {
             for (int i = 0; i < MAX_CONTROLLERS; i++) {
-                for (int j = 1; j <= NORMAL_CTLR_BUTTONS; j++) {
+                for (int j = 0; j < NORMAL_CTLR_BUTTONS; j++) {
                     if (control.equals(new ControllerButtonControl(i, j))) {
                         return "C" + i + "B" + j;
                     }
                 }
             }
             for (int i = 0; i < MAX_CONTROLLERS; i++) {
-                for (int j = NORMAL_CTLR_BUTTONS + 1; j <= MAX_CTLR_BUTTONS; j++) {
+                for (int j = NORMAL_CTLR_BUTTONS; j < MAX_CTLR_BUTTONS; j++) {
                     if (control.equals(new ControllerButtonControl(i, j))) {
                         return "C" + i + "B" + j;
                     }
@@ -962,16 +959,14 @@ public abstract class CellGame {
                 }
             }
             String controllerNumStr = controlName.substring(1, i);
-            if (controllerNumStr.charAt(0) == '0' && controllerNumStr.length() > 1) {
-                return null;
-            }
             int controllerNum;
             try {
                 controllerNum = Integer.parseInt(controllerNumStr);
             } catch (NumberFormatException e) {
                 return null;
             }
-            if (controllerNum < 0 || controllerNum >= MAX_CONTROLLERS) {
+            if (controllerNum < 0 || controllerNum >= MAX_CONTROLLERS
+                    || (controllerNumStr.charAt(0) == '0' && controllerNumStr.length() > 1)) {
                 return null;
             }
             if (c == 'B') {
@@ -985,16 +980,14 @@ public abstract class CellGame {
                     j++;
                 }
                 String buttonNumStr = controlName.substring(i, j);
-                if (buttonNumStr.charAt(0) == '0' && buttonNumStr.length() > 1) {
-                    return null;
-                }
                 int buttonNum;
                 try {
                     buttonNum = Integer.parseInt(buttonNumStr);
                 } catch (NumberFormatException e) {
                     return null;
                 }
-                if (buttonNum <= 0 || buttonNum > MAX_CONTROLLERS) {
+                if (buttonNum < 0 || buttonNum >= MAX_CTLR_BUTTONS
+                        || (buttonNumStr.charAt(0) == '0' && buttonNumStr.length() > 1)) {
                     return null;
                 }
                 return new ControllerButtonControl(controllerNum, buttonNum);
