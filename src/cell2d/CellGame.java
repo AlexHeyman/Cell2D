@@ -817,7 +817,7 @@ public abstract class CellGame {
 	putKeycodeName(Input.KEY_MULTIPLY, "Numpd*");
 	putKeycodeName(Input.KEY_LMENU, "LAlt");
 	putKeycodeName(Input.KEY_SPACE, "Space");
-	putKeycodeName(Input.KEY_CAPITAL, "Caps");
+	putKeycodeName(Input.KEY_CAPITAL, "CapsLk");
 	putKeycodeName(Input.KEY_F1, "F1");
         putKeycodeName(Input.KEY_F2, "F2");
         putKeycodeName(Input.KEY_F3, "F3");
@@ -829,7 +829,7 @@ public abstract class CellGame {
         putKeycodeName(Input.KEY_F9, "F9");
         putKeycodeName(Input.KEY_F10, "F10");
 	putKeycodeName(Input.KEY_NUMLOCK, "NumLk");
-	putKeycodeName(Input.KEY_SCROLL, "ScrLk");
+	putKeycodeName(Input.KEY_SCROLL, "ScrlLk");
 	putKeycodeName(Input.KEY_NUMPAD7, "Numpd7");
 	putKeycodeName(Input.KEY_NUMPAD8, "Numpd8");
 	putKeycodeName(Input.KEY_NUMPAD9, "Numpd9");
@@ -865,7 +865,7 @@ public abstract class CellGame {
 	putKeycodeName(Input.KEY_RCONTROL, "RCtrl");
 	putKeycodeName(Input.KEY_NUMPADCOMMA, "Numpd,");
 	putKeycodeName(Input.KEY_DIVIDE, "Numpd%");
-	putKeycodeName(Input.KEY_SYSRQ, "Sysrq");
+	putKeycodeName(Input.KEY_SYSRQ, "SysRq");
 	putKeycodeName(Input.KEY_RMENU, "RAlt");
 	putKeycodeName(Input.KEY_PAUSE, "Pause");
 	putKeycodeName(Input.KEY_HOME, "Home");
@@ -885,6 +885,17 @@ public abstract class CellGame {
 	putKeycodeName(Input.KEY_SLEEP, "Sleep");
     }
     
+    /**
+     * Returns a short, descriptive, and unique String name for the specified
+     * Control. The name will be no more than 6 characters long and contain only
+     * ASCII characters and no whitespace. Two distinct Control objects will
+     * have the same name if and only if they are equal. This method will return
+     * a null name for certain malformed or highly unusual Control objects, but
+     * any Control associated with an actual physical control device is almost
+     * guaranteed to have a non-null name.
+     * @param control The Control to name
+     * @return The name of the specified Control
+     */
     public final String getControlName(Control control) {
         if (control instanceof KeyControl) {
             if (KEYCODE_NAMES == null) {
@@ -904,13 +915,13 @@ public abstract class CellGame {
         } else if (control instanceof ControllerDirectionControl) {
             for (int i = 0; i < MAX_CONTROLLERS; i++) {
                 if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.UP))) {
-                    return "C" + i + "UP";
+                    return "C" + i + "Up";
                 } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.DOWN))) {
-                    return "C" + i + "DWN";
+                    return "C" + i + "Dwn";
                 } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.LEFT))) {
-                    return "C" + i + "LFT";
+                    return "C" + i + "Lft";
                 } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.RIGHT))) {
-                    return "C" + i + "RGT";
+                    return "C" + i + "Rgt";
                 }
             }
         } else if (control instanceof ControllerButtonControl) {
@@ -932,6 +943,12 @@ public abstract class CellGame {
         return null;
     }
     
+    /**
+     * Returns the Control whose name according to getControlName() is the
+     * specified String, or null if no Control has that String as a name.
+     * @param controlName The name of the Control to be returned
+     * @return The Control whose name is the specified String
+     */
     public final Control getControl(String controlName) {
         if (NAME_KEYCODES == null) {
             initKeycodeData();
@@ -993,13 +1010,13 @@ public abstract class CellGame {
                 return new ControllerButtonControl(controllerNum, buttonNum);
             }
             switch (controlName.substring(i)) {
-                case "UP":
+                case "Up":
                     return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.UP);
-                case "DWN":
+                case "Dwn":
                     return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.DOWN);
-                case "LFT":
+                case "Lft":
                     return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.LEFT);
-                case "RGT":
+                case "Rgt":
                     return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.RIGHT);
             }
         }
