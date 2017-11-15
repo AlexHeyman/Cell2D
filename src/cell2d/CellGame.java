@@ -82,9 +82,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.5.0.
+     * The version number of Cell2D, currently 1.5.1.
      */
-    public static final String VERSION = "1.5.0";
+    public static final String VERSION = "1.5.1";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -144,7 +144,8 @@ public abstract class CellGame {
     private Command[] commands;
     private CommandState[] commandStates;
     private CommandState[] commandChanges;
-    private int commandNumToBind = -1;
+    private int bindingCommandNum = -1;
+    private int boundCommandNum = -1;
     private int adjustedMouseX = 0;
     private int newMouseX = 0;
     private int adjustedMouseY = 0;
@@ -153,6 +154,7 @@ public abstract class CellGame {
     private int newMouseWheelChange = 0;
     private String typingString = null;
     private int maxTypingStringLength = 0;
+    private boolean finishTypingString = false;
     private int fps;
     private boolean showFPS = false;
     private double msPerFrame;
@@ -345,9 +347,6 @@ public abstract class CellGame {
                         } else if (updateScreen) {
                             updateScreen(container);
                         }
-                        if (commandNumToBind == -2) {
-                            commandNumToBind = -1;
-                        }
                     }
                 } else {
                     provider = new InputProvider(container.getInput());
@@ -356,6 +355,10 @@ public abstract class CellGame {
                     newMouseX = input.getMouseX();
                     newMouseY = input.getMouseY();
                     initActions();
+                    if (currentState == null) {
+                        throw new RuntimeException("A CellGame did not enter any of its CellGameStates "
+                                + "during initialization");
+                    }
                     loaded = true;
                 }
             }
@@ -390,7 +393,7 @@ public abstract class CellGame {
         
         @Override
         public final void keyPressed(int key, char c) {
-            if (commandNumToBind >= 0) {
+            if (bindingCommandNum >= 0) {
                 finishBindToCommand(new KeyControl(key));
             } else if (typingString != null) {
                 if (key == Input.KEY_ESCAPE) {
@@ -399,85 +402,87 @@ public abstract class CellGame {
                     if (typingString.length() > 0) {
                         char toDelete = typingString.charAt(typingString.length() - 1);
                         typingString = typingString.substring(0, typingString.length() - 1);
-                        currentState.charDeletedActions(currentState.game, toDelete);
+                        if (currentState != null) {
+                            currentState.charDeletedActions(currentState.game, toDelete);
+                        }
                     }
                 } else if (key == Input.KEY_DELETE) {
                     String s = typingString;
                     typingString = "";
-                    currentState.stringDeletedActions(currentState.game, s);
+                    if (currentState != null) {
+                        currentState.stringDeletedActions(currentState.game, s);
+                    }
                 } else if (key == Input.KEY_ENTER) {
-                    finishTypingString();
+                    finishTypingString = true;
                 } else if (c != '\u0000' && typingString.length() < maxTypingStringLength) {
                     typingString += c;
-                    currentState.charTypedActions(currentState.game, c);
+                    if (currentState != null) {
+                        currentState.charTypedActions(currentState.game, c);
+                    }
                 }
             }
         }
         
         @Override
         public final void mouseClicked(int button, int x, int y, int clickCount) {
-            if (commandNumToBind >= 0) {
+            if (bindingCommandNum >= 0) {
                 finishBindToCommand(new MouseButtonControl(button));
             }
         }
         
         @Override
         public final void controllerUpPressed(int controller) {
-            if (commandNumToBind >= 0) {
+            if (bindingCommandNum >= 0) {
                 finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.UP));
             }
         }
         
         @Override
         public final void controllerDownPressed(int controller) {
-            if (commandNumToBind >= 0) {
+            if (bindingCommandNum >= 0) {
                 finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.DOWN));
             }
         }
         
         @Override
         public final void controllerLeftPressed(int controller) {
-            if (commandNumToBind >= 0) {
+            if (bindingCommandNum >= 0) {
                 finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.LEFT));
             }
         }
         
         @Override
         public final void controllerRightPressed(int controller) {
-            if (commandNumToBind >= 0) {
+            if (bindingCommandNum >= 0) {
                 finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.RIGHT));
             }
         }
         
         @Override
         public final void controllerButtonPressed(int controller, int button) {
-            if (commandNumToBind >= 0) {
+            if (bindingCommandNum >= 0) {
                 finishBindToCommand(new ControllerButtonControl(controller, button));
             }
         }
         
         @Override
         public final void controlPressed(Command command) {
-            if (typingString == null) {
-                if (commandNumToBind == -1) {
-                    int i = Arrays.asList(commands).indexOf(command);
-                    if (i >= 0) {
-                        if (commandChanges[i] == CommandState.NOTHELD
-                                || commandChanges[i] == CommandState.TAPPED) {
-                            commandChanges[i] = CommandState.PRESSED;
-                        } else if (commandChanges[i] == CommandState.RELEASED) {
-                            commandChanges[i] = CommandState.UNTAPPED;
-                        }
+            if (bindingCommandNum == -1 && boundCommandNum == -1 && typingString == null) {
+                int i = Arrays.asList(commands).indexOf(command);
+                if (i >= 0) {
+                    if (commandChanges[i] == CommandState.NOTHELD
+                            || commandChanges[i] == CommandState.TAPPED) {
+                        commandChanges[i] = CommandState.PRESSED;
+                    } else if (commandChanges[i] == CommandState.RELEASED) {
+                        commandChanges[i] = CommandState.UNTAPPED;
                     }
-                } else if (commandNumToBind == -2) {
-                    commandNumToBind = -1;
                 }
             }
         }
         
         @Override
         public final void controlReleased(Command command) {
-            if (commandNumToBind == -1 && typingString == null) {
+            if (bindingCommandNum == -1 && boundCommandNum == -1 && typingString == null) {
                 int i = Arrays.asList(commands).indexOf(command);
                 if (i >= 0) {
                     if (commandChanges[i] == CommandState.HELD
@@ -486,6 +491,25 @@ public abstract class CellGame {
                     } else if (commandChanges[i] == CommandState.PRESSED) {
                         commandChanges[i] = CommandState.TAPPED;
                     }
+                }
+            }
+        }
+        
+        @Override
+        public final void inputEnded() {
+            if (boundCommandNum >= 0) {
+                int commandNum = boundCommandNum;
+                boundCommandNum = -1;
+                if (currentState != null) {
+                    currentState.bindFinishedActions(currentState.game, commandNum);
+                }
+            } else if (finishTypingString) {
+                String s = typingString;
+                typingString = null;
+                maxTypingStringLength = 0;
+                finishTypingString = false;
+                if (currentState != null) {
+                    currentState.stringFinishedActions(currentState.game, s);
                 }
             }
         }
@@ -629,7 +653,8 @@ public abstract class CellGame {
      * entering its first state. This should include creating at least one
      * CellGameState for it, binding default controls to its commands, loading
      * assets, etc. enterState() must be called during this method to tell the
-     * CellGame which CellGameState to start out in, or the game will crash.
+     * CellGame which CellGameState to start out in, or an Exception will be
+     * thrown.
      */
     public abstract void initActions();
     
@@ -715,14 +740,16 @@ public abstract class CellGame {
      * @return The number of the command to which this CellGame has been
      * instructed to bind the next valid control pressed
      */
-    public final int getBindingCommand() {
-        return commandNumToBind;
+    public final int getBindingCommandNum() {
+        return bindingCommandNum;
     }
     
     /**
      * Instructs this CellGame to bind the next valid control pressed to the
-     * specified command. This method will throw an Exception if the CellGame is
-     * already being used to type a string.
+     * specified command. After that control is bound, the bindFinishedActions()
+     * method of this CellGame's current CellGameState will be called. This
+     * method will throw an Exception if this CellGame is already being used to
+     * type a string.
      * @param commandNum The number of the command to which the next valid
      * control pressed should be bound
      */
@@ -733,15 +760,16 @@ public abstract class CellGame {
         if (typingString != null) {
             throw new RuntimeException("Attempted to begin waiting to bind to command number " + commandNum + " while already typing to a String");
         }
-        commandNumToBind = commandNum;
+        bindingCommandNum = commandNum;
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
         }
     }
     
     private void finishBindToCommand(Control control) {
-        bindControl(commandNumToBind, control);
-        commandNumToBind = -2;
+        bindControl(bindingCommandNum, control);
+        boundCommandNum = bindingCommandNum;
+        bindingCommandNum = -1;
     }
     
     /**
@@ -749,7 +777,7 @@ public abstract class CellGame {
      * pressed to a specified command, if it has been instructed to do so.
      */
     public final void cancelBindToCommand() {
-        commandNumToBind = -1;
+        bindingCommandNum = -1;
     }
     
     private static void putKeycodeName(int keycode, String name) {
@@ -1099,13 +1127,25 @@ public abstract class CellGame {
     }
     
     /**
+     * Returns the maximum length in characters of the String that this CellGame
+     * is being used to type, or 0 if this CellGame is not being used to type a
+     * String.
+     * @return The maximum length of the String that this CellGame is being used
+     * to type
+     */
+    public final int getMaxTypingStringLength() {
+        return maxTypingStringLength;
+    }
+    
+    /**
      * Instructs this CellGame to interpret all inputs as typing a String with a
      * specified maximum length until further notice. While typing, the
      * Backspace key deletes individual characters, the Delete key resets the
      * String to the empty string, the Escape key calls cancelTypingString(),
-     * and the Enter key calls finishTypingString(). This method will throw an
-     * Exception if this CellGame has already been instructed to bind the next
-     * control pressed to a specified command.
+     * and the Enter key finishes the typing and calls the
+     * stringFinishedActions() method of this CellGame's current CellGameState.
+     * This method will throw an Exception if this CellGame has already been
+     * instructed to bind the next control pressed to a specified command.
      * @param maxLength The maximum length in characters of the String to be
      * typed
      */
@@ -1118,8 +1158,9 @@ public abstract class CellGame {
      * specified initial value and maximum length until further notice. While
      * typing, the Backspace key deletes individual characters, the Delete key
      * resets the String to the empty string, the Escape key calls
-     * cancelTypingString(), and the Enter key calls finishTypingString(). This
-     * method will throw an Exception if this CellGame has already been
+     * cancelTypingString(), and the Enter key finishes the typing and calls the
+     * stringFinishedActions() method of this CellGame's current CellGameState.
+     * This method will throw an Exception if this CellGame has already been
      * instructed to bind the next control pressed to a specified command.
      * @param initialString The initial value of the String to be typed
      * @param maxLength The maximum length in characters of the String to be
@@ -1129,8 +1170,8 @@ public abstract class CellGame {
         if (maxLength <= 0) {
             throw new RuntimeException("Attempted to begin typing to a String with non-positive maximum length " + maxLength);
         }
-        if (commandNumToBind >= 0) {
-            throw new RuntimeException("Attempted to begin typing to a String while already binding to command number " + commandNumToBind);
+        if (bindingCommandNum >= 0) {
+            throw new RuntimeException("Attempted to begin typing to a String while already binding to command number " + bindingCommandNum);
         }
         if (initialString == null) {
             initialString = "";
@@ -1143,20 +1184,8 @@ public abstract class CellGame {
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
         }
-        currentState.stringBeganActions(currentState.game, initialString);
-    }
-    
-    /**
-     * Instructs this CellGame to stop interpreting inputs as typing a String,
-     * if it was doing so, and consider the String finished. This will call the
-     * stringFinishedActions() method of this CellGame's current CellGameState.
-     */
-    public final void finishTypingString() {
-        if (typingString != null) {
-            String s = typingString;
-            typingString = null;
-            maxTypingStringLength = 0;
-            currentState.stringFinishedActions(currentState.game, s);
+        if (currentState != null) {
+            currentState.stringBeganActions(currentState.game, initialString);
         }
     }
     
@@ -1170,7 +1199,9 @@ public abstract class CellGame {
             String s = typingString;
             typingString = null;
             maxTypingStringLength = 0;
-            currentState.stringCanceledActions(currentState.game, s);
+            if (currentState != null) {
+                currentState.stringCanceledActions(currentState.game, s);
+            }
         }
     }
     

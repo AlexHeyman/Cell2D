@@ -363,6 +363,14 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     public void renderActions(T game, Graphics g, int x1, int y1, int x2, int y2) {}
     
     /**
+     * Actions for this CellGameState to take immediately after its CellGame has
+     * bound the last valid control pressed to a specified command.
+     * @param game This CellGameState's CellGame
+     * @param commandNum The number of the command that was bound to
+     */
+    public void bindFinishedActions(T game, int commandNum) {}
+    
+    /**
      * Actions for this CellGameState to take immediately after its CellGame
      * begins typing a new String.
      * @param game This CellGameState's CellGame
