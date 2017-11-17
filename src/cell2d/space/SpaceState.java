@@ -37,24 +37,24 @@ import org.newdawn.slick.Graphics;
  * that Thinkers are assigned to ThinkerGroups. Similarly to Thinkers, the
  * actual addition or removal of a SpaceObject to or from a SpaceState is
  * delayed until any and all current iterations over its SpaceThinkers,
- * SpaceObjects, or ThinkerObjects, such as the periods during which
- * ThinkerObjects move or SpaceThinkers take their time-dependent actions, have
+ * SpaceObjects, or MobileObjects, such as the periods during which
+ * MobileObjects move or SpaceThinkers take their time-dependent actions, have
  * been completed. Multiple delayed instructions may be successfully given to
  * SpaceStates regarding the same SpaceObject without having to wait until all
  * iterations have finished.</p>
  * 
  * <p>SpaceStates use cells to organize SpaceObjects by location, improving the
- * efficiency of processes like ThinkerObject movement that are concerned only
+ * efficiency of processes like MobileObject movement that are concerned only
  * with SpaceObjects in a small region of space. For maximum efficiency, cells
  * should be set to be large enough that SpaceObjects do not change which cells
  * they are in too frequently, but small enough that not too many SpaceObjects
  * are in each cell at any one time.</p>
  * 
  * <p>Every frame, between the periods in which its SpaceThinkers perform their
- * beforeMovementActions() and frameActions(), a SpaceState moves each of its
- * ThinkerObjects by the sum of its velocity and step multiplied by its time
+ * beforeMovementActions() and their frameActions(), a SpaceState moves each of
+ * its MobileObjects by the sum of its velocity and step multiplied by its time
  * factor, then resets its step to (0, 0). This, along with manual calls to the
- * ThinkerObject's doMovement() method, is when the ThinkerObject interacts with
+ * MobileObject's doMovement() method, is when the MobileObject interacts with
  * the solid surfaces of SpaceObjects in its path if it has Cell2D's standard
  * collision mechanics enabled.</p>
  * 
@@ -82,10 +82,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     private static abstract class SpaceComparator<T> implements Comparator<T>, Serializable {}
     
-    private Comparator<ThinkerObject<T>> movementPriorityComparator = new SpaceComparator<ThinkerObject<T>>() {
+    private Comparator<MobileObject<T>> movementPriorityComparator = new SpaceComparator<MobileObject<T>>() {
         
         @Override
-        public final int compare(ThinkerObject<T> object1, ThinkerObject<T> object2) {
+        public final int compare(MobileObject<T> object1, MobileObject<T> object2) {
             int diff = object2.movementPriority - object1.movementPriority;
             return (diff == 0 ? Long.signum(object1.id - object2.id) : diff);
         }
@@ -152,9 +152,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     private int objectIterators = 0;
     private final Queue<ObjectChangeData<T>> objectChanges = new LinkedList<>();
     private boolean updatingObjectList = false;
-    private final SortedSet<ThinkerObject<T>> thinkerObjects = new TreeSet<>(movementPriorityComparator);
-    private int thinkerObjectIterators = 0;
-    private final Queue<ThinkerObjectChangeData<T>> thinkerObjectChanges = new LinkedList<>();
+    private final SortedSet<MobileObject<T>> mobileObjects = new TreeSet<>(movementPriorityComparator);
+    private int mobileObjectIterators = 0;
+    private final Queue<MobileObjectChangeData<T>> mobileObjectChanges = new LinkedList<>();
     private long cellWidth, cellHeight;
     private final Map<Point,Cell> cells = new HashMap<>();
     private int cellLeft = 0;
@@ -1001,7 +1001,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     private void updateObjectList() {
-        if (objectIterators == 0 && thinkerObjectIterators == 0
+        if (objectIterators == 0 && mobileObjectIterators == 0
                 && !iteratingThroughThinkers() && !updatingObjectList) {
             updatingObjectList = true;
             while (!objectChanges.isEmpty()) {
@@ -1021,22 +1021,21 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     /**
-     * Returns the number of ThinkerObjects that are assigned to this
-     * SpaceState.
-     * @return The number of ThinkerObjects that are assigned to this SpaceState
+     * Returns the number of MobileObjects that are assigned to this SpaceState.
+     * @return The number of MobileObjects that are assigned to this SpaceState
      */
-    public final int getNumThinkerObjects() {
-        return thinkerObjects.size();
+    public final int getNumMobileObjects() {
+        return mobileObjects.size();
     }
     
-    private class ThinkerObjectIterator implements SafeIterator<ThinkerObject<T>> {
+    private class MobileObjectIterator implements SafeIterator<MobileObject<T>> {
         
         private boolean stopped = false;
-        private final Iterator<ThinkerObject<T>> iterator = thinkerObjects.iterator();
-        private ThinkerObject lastObject = null;
+        private final Iterator<MobileObject<T>> iterator = mobileObjects.iterator();
+        private MobileObject lastObject = null;
         
-        private ThinkerObjectIterator() {
-            thinkerObjectIterators++;
+        private MobileObjectIterator() {
+            mobileObjectIterators++;
         }
         
         @Override
@@ -1052,7 +1051,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         
         @Override
-        public final ThinkerObject next() {
+        public final MobileObject next() {
             if (stopped) {
                 return null;
             }
@@ -1072,8 +1071,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         public final void stop() {
             if (!stopped) {
                 stopped = true;
-                thinkerObjectIterators--;
-                updateThinkerObjectList();
+                mobileObjectIterators--;
+                updateMobileObjectList();
             }
         }
         
@@ -1081,38 +1080,38 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     /**
      * Returns whether any Iterators over this SpaceState's list of
-     * ThinkerObjects are in progress.
+     * MobileObjects are in progress.
      * @return Whether any Iterators over this SpaceState's list of
-     * ThinkerObjects are in progress
+     * MobileObjects are in progress
      */
-    public final boolean iteratingThroughThinkerObjects() {
-        return thinkerObjectIterators > 0;
+    public final boolean iteratingThroughMobileObjects() {
+        return mobileObjectIterators > 0;
     }
     
     /**
-     * Returns a new Iterator over this SpaceState's list of ThinkerObjects.
-     * @return A new Iterator over this SpaceState's list of ThinkerObjects
+     * Returns a new Iterator over this SpaceState's list of MobileObjects.
+     * @return A new Iterator over this SpaceState's list of MobileObjects
      */
-    public final SafeIterator<ThinkerObject<T>> thinkerObjectIterator() {
-        return new ThinkerObjectIterator();
+    public final SafeIterator<MobileObject<T>> mobileObjectIterator() {
+        return new MobileObjectIterator();
     }
     
-    private static class ThinkerObjectChangeData<T extends CellGame> {
+    private static class MobileObjectChangeData<T extends CellGame> {
         
         private boolean used = false;
         private final boolean changePriority;
-        private final ThinkerObject<T> object;
+        private final MobileObject<T> object;
         private final boolean add;
         private final int movementPriority;
         
-        private ThinkerObjectChangeData(ThinkerObject<T> object, boolean add) {
+        private MobileObjectChangeData(MobileObject<T> object, boolean add) {
             changePriority = false;
             this.object = object;
             this.add = add;
             movementPriority = 0;
         }
         
-        private ThinkerObjectChangeData(ThinkerObject<T> object, int movementPriority) {
+        private MobileObjectChangeData(MobileObject<T> object, int movementPriority) {
             changePriority = true;
             this.object = object;
             add = false;
@@ -1121,39 +1120,39 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
     }
     
-    final void addThinkerObject(ThinkerObject<T> object) {
-        thinkerObjectChanges.add(new ThinkerObjectChangeData<>(object, true));
-        updateThinkerObjectList();
+    final void addMobileObject(MobileObject<T> object) {
+        mobileObjectChanges.add(new MobileObjectChangeData<>(object, true));
+        updateMobileObjectList();
     }
     
-    final void removeThinkerObject(ThinkerObject<T> object) {
-        thinkerObjectChanges.add(new ThinkerObjectChangeData<>(object, false));
-        updateThinkerObjectList();
+    final void removeMobileObject(MobileObject<T> object) {
+        mobileObjectChanges.add(new MobileObjectChangeData<>(object, false));
+        updateMobileObjectList();
     }
     
-    final void changeThinkerObjectMovementPriority(ThinkerObject<T> object, int movementPriority) {
-        thinkerObjectChanges.add(new ThinkerObjectChangeData<>(object, movementPriority));
-        updateThinkerObjectList();
+    final void changeMobileObjectMovementPriority(MobileObject<T> object, int movementPriority) {
+        mobileObjectChanges.add(new MobileObjectChangeData<>(object, movementPriority));
+        updateMobileObjectList();
     }
     
-    private void updateThinkerObjectList() {
-        if (thinkerObjectIterators == 0) {
-            while (!thinkerObjectChanges.isEmpty()) {
-                ThinkerObjectChangeData<T> data = thinkerObjectChanges.remove();
+    private void updateMobileObjectList() {
+        if (mobileObjectIterators == 0) {
+            while (!mobileObjectChanges.isEmpty()) {
+                MobileObjectChangeData<T> data = mobileObjectChanges.remove();
                 if (!data.used) {
                     data.used = true;
                     if (data.changePriority) {
                         if (data.object.state == null) {
                             data.object.movementPriority = data.movementPriority;
                         } else {
-                            thinkerObjects.remove(data.object);
+                            mobileObjects.remove(data.object);
                             data.object.movementPriority = data.movementPriority;
-                            thinkerObjects.add(data.object);
+                            mobileObjects.add(data.object);
                         }
                     } else if (data.add) {
-                        thinkerObjects.add(data.object);
+                        mobileObjects.add(data.object);
                     } else {
-                        thinkerObjects.remove(data.object);
+                        mobileObjects.remove(data.object);
                     }
                 }
             }
@@ -1189,7 +1188,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     public final <O extends SpaceObject<T>> O nearestObject(long pointX, long pointY, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        for (SpaceObject<T> object : (ThinkerObject.class.isAssignableFrom(cls) ? thinkerObjects : spaceObjects)) {
+        for (SpaceObject<T> object : (MobileObject.class.isAssignableFrom(cls) ? mobileObjects : spaceObjects)) {
             if (cls.isAssignableFrom(object.getClass())) {
                 long distance = CellVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
                 if (nearestDistance < 0 || distance < nearestDistance) {
@@ -2113,8 +2112,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return false;
     }
     
-    private boolean areRelated(ThinkerObject object1, ThinkerObject object2) {
-        ThinkerObject ancestor = object1.effLeader;
+    private boolean areRelated(MobileObject object1, MobileObject object2) {
+        MobileObject ancestor = object1.effLeader;
         while (ancestor != null) {
             if (ancestor == object2) {
                 return true;
@@ -2153,11 +2152,11 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     private static class MoveData<T extends CellGame> {
         
-        private final ThinkerObject<T> object;
+        private final MobileObject<T> object;
         private final boolean moveX, moveY;
         private final long diffX, diffY;
         
-        private MoveData(ThinkerObject<T> object, boolean moveX, boolean moveY, long diffX, long diffY) {
+        private MoveData(MobileObject<T> object, boolean moveX, boolean moveY, long diffX, long diffY) {
             this.object = object;
             this.moveX = moveX;
             this.moveY = moveY;
@@ -2167,7 +2166,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
     }
     
-    final CellVector move(ThinkerObject<T> object, long changeX, long changeY) {
+    final CellVector move(MobileObject<T> object, long changeX, long changeY) {
         if (changeX == 0 && changeY == 0) {
             Double pressingAngle = object.getAbsPressingAngle();
             if (object.hasCollision() && object.getCollisionHitbox() != null && pressingAngle != null) {
@@ -2192,7 +2191,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             if (pressingLeft && hitbox.surfaceIsSolid(Direction.RIGHT)
                                     && hitbox.getRightEdge() == leftEdge
                                     && hitbox.getBottomEdge() > topEdge && hitbox.getTopEdge() < bottomEdge) {
-                                if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                if (!(hitbox.getObject() instanceof MobileObject && areRelated(object, (MobileObject)hitbox.getObject()))) {
                                     if (pressingAgainst == null) {
                                         pressingAgainst = new HashMap<>();
                                     }
@@ -2201,7 +2200,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             } else if (pressingRight && hitbox.surfaceIsSolid(Direction.LEFT)
                                     && hitbox.getLeftEdge() == rightEdge
                                     && hitbox.getBottomEdge() > topEdge && hitbox.getTopEdge() < bottomEdge) {
-                                if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                if (!(hitbox.getObject() instanceof MobileObject && areRelated(object, (MobileObject)hitbox.getObject()))) {
                                     if (pressingAgainst == null) {
                                         pressingAgainst = new HashMap<>();
                                     }
@@ -2210,7 +2209,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             } else if (pressingUp && hitbox.surfaceIsSolid(Direction.DOWN)
                                     && hitbox.getBottomEdge() == topEdge
                                     && hitbox.getRightEdge() > leftEdge && hitbox.getLeftEdge() < rightEdge) {
-                                if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                if (!(hitbox.getObject() instanceof MobileObject && areRelated(object, (MobileObject)hitbox.getObject()))) {
                                     if (pressingAgainst == null) {
                                         pressingAgainst = new HashMap<>();
                                     }
@@ -2219,7 +2218,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             } else if (pressingDown && hitbox.surfaceIsSolid(Direction.UP)
                                     && hitbox.getTopEdge() == bottomEdge
                                     && hitbox.getRightEdge() > leftEdge && hitbox.getLeftEdge() < rightEdge) {
-                                if (!(hitbox.getObject() instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitbox.getObject()))) {
+                                if (!(hitbox.getObject() instanceof MobileObject && areRelated(object, (MobileObject)hitbox.getObject()))) {
                                     if (pressingAgainst == null) {
                                         pressingAgainst = new HashMap<>();
                                     }
@@ -2329,7 +2328,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff
                                         && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2340,7 +2339,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2366,7 +2365,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2377,7 +2376,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2400,7 +2399,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
                                         && (hitboxLeft < rightEdge + changeX || (pressingRight && hitboxLeft == rightEdge + changeX))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2411,7 +2410,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2423,7 +2422,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2452,7 +2451,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2463,7 +2462,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2489,7 +2488,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2500,7 +2499,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2523,7 +2522,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
                                         && (hitboxRight > leftEdge + changeX || (pressingLeft && hitboxRight == leftEdge + changeX))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2534,7 +2533,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2546,7 +2545,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2572,7 +2571,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge
                                         && (hitboxTop < bottomEdge + changeY || (pressingDown && hitboxTop == bottomEdge + changeY))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2583,7 +2582,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2595,7 +2594,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2619,7 +2618,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge
                                         && (hitboxBottom > topEdge + changeY || (pressingUp && hitboxBottom == topEdge + changeY))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2630,7 +2629,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2642,7 +2641,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
-                                    if (!(hitboxObject instanceof ThinkerObject && areRelated(object, (ThinkerObject)hitboxObject))) {
+                                    if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         if (moveEvents == null) {
                                             moveEvents = new TreeSet<>(moveComparator);
                                         }
@@ -2684,7 +2683,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxTop = hitbox.getTopEdge();
                                 long verticalDiff = (hitboxLeft - rightEdge)*changeY/changeX;
                                 long horizontalDiff = (hitboxTop - bottomEdge)*changeX/changeY;
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
@@ -2736,7 +2735,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxBottom = hitbox.getBottomEdge();
                                 long verticalDiff = (hitboxLeft - rightEdge)*changeY/changeX;
                                 long horizontalDiff = (hitboxBottom - topEdge)*changeX/changeY;
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
@@ -2785,7 +2784,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxLeft = hitbox.getLeftEdge();
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge) {
                                     if (!areRelated(object, hitboxObject)
@@ -2841,7 +2840,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxTop = hitbox.getTopEdge();
                                 long verticalDiff = (hitboxRight - leftEdge)*changeY/changeX;
                                 long horizontalDiff = (hitboxTop - bottomEdge)*changeX/changeY;
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
@@ -2893,7 +2892,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxBottom = hitbox.getBottomEdge();
                                 long verticalDiff = (hitboxRight - leftEdge)*changeY/changeX;
                                 long horizontalDiff = (hitboxBottom - topEdge)*changeX/changeY;
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
@@ -2942,7 +2941,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxRight = hitbox.getRightEdge();
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge) {
                                     if (!areRelated(object, hitboxObject)
@@ -2995,7 +2994,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxTop = hitbox.getTopEdge();
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidBottom && hitboxTop >= bottomEdge && hitboxTop < bottomEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge) {
                                     if (!areRelated(object, hitboxObject)
@@ -3046,7 +3045,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxBottom = hitbox.getBottomEdge();
-                                ThinkerObject<T> hitboxObject = (ThinkerObject)hitbox.getObject();
+                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidTop && hitboxBottom <= topEdge && hitboxBottom > topEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge) {
                                     if (!areRelated(object, hitboxObject)
@@ -3110,7 +3109,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
                 Direction direction = event.direction;
                 if (event.type == 2) {
-                    ThinkerObject<T> objectToMove = (ThinkerObject<T>)event.object;
+                    MobileObject<T> objectToMove = (MobileObject<T>)event.object;
                     CollisionResponse response = objectToMove.collide(object, direction);
                     if (response != CollisionResponse.NONE) {
                         switch (response) {
@@ -3221,7 +3220,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         CellVector displacement = new CellVector(changeX, changeY);
         object.setPosition(object.getX() + changeX, object.getY() + changeY);
-        for (ThinkerObject<T> follower : object.followers) {
+        for (MobileObject<T> follower : object.followers) {
             move(follower, changeX, changeY);
         }
         if (moveData != null) {
@@ -3244,14 +3243,14 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (thinkerIterator.hasNext()) {
             thinkerIterator.next().beforeMovement();
         }
-        for (ThinkerObject object : thinkerObjects) {
+        for (MobileObject object : mobileObjects) {
             object.collisions.clear();
             object.collisionDirections.clear();
             object.displacement.clear();
         }
-        Iterator<ThinkerObject<T>> iterator = thinkerObjectIterator();
+        Iterator<MobileObject<T>> iterator = mobileObjectIterator();
         while (iterator.hasNext()) {
-            ThinkerObject object = iterator.next();
+            MobileObject object = iterator.next();
             long objectTimeFactor = object.getEffectiveTimeFactor();
             long dx = Frac.mul(objectTimeFactor, object.getVelocityX() + object.getStepX());
             long dy = Frac.mul(objectTimeFactor, object.getVelocityY() + object.getStepY());
