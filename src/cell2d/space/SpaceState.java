@@ -2137,6 +2137,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     private static class MoveEvent<T extends CellGame> {
         
+        /*
+         * Type 0 = hitting the object's solid surface.
+         * Type 1 = pressing against the object's solid surface as you move perpendicular to the surface.
+         * Type 2 = the colliding object encountering your solid surface and you moving it along with you.
+         * If multiple events happen after you travel the same distance, lower types cancel higher types
+         * if the collisions are successful.
+         */
         private final int type;
         private final SpaceObject<T> object;
         private final Direction direction;
@@ -2172,9 +2179,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     final CellVector move(MobileObject<T> object, long changeX, long changeY) {
-        if (changeX == 0 && changeY == 0) {
+        if (changeX == 0 && changeY == 0) { //Object isn't changing position
             Double pressingAngle = object.getAbsPressingAngle();
             if (object.hasCollision() && object.getCollisionHitbox() != null && pressingAngle != null) {
+                //Object can collide and is pressing; check for solid objects that it's pressing against
                 Hitbox collisionHitbox = object.getCollisionHitbox();
                 long leftEdge = collisionHitbox.getLeftEdge();
                 long rightEdge = collisionHitbox.getRightEdge();
@@ -2237,6 +2245,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     scannedHitbox.scanned = false;
                 }
                 if (pressingAgainst != null) {
+                    //Object is pressing against things; make it collide with them
                     EnumSet<Direction> slideDirections = EnumSet.noneOf(Direction.class);
                     boolean stop = false;
                     for (Map.Entry<SpaceObject<T>,Direction> entry : pressingAgainst.entrySet()) {
@@ -2255,6 +2264,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             object.addCollision(pressingObject, direction);
                         }
                     }
+                    //Change object's velocity appropriately based on its collisions
                     if (stop) {
                         object.setVelocity(0, 0);
                     } else {
@@ -2279,9 +2289,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             }
-            return new CellVector();
+            return new CellVector(); //Object was not displaced
         }
-        CellVector nextMovement = null;
+        CellVector nextMovement = null; //Object might need to move again due to sliding or something
         long left, right, top, bottom;
         if (changeX > 0) {
             left = 0;
@@ -2297,8 +2307,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             top = changeY;
             bottom = 0;
         }
-        SortedSet<MoveEvent<T>> moveEvents = null;
+        SortedSet<MoveEvent<T>> moveEvents = null; //Record encounters that object needs to have as it moves
         if (object.hasCollision() && object.getCollisionHitbox() != null) {
+            //Object can collide; check for solid objects in the path of its movement
             Hitbox collisionHitbox = object.getCollisionHitbox();
             long leftEdge = collisionHitbox.getLeftEdge();
             long rightEdge = collisionHitbox.getRightEdge();
@@ -2318,7 +2329,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             List<Hitbox<T>> scanned = new ArrayList<>();
             Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge + left, topEdge + top, rightEdge + right, bottomEdge + bottom));
             if (changeX > 0) {
-                if (changeY > 0) {
+                if (changeY > 0) { //Object is moving diagonally down-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2355,7 +2366,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else if (changeY < 0) {
+                } else if (changeY < 0) { //Object is moving diagonally up-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2392,7 +2403,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else {
+                } else { //Object is moving right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2441,7 +2452,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             } else if (changeX < 0) {
-                if (changeY > 0) {
+                if (changeY > 0) { //Object is moving diagonally down-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2478,7 +2489,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else if (changeY < 0) {
+                } else if (changeY < 0) { //Object is moving diagonally up-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2515,7 +2526,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else {
+                } else { //Object is moving left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2564,7 +2575,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             } else {
-                if (changeY > 0) {
+                if (changeY > 0) { //Object is moving down
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2611,7 +2622,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else {
+                } else { //Object is moving up
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.solidHitboxes) {
@@ -2665,6 +2676,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             }
         }
         if (object.isSolid()) {
+            //Object has solid surfaces; check for colliding objects to move along with it
             Hitbox<T> solidHitbox = object.getSolidHitbox();
             boolean solidLeft = solidHitbox.surfaceIsSolid(Direction.LEFT);
             boolean solidRight = solidHitbox.surfaceIsSolid(Direction.RIGHT);
@@ -2677,7 +2689,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             List<Hitbox<T>> scanned = new ArrayList<>();
             Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge + left, topEdge + top, rightEdge + right, bottomEdge + bottom));
             if (changeX > 0) {
-                if (changeY > 0) {
+                if (changeY > 0) { //Object is moving diagonally down-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -2729,7 +2741,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else if (changeY < 0) {
+                } else if (changeY < 0) { //Object is moving diagonally up-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -2781,7 +2793,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else {
+                } else { //Object is moving right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -2834,7 +2846,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             } else if (changeX < 0) {
-                if (changeY > 0) {
+                if (changeY > 0) { //Object is moving diagonally down-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -2886,7 +2898,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else if (changeY < 0) {
+                } else if (changeY < 0) { //Object is moving diagonally up-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -2938,7 +2950,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else {
+                } else { //Object is moving left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -2991,7 +3003,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             } else {
-                if (changeY > 0) {
+                if (changeY > 0) { //Object is moving down
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -3042,7 +3054,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     }
-                } else {
+                } else { //Object is moving up
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
                         for (Hitbox<T> hitbox : cell.collisionHitboxes) {
@@ -3099,21 +3111,22 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 scannedHitbox.scanned = false;
             }
         }
-        boolean blocked = false;
-        long blockedMetric = 0;
-        int blockedType = 0;
-        long newChangeX = 0;
-        long newChangeY = 0;
-        EnumSet<Direction> slideDirections = EnumSet.noneOf(Direction.class);
-        boolean stop = false;
-        List<MoveData<T>> moveData = null;
-        if (moveEvents != null) {
+        List<MoveData<T>> moveData = null; //Record objects that need to move along with this object
+        if (moveEvents != null) { //Does object need to collide with anything?
+            boolean blocked = false;
+            long blockedMetric = 0;
+            int blockedType = 0;
+            long realChangeX = 0;
+            long realChangeY = 0;
+            EnumSet<Direction> slideDirections = EnumSet.noneOf(Direction.class);
+            boolean stop = false;
+            //Make object collide with things
             for (MoveEvent<T> event : moveEvents) {
                 if (blocked && (event.metric > blockedMetric || event.type > blockedType)) {
                     break;
                 }
                 Direction direction = event.direction;
-                if (event.type == 2) {
+                if (event.type == 2) { //Colliding object that will collide with this object
                     MobileObject<T> objectToMove = (MobileObject<T>)event.object;
                     CollisionResponse response = objectToMove.collide(object, direction);
                     if (response != CollisionResponse.NONE) {
@@ -3156,7 +3169,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         moveData.add(new MoveData<>(objectToMove, objectPressing || direction == Direction.LEFT || direction == Direction.RIGHT,
                                 objectPressing || direction == Direction.UP || direction == Direction.DOWN, event.diffX, event.diffY));
                     }
-                } else {
+                } else { //Solid object that this object will collide with
                     SpaceObject<T> solidObject = event.object;
                     if (solidObject.moved) {
                         continue;
@@ -3176,59 +3189,59 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             blocked = true;
                             blockedMetric = event.metric;
                             blockedType = event.type;
-                            newChangeX = event.diffX;
-                            newChangeY = event.diffY;
+                            realChangeX = event.diffX;
+                            realChangeY = event.diffY;
                         }
                     }
                 }
             }
-        }
-        if (blocked) {
-            if (stop) {
-                object.setVelocity(0, 0);
-                changeX = newChangeX;
-                changeY = newChangeY;
-            } else {
-                nextMovement = new CellVector(changeX - newChangeX, changeY - newChangeY);
-                changeX = newChangeX;
-                changeY = newChangeY;
-                if (slideDirections.contains(Direction.LEFT)) {
-                    if (object.getVelocityX() < 0) {
-                        object.setVelocityX(0);
+            //Change object's velocity appropriately based on its collisions
+            if (blocked) {
+                if (stop) {
+                    object.setVelocity(0, 0);
+                } else {
+                    nextMovement = new CellVector(changeX - realChangeX, changeY - realChangeY);
+                    if (slideDirections.contains(Direction.LEFT)) {
+                        if (object.getVelocityX() < 0) {
+                            object.setVelocityX(0);
+                        }
+                        nextMovement.setX(0);
+                    } else if (slideDirections.contains(Direction.RIGHT)) {
+                        if (object.getVelocityX() > 0) {
+                            object.setVelocityX(0);
+                        }
+                        nextMovement.setX(0);
                     }
-                    nextMovement.setX(0);
-                } else if (slideDirections.contains(Direction.RIGHT)) {
-                    if (object.getVelocityX() > 0) {
-                        object.setVelocityX(0);
+                    if (slideDirections.contains(Direction.UP)) {
+                        if (object.getVelocityY() < 0) {
+                            object.setVelocityY(0);
+                        }
+                        nextMovement.setY(0);
+                    } else if (slideDirections.contains(Direction.DOWN)) {
+                        if (object.getVelocityY() > 0) {
+                            object.setVelocityY(0);
+                        }
+                        nextMovement.setY(0);
                     }
-                    nextMovement.setX(0);
                 }
-                if (slideDirections.contains(Direction.UP)) {
-                    if (object.getVelocityY() < 0) {
-                        object.setVelocityY(0);
-                    }
-                    nextMovement.setY(0);
-                } else if (slideDirections.contains(Direction.DOWN)) {
-                    if (object.getVelocityY() > 0) {
-                        object.setVelocityY(0);
-                    }
-                    nextMovement.setY(0);
-                }
+                changeX = realChangeX;
+                changeY = realChangeY;
             }
-        }
-        if (moveEvents != null) {
             for (MoveEvent<T> event : moveEvents) {
-                SpaceObject<T> eventObject = event.object;
-                eventObject.solidEvent = false;
-                eventObject.moved = false;
+                event.object.solidEvent = false;
+                event.object.moved = false;
             }
         }
-        CellVector displacement = new CellVector(changeX, changeY);
-        object.setPosition(object.getX() + changeX, object.getY() + changeY);
-        for (MobileObject<T> follower : object.followers) {
-            move(follower, changeX, changeY);
+        CellVector displacement = new CellVector(changeX, changeY); //How far was object displaced in total?
+        object.setPosition(object.getX() + changeX, object.getY() + changeY); //Move object
+        if (!object.followers.isEmpty()) {
+            //Object has followers; move them along with it
+            for (MobileObject<T> follower : object.followers) {
+                move(follower, changeX, changeY);
+            }
         }
         if (moveData != null) {
+            //Object needs to move certain colliding objects along with it; do so
             for (MoveData<T> data : moveData) {
                 move(data.object, (data.moveX ? changeX - data.diffX : 0), (data.moveY ? changeY - data.diffY : 0));
             }
@@ -3237,6 +3250,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             }
         }
         if (nextMovement != null && (nextMovement.getX() != 0 || nextMovement.getY() != 0)) {
+            //Object needs to move again immediately; do so
             displacement.add(move(object, nextMovement.getX(), nextMovement.getY()));
         }
         return displacement;
