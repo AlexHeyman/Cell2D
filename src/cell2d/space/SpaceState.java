@@ -1357,7 +1357,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return nearest;
     }
     
-    private static boolean circleMeetsOrthogonalLine(long cu, long cv, long radius, long u1, long u2, long v) {
+    private static boolean circleMeetsOrthogonalSeg(long cu, long cv, long radius, long u1, long u2, long v) {
         v -= cv;
         if (Math.abs(v) <= radius) {
             long rangeRadius = Frac.sqrt(Frac.mul(radius, radius) - Frac.mul(v, v));
@@ -1367,13 +1367,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     private static boolean circleMeetsRectangle(long cx, long cy, long radius, long x1, long y1, long x2, long y2) {
-        if (cx >= x1 && cx <= x2 && cy >= y1 && cy <= y2) {
+        if (cx >= x1 && cx <= x2 && cy >= y1 && cy <= y2) { //Circle's center is in rectangle
             return true;
         }
-        return circleMeetsOrthogonalLine(cx, cy, radius, x1, x2, y1)
-                || circleMeetsOrthogonalLine(cx, cy, radius, x1, x2, y2)
-                || circleMeetsOrthogonalLine(cy, cx, radius, y1, y2, x1)
-                || circleMeetsOrthogonalLine(cy, cx, radius, y1, y2, x2);
+        //Rectangle's top left vertex is in circle
+        if (CellVector.distanceBetween(cx, cy, x1, y1) <= radius) {
+            return true;
+        }
+        //Any of rectangle's edges meet circle
+        return circleMeetsOrthogonalSeg(cx, cy, radius, x1, x2, y1)
+                || circleMeetsOrthogonalSeg(cx, cy, radius, x1, x2, y2)
+                || circleMeetsOrthogonalSeg(cy, cx, radius, y1, y2, x1)
+                || circleMeetsOrthogonalSeg(cy, cx, radius, y1, y2, x2);
     }
     
     /**
