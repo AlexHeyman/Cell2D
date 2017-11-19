@@ -9,12 +9,12 @@ import java.awt.Point;
  * <p>A Viewport is a SpaceThinker that represents a rectangular region of the
  * screen through which the space of the SpaceState to which it is assigned can
  * be viewed. The center of a Viewport's rectangular field of view in a
- * SpaceState is marked by a SpaceObject called the Viewport's camera. To render
- * any visuals, including its HUD if it has one, a Viewport must be assigned to
- * a SpaceState through its setViewport() method. To render the region of its
- * SpaceState in its field of view, a Viewport's camera must be assigned to the
- * same SpaceState as it. One pixel in a Viewport's rendering region on the
- * screen is equal to one fracunit in its SpaceState.</p>
+ * SpaceState is the center of a SpaceObject called the Viewport's camera. To
+ * render any visuals, including its HUD if it has one, a Viewport must be
+ * assigned to a SpaceState through its setViewport() method. To render the
+ * region of its SpaceState in its field of view, a Viewport's camera must be
+ * assigned to the same SpaceState as it. One pixel in a Viewport's rendering
+ * region on the screen is equal to one fracunit in its SpaceState.</p>
  * 
  * <p>While a Viewport is rendering visuals, the region of the Graphics context
  * to which it is rendering that is outside its rendering region cannot be drawn
@@ -289,7 +289,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getLeftEdge() throws NullPointerException {
-        return (long)(Frac.toInt(camera.getCenterX()) + left) << Frac.BITS;
+        return camera.getCenterX() + ((long)left << Frac.BITS);
     }
     
     /**
@@ -299,7 +299,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getRightEdge() throws NullPointerException {
-        return (long)(Frac.toInt(camera.getCenterX()) + right) << Frac.BITS;
+        return camera.getCenterX() + ((long)right << Frac.BITS);
     }
     
     /**
@@ -309,7 +309,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getTopEdge() throws NullPointerException {
-        return (long)(Frac.toInt(camera.getCenterY()) + top) << Frac.BITS;
+        return camera.getCenterY() + ((long)top << Frac.BITS);
     }
     
     /**
@@ -319,7 +319,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * @throws NullPointerException If this Viewport has no camera
      */
     public final long getBottomEdge() throws NullPointerException {
-        return (long)(Frac.toInt(camera.getCenterY()) + bottom) << Frac.BITS;
+        return camera.getCenterY() + ((long)bottom << Frac.BITS);
     }
     
     /**
@@ -366,12 +366,10 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      */
     public final Point getScreenPoint(long x, long y) {
         if (camera != null) {
-            int fx = Frac.intFloor(x);
-            int fy = Frac.intFloor(y);
-            int centerX = Frac.toInt(camera.getCenterX());
-            int centerY = Frac.toInt(camera.getCenterY());
-            if (fx >= centerX + left && fx < centerX + right && fy >= centerY + top && fy < centerY + bottom) {
-                return new Point(fx + roundX1 - centerX - left, fy + roundY1 - centerY - top);
+            int fx = Frac.intFloor(x - camera.getCenterX());
+            int fy = Frac.intFloor(y - camera.getCenterY());
+            if (fx >= left && fx < right && fy >= top && fy < bottom) {
+                return new Point(fx + roundX1 - left, fy + roundY1 - top);
             }
         }
         return null;
@@ -389,10 +387,10 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      */
     public final boolean rectangleIsVisible(long x1, long y1, long x2, long y2) {
         if (camera != null) {
-            int centerX = Frac.toInt(camera.getCenterX());
-            int centerY = Frac.toInt(camera.getCenterY());
-            return Frac.intFloor(x1) < centerX + right && Frac.intCeil(x2) > centerX + left
-                    && Frac.intFloor(y1) < centerY + bottom && Frac.intCeil(y2) > centerY + top;
+            long centerX = camera.getCenterX();
+            long centerY = camera.getCenterY();
+            return Frac.intFloor(x1 - centerX) < right && Frac.intCeil(x2 - centerX) > left
+                    && Frac.intFloor(y1 - centerY) < bottom && Frac.intCeil(y2 - centerY) > top;
         }
         return false;
     }
