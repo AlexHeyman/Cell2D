@@ -3269,9 +3269,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         while (iterator.hasNext()) {
             MobileObject object = iterator.next();
             long objectTimeFactor = object.getEffectiveTimeFactor();
-            long dx = Frac.mul(objectTimeFactor, object.getVelocityX() + object.getStepX());
-            long dy = Frac.mul(objectTimeFactor, object.getVelocityY() + object.getStepY());
-            object.displacement.setCoordinates(move(object, dx, dy));
+            long changeX = Frac.mul(objectTimeFactor, object.getVelocityX() + object.getStepX());
+            long changeY = Frac.mul(objectTimeFactor, object.getVelocityY() + object.getStepY());
+            object.displacement.setCoordinates(move(object, changeX, changeY));
             object.setStep(0, 0);
         }
     }
