@@ -146,6 +146,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
                 right = Math.max(right, hitbox.getRightEdge() - x);
                 top = Math.min(top, hitbox.getTopEdge() - y);
                 bottom = Math.max(bottom, hitbox.getBottomEdge() - y);
+                updateBoundaries();
             } else {
                 removeChild(oldHitbox);
                 oldHitbox.componentOf = null;
