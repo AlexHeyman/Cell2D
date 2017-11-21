@@ -966,10 +966,6 @@ public abstract class Hitbox<T extends CellGame> {
         if (cx > x1 && cx < x2 && cy > y1 && cy < y2) { //Circle's center is in rectangle
             return true;
         }
-        //Rectangle's top left vertex is in circle
-        if (CellVector.distanceBetween(cx, cy, x1, y1) < radius) {
-            return true;
-        }
         //Any of rectangle's edges intersect circle
         return circleIntersectsOrthogonalSeg(cx, cy, radius, x1, x2, y1)
                 || circleIntersectsOrthogonalSeg(cx, cy, radius, x1, x2, y2)
