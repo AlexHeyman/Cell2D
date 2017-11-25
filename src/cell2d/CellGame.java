@@ -82,9 +82,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.5.1.
+     * The version number of Cell2D, currently 1.5.2.
      */
-    public static final String VERSION = "1.5.1";
+    public static final String VERSION = "1.5.2";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -1503,8 +1503,8 @@ public abstract class CellGame {
      * @param music The Music track to add
      * @param loop If true, the Music track will loop indefinitely until
      * stopped when it plays; otherwise, it will play once
-     * @param replace If true, all other Music tracks assigned to the specified
-     * priority will be removed from it
+     * @param replace If true, all other Music tracks assigned to the priority
+     * to which the specified Music track is added will be removed from it
      */
     public final void addMusic(Music music, boolean loop, boolean replace) {
         addMusic(getMusicStackTop(), music, 1, 1, loop, replace);
@@ -1521,8 +1521,8 @@ public abstract class CellGame {
      * it plays, with 1 representing no volume change
      * @param loop If true, the Music track will loop indefinitely until
      * stopped when it plays; otherwise, it will play once
-     * @param replace If true, all other Music tracks assigned to the specified
-     * priority will be removed from it
+     * @param replace If true, all other Music tracks assigned to the priority
+     * to which the specified Music track is added will be removed from it
      */
     public final void addMusic(Music music, double speed, double volume, boolean loop, boolean replace) {
         addMusic(getMusicStackTop(), music, speed, volume, loop, replace);
