@@ -128,7 +128,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             int diff = hitbox1.drawPriority - hitbox2.drawPriority;
             if (diff == 0) {
                 long yDiff = hitbox1.getRelY() - hitbox2.getRelY();
-                return (yDiff == 0 ? Long.signum(hitbox1.id - hitbox2.id) : (int)Math.signum(yDiff));
+                return (yDiff == 0 ? Long.signum(hitbox2.id - hitbox1.id) : (int)Math.signum(yDiff));
             }
             return diff;
         }
@@ -141,7 +141,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             int drawPriorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
             if (drawPriorityDiff == 0) {
                 long yDiff = hitbox2.getRelY() - hitbox1.getRelY();
-                return (yDiff == 0 ? Long.signum(hitbox1.id - hitbox2.id) : (int)Math.signum(yDiff));
+                return (yDiff == 0 ? Long.signum(hitbox2.id - hitbox1.id) : (int)Math.signum(yDiff));
             }
             return drawPriorityDiff;
         }
