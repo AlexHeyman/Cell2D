@@ -167,7 +167,7 @@ public abstract class CellGame {
     private int screenYOffset = 0;
     private boolean fullscreen;
     private boolean updateScreen = true;
-    private boolean loadingVisualsRenderedOnce = false;
+    private boolean loadingVisualsRendered = false;
     private final SortedMap<Integer,Map<Music,MusicInstance>> musicStack = new TreeMap<>();
     
     /**
@@ -298,69 +298,67 @@ public abstract class CellGame {
         
         @Override
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
-            if (loadingVisualsRenderedOnce) {
-                if (loaded) {
-                    double msElapsed = Math.min(delta, msPerFrame);
-                    if (!musicStack.isEmpty()) {
-                        int top = musicStack.lastKey();
-                        Map<Music,MusicInstance> musics = musicStack.get(top);
-                        Iterator<Music> iterator = musics.keySet().iterator();
-                        while (iterator.hasNext()) {
-                            Music music = iterator.next();
-                            if (music.update(msElapsed)) {
-                                iterator.remove();
-                            }
+            if (loaded) {
+                double msElapsed = Math.min(delta, msPerFrame);
+                if (!musicStack.isEmpty()) {
+                    int top = musicStack.lastKey();
+                    Map<Music,MusicInstance> musics = musicStack.get(top);
+                    Iterator<Music> iterator = musics.keySet().iterator();
+                    while (iterator.hasNext()) {
+                        Music music = iterator.next();
+                        if (music.update(msElapsed)) {
+                            iterator.remove();
                         }
-                        if (musics.isEmpty()) {
-                            musicStack.remove(top);
-                            if (!musicStack.isEmpty()) {
-                                for (Map.Entry<Music,MusicInstance> entry
-                                        : musicStack.get(musicStack.lastKey()).entrySet()) {
-                                    entry.getKey().play(entry.getValue());
-                                }
+                    }
+                    if (musics.isEmpty()) {
+                        musicStack.remove(top);
+                        if (!musicStack.isEmpty()) {
+                            for (Map.Entry<Music,MusicInstance> entry
+                                    : musicStack.get(musicStack.lastKey()).entrySet()) {
+                                entry.getKey().play(entry.getValue());
                             }
                         }
                     }
-                    msToRun += msElapsed;
-                    if (msToRun >= msPerFrame) {
-                        for (int i = 0; i < commandChanges.length; i++) {
-                            commandStates[i] = commandChanges[i];
-                            if (commandChanges[i] == CommandState.PRESSED
-                                    || commandChanges[i] == CommandState.UNTAPPED) {
-                                commandChanges[i] = CommandState.HELD;
-                            } else if (commandChanges[i] == CommandState.RELEASED
-                                    || commandChanges[i] == CommandState.TAPPED) {
-                                commandChanges[i] = CommandState.NOTHELD;
-                            }
-                        }
-                        adjustedMouseX = Math.min(Math.max(
-                                (int)(newMouseX/effectiveScaleFactor) - screenXOffset, 0), screenWidth - 1);
-                        adjustedMouseY = Math.min(Math.max(
-                                (int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
-                        mouseWheelChange = newMouseWheelChange;
-                        newMouseWheelChange = 0;
-                        currentState.frame();
-                        msToRun -= msPerFrame;
-                        if (closeRequested) {
-                            Audio.close();
-                            container.exit();
-                        } else if (updateScreen) {
-                            updateScreen(container);
-                        }
-                    }
-                } else {
-                    provider = new InputProvider(container.getInput());
-                    provider.addListener(this);
-                    input = new Input(container.getScreenHeight());
-                    newMouseX = input.getMouseX();
-                    newMouseY = input.getMouseY();
-                    initActions();
-                    if (currentState == null) {
-                        throw new RuntimeException("A CellGame did not enter any of its CellGameStates "
-                                + "during initialization");
-                    }
-                    loaded = true;
                 }
+                msToRun += msElapsed;
+                if (msToRun >= msPerFrame) {
+                    for (int i = 0; i < commandChanges.length; i++) {
+                        commandStates[i] = commandChanges[i];
+                        if (commandChanges[i] == CommandState.PRESSED
+                                || commandChanges[i] == CommandState.UNTAPPED) {
+                            commandChanges[i] = CommandState.HELD;
+                        } else if (commandChanges[i] == CommandState.RELEASED
+                                || commandChanges[i] == CommandState.TAPPED) {
+                            commandChanges[i] = CommandState.NOTHELD;
+                        }
+                    }
+                    adjustedMouseX = Math.min(Math.max(
+                            (int)(newMouseX/effectiveScaleFactor) - screenXOffset, 0), screenWidth - 1);
+                    adjustedMouseY = Math.min(Math.max(
+                            (int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
+                    mouseWheelChange = newMouseWheelChange;
+                    newMouseWheelChange = 0;
+                    currentState.frame();
+                    msToRun -= msPerFrame;
+                    if (closeRequested) {
+                        Audio.close();
+                        container.exit();
+                    } else if (updateScreen) {
+                        updateScreen(container);
+                    }
+                }
+            } else if (loadingVisualsRendered) {
+                provider = new InputProvider(container.getInput());
+                provider.addListener(this);
+                input = new Input(container.getScreenHeight());
+                newMouseX = input.getMouseX();
+                newMouseY = input.getMouseY();
+                initActions();
+                if (currentState == null) {
+                    throw new RuntimeException("A CellGame did not enter any of its CellGameStates during "
+                            + "initialization");
+                }
+                loaded = true;
             }
         }
         
@@ -563,9 +561,9 @@ public abstract class CellGame {
         
         @Override
         public final void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {
-            if (!loadingVisualsRenderedOnce) {
+            if (!loadingVisualsRendered) {
                 renderLoadingVisuals(g, x1, y1, x2, y2);
-                loadingVisualsRenderedOnce = true;
+                loadingVisualsRendered = true;
             }
         }
         
