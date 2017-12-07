@@ -210,6 +210,14 @@ public abstract class CellGame {
         this.fullscreen = fullscreen;
     }
     
+    /**
+     * Instructs this CellGame to close itself the next time it finishes a game
+     * logic update.
+     */
+    public final void close() {
+        closeRequested = true;
+    }
+    
     private void resetCommandChanges() {
         for (int i = 0; i < commandChanges.length; i++) {
             commandChanges[i] = CommandState.NOTHELD;
@@ -282,14 +290,6 @@ public abstract class CellGame {
         effectiveScaleFactor = ((double)containerHeight)/screenHeight;
         screenXOffset = (int)((containerWidth/effectiveScaleFactor - screenWidth)/2);
         screenYOffset = 0;
-    }
-    
-    /**
-     * Instructs this CellGame to close itself the next time it finishes a game
-     * logic update.
-     */
-    public final void close() {
-        closeRequested = true;
     }
     
     private class Game extends StateBasedGame implements InputProviderListener {
