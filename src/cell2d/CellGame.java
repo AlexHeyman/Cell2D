@@ -210,6 +210,12 @@ public abstract class CellGame {
         this.fullscreen = fullscreen;
     }
     
+    private void resetCommandChanges() {
+        for (int i = 0; i < commandChanges.length; i++) {
+            commandChanges[i] = CommandState.NOTHELD;
+        }
+    }
+    
     private void updateScreen(GameContainer container) throws SlickException {
         updateScreen = false;
         if (container instanceof AppGameContainer) {
@@ -253,6 +259,7 @@ public abstract class CellGame {
                     screenXOffset = newXOffset;
                     screenYOffset = newYOffset;
                     appContainer.setDisplayMode(newWidth, newHeight, true);
+                    resetCommandChanges();
                     return;
                 }
             }
@@ -260,6 +267,7 @@ public abstract class CellGame {
             screenXOffset = 0;
             screenYOffset = 0;
             appContainer.setDisplayMode((int)(screenWidth*scaleFactor), (int)(screenHeight*scaleFactor), false);
+            resetCommandChanges();
             return;
         }
         double screenRatio = ((double)screenHeight)/screenWidth;
@@ -759,9 +767,7 @@ public abstract class CellGame {
             throw new RuntimeException("Attempted to begin waiting to bind to command number " + commandNum + " while already typing to a String");
         }
         bindingCommandNum = commandNum;
-        for (int i = 0; i < commandChanges.length; i++) {
-            commandChanges[i] = CommandState.NOTHELD;
-        }
+        resetCommandChanges();
     }
     
     private void finishBindToCommand(Control control) {
@@ -1179,9 +1185,7 @@ public abstract class CellGame {
         }
         typingString = initialString;
         maxTypingStringLength = maxLength;
-        for (int i = 0; i < commandChanges.length; i++) {
-            commandChanges[i] = CommandState.NOTHELD;
-        }
+        resetCommandChanges();
         if (currentState != null) {
             currentState.stringBeganActions(currentState.game, initialString);
         }
