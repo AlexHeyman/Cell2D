@@ -2369,8 +2369,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 scanned.add(hitbox);
                                 long hitboxLeft = hitbox.getLeftEdge();
                                 long hitboxBottom = hitbox.getBottomEdge();
-                                long verticalDiff = (hitboxLeft - rightEdge)*changeY/changeX;
-                                long horizontalDiff = (hitboxBottom - topEdge)*changeX/changeY;
+                                long verticalDiff = Frac.div(Frac.mul(hitboxLeft - rightEdge, changeY), changeX);
+                                long horizontalDiff = Frac.div(Frac.mul(hitboxBottom - topEdge, changeX), changeY);
                                 if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxLeft < rightEdge + changeX) {
@@ -2455,8 +2455,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 scanned.add(hitbox);
                                 long hitboxRight = hitbox.getRightEdge();
                                 long hitboxTop = hitbox.getTopEdge();
-                                long verticalDiff = (hitboxRight - leftEdge)*changeY/changeX;
-                                long horizontalDiff = (hitboxTop - bottomEdge)*changeX/changeY;
+                                long verticalDiff = Frac.div(Frac.mul(hitboxRight - leftEdge, changeY), changeX);
+                                long horizontalDiff = Frac.div(Frac.mul(hitboxTop - bottomEdge, changeX), changeY);
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
@@ -2492,8 +2492,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 scanned.add(hitbox);
                                 long hitboxRight = hitbox.getRightEdge();
                                 long hitboxBottom = hitbox.getBottomEdge();
-                                long verticalDiff = (hitboxRight - leftEdge)*changeY/changeX;
-                                long horizontalDiff = (hitboxBottom - topEdge)*changeX/changeY;
+                                long verticalDiff = Frac.div(Frac.mul(hitboxRight - leftEdge, changeY), changeX);
+                                long horizontalDiff = Frac.div(Frac.mul(hitboxBottom - topEdge, changeX), changeY);
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
@@ -2692,8 +2692,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 scanned.add(hitbox);
                                 long hitboxLeft = hitbox.getLeftEdge();
                                 long hitboxTop = hitbox.getTopEdge();
-                                long verticalDiff = (hitboxLeft - rightEdge)*changeY/changeX;
-                                long horizontalDiff = (hitboxTop - bottomEdge)*changeX/changeY;
+                                long verticalDiff = Frac.div(Frac.mul(hitboxLeft - rightEdge, changeY), changeX);
+                                long horizontalDiff = Frac.div(Frac.mul(hitboxTop - bottomEdge, changeX), changeY);
                                 MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
@@ -2744,8 +2744,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 scanned.add(hitbox);
                                 long hitboxLeft = hitbox.getLeftEdge();
                                 long hitboxBottom = hitbox.getBottomEdge();
-                                long verticalDiff = (hitboxLeft - rightEdge)*changeY/changeX;
-                                long horizontalDiff = (hitboxBottom - topEdge)*changeX/changeY;
+                                long verticalDiff = Frac.div(Frac.mul(hitboxLeft - rightEdge, changeY), changeX);
+                                long horizontalDiff = Frac.div(Frac.mul(hitboxBottom - topEdge, changeX), changeY);
                                 MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
@@ -2849,8 +2849,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 scanned.add(hitbox);
                                 long hitboxRight = hitbox.getRightEdge();
                                 long hitboxTop = hitbox.getTopEdge();
-                                long verticalDiff = (hitboxRight - leftEdge)*changeY/changeX;
-                                long horizontalDiff = (hitboxTop - bottomEdge)*changeX/changeY;
+                                long verticalDiff = Frac.div(Frac.mul(hitboxRight - leftEdge, changeY), changeX);
+                                long horizontalDiff = Frac.div(Frac.mul(hitboxTop - bottomEdge, changeX), changeY);
                                 MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
@@ -2901,8 +2901,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 scanned.add(hitbox);
                                 long hitboxRight = hitbox.getRightEdge();
                                 long hitboxBottom = hitbox.getBottomEdge();
-                                long verticalDiff = (hitboxRight - leftEdge)*changeY/changeX;
-                                long horizontalDiff = (hitboxBottom - topEdge)*changeX/changeY;
+                                long verticalDiff = Frac.div(Frac.mul(hitboxRight - leftEdge, changeY), changeX);
+                                long horizontalDiff = Frac.div(Frac.mul(hitboxBottom - topEdge, changeX), changeY);
                                 MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
