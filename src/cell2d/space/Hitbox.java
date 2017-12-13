@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public abstract class Hitbox<T extends CellGame> {
     
-    static final int HITBOXES_PER_OBJECT = 5;
     private static final AtomicLong idCounter = new AtomicLong(0);
     
     final long id;
@@ -45,8 +44,7 @@ public abstract class Hitbox<T extends CellGame> {
     CompositeHitbox<T> componentOf = null;
     EnumSet<Direction> solidSurfaces = EnumSet.noneOf(Direction.class);
     private SpaceObject<T> object = null;
-    final boolean[] roles = new boolean[HITBOXES_PER_OBJECT];
-    private int numRoles = 0;
+    final Set<HitboxRole> roles = EnumSet.noneOf(HitboxRole.class);
     SpaceState<T> state = null;
     int[] cellRange = null;
     boolean scanned = false;
@@ -182,12 +180,14 @@ public abstract class Hitbox<T extends CellGame> {
      */
     public final void setSurfaceSolid(Direction direction, boolean solid) {
         if (solid) {
-            if (solidSurfaces.add(direction) && solidSurfaces.size() == 1 && roles[3] && state != null) {
-                state.addSolidHitbox(this);
+            if (solidSurfaces.add(direction) && solidSurfaces.size() == 1
+                    && roles.contains(HitboxRole.SOLID) && state != null) {
+                state.addHitbox(this, HitboxRole.SOLID);
             }
         } else {
-            if (solidSurfaces.remove(direction) && solidSurfaces.isEmpty() && roles[3] && state != null) {
-                state.removeSolidHitbox(this);
+            if (solidSurfaces.remove(direction) && solidSurfaces.isEmpty()
+                    && roles.contains(HitboxRole.SOLID) && state != null) {
+                state.removeHitbox(this, HitboxRole.SOLID);
             }
         }
     }
@@ -199,13 +199,13 @@ public abstract class Hitbox<T extends CellGame> {
      */
     public final void setSolid(boolean solid) {
         if (solid) {
-            if (solidSurfaces.isEmpty() && roles[3] && state != null) {
-                state.addSolidHitbox(this);
+            if (solidSurfaces.isEmpty() && roles.contains(HitboxRole.SOLID) && state != null) {
+                state.addHitbox(this, HitboxRole.SOLID);
             }
             solidSurfaces = EnumSet.allOf(Direction.class);
         } else {
-            if (!solidSurfaces.isEmpty() && roles[3] && state != null) {
-                state.removeSolidHitbox(this);
+            if (!solidSurfaces.isEmpty() && roles.contains(HitboxRole.SOLID) && state != null) {
+                state.removeHitbox(this, HitboxRole.SOLID);
             }
             solidSurfaces.clear();
         }
@@ -246,97 +246,19 @@ public abstract class Hitbox<T extends CellGame> {
         }
     }
     
-    final void addAsLocatorHitbox(int drawPriority) {
-        this.drawPriority = drawPriority;
+    final void add(HitboxRole role) {
         if (state != null) {
-            state.addLocatorHitbox(this);
+            state.addHitbox(this, role);
         }
-        roles[0] = true;
-        numRoles++;
+        roles.add(role);
     }
     
-    final void removeAsLocatorHitbox() {
+    final void remove(HitboxRole role) {
         if (state != null) {
-            state.removeLocatorHitbox(this);
+            state.removeHitbox(this, role);
         }
-        drawPriority = 0;
-        roles[0] = false;
-        numRoles--;
-        if (numRoles == 0) {
-            setObject(null);
-            if (parent != null) {
-                parent.removeChild(this);
-            }
-        }
-    }
-    
-    final void changeDrawPriority(int drawPriority) {
-        if (state == null) {
-            this.drawPriority = drawPriority;
-        } else {
-            state.changeLocatorHitboxDrawPriority(this, drawPriority);
-        }
-    }
-    
-    final void addAsCenterHitbox() {
-        if (state != null) {
-            state.addCenterHitbox(this);
-        }
-        roles[1] = true;
-        numRoles++;
-    }
-    
-    final void removeAsCenterHitbox() {
-        if (state != null) {
-            state.removeCenterHitbox(this);
-        }
-        roles[1] = false;
-        numRoles--;
-        if (numRoles == 0) {
-            setObject(null);
-            if (parent != null) {
-                parent.removeChild(this);
-            }
-        }
-    }
-    
-    final void addAsOverlapHitbox() {
-        if (state != null) {
-            state.addOverlapHitbox(this);
-        }
-        roles[2] = true;
-        numRoles++;
-    }
-    
-    final void removeAsOverlapHitbox() {
-        if (state != null) {
-            state.removeOverlapHitbox(this);
-        }
-        roles[2] = false;
-        numRoles--;
-        if (numRoles == 0) {
-            setObject(null);
-            if (parent != null) {
-                parent.removeChild(this);
-            }
-        }
-    }
-    
-    final void addAsSolidHitbox() {
-        if (state != null) {
-            state.addSolidHitbox(this);
-        }
-        roles[3] = true;
-        numRoles++;
-    }
-    
-    final void removeAsSolidHitbox() {
-        if (state != null) {
-            state.removeSolidHitbox(this);
-        }
-        roles[3] = false;
-        numRoles--;
-        if (numRoles == 0) {
+        roles.remove(role);
+        if (roles.isEmpty()) {
             setObject(null);
             if (parent != null) {
                 parent.removeChild(this);
@@ -346,23 +268,29 @@ public abstract class Hitbox<T extends CellGame> {
     
     final void addAsCollisionHitbox(boolean hasCollision) {
         if (state != null && hasCollision) {
-            state.addCollisionHitbox(this);
+            state.addHitbox(this, HitboxRole.COLLISION);
         }
-        roles[4] = true;
-        numRoles++;
+        roles.add(HitboxRole.COLLISION);
     }
     
     final void removeAsCollisionHitbox(boolean hasCollision) {
         if (state != null && hasCollision) {
-            state.removeCollisionHitbox(this);
+            state.removeHitbox(this, HitboxRole.COLLISION);
         }
-        roles[4] = false;
-        numRoles--;
-        if (numRoles == 0) {
+        roles.remove(HitboxRole.COLLISION);
+        if (roles.isEmpty()) {
             setObject(null);
             if (parent != null) {
                 parent.removeChild(this);
             }
+        }
+    }
+    
+    final void setDrawPriority(int drawPriority) {
+        if (state == null) {
+            this.drawPriority = drawPriority;
+        } else {
+            state.setLocatorHitboxDrawPriority(this, drawPriority);
         }
     }
     

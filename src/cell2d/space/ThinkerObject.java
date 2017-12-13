@@ -51,17 +51,6 @@ public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> 
         super(locatorHitbox);
     }
     
-    /**
-     * Creates a new ThinkerObject with the specified locator Hitbox that acts
-     * as if it was created by the specified SpaceObject, initially copying its
-     * creator's time factor, flipped status, and angle of rotation.
-     * @param locatorHitbox This ThinkerObject's locator Hitbox
-     * @param creator This ThinkerObject's creator
-     */
-    public ThinkerObject(Hitbox<T> locatorHitbox, SpaceObject<T> creator) {
-        super(locatorHitbox, creator);
-    }
-    
     @Override
     void addNonCellData() {
         super.addNonCellData();

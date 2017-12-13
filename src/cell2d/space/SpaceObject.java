@@ -92,26 +92,11 @@ public abstract class SpaceObject<T extends CellGame> {
      */
     public SpaceObject(Hitbox<T> locatorHitbox) {
         centerHitbox = new PointHitbox<>(0, 0);
-        centerHitbox.addAsCenterHitbox();
+        centerHitbox.add(HitboxRole.CENTER);
         if (!setLocatorHitbox(locatorHitbox)) {
-            throw new RuntimeException("Attempted to create a SpaceObject with an invalid locator hitbox");
+            throw new RuntimeException("Attempted to create a SpaceObject with an invalid locator Hitbox");
         }
         id = idCounter.getAndIncrement();
-    }
-    
-    /**
-     * Creates a new SpaceObject with the specified locator Hitbox that acts as
-     * if it was created by the specified SpaceObject, initially copying its
-     * creator's time factor, flipped status, and angle of rotation.
-     * @param locatorHitbox This SpaceObject's locator Hitbox
-     * @param creator This SpaceObject's creator
-     */
-    public SpaceObject(Hitbox<T> locatorHitbox, SpaceObject<T> creator) {
-        this(locatorHitbox);
-        setTimeFactor(creator.timeFactor);
-        setXFlip(creator.getXFlip());
-        setYFlip(creator.getYFlip());
-        setAngle(creator.getAngle());
     }
     
     /**
@@ -170,25 +155,25 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     void addCellData() {
-        state.addLocatorHitbox(locatorHitbox);
-        state.addCenterHitbox(centerHitbox);
+        state.addHitbox(locatorHitbox, HitboxRole.LOCATOR);
+        state.addHitbox(centerHitbox, HitboxRole.CENTER);
         if (overlapHitbox != null) {
-            state.addOverlapHitbox(overlapHitbox);
+            state.addHitbox(overlapHitbox, HitboxRole.OVERLAP);
         }
         if (solidHitbox != null) {
-            state.addSolidHitbox(solidHitbox);
+            state.addHitbox(solidHitbox, HitboxRole.SOLID);
         }
     }
     
     void removeData() {
         locatorHitbox.setGameState(null);
-        state.removeLocatorHitbox(locatorHitbox);
-        state.removeCenterHitbox(centerHitbox);
+        state.removeHitbox(locatorHitbox, HitboxRole.LOCATOR);
+        state.removeHitbox(centerHitbox, HitboxRole.CENTER);
         if (overlapHitbox != null) {
-            state.removeOverlapHitbox(overlapHitbox);
+            state.removeHitbox(overlapHitbox, HitboxRole.OVERLAP);
         }
         if (solidHitbox != null) {
-            state.removeSolidHitbox(solidHitbox);
+            state.removeHitbox(solidHitbox, HitboxRole.SOLID);
         }
         if (!animInstances.isEmpty()) {
             for (AnimationInstance instance : animInstances.values()) {
@@ -256,12 +241,13 @@ public abstract class SpaceObject<T extends CellGame> {
                     && locatorHitbox.getComponentOf() != this.locatorHitbox)) {
                 if (this.locatorHitbox != null) {
                     removeNonLocatorHitboxes(this.locatorHitbox);
-                    this.locatorHitbox.removeAsLocatorHitbox();
+                    this.locatorHitbox.remove(HitboxRole.LOCATOR);
                 }
                 this.locatorHitbox = locatorHitbox;
                 locatorHitbox.setObject(this);
                 addNonLocatorHitboxes(locatorHitbox);
-                locatorHitbox.addAsLocatorHitbox(drawPriority);
+                locatorHitbox.drawPriority = drawPriority;
+                locatorHitbox.add(HitboxRole.LOCATOR);
                 return true;
             }
         }
@@ -789,12 +775,12 @@ public abstract class SpaceObject<T extends CellGame> {
             }
             if (acceptable) {
                 if (this.overlapHitbox != null) {
-                    this.overlapHitbox.removeAsOverlapHitbox();
+                    this.overlapHitbox.remove(HitboxRole.OVERLAP);
                 }
                 this.overlapHitbox = overlapHitbox;
                 if (overlapHitbox != null) {
                     locatorHitbox.addChild(overlapHitbox);
-                    overlapHitbox.addAsOverlapHitbox();
+                    overlapHitbox.add(HitboxRole.OVERLAP);
                 }
                 return true;
             }
@@ -944,12 +930,12 @@ public abstract class SpaceObject<T extends CellGame> {
             }
             if (acceptable) {
                 if (this.solidHitbox != null) {
-                    this.solidHitbox.removeAsSolidHitbox();
+                    this.solidHitbox.remove(HitboxRole.SOLID);
                 }
                 this.solidHitbox = solidHitbox;
                 if (solidHitbox != null) {
                     locatorHitbox.addChild(solidHitbox);
-                    solidHitbox.addAsSolidHitbox();
+                    solidHitbox.add(HitboxRole.SOLID);
                 }
                 return true;
             }
@@ -1023,7 +1009,7 @@ public abstract class SpaceObject<T extends CellGame> {
      */
     public final void setDrawPriority(int drawPriority) {
         this.drawPriority = drawPriority;
-        locatorHitbox.changeDrawPriority(drawPriority);
+        locatorHitbox.setDrawPriority(drawPriority);
     }
     
     /**

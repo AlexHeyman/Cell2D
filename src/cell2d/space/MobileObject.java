@@ -83,17 +83,6 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
         super(locatorHitbox);
     }
     
-    /**
-     * Creates a new MobileObject with the specified locator Hitbox that acts as
-     * if it was created by the specified SpaceObject, initially copying its
-     * creator's time factor, flipped status, and angle of rotation.
-     * @param locatorHitbox This MobileObject's locator Hitbox
-     * @param creator This MobileObject's creator
-     */
-    public MobileObject(Hitbox<T> locatorHitbox, SpaceObject<T> creator) {
-        super(locatorHitbox, creator);
-    }
-    
     @Override
     void addNonCellData() {
         super.addNonCellData();
@@ -104,7 +93,7 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
     void addCellData() {
         super.addCellData();
         if (hasCollision && collisionHitbox != null) {
-            state.addCollisionHitbox(collisionHitbox);
+            state.addHitbox(collisionHitbox, HitboxRole.COLLISION);
         }
     }
     
@@ -113,7 +102,7 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
         super.removeData();
         state.removeMobileObject(this);
         if (hasCollision && collisionHitbox != null) {
-            state.removeCollisionHitbox(collisionHitbox);
+            state.removeHitbox(collisionHitbox, HitboxRole.COLLISION);
         }
         collisions.clear();
         collisionDirections.clear();
@@ -187,9 +176,9 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
     public final void setCollision(boolean hasCollision) {
         if (state != null && collisionHitbox != null) {
             if (hasCollision && !this.hasCollision) {
-                state.addCollisionHitbox(collisionHitbox);
+                state.addHitbox(collisionHitbox, HitboxRole.COLLISION);
             } else if (!hasCollision && this.hasCollision) {
-                state.removeCollisionHitbox(collisionHitbox);
+                state.removeHitbox(collisionHitbox, HitboxRole.COLLISION);
             }
         }
         this.hasCollision = hasCollision;
