@@ -82,9 +82,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.5.2.
+     * The version number of Cell2D, currently 1.5.3.
      */
-    public static final String VERSION = "1.5.2";
+    public static final String VERSION = "1.5.3";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -127,6 +127,9 @@ public abstract class CellGame {
             game.updateScreen(container);
             container.setTargetFrameRate(game.fps);
             container.setShowFPS(game.showFPS);
+            if (game.iconPath != null) {
+                container.setIcon(game.iconPath);
+            }
             container.start();
         } catch (SlickException e) {
             throw new RuntimeException("Failed to start a CellGame");
@@ -167,6 +170,7 @@ public abstract class CellGame {
     private int screenYOffset = 0;
     private boolean fullscreen;
     private boolean updateScreen = true;
+    private final String iconPath;
     private boolean loadingVisualsRendered = false;
     private final SortedMap<Integer,Map<Music,MusicInstance>> musicStack = new TreeMap<>();
     
@@ -183,9 +187,12 @@ public abstract class CellGame {
      * @param scaleFactor The initial factor by which the screen should be
      * scaled to make the size of the program window
      * @param fullscreen Whether this CellGame should start in fullscreen mode
+     * @param iconPath The relative path to the image file that this CellGame's
+     * program window should use as its icon, or null if the window should use
+     * the default LWJGL 2 icon
      */
     public CellGame(String name, int numCommands, int fps,
-            int screenWidth, int screenHeight, double scaleFactor, boolean fullscreen) {
+            int screenWidth, int screenHeight, double scaleFactor, boolean fullscreen, String iconPath) {
         game = new Game(name);
         if (numCommands < 0) {
             throw new RuntimeException("Attempted to create a CellGame with a negative number of commands");
@@ -208,6 +215,7 @@ public abstract class CellGame {
         this.screenHeight = screenHeight;
         setScaleFactor(scaleFactor);
         this.fullscreen = fullscreen;
+        this.iconPath = iconPath;
     }
     
     /**
@@ -1333,6 +1341,17 @@ public abstract class CellGame {
     public final void setFullscreen(boolean fullscreen) {
         this.fullscreen = fullscreen;
         updateScreen = true;
+    }
+    
+    /**
+     * Returns the relative path to the image file that this CellGame's program
+     * window uses as its icon, or null if the window uses the default LWJGL 2
+     * icon.
+     * @return The relative path to the image file that this CellGame's program
+     * window uses as its icon
+     */
+    public final String getIconPath() {
+        return iconPath;
     }
     
     /**
