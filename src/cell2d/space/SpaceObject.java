@@ -540,7 +540,7 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Sets this SpaceObject's center's offset to the specified value.
-     * @param offset 
+     * @param offset This SpaceObject's center's new offset
      */
     public final void setCenterOffset(CellVector offset) {
         centerHitbox.setRelPosition(offset);
