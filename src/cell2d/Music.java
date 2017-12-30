@@ -91,7 +91,7 @@ public class Music {
         resetPlayData();
     }
     
-    final void resetPlayData() {
+    private void resetPlayData() {
         speed = 0;
         volume = 0;
         pausePosition = -1;

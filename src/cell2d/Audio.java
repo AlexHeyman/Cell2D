@@ -122,8 +122,8 @@ class Audio {
             int source = sources.get(freeIndex);
             AL10.alSourceStop(source);
             AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
-            AL10.alSourcef(source, AL10.AL_PITCH, (float)speed);
-            AL10.alSourcef(source, AL10.AL_GAIN, (float)volume); 
+            AL10.alSourcef(source, AL10.AL_PITCH, (float)Math.max(speed, 0));
+            AL10.alSourcef(source, AL10.AL_GAIN, (float)Math.min(Math.max(volume, 0), 1));
             AL10.alSourcei(source, AL10.AL_LOOPING, loop ? AL10.AL_TRUE : AL10.AL_FALSE);
             AL10.alSourcePlay(source);
         }
