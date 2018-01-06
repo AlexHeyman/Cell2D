@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>,
         V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
     
-    private static final AtomicLong idCounter = new AtomicLong(0);
+    private static final AtomicLong ID_COUNTER = new AtomicLong(0);
     
     final long id;
     private final V thisThinker;
@@ -74,7 +74,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
      * Creates a new Thinker.
      */
     public Thinker() {
-        id = idCounter.getAndIncrement();
+        id = ID_COUNTER.getAndIncrement();
         thisThinker = getThis();
     }
     

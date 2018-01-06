@@ -67,7 +67,7 @@ import org.newdawn.slick.Graphics;
  */
 public abstract class SpaceObject<T extends CellGame> {
     
-    private static final AtomicLong idCounter = new AtomicLong(0);
+    private static final AtomicLong ID_COUNTER = new AtomicLong(0);
     
     final long id;
     T game = null;
@@ -96,7 +96,7 @@ public abstract class SpaceObject<T extends CellGame> {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a SpaceObject with an invalid locator Hitbox");
         }
-        id = idCounter.getAndIncrement();
+        id = ID_COUNTER.getAndIncrement();
     }
     
     /**

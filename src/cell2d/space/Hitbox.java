@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public abstract class Hitbox<T extends CellGame> {
     
-    private static final AtomicLong idCounter = new AtomicLong(0);
+    private static final AtomicLong ID_COUNTER = new AtomicLong(0);
     
     final long id;
     private Hitbox<T> parent = null;
@@ -67,7 +67,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param relPosition This Hitbox's relative position
      */
     public Hitbox(CellVector relPosition) {
-        id = idCounter.getAndIncrement();
+        id = ID_COUNTER.getAndIncrement();
         this.relPosition = new CellVector(relPosition);
         absPosition = new CellVector(relPosition);
     }
@@ -78,7 +78,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param relY The y-coordinate of this Hitbox's relative position
      */
     public Hitbox(long relX, long relY) {
-        id = idCounter.getAndIncrement();
+        id = ID_COUNTER.getAndIncrement();
         this.relPosition = new CellVector(relX, relY);
         absPosition = new CellVector(relPosition);
     }
