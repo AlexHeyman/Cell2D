@@ -91,21 +91,21 @@ class Audio {
         }
     }
     
-    void unload() {
+    final void unload() {
         stop();
         AL10.alDeleteBuffers(buffer);
     }
     
-    double getLength() {
+    final double getLength() {
         return length;
     }
     
-    boolean isPlaying() {
+    final boolean isPlaying() {
         return index >= 0 && timesSourcePlayed == timesSourcesPlayed[index]
                 && AL10.alGetSourcei(sources.get(index), AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
     }
     
-    void play(double speed, double volume, boolean loop) {
+    final void play(double speed, double volume, boolean loop) {
         int freeIndex = -1;
         for (int i = 0; i < numSources; i++) {
             int state = AL10.alGetSourcei(sources.get(i), AL10.AL_SOURCE_STATE);
@@ -129,18 +129,18 @@ class Audio {
         }
     }
     
-    void stop() {
+    final void stop() {
         if (isPlaying()) {
             AL10.alSourceStop(sources.get(index));
         }
         index = -1;
     }
     
-    double getPosition() {
+    final double getPosition() {
         return (isPlaying() ? AL10.alGetSourcef(sources.get(index), AL11.AL_SEC_OFFSET) : 0);
     }
     
-    void setPosition(double position) {
+    final void setPosition(double position) {
         if (isPlaying()) {
             position %= length;
             if (position < 0) {
@@ -150,13 +150,13 @@ class Audio {
         }
     }
     
-    void setSpeed(double speed) {
+    final void setSpeed(double speed) {
         if (isPlaying()) {
             AL10.alSourcef(sources.get(index), AL10.AL_PITCH, (float)Math.max(speed, 0));
         }
     }
     
-    void setVolume(double volume) {
+    final void setVolume(double volume) {
         if (isPlaying()) {
             AL10.alSourcef(sources.get(index), AL10.AL_GAIN, (float)Math.min(Math.max(volume, 0), 1));
         }

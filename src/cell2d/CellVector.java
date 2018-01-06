@@ -299,7 +299,7 @@ public class CellVector {
      * @param second The second CellVector
      * @return The sum of the two CellVectors
      */
-    public static final CellVector add(CellVector first, CellVector second) {
+    public static CellVector add(CellVector first, CellVector second) {
         return new CellVector(first.x + second.x, first.y + second.y);
     }
     
@@ -333,7 +333,7 @@ public class CellVector {
      * @param second The second CellVector
      * @return The second CellVector subtracted from the first
      */
-    public static final CellVector sub(CellVector first, CellVector second) {
+    public static CellVector sub(CellVector first, CellVector second) {
         return new CellVector(first.x - second.x, first.y - second.y);
     }
     
@@ -400,7 +400,7 @@ public class CellVector {
      * @param y2 The y-coordinate of the second point
      * @return The distance between (x1, y1) and (x2, y2)
      */
-    public static final long distanceBetween(long x1, long y1, long x2, long y2) {
+    public static long distanceBetween(long x1, long y1, long x2, long y2) {
         long xDist = x2 - x1;
         long yDist = y2 - y1;
         return Frac.sqrt(Frac.mul(xDist, xDist) + Frac.mul(yDist, yDist));
@@ -429,7 +429,7 @@ public class CellVector {
      * @param y2 The y-coordinate of the second point
      * @return The angle from (x1, y1) to (x2, y2)
      */
-    public static final double angleBetween(long x1, long y1, long x2, long y2) {
+    public static double angleBetween(long x1, long y1, long x2, long y2) {
         double angle = Math.toDegrees(Math.atan2(y1 - y2, x2 - x1)) % 360;
         if (angle < 0) {
             angle += 360;
@@ -486,7 +486,7 @@ public class CellVector {
      * @param diff2 The difference of the second line segment's endpoints
      * @return Whether the two line segments intersect
      */
-    public static final boolean lineSegmentsIntersect(
+    public static boolean lineSegmentsIntersect(
             CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
         if (!segBoxesIntersect(start1, diff1, start2, diff2)) {
             return false;
@@ -518,7 +518,7 @@ public class CellVector {
      * @param diff2 The difference of the second line segment's endpoints
      * @return The point at which the two line segments intersect
      */
-    public static final CellVector lineSegmentsIntersectionPoint(
+    public static CellVector lineSegmentsIntersectionPoint(
             CellVector start1, CellVector diff1, CellVector start2, CellVector diff2) {
         if (!segBoxesIntersect(start1, diff1, start2, diff2) || diff1.cross(diff2) == 0) {
             return null;

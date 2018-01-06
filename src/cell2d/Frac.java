@@ -37,7 +37,7 @@ public class Frac {
      * @return The equivalent of the specified <code>double</code> in fracunit
      * scale
      */
-    public static final long units(double a) {
+    public static long units(double a) {
         return (long)(a*UNIT);
     }
     
@@ -49,7 +49,7 @@ public class Frac {
      * @return The equivalent of the specified fracunit-scale number, rounded to
      * the nearest fracunit, as an <code>int</code>
      */
-    public static final int toInt(long a) {
+    public static int toInt(long a) {
         return (int)(round(a) >> BITS);
     }
     
@@ -61,7 +61,7 @@ public class Frac {
      * @return The equivalent of the specified fracunit-scale number as a <code>
      * double</code>
      */
-    public static final double toDouble(long a) {
+    public static double toDouble(long a) {
         return ((double)a)/UNIT;
     }
     
@@ -71,7 +71,7 @@ public class Frac {
      * @param b The second number
      * @return The product of the two numbers
      */
-    public static final long mul(long a, long b) {
+    public static long mul(long a, long b) {
         return BigInteger.valueOf(a).multiply(BigInteger.valueOf(b)).shiftRight(BITS).longValue();
     }
     
@@ -81,7 +81,7 @@ public class Frac {
      * @param b The second number
      * @return The first number divided by the second
      */
-    public static final long div(long a, long b) {
+    public static long div(long a, long b) {
         return BigInteger.valueOf(a).shiftLeft(BITS).divide(BigInteger.valueOf(b)).longValue();
     }
     
@@ -90,7 +90,7 @@ public class Frac {
      * @param a The number
      * @return The number's square root
      */
-    public static final long sqrt(long a) {
+    public static long sqrt(long a) {
         return units(Math.sqrt(toDouble(a)));
     }
     
@@ -99,7 +99,7 @@ public class Frac {
      * @param a The number
      * @return The number rounded to the nearest fracunit
      */
-    public static final long round(long a) {
+    public static long round(long a) {
         long diff = a & (UNIT - 1);
         return (diff < UNIT/2 ? a - diff : a + UNIT - diff);
     }
@@ -111,7 +111,7 @@ public class Frac {
      * @return The smallest fracunit-scale integer that is greater than or equal
      * to the number
      */
-    public static final long ceil(long a) {
+    public static long ceil(long a) {
         return -((-a >> BITS) << BITS);
     }
     
@@ -121,7 +121,7 @@ public class Frac {
      * @param a The number
      * @return The smallest integer that is greater than or equal to the number
      */
-    public static final int intCeil(long a) {
+    public static int intCeil(long a) {
         return (int)(-(-a >> BITS));
     }
     
@@ -132,7 +132,7 @@ public class Frac {
      * @return The largest fracunit-scale integer that is less than or equal to
      * the number
      */
-    public static final long floor(long a) {
+    public static long floor(long a) {
         return (a >> BITS) << BITS;
     }
     
@@ -142,7 +142,7 @@ public class Frac {
      * @param a The number
      * @return The largest integer that is less than or equal to the number
      */
-    public static final int intFloor(long a) {
+    public static int intFloor(long a) {
         return (int)(a >> BITS);
     }
     

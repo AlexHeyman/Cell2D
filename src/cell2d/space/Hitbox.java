@@ -1275,7 +1275,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param hitbox2 The second Hitbox
      * @return Whether the two Hitboxes overlap
      */
-    public static final <T extends CellGame> boolean overlap(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
+    public static <T extends CellGame> boolean overlap(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
         if ((hitbox1.getObject() != hitbox2.getObject() || hitbox1.getObject() == null)
                 && hitbox1.getLeftEdge() <= hitbox2.getRightEdge()
                 && hitbox1.getRightEdge() >= hitbox2.getLeftEdge()

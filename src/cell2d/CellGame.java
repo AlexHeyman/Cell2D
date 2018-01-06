@@ -103,7 +103,7 @@ public abstract class CellGame {
      * @param path The relative path to the folder containing the native
      * libraries
      */
-    public static final void loadNatives(String path) {
+    public static void loadNatives(String path) {
         System.setProperty("java.library.path", path);
         try {
             Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
@@ -120,7 +120,7 @@ public abstract class CellGame {
      * end.
      * @param game The CellGame to start
      */
-    public static final void startGame(CellGame game) {
+    public static void startGame(CellGame game) {
         Log.info("Cell2D Version: " + VERSION);
         try {
             AppGameContainer container = new AppGameContainer(game.game);

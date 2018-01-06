@@ -100,8 +100,8 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
      * relative vertex
      * @return The new PolygonHitbox
      */
-    public static final PolygonHitbox regularPolygon(long relX, long relY,
-            int numVertices, long radius, double angle) {
+    public static PolygonHitbox regularPolygon(
+            long relX, long relY, int numVertices, long radius, double angle) {
         if (numVertices < 3) {
             throw new RuntimeException("Attempted to make a regular polygon with fewer than 3 vertices");
         }

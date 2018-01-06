@@ -43,7 +43,7 @@ class GameImage {
         return new Color((color >> 16) & 255, (color >> 8) & 255, color & 255, (color >> 24) & 255);
     }
     
-    static final GameImage getTransparentImage(String path, Color transColor) {
+    static GameImage getTransparentImage(String path, Color transColor) {
         BufferedImage bufferedImage;
         try {
             bufferedImage = ImageIO.read(new File(path));
@@ -100,7 +100,7 @@ class GameImage {
         return new GameImage(image, bufferedImage);
     }
     
-    static final GameImage getRecoloredImage(BufferedImage bufferedImage, Map<Color,Color> colorMap) {
+    static GameImage getRecoloredImage(BufferedImage bufferedImage, Map<Color,Color> colorMap) {
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -162,7 +162,7 @@ class GameImage {
         return new GameImage(image, newImage);
     }
     
-    static final GameImage getRecoloredImage(BufferedImage bufferedImage, Color blendColor) {
+    static GameImage getRecoloredImage(BufferedImage bufferedImage, Color blendColor) {
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);

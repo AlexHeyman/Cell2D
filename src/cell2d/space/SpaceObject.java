@@ -805,7 +805,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param object2 The second SpaceObject
      * @return Whether the two SpaceObjects overlap
      */
-    public static final <T extends CellGame> boolean overlap(SpaceObject<T> object1, SpaceObject<T> object2) {
+    public static <T extends CellGame> boolean overlap(SpaceObject<T> object1, SpaceObject<T> object2) {
         return object1.overlapHitbox != null && object2.overlapHitbox != null
                 && Hitbox.overlap(object1.overlapHitbox, object2.overlapHitbox);
     }
