@@ -15,7 +15,7 @@ import java.math.BigInteger;
  * in the Frac class.</p>
  * @author Andrew Heyman
  */
-public class Frac {
+public final class Frac {
     
     /**
      * 32, the number of bits by which an integer must be shifted left to be
