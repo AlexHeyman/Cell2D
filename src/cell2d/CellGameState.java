@@ -41,7 +41,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     
     private final U thisState;
     final T game;
-    private int id;
+    private final int id;
     boolean active = false;
     private long timeFactor = Frac.UNIT;
     private final Set<AnimationInstance> animInstances = new HashSet<>();

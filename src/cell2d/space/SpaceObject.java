@@ -32,11 +32,11 @@ import org.newdawn.slick.Graphics;
  * represents it for purposes of surface solidity and ThinkerObjects colliding
  * with it. The solid Hitbox's rectangular bounding box, rather than its exact
  * shape, is what represents the SpaceObject in Cell2D's standard collision
- * mechanics. All of a SpaceState's Hitboxes other than its locator Hitbox have
- * positions, flipped statuses, and angles of rotation that are relative to
- * those of its locator Hitbox. A SpaceObject may use a single Hitbox for more
- * than one of these purposes, but a Hitbox may not be used by multiple
- * SpaceObjects at once.</p>
+ * mechanics. A SpaceObject may use a single Hitbox for more than one purpose,
+ * but a Hitbox may not be used by multiple SpaceObjects at once. All of a
+ * SpaceObject's Hitboxes other than its locator Hitbox have positions, flipped
+ * statuses, and angles of rotation that are relative to those of its locator
+ * Hitbox.</p>
  * 
  * <p>A SpaceObject has a point called a center that summarizes its location.
  * Its center has an offset that is relative to the SpaceObject's position,
