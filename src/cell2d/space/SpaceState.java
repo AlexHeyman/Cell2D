@@ -88,7 +88,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         @Override
         public final int compare(MobileObject<T> object1, MobileObject<T> object2) {
             int diff = object2.movementPriority - object1.movementPriority;
-            return (diff == 0 ? Long.signum(object1.id - object2.id) : diff);
+            return (diff == 0 ? Long.signum(object1.hashCode() - object2.hashCode()) : diff);
         }
         
     };
@@ -99,7 +99,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             long diff = event1.metric - event2.metric;
             if (diff == 0) {
                 int typeDiff = event1.type - event2.type;
-                return (typeDiff == 0 ? Long.signum(event1.object.id - event2.object.id) : typeDiff);
+                return (typeDiff == 0 ?
+                        Long.signum(event1.hashCode() - event2.hashCode()) : typeDiff);
             }
             return (int)Math.signum(diff);
         }
@@ -110,14 +111,16 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         @Override
         public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
             int diff = hitbox1.drawPriority - hitbox2.drawPriority;
-            return (diff == 0 ? Long.signum(hitbox2.id - hitbox1.id) : diff);
+            return (diff == 0 ? Long.signum(hitbox1.hashCode() - hitbox2.hashCode()) : diff);
         }
         
     };
-    private Comparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>> drawPriorityIteratorComparator = new SpaceComparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>>() {
+    private Comparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>> drawPriorityIteratorComparator
+            = new SpaceComparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>>() {
         
         @Override
-        public final int compare(Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair1, Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair2) {
+        public final int compare(Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair1,
+                Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair2) {
             return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
         }
         
@@ -129,7 +132,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             int diff = hitbox1.drawPriority - hitbox2.drawPriority;
             if (diff == 0) {
                 long yDiff = hitbox1.getRelY() - hitbox2.getRelY();
-                return (yDiff == 0 ? Long.signum(hitbox2.id - hitbox1.id) : (int)Math.signum(yDiff));
+                return (yDiff == 0 ?
+                        Long.signum(hitbox1.hashCode() - hitbox2.hashCode()) : (int)Math.signum(yDiff));
             }
             return diff;
         }
@@ -142,7 +146,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             int drawPriorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
             if (drawPriorityDiff == 0) {
                 long yDiff = hitbox2.getRelY() - hitbox1.getRelY();
-                return (yDiff == 0 ? Long.signum(hitbox2.id - hitbox1.id) : (int)Math.signum(yDiff));
+                return (yDiff == 0 ?
+                        Long.signum(hitbox1.hashCode() - hitbox2.hashCode()) : (int)Math.signum(yDiff));
             }
             return drawPriorityDiff;
         }

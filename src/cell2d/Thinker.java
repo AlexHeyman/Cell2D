@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>A Thinker is a collection of methods that contributes to the mechanics of
@@ -56,9 +55,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>,
         V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
     
-    private static final AtomicLong ID_COUNTER = new AtomicLong(0);
-    
-    final long id;
     private final V thisThinker;
     ThinkerGroup<T,U,V> group = null;
     ThinkerGroup<T,U,V> newGroup = null;
@@ -74,8 +70,17 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
      * Creates a new Thinker.
      */
     public Thinker() {
-        id = ID_COUNTER.getAndIncrement();
         thisThinker = getThis();
+    }
+    
+    @Override
+    public final boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+    
+    @Override
+    public final int hashCode() {
+        return super.hashCode();
     }
     
     /**

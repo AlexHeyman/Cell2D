@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import org.newdawn.slick.Graphics;
 
 /**
@@ -67,9 +66,6 @@ import org.newdawn.slick.Graphics;
  */
 public abstract class SpaceObject<T extends CellGame> {
     
-    private static final AtomicLong ID_COUNTER = new AtomicLong(0);
-    
-    final long id;
     T game = null;
     SpaceState<T> state = null;
     SpaceState<T> newState = null;
@@ -96,7 +92,16 @@ public abstract class SpaceObject<T extends CellGame> {
         if (!setLocatorHitbox(locatorHitbox)) {
             throw new RuntimeException("Attempted to create a SpaceObject with an invalid locator Hitbox");
         }
-        id = ID_COUNTER.getAndIncrement();
+    }
+    
+    @Override
+    public final boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+    
+    @Override
+    public final int hashCode() {
+        return super.hashCode();
     }
     
     /**

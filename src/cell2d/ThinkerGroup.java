@@ -35,7 +35,8 @@ public abstract class ThinkerGroup<T extends CellGame, U extends CellGameState<T
         @Override
         public final int compare(V thinker1, V thinker2) {
             int priorityDifference = thinker2.actionPriority - thinker1.actionPriority;
-            return (priorityDifference == 0 ? Long.signum(thinker2.id - thinker1.id) : priorityDifference);
+            return (priorityDifference == 0 ?
+                    Long.signum(thinker1.hashCode() - thinker2.hashCode()) : priorityDifference);
         }
         
     };
