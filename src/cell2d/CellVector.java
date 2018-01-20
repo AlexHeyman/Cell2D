@@ -2,15 +2,18 @@ package cell2d;
 
 import cell2d.space.Hitbox;
 import cell2d.space.SpaceObject;
+import java.util.Objects;
 
 /**
  * <p>A CellVector represents a point in continuous space as a two-dimensional
- * vector. A CellVector retains its identity as an Object even if the point that
- * it represents is changed, and thus two different CellVectors with the same
- * point are not considered equal. CellVectors measure angles in degrees going
- * counterclockwise from directly right and normalize them to be between 0 and
- * 360. All operations on a CellVector return the CellVector itself to allow
- * operations to be easily strung together.</p>
+ * vector. CellVectors are mutable; that is, the point that they represent can
+ * be changed. However, since the point that a CellVector represents is the
+ * basis of its equals() and hashCode() methods, care must be taken not to
+ * mutate a CellVector while data structures such as Maps or Sets are storing
+ * it. CellVectors measure angles in degrees going counterclockwise from
+ * directly right and normalize them to be between 0 and 360. All operations on
+ * a CellVector return the CellVector itself to allow operations to be easily
+ * strung together.</p>
  * @author Andrew Heyman
  */
 public class CellVector {
@@ -54,6 +57,27 @@ public class CellVector {
         double radians = Math.toRadians(angle);
         x = Frac.units(Math.cos(radians));
         y = Frac.units(-Math.sin(radians));
+    }
+    
+    /**
+     * Returns whether two CellVectors are equal. Two CellVectors are equal if
+     * and only if they represent the same point.
+     * @param obj The object to be compared with this CellVector
+     * @return Whether the specified object is a CellVector that is equal to
+     * this CellVector
+     */
+    @Override
+    public final boolean equals(Object obj) {
+        if (obj instanceof CellVector) {
+            CellVector vector = (CellVector)obj;
+            return x == vector.x && y == vector.y;
+        }
+        return false;
+    }
+    
+    @Override
+    public final int hashCode() {
+        return Objects.hash(x, y);
     }
     
     /**

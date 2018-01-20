@@ -87,8 +87,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
         @Override
         public final int compare(MobileObject<T> object1, MobileObject<T> object2) {
-            int diff = object2.movementPriority - object1.movementPriority;
-            return (diff == 0 ? Long.signum(object1.hashCode() - object2.hashCode()) : diff);
+            int priorityDiff = object2.movementPriority - object1.movementPriority;
+            return (priorityDiff == 0 ?
+                    System.identityHashCode(object1) - System.identityHashCode(object2) : priorityDiff);
         }
         
     };
@@ -96,13 +97,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
         @Override
         public final int compare(MoveEvent<T> event1, MoveEvent<T> event2) {
-            long diff = event1.metric - event2.metric;
-            if (diff == 0) {
+            long metricDiff = event1.metric - event2.metric;
+            if (metricDiff == 0) {
                 int typeDiff = event1.type - event2.type;
                 return (typeDiff == 0 ?
-                        Long.signum(event1.hashCode() - event2.hashCode()) : typeDiff);
+                        System.identityHashCode(event1) - System.identityHashCode(event2) : typeDiff);
             }
-            return (int)Math.signum(diff);
+            return (int)Math.signum(metricDiff);
         }
         
     };
@@ -110,8 +111,9 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
         @Override
         public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
-            int diff = hitbox1.drawPriority - hitbox2.drawPriority;
-            return (diff == 0 ? Long.signum(hitbox1.hashCode() - hitbox2.hashCode()) : diff);
+            int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+            return (priorityDiff == 0 ?
+                    System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2) : priorityDiff);
         }
         
     };
@@ -129,13 +131,14 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
         @Override
         public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
-            int diff = hitbox1.drawPriority - hitbox2.drawPriority;
-            if (diff == 0) {
+            int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+            if (priorityDiff == 0) {
                 long yDiff = hitbox1.getRelY() - hitbox2.getRelY();
                 return (yDiff == 0 ?
-                        Long.signum(hitbox1.hashCode() - hitbox2.hashCode()) : (int)Math.signum(yDiff));
+                        System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
+                        : (int)Math.signum(yDiff));
             }
-            return diff;
+            return priorityDiff;
         }
         
     };
@@ -143,13 +146,14 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
         @Override
         public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
-            int drawPriorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
-            if (drawPriorityDiff == 0) {
+            int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+            if (priorityDiff == 0) {
                 long yDiff = hitbox2.getRelY() - hitbox1.getRelY();
                 return (yDiff == 0 ?
-                        Long.signum(hitbox1.hashCode() - hitbox2.hashCode()) : (int)Math.signum(yDiff));
+                        System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
+                        : (int)Math.signum(yDiff));
             }
-            return drawPriorityDiff;
+            return priorityDiff;
         }
         
     };

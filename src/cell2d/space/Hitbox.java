@@ -77,16 +77,6 @@ public abstract class Hitbox<T extends CellGame> {
         absPosition = new CellVector(relPosition);
     }
     
-    @Override
-    public final boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-    
-    @Override
-    public final int hashCode() {
-        return super.hashCode();
-    }
-    
     /**
      * Returns a copy of this Hitbox with its relative position at the origin
      * that is not flipped or rotated.
@@ -1055,13 +1045,11 @@ public abstract class Hitbox<T extends CellGame> {
     private static boolean pointIntersectsPolygon(CellVector point, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
         if (numVertices == 0) { //Polygon is a point at its position
-            CellVector position = polygon.getAbsPosition();
             //Point is identical to polygon
-            return point.getX() == position.getX() && point.getY() == position.getY();
+            return point.equals(polygon.getAbsPosition());
         } else if (numVertices == 1) { //Polygon is a point at its first vertex
-            CellVector position = polygon.getAbsVertex(0);
             //Point is identical to polygon
-            return point.getX() == position.getX() && point.getY() == position.getY();
+            return point.equals(polygon.getAbsVertex(0));
         }
         CellVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) { //Polygon is a line segment

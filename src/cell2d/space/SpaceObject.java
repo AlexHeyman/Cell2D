@@ -113,16 +113,6 @@ public abstract class SpaceObject<T extends CellGame> {
         this(new PointHitbox<>(x, y));
     }
     
-    @Override
-    public final boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-    
-    @Override
-    public final int hashCode() {
-        return super.hashCode();
-    }
-    
     /**
      * Returns the CellGame of the SpaceState to which this SpaceObject is
      * assigned, or null if it is not assigned to a SpaceState.

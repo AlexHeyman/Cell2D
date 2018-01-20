@@ -73,16 +73,6 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
         thisThinker = getThis();
     }
     
-    @Override
-    public final boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-    
-    @Override
-    public final int hashCode() {
-        return super.hashCode();
-    }
-    
     /**
      * A method which returns this Thinker as a V, rather than as a
      * Thinker&lt;T,U,V&gt;. This must be implemented somewhere in the lineage
