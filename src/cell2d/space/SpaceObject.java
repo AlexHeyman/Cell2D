@@ -94,6 +94,25 @@ public abstract class SpaceObject<T extends CellGame> {
         }
     }
     
+    /**
+     * Creates a new SpaceObject with a new PointHitbox at the specified
+     * position as its locator Hitbox.
+     * @param position This SpaceObject's position
+     */
+    public SpaceObject(CellVector position) {
+        this(new PointHitbox<>(position));
+    }
+    
+    /**
+     * Creates a new SpaceObject with a new PointHitbox at the specified
+     * position as its locator Hitbox.
+     * @param x The x-coordinate of this SpaceObject's position
+     * @param y The y-coordinate of this SpaceObject's position
+     */
+    public SpaceObject(long x, long y) {
+        this(new PointHitbox<>(x, y));
+    }
+    
     @Override
     public final boolean equals(Object obj) {
         return super.equals(obj);
@@ -260,9 +279,7 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     void removeNonLocatorHitboxes(Hitbox locatorHitbox) {
-        if (centerHitbox != null) {
-            locatorHitbox.removeChild(centerHitbox);
-        }
+        locatorHitbox.removeChild(centerHitbox);
         if (overlapHitbox != null) {
             locatorHitbox.removeChild(overlapHitbox);
         }
@@ -272,9 +289,7 @@ public abstract class SpaceObject<T extends CellGame> {
     }
     
     void addNonLocatorHitboxes(Hitbox locatorHitbox) {
-        if (centerHitbox != null) {
-            locatorHitbox.addChild(centerHitbox);
-        }
+        locatorHitbox.addChild(centerHitbox);
         if (overlapHitbox != null) {
             locatorHitbox.addChild(overlapHitbox);
         }

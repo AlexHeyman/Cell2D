@@ -83,6 +83,25 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
         super(locatorHitbox);
     }
     
+    /**
+     * Creates a new MobileObject with a new PointHitbox at the specified
+     * position as its locator Hitbox.
+     * @param position This MobileObject's position
+     */
+    public MobileObject(CellVector position) {
+        super(position);
+    }
+    
+    /**
+     * Creates a new MobileObject with a new PointHitbox at the specified
+     * position as its locator Hitbox.
+     * @param x The x-coordinate of this MobileObject's position
+     * @param y The y-coordinate of this MobileObject's position
+     */
+    public MobileObject(long x, long y) {
+        super(x, y);
+    }
+    
     @Override
     void addNonCellData() {
         super.addNonCellData();

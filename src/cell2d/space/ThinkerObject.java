@@ -1,6 +1,7 @@
 package cell2d.space;
 
 import cell2d.CellGame;
+import cell2d.CellVector;
 import cell2d.SafeIterator;
 import cell2d.TimedEvent;
 
@@ -49,6 +50,25 @@ public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> 
      */
     public ThinkerObject(Hitbox<T> locatorHitbox) {
         super(locatorHitbox);
+    }
+    
+    /**
+     * Creates a new ThinkerObject with a new PointHitbox at the specified
+     * position as its locator Hitbox.
+     * @param position This ThinkerObject's position
+     */
+    public ThinkerObject(CellVector position) {
+        super(position);
+    }
+    
+    /**
+     * Creates a new ThinkerObject with a new PointHitbox at the specified
+     * position as its locator Hitbox.
+     * @param x The x-coordinate of this ThinkerObject's position
+     * @param y The y-coordinate of this ThinkerObject's position
+     */
+    public ThinkerObject(long x, long y) {
+        super(x, y);
     }
     
     @Override
