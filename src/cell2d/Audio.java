@@ -21,15 +21,14 @@ import org.newdawn.slick.util.ResourceLoader;
  */
 class Audio {
     
-    private static final int MAX_SOURCES = 64;
+    private static final int NUM_SOURCES = 64;
     private static boolean initialized = false;
-    private static int numSources = 0;
     private static IntBuffer sources = null;
-    private static long[] timesSourcesPlayed = null;
+    private static int[] timesSourcesPlayed = null;
     
     private final int buffer;
     private int index = -1;
-    private long timesSourcePlayed = -1;
+    private int timesSourcePlayed = -1;
     private final float length;
     
     Audio(String path) {
@@ -72,17 +71,16 @@ class Audio {
         } catch (LWJGLException e) {
             throw new RuntimeException(e.toString());
         }
-        sources = BufferUtils.createIntBuffer(MAX_SOURCES);
-        while (numSources < MAX_SOURCES) {
+        sources = BufferUtils.createIntBuffer(NUM_SOURCES);
+        for (int i = 0; i < NUM_SOURCES; i++) {
             IntBuffer buf = BufferUtils.createIntBuffer(1);
             AL10.alGenSources(buf);
             if (AL10.alGetError() != AL10.AL_NO_ERROR) {
                 break;
             }
             sources.put(buf.get(0));
-            numSources++;
         }
-        timesSourcesPlayed = new long[numSources];
+        timesSourcesPlayed = new int[NUM_SOURCES];
     }
     
     static void close() {
@@ -107,7 +105,7 @@ class Audio {
     
     final void play(double speed, double volume, boolean loop) {
         int freeIndex = -1;
-        for (int i = 0; i < numSources; i++) {
+        for (int i = 0; i < NUM_SOURCES; i++) {
             int state = AL10.alGetSourcei(sources.get(i), AL10.AL_SOURCE_STATE);
             if (state != AL10.AL_PLAYING && state != AL10.AL_PAUSED) {
                 freeIndex = i;
@@ -122,8 +120,8 @@ class Audio {
             int source = sources.get(freeIndex);
             AL10.alSourceStop(source);
             AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
-            AL10.alSourcef(source, AL10.AL_PITCH, (float)Math.max(speed, 0));
-            AL10.alSourcef(source, AL10.AL_GAIN, (float)Math.min(Math.max(volume, 0), 1));
+            AL10.alSourcef(source, AL10.AL_PITCH, (float)speed);
+            AL10.alSourcef(source, AL10.AL_GAIN, (float)volume);
             AL10.alSourcei(source, AL10.AL_LOOPING, loop ? AL10.AL_TRUE : AL10.AL_FALSE);
             AL10.alSourcePlay(source);
         }
@@ -152,13 +150,13 @@ class Audio {
     
     final void setSpeed(double speed) {
         if (isPlaying()) {
-            AL10.alSourcef(sources.get(index), AL10.AL_PITCH, (float)Math.max(speed, 0));
+            AL10.alSourcef(sources.get(index), AL10.AL_PITCH, (float)speed);
         }
     }
     
     final void setVolume(double volume) {
         if (isPlaying()) {
-            AL10.alSourcef(sources.get(index), AL10.AL_GAIN, (float)Math.min(Math.max(volume, 0), 1));
+            AL10.alSourcef(sources.get(index), AL10.AL_GAIN, (float)volume);
         }
     }
     

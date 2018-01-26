@@ -9,6 +9,13 @@ package cell2d;
  * <p>Like Sprites, SpriteSheets, and Sounds, Music tracks can be manually
  * loaded and unloaded into and out of memory. Loading may take a moment, but
  * while a Music track is not loaded, it cannot play.</p>
+ * 
+ * <p>Music tracks can be played at different speeds from 0 up, with a speed of
+ * 0 making the Music track inaudible and a speed of 1 causing no speed change.
+ * They can also be played at different volumes between 0 and 1, with a volume
+ * of 0 making the Music track inaudible and a volume of 1 causing no volume
+ * change. Finally, the Music class has a global volume between 0 and 1 by which
+ * the effective volumes of all currently playing Music tracks are scaled.</p>
  * @author Andrew Heyman
  */
 public class Music {
@@ -19,6 +26,23 @@ public class Music {
      * speed, and volume of 0.
      */
     public static final Music BLANK = new Music();
+    private static double globalVolume = 1;
+    
+    /**
+     * Returns the global music volume.
+     * @return The global music volume
+     */
+    public static final double getGlobalVolume() {
+        return globalVolume;
+    }
+    
+    /**
+     * Sets the global music volume to the specified value.
+     * @param volume The new global music volume
+     */
+    public static final void setGlobalVolume(double volume) {
+        globalVolume = Math.min(Math.max(volume, 0), 1);
+    }
     
     private static enum FadeType {
         NONE, TO, OUT
@@ -32,6 +56,7 @@ public class Music {
     private MusicInstance instance = null;
     private double speed;
     private double volume;
+    private double lastGlobalVolume = globalVolume;
     private double pausePosition;
     private FadeType speedFadeType;
     private double speedFadeStart = 0;
@@ -151,9 +176,10 @@ public class Music {
             speedFadeType = FadeType.NONE;
             volumeFadeType = FadeType.NONE;
             if (!blank) {
-                speed = instance.destSpeed;
-                volume = instance.destVolume;
-                audio.play(speed, volume, false);
+                speed = instance.getDestSpeed();
+                volume = instance.getDestVolume();
+                lastGlobalVolume = globalVolume;
+                audio.play(speed, volume*globalVolume, false);
             }
             return true;
         }
@@ -193,7 +219,8 @@ public class Music {
      */
     public final void resume() {
         if (!blank && instance != null && pausePosition >= 0) {
-            audio.play(speed, volume, instance.loop);
+            lastGlobalVolume = globalVolume;
+            audio.play(speed, volume*globalVolume, instance.isLooping());
             audio.setPosition(pausePosition);
             pausePosition = -1;
         }
@@ -229,8 +256,8 @@ public class Music {
     }
     
     /**
-     * Returns the speed at which this Music track is playing, with 1
-     * representing no speed change, or 0 if it is not currently playing.
+     * Returns the speed at which this Music track is playing, or 0 if it is not
+     * currently playing.
      * @return The speed at which this Music track is playing
      */
     public final double getSpeed() {
@@ -238,18 +265,18 @@ public class Music {
     }
     
     /**
-     * Sets the speed at which this Music track is playing, with 1 representing
-     * no speed change, if it is currently playing. If this Music track's speed
-     * is fading, the fade will be interrupted.
+     * Sets the speed at which this Music track is playing if it is currently
+     * playing. If this Music track's speed is fading, the fade will be
+     * interrupted.
      * @param speed The speed at which this Music track should play
      */
     public final void setSpeed(double speed) {
         if (!blank && instance != null) {
             speedFadeType = FadeType.NONE;
-            instance.destSpeed = speed;
-            this.speed = speed;
+            instance.setDestSpeed(speed);
+            this.speed = instance.getDestSpeed();
             if (pausePosition < 0) {
-                audio.setSpeed(speed);
+                audio.setSpeed(this.speed);
             }
         }
     }
@@ -265,15 +292,15 @@ public class Music {
         if (!blank && instance != null) {
             speedFadeType = FadeType.TO;
             speedFadeStart = this.speed;
-            instance.destSpeed = speed;
+            instance.setDestSpeed(speed);
             speedFadeDuration = duration*1000;
             speedMSFading = 0;
         }
     }
     
     /**
-     * Returns the volume at which this Music track is playing, with 1
-     * representing no volume change, or 0 if it is not currently playing.
+     * Returns the volume at which this Music track is playing, or 0 if it is
+     * not currently playing.
      * @return The volume at which this Music track is playing
      */
     public final double getVolume() {
@@ -281,18 +308,18 @@ public class Music {
     }
     
     /**
-     * Sets the volume at which this Music track is playing, with 1 representing
-     * no volume change, if it is currently playing. If this Music track's
-     * volume is fading, the fade will be interrupted.
+     * Sets the volume at which this Music track is playing if it is currently
+     * playing. If this Music track's volume is fading, the fade will be
+     * interrupted.
      * @param volume The volume at which this Music track should play
      */
     public final void setVolume(double volume) {
         if (!blank && instance != null) {
             volumeFadeType = FadeType.NONE;
-            instance.destVolume = volume;
-            this.volume = volume;
+            instance.setDestVolume(volume);
+            this.volume = instance.getDestVolume();
             if (pausePosition < 0) {
-                audio.setVolume(volume);
+                audio.setVolume(this.volume*globalVolume);
             }
         }
     }
@@ -308,7 +335,7 @@ public class Music {
         if (!blank && instance != null) {
             volumeFadeType = FadeType.TO;
             volumeFadeStart = this.volume;
-            instance.destVolume = volume;
+            instance.setDestVolume(volume);
             volumeFadeDuration = duration*1000;
             volumeMSFading = 0;
         }
@@ -326,7 +353,7 @@ public class Music {
         } else if (instance != null) {
             volumeFadeType = FadeType.OUT;
             volumeFadeStart = this.volume;
-            instance.destVolume = 0;
+            instance.setDestVolume(0);
             volumeFadeDuration = duration*1000;
             volumeMSFading = 0;
         }
@@ -337,7 +364,7 @@ public class Music {
      * @return Whether this Music track is currently looping indefinitely
      */
     public final boolean isLooping() {
-        return instance != null && (blank || instance.loop);
+        return instance != null && (blank || instance.isLooping());
     }
     
     /**
@@ -347,41 +374,42 @@ public class Music {
      */
     public final void setLooping(boolean loop) {
         if (!blank && instance != null) {
-            instance.loop = loop;
+            instance.setLooping(loop);
         }
     }
     
     final boolean update(double msElapsed) {
         if (!blank && pausePosition < 0) {
             if (!audio.isPlaying()) {
-                if (instance.loop) {
-                    audio.play(speed, volume, false);
+                if (instance.isLooping()) {
+                    audio.play(speed, volume*globalVolume, false);
                     audio.setPosition(loopStart);
                 } else {
                     instance = null;
                     resetPlayData();
                     return true;
                 }
-            } else if (loopEnd >= 0 && instance.loop && audio.getPosition() >= loopEnd) {
+            } else if (loopEnd >= 0 && instance.isLooping() && audio.getPosition() >= loopEnd) {
                 audio.setPosition(loopStart + ((audio.getPosition() - loopStart) % (loopEnd - loopStart)));
             }
             if (speedFadeType != FadeType.NONE) {
-                speedMSFading = Math.min(speedMSFading + msElapsed, speedFadeDuration);
-                if (speedMSFading == speedFadeDuration) {
-                    speed = instance.destSpeed;
+                speedMSFading += msElapsed;
+                if (speedMSFading >= speedFadeDuration) {
+                    speed = instance.getDestSpeed();
                     audio.setSpeed(speed);
                     speedFadeType = FadeType.NONE;
                 } else {
                     speed = speedFadeStart
-                            + (speedMSFading/speedFadeDuration)*(instance.destSpeed - speedFadeStart);
+                            + ((speedMSFading/speedFadeDuration)
+                            * (instance.getDestSpeed() - speedFadeStart));
                     audio.setSpeed(speed);
                 }
             }
             if (volumeFadeType != FadeType.NONE) {
-                volumeMSFading = Math.min(volumeMSFading + msElapsed, volumeFadeDuration);
-                if (volumeMSFading == volumeFadeDuration) {
-                    volume = instance.destVolume;
-                    audio.setVolume(volume);
+                volumeMSFading += msElapsed;
+                if (volumeMSFading >= volumeFadeDuration) {
+                    volume = instance.getDestVolume();
+                    audio.setVolume(volume*globalVolume);
                     if (volumeFadeType == FadeType.OUT) {
                         instance = null;
                         resetPlayData();
@@ -391,11 +419,15 @@ public class Music {
                     volumeFadeType = FadeType.NONE;
                 } else {
                     volume = volumeFadeStart
-                            + (volumeMSFading/volumeFadeDuration)*(instance.destVolume - volumeFadeStart);
-                    audio.setVolume(volume);
+                            + ((volumeMSFading/volumeFadeDuration)
+                            * (instance.getDestVolume() - volumeFadeStart));
+                    audio.setVolume(volume*globalVolume);
                 }
+            } else if (globalVolume != lastGlobalVolume) {
+                audio.setVolume(volume*globalVolume);
             }
         }
+        lastGlobalVolume = globalVolume;
         return false;
     }
     

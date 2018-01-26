@@ -1452,9 +1452,9 @@ public abstract class CellGame {
      * @param priority The priority to assign the specified Music track to
      * @param music The Music track to add
      * @param speed The speed at which to play the specified Music track when it
-     * plays, with 1 representing no speed change
+     * plays
      * @param volume The volume at which to play the specified Music track when
-     * it plays, with 1 representing no volume change
+     * it plays
      * @param loop If true, the Music track will loop indefinitely until
      * stopped when it plays; otherwise, it will play once
      * @param replace If true, all other Music tracks assigned to the specified
@@ -1507,9 +1507,9 @@ public abstract class CellGame {
      * @param priority The priority to assign the specified Music track to
      * @param music The Music track to add
      * @param speed The speed at which to play the specified Music track when it
-     * plays, with 1 representing no speed change
+     * plays
      * @param volume The volume at which to play the specified Music track when
-     * it plays, with 1 representing no volume change
+     * it plays
      * @param loop If true, the Music track will loop indefinitely until
      * stopped when it plays; otherwise, it will play once
      */
@@ -1537,9 +1537,9 @@ public abstract class CellGame {
      * Music track will automatically begin playing.
      * @param music The Music track to add
      * @param speed The speed at which to play the specified Music track when it
-     * plays, with 1 representing no speed change
+     * plays
      * @param volume The volume at which to play the specified Music track when
-     * it plays, with 1 representing no volume change
+     * it plays
      * @param loop If true, the Music track will loop indefinitely until
      * stopped when it plays; otherwise, it will play once
      * @param replace If true, all other Music tracks assigned to the priority
@@ -1569,9 +1569,9 @@ public abstract class CellGame {
      * The Music track will automatically begin playing.
      * @param music The Music track to add
      * @param speed The speed at which to play the specified Music track when it
-     * plays, with 1 representing no speed change
+     * plays
      * @param volume The volume at which to play the specified Music track when
-     * it plays, with 1 representing no volume change
+     * it plays
      * @param loop If true, the Music track will loop indefinitely until
      * stopped when it plays; otherwise, it will play once
      */
