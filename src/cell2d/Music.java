@@ -32,7 +32,7 @@ public class Music {
      * Returns the global music volume.
      * @return The global music volume
      */
-    public static final double getGlobalVolume() {
+    public static double getGlobalVolume() {
         return globalVolume;
     }
     
@@ -40,7 +40,7 @@ public class Music {
      * Sets the global music volume to the specified value.
      * @param volume The new global music volume
      */
-    public static final void setGlobalVolume(double volume) {
+    public static void setGlobalVolume(double volume) {
         globalVolume = Math.min(Math.max(volume, 0), 1);
     }
     
