@@ -3190,13 +3190,15 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 if (viewport.getCamera() != null && viewport.getCamera().newState == this) {
                     long cx = viewport.getCamera().getCenterX();
                     long cy = viewport.getCamera().getCenterY();
-                    for (SpaceLayer layer : spaceLayers.headMap(0).values()) {
-                        layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
-                    }
                     long leftEdge = viewport.getLeftEdge();
                     long rightEdge = viewport.getRightEdge();
                     long topEdge = viewport.getTopEdge();
                     long bottomEdge = viewport.getBottomEdge();
+                    int scx = vx1 + Frac.toInt(cx - leftEdge);
+                    int scy = vy1 + Frac.toInt(cy - topEdge);
+                    for (SpaceLayer layer : spaceLayers.headMap(0).values()) {
+                        layer.renderActions(game, this, g, cx, cy, scx, scy, vx1, vy1, vx2, vy2);
+                    }
                     int[] cellRange = getCellRangeExclusive(leftEdge, topEdge, rightEdge, bottomEdge);
                     if (drawMode == DrawMode.FLAT) {
                         if (cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
@@ -3336,7 +3338,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         }
                     }
                     for (SpaceLayer layer : spaceLayers.tailMap(0).values()) {
-                        layer.renderActions(game, this, g, cx, cy, vx1, vy1, vx2, vy2);
+                        layer.renderActions(game, this, g, cx, cy, scx, scy, vx1, vy1, vx2, vy2);
                     }
                 }
                 if (viewport.getHUD() != null && viewport.getHUD().getGameState() == this) {

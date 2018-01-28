@@ -21,8 +21,12 @@ public abstract class SpaceLayer<T extends CellGame> extends SpaceThinker<T> {
      * @param state This SpaceLayer's SpaceState
      * @param g The Graphics context to which this SpaceLayer is rendering its
      * visuals this frame
-     * @param x The camera's center x-coordinate
-     * @param y The camera's center y-coordinate
+     * @param cx The camera's center x-coordinate
+     * @param cy The camera's center y-coordinate
+     * @param x The x-coordinate in pixels on the Graphics context that
+     * corresponds to the camera's center x-coordinate
+     * @param y The y-coordinate in pixels on the Graphics context that
+     * corresponds to the camera's center y-coordinate
      * @param x1 The x-coordinate in pixels of the Viewport's left edge on the
      * Graphics context
      * @param y1 The y-coordinate in pixels of the Viewport's top edge on the
@@ -33,6 +37,6 @@ public abstract class SpaceLayer<T extends CellGame> extends SpaceThinker<T> {
      * Graphics context
      */
     public abstract void renderActions(T game, SpaceState<T> state,
-            Graphics g, long x, long y, int x1, int y1, int x2, int y2);
+            Graphics g, long cx, long cy, int x, int y, int x1, int y1, int x2, int y2);
     
 }
