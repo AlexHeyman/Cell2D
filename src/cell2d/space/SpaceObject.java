@@ -991,8 +991,8 @@ public abstract class SpaceObject<T extends CellGame> {
     
     /**
      * Sets whether this SpaceObject's surfaces in every direction are solid. If
-     * the surface is being made solid but this SpaceObject has no solid Hitbox,
-     * a copy of its locator Hitbox will be created to serve as one.
+     * the surfaces are being made solid but this SpaceObject has no solid
+     * Hitbox, a copy of its locator Hitbox will be created to serve as one.
      * @param solid Whether this SpaceObject's surfaces in every direction
      * should be solid
      */
