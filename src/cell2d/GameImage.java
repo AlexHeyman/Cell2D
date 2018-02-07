@@ -72,7 +72,7 @@ class GameImage {
                 image = new Image(width, height);
                 graphics = image.getGraphics();
             } catch (SlickException e) {
-                throw new RuntimeException(e.toString());
+                throw new RuntimeException(e);
             }
             int transR = transColor.getRedByte();
             int transG = transColor.getGreenByte();
@@ -93,7 +93,7 @@ class GameImage {
             try {
                 GraphicsFactory.releaseGraphicsForImage(image);
             } catch (SlickException e) {
-                throw new RuntimeException(e.toString());
+                throw new RuntimeException(e);
             }
         }
         image.setFilter(Image.FILTER_NEAREST);
@@ -113,7 +113,7 @@ class GameImage {
             image = new Image(width, height);
             graphics = image.getGraphics();
         } catch (SlickException e) {
-            throw new RuntimeException(e.toString());
+            throw new RuntimeException(e);
         }
         image.setFilter(Image.FILTER_NEAREST);
         int size = colorMap.size();
@@ -157,7 +157,7 @@ class GameImage {
         try {
             GraphicsFactory.releaseGraphicsForImage(image);
         } catch (SlickException e) {
-            throw new RuntimeException(e.toString());
+            throw new RuntimeException(e);
         }
         return new GameImage(image, newImage);
     }
@@ -175,7 +175,7 @@ class GameImage {
             image = new Image(width, height);
             graphics = image.getGraphics();
         } catch (SlickException e) {
-            throw new RuntimeException(e.toString());
+            throw new RuntimeException(e);
         }
         image.setFilter(Image.FILTER_NEAREST);
         int blendAlpha = blendColor.getAlphaByte();
@@ -211,7 +211,7 @@ class GameImage {
         try {
             GraphicsFactory.releaseGraphicsForImage(image);
         } catch (SlickException e) {
-            throw new RuntimeException(e.toString());
+            throw new RuntimeException(e);
         }
         return new GameImage(image, newImage);
     }

@@ -69,7 +69,7 @@ class Audio {
         try {
             AL.create();
         } catch (LWJGLException e) {
-            throw new RuntimeException(e.toString());
+            throw new RuntimeException(e);
         }
         sources = BufferUtils.createIntBuffer(NUM_SOURCES);
         for (int i = 0; i < NUM_SOURCES; i++) {
