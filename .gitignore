@@ -12,4 +12,7 @@
 hs_err_pid*
 /build/
 /dist/
+/nbproject/
 /test/
+/build.xml
+/manifest.mf
