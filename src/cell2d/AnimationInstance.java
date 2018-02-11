@@ -34,6 +34,9 @@ import org.newdawn.slick.Graphics;
  * all, time will not pass for it. AnimationInstances assigned to the active
  * CellGameState update their indices at the beginning of each frame, before
  * Thinkers' timeUnitActions() are taken.</p>
+ * 
+ * <p>All operations on an AnimationInstance return the AnimationInstance itself
+ * to allow operations to be easily strung together.</p>
  * @author Andrew Heyman
  */
 public class AnimationInstance implements Drawable {
@@ -114,14 +117,16 @@ public class AnimationInstance implements Drawable {
      * from its current CellGameState if it has one.
      * @param state The CellGameState to which this AnimationInstance should be
      * assigned
+     * @return This AnimationInstance
      */
-    public final void setGameState(CellGameState state) {
+    public final AnimationInstance setGameState(CellGameState state) {
         if (this.state != null) {
             this.state.removeAnimInstance(this);
         }
         if (state != null) {
             state.addAnimInstance(this);
         }
+        return this;
     }
     
     /**
@@ -145,11 +150,13 @@ public class AnimationInstance implements Drawable {
     /**
      * Sets this AnimationInstance's time factor to the specified value.
      * @param timeFactor The new time factor
+     * @return This AnimationInstance
      */
-    public final void setTimeFactor(long timeFactor) {
+    public final AnimationInstance setTimeFactor(long timeFactor) {
         if (!blank) {
             this.timeFactor = timeFactor;
         }
+        return this;
     }
     
     /**
@@ -203,8 +210,9 @@ public class AnimationInstance implements Drawable {
      * @param resetLowerIndices If this is false and the frame at the new index
      * is compatible with the frame at the current one, the indices at lower
      * levels will not be reset to 0. Otherwise, they will be.
+     * @return This AnimationInstance
      */
-    public final void setIndex(int level, int index, boolean resetLowerIndices) {
+    public final AnimationInstance setIndex(int level, int index, boolean resetLowerIndices) {
         if (!blank && level >= 0 && level < indices.length) {
             Animatable frame = animation;
             for (int i = indices.length - 1; i > level; i--) {
@@ -214,6 +222,7 @@ public class AnimationInstance implements Drawable {
             indexChanges[level] = 0;
             updateCurrentSprite();
         }
+        return this;
     }
     
     /**
@@ -221,9 +230,10 @@ public class AnimationInstance implements Drawable {
      * specified value. All indices at lower levels will be reset to 0.
      * @param level The level of the index to be set
      * @param index The value to which the index will be set
+     * @return This AnimationInstance
      */
-    public final void setIndex(int level, int index) {
-        setIndex(level, index, true);
+    public final AnimationInstance setIndex(int level, int index) {
+        return setIndex(level, index, true);
     }
     
     /**
@@ -231,9 +241,10 @@ public class AnimationInstance implements Drawable {
      * value. If this AnimationInstance has only one level, this will be its
      * only index. Otherwise, all indices at lower levels will be reset to 0.
      * @param index The value to which the index will be set
+     * @return This AnimationInstance
      */
-    public final void setIndex(int index) {
-        setIndex(indices.length - 1, index, true);
+    public final AnimationInstance setIndex(int index) {
+        return setIndex(indices.length - 1, index, true);
     }
     
     /**
@@ -260,11 +271,13 @@ public class AnimationInstance implements Drawable {
      * specified value.
      * @param level The level of the speed to be set
      * @param speed The value to which the speed will be set
+     * @return This AnimationInstance
      */
-    public final void setSpeed(int level, long speed) {
+    public final AnimationInstance setSpeed(int level, long speed) {
         if (!blank && level >= 0 && level < speeds.length) {
             speeds[level] = speed;
         }
+        return this;
     }
     
     /**
@@ -272,11 +285,13 @@ public class AnimationInstance implements Drawable {
      * value. If this AnimationInstance has only one level, this will be its
      * only speed.
      * @param speed The value to which the speed will be set
+     * @return This AnimationInstance
      */
-    public final void setSpeed(long speed) {
+    public final AnimationInstance setSpeed(long speed) {
         if (!blank) {
             speeds[indices.length - 1] = speed;
         }
+        return this;
     }
     
     final void update() {
