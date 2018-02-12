@@ -224,9 +224,9 @@ public class CellVector {
     }
     
     /**
-     * Multiplies this CellVector's coordinates by the specified factor.
-     * @param scaleFactor The factor in fracunits by which to scale this
-     * CellVector
+     * Multiplies this CellVector's coordinates by the specified fracunit-scale
+     * factor.
+     * @param scaleFactor The factor by which to scale this CellVector
      * @return This CellVector
      */
     public final CellVector scale(long scaleFactor) {
