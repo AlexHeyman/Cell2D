@@ -10,10 +10,10 @@ import java.util.Objects;
  * be changed. However, since the point that a CellVector represents is the
  * basis of its equals() and hashCode() methods, care must be taken not to
  * mutate a CellVector while data structures such as Maps or Sets are using it.
- * CellVectors measure angles in degrees going counterclockwise from directly
- * right and normalize them to be between 0 and 360. All operations on a
- * CellVector return the CellVector itself to allow operations to be easily
- * strung together.</p>
+ * CellVectors measure length in fracunits, and they measure angles in degrees
+ * going counterclockwise from directly right and normalize them to be between 0
+ * and 360. All operations on a CellVector return the CellVector itself to allow
+ * operations to be easily strung together.</p>
  * @author Andrew Heyman
  */
 public class CellVector {
