@@ -28,7 +28,8 @@ public class ColorMapFilter extends Filter {
     }
     
     /**
-     * Returns the Map that this ColorMapFilter uses.
+     * Returns the Map that this ColorMapFilter uses. Changes to the returned
+     * Map will not be reflected in this ColorMapFilter.
      * @return The Map that this ColorMapFilter uses
      */
     public final Map<Color,Color> getColorMap() {
