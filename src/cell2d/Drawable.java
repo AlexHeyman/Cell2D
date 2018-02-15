@@ -20,7 +20,7 @@ public interface Drawable {
      * @param y The y-coordinate on the Graphics context of the drawn image's
      * origin
      */
-    public abstract void draw(Graphics g, int x, int y);
+    void draw(Graphics g, int x, int y);
     
     /**
      * Draws this Drawable's image to the specified Graphics context.
@@ -39,8 +39,8 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn image, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y,
-            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter);
+    void draw(Graphics g, int x, int y, boolean xFlip, boolean yFlip,
+            double angle, double alpha, Filter filter);
     
     /**
      * Draws this Drawable's image to the specified Graphics context.
@@ -59,7 +59,7 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn image, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y, double scale,
+    void draw(Graphics g, int x, int y, double scale,
             boolean xFlip, boolean yFlip, double alpha, Filter filter);
     
     /**
@@ -77,7 +77,7 @@ public interface Drawable {
      * @param bottom The y-coordinate on the image, relative to its origin, of
      * the region's bottom edge
      */
-    public abstract void draw(Graphics g, int x, int y, int left, int right, int top, int bottom);
+    void draw(Graphics g, int x, int y, int left, int right, int top, int bottom);
     
     /**
      * Draws a rectangular region of this Drawable's image to the specified
@@ -103,7 +103,7 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn region, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+    void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter);
     
     /**
@@ -130,7 +130,7 @@ public interface Drawable {
      * @param filter The Filter to apply to the drawn region, or null if none
      * should be applied. Not every Filter has an effect on every Drawable.
      */
-    public abstract void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+    void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter);
     
 }

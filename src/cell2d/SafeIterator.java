@@ -20,6 +20,6 @@ public interface SafeIterator<E> extends Iterator<E> {
      * or else its Collection will not be notified that it is no longer being
      * iterated over and that it is safe for it to update.
      */
-    public void stop();
+    void stop();
     
 }

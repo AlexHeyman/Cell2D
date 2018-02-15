@@ -18,13 +18,13 @@ public interface Animatable {
      * Animations has a level of 3.
      * @return This Animatable's level
      */
-    public int getLevel();
+    int getLevel();
     
     /**
      * Returns how many frames this Animatable has.
      * @return This Animatable's number of frames
      */
-    public int getNumFrames();
+    int getNumFrames();
     
     /**
      * Returns this Animatable's frame at the specified index. If the specified
@@ -32,7 +32,7 @@ public interface Animatable {
      * @param index The index of the frame to be returned
      * @return This Animatable's frame at the specified index
      */
-    public Animatable getFrame(int index);
+    Animatable getFrame(int index);
     
     /**
      * Returns the duration of the frame at the specified index. If the
@@ -40,7 +40,7 @@ public interface Animatable {
      * @param index The index of the frame whose duration is to be returned
      * @return The duration of the frame at the specified index
      */
-    public long getFrameDuration(int index);
+    long getFrameDuration(int index);
     
     /**
      * Returns whether the two frames at the specified indices are compatible
@@ -54,6 +54,6 @@ public interface Animatable {
      * @return Whether or not an AnimationInstance may transition between the
      * two frames without resetting its lower indices to 0
      */
-    public boolean framesAreCompatible(int index1, int index2);
+    boolean framesAreCompatible(int index1, int index2);
     
 }
