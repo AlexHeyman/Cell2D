@@ -30,7 +30,7 @@ import org.newdawn.slick.Graphics;
 /**
  * <p>A SpaceState is a CellGameState that handles gameplay in a continuous
  * two-dimensional space. Space in a SpaceState is divided into rectangular
- * cells of equal and positive widths and heights, both of which are specified
+ * cells of equal width and equal height, both of which are specified
  * externally. A SpaceState automatically creates more cells as SpaceObjects
  * enter where they would be if they existed.</p>
  * 
