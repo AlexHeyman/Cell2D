@@ -30,8 +30,8 @@ import java.util.Map;
  * Thinkers in its ThinkerGroup. All of the Thinkers assigned to a ThinkerGroup
  * will take each type of time-dependent actions in order from highest to lowest
  * action priority. A Thinker that is assigned to another Thinker will take each
- * type of time-dependent actions after its assignee Thinker does, but before
- * any of the other Thinkers in its assignee Thinker's ThinkerGroup do.</p>
+ * type of time-dependent actions after its assignee Thinker, but before the
+ * next Thinker assigned to its assignee Thinker's ThinkerGroup.</p>
  * 
  * <p>A Thinker has timers that can activate TimedEvents after a certain number
  * of time units. Timers have integer values, with a positive value x indicating
