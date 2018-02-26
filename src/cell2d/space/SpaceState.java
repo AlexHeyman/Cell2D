@@ -250,16 +250,19 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     private int[] getCellRangeInclusive(long x1, long y1, long x2, long y2) {
-        int[] cellRange = {(int)Math.ceil(x1/cellWidth) - 1, (int)Math.ceil(y1/cellHeight) - 1, (int)Math.floor(x2/cellWidth), (int)Math.floor(y2/cellHeight)};
+        int[] cellRange = {(int)Math.ceil(x1/cellWidth) - 1, (int)Math.ceil(y1/cellHeight) - 1,
+            (int)Math.floor(x2/cellWidth), (int)Math.floor(y2/cellHeight)};
         return cellRange;
     }
     
     private int[] getCellRangeInclusive(Hitbox<T> hitbox) {
-        return getCellRangeInclusive(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
+        return getCellRangeInclusive(hitbox.getLeftEdge(), hitbox.getTopEdge(),
+                hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
     
     private int[] getCellRangeExclusive(long x1, long y1, long x2, long y2) {
-        int[] cellRange = {(int)Math.floor(x1/cellWidth), (int)Math.floor(y1/cellHeight), (int)Math.ceil(x2/cellWidth) - 1, (int)Math.ceil(y2/cellHeight) - 1};
+        int[] cellRange = {(int)Math.floor(x1/cellWidth), (int)Math.floor(y1/cellHeight),
+            (int)Math.ceil(x2/cellWidth) - 1, (int)Math.ceil(y2/cellHeight) - 1};
         if (cellRange[0] == cellRange[2] + 1) {
             cellRange[0]--;
         }
@@ -270,7 +273,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     private int[] getCellRangeExclusive(Hitbox<T> hitbox) {
-        return getCellRangeExclusive(hitbox.getLeftEdge(), hitbox.getTopEdge(), hitbox.getRightEdge(), hitbox.getBottomEdge());
+        return getCellRangeExclusive(hitbox.getLeftEdge(), hitbox.getTopEdge(),
+                hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
     
     private void updateCellRange(Hitbox<T> hitbox) {
@@ -355,7 +359,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     }
     
     private List<Cell> getCells(int[] cellRange) {
-        List<Cell> cellList = new ArrayList<>((cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
+        List<Cell> cellList = new ArrayList<>(
+                (cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
         Iterator<Cell> iterator = new WriteCellRangeIterator(cellRange);
         while (iterator.hasNext()) {
             cellList.add(iterator.next());
@@ -776,7 +781,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      */
     public final void removeLeftOfLine(long x) {
         List<Hitbox<T>> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator(cellLeft, cellTop, (int)Math.ceil(x/cellWidth), cellBottom);
+        Iterator<Cell> iterator = new ReadCellRangeIterator(
+                cellLeft, cellTop, (int)Math.ceil(x/cellWidth), cellBottom);
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -802,7 +808,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      */
     public final void removeRightOfLine(long x) {
         List<Hitbox<T>> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator((int)Math.floor(x/cellWidth), cellTop, cellRight, cellBottom);
+        Iterator<Cell> iterator = new ReadCellRangeIterator(
+                (int)Math.floor(x/cellWidth), cellTop, cellRight, cellBottom);
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -828,7 +835,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      */
     public final void removeAboveLine(long y) {
         List<Hitbox<T>> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator(cellLeft, cellTop, cellRight, (int)Math.ceil(y/cellHeight));
+        Iterator<Cell> iterator = new ReadCellRangeIterator(
+                cellLeft, cellTop, cellRight, (int)Math.ceil(y/cellHeight));
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -854,7 +862,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      */
     public final void removeBelowLine(long y) {
         List<Hitbox<T>> scanned = new ArrayList<>();
-        Iterator<Cell> iterator = new ReadCellRangeIterator(cellLeft, (int)Math.floor(y/cellHeight), cellRight, cellBottom);
+        Iterator<Cell> iterator = new ReadCellRangeIterator(
+                cellLeft, (int)Math.floor(y/cellHeight), cellRight, cellBottom);
         while (iterator.hasNext()) {
             for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -1089,9 +1098,11 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     public final <O extends SpaceObject<T>> O nearestObject(long pointX, long pointY, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        for (SpaceObject<T> object : (MobileObject.class.isAssignableFrom(cls) ? mobileObjects : spaceObjects)) {
+        for (SpaceObject<T> object :
+                (MobileObject.class.isAssignableFrom(cls) ? mobileObjects : spaceObjects)) {
             if (cls.isAssignableFrom(object.getClass())) {
-                long distance = CellVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
+                long distance = CellVector.distanceBetween(
+                        pointX, pointY, object.getCenterX(), object.getCenterY());
                 if (nearestDistance < 0 || distance < nearestDistance) {
                     nearest = cls.cast(object);
                     nearestDistance = distance;
@@ -1113,7 +1124,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified rectangular region
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinRectangle(long x1, long y1, long x2, long y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean objectIsWithinRectangle(
+            long x1, long y1, long x2, long y2, Class<O> cls) {
         return objectWithinRectangle(x1, y1, x2, y2, cls) != null;
     }
     
@@ -1130,7 +1142,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class within the specified
      * rectangular region
      */
-    public final <O extends SpaceObject<T>> O objectWithinRectangle(long x1, long y1, long x2, long y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O objectWithinRectangle(
+            long x1, long y1, long x2, long y2, Class<O> cls) {
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
@@ -1169,7 +1182,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class within the
      * specified rectangular region
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinRectangle(long x1, long y1, long x2, long y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> objectsWithinRectangle(
+            long x1, long y1, long x2, long y2, Class<O> cls) {
         List<O> within = new ArrayList<>();
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
@@ -1208,7 +1222,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(CellVector point, long x1, long y1, long x2, long y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(
+            CellVector point, long x1, long y1, long x2, long y2, Class<O> cls) {
         return nearestObjectWithinRectangle(point.getX(), point.getY(), x1, y1, x2, y2, cls);
     }
     
@@ -1227,7 +1242,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(long pointX, long pointY, long x1, long y1, long x2, long y2, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(
+            long pointX, long pointY, long x1, long y1, long x2, long y2, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
@@ -1243,7 +1259,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             && centerHitbox.getAbsY() >= y1
                             && centerHitbox.getAbsX() <= x2
                             && centerHitbox.getAbsY() <= y2) {
-                        long distance = CellVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
+                        long distance = CellVector.distanceBetween(
+                                pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
                         if (nearestDistance < 0 || distance < nearestDistance) {
                             nearest = cls.cast(object);
                             nearestDistance = distance;
@@ -1258,7 +1275,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return nearest;
     }
     
-    private static boolean circleMeetsOrthogonalSeg(long cu, long cv, long radius, long u1, long u2, long v) {
+    private static boolean circleMeetsOrthogonalSeg(
+            long cu, long cv, long radius, long u1, long u2, long v) {
         v -= cv;
         if (Math.abs(v) <= radius) {
             long rangeRadius = Frac.sqrt(Frac.mul(radius, radius) - Frac.mul(v, v));
@@ -1267,7 +1285,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return false;
     }
     
-    private static boolean circleMeetsRectangle(long cx, long cy, long radius, long x1, long y1, long x2, long y2) {
+    private static boolean circleMeetsRectangle(
+            long cx, long cy, long radius, long x1, long y1, long x2, long y2) {
         if (cx >= x1 && cx <= x2 && cy >= y1 && cy <= y2) { //Circle's center is in rectangle
             return true;
         }
@@ -1288,7 +1307,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified circular region
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(CellVector center, long radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(
+            CellVector center, long radius, Class<O> cls) {
         return objectWithinCircle(center.getX(), center.getY(), radius, cls) != null;
     }
     
@@ -1303,7 +1323,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified circular region
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(long centerX, long centerY, long radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(
+            long centerX, long centerY, long radius, Class<O> cls) {
         return objectWithinCircle(centerX, centerY, radius, cls) != null;
     }
     
@@ -1318,7 +1339,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class within the specified
      * circular region
      */
-    public final <O extends SpaceObject<T>> O objectWithinCircle(CellVector center, long radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O objectWithinCircle(
+            CellVector center, long radius, Class<O> cls) {
         return objectWithinCircle(center.getX(), center.getY(), radius, cls);
     }
     
@@ -1334,7 +1356,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class within the specified
      * circular region
      */
-    public final <O extends SpaceObject<T>> O objectWithinCircle(long centerX, long centerY, long radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O objectWithinCircle(
+            long centerX, long centerY, long radius, Class<O> cls) {
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
         while (iterator.hasNext()) {
@@ -1371,7 +1394,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class within the
      * specified circular region
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(CellVector center, long radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(
+            CellVector center, long radius, Class<O> cls) {
         return objectsWithinCircle(center.getX(), center.getY(), radius, cls);
     }
     
@@ -1386,7 +1410,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class within the
      * specified circular region
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(long centerX, long centerY, long radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(
+            long centerX, long centerY, long radius, Class<O> cls) {
         List<O> within = new ArrayList<>();
         List<Hitbox<T>> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
@@ -1423,8 +1448,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(CellVector point, CellVector center, long radius, Class<O> cls) {
-        return nearestObjectWithinCircle(point.getX(), point.getY(), center.getX(), center.getY(), radius, cls);
+    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(
+            CellVector point, CellVector center, long radius, Class<O> cls) {
+        return nearestObjectWithinCircle(
+                point.getX(), point.getY(), center.getX(), center.getY(), radius, cls);
     }
     
     /**
@@ -1441,7 +1468,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(long pointX, long pointY, long centerX, long centerY, long radius, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(
+            long pointX, long pointY, long centerX, long centerY, long radius, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
@@ -1560,7 +1588,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class that overlaps the
      * specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestOverlappingObject(CellVector point, Hitbox hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestOverlappingObject(
+            CellVector point, Hitbox hitbox, Class<O> cls) {
         return nearestOverlappingObject(point.getX(), point.getY(), hitbox, cls);
     }
     
@@ -1576,7 +1605,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class that overlaps the
      * specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestOverlappingObject(long pointX, long pointY, Hitbox hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestOverlappingObject(
+            long pointX, long pointY, Hitbox hitbox, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
@@ -1728,7 +1758,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class whose solid Hitbox
      * overlaps the specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(CellVector point, Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(
+            CellVector point, Hitbox<T> hitbox, Class<O> cls) {
         return nearestIntersectingSolidObject(point.getX(), point.getY(), hitbox, cls);
     }
     
@@ -1744,7 +1775,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class whose solid Hitbox
      * overlaps the specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(long pointX, long pointY, Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(
+            long pointX, long pointY, Hitbox<T> hitbox, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
         List<Hitbox<T>> scanned = new ArrayList<>();
