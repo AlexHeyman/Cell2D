@@ -2234,7 +2234,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             top = changeY;
             bottom = 0;
         }
-        SortedSet<MoveEvent<T>> moveEvents = null; //Record encounters that object needs to have as it moves
+        SortedSet<MoveEvent<T>> moveEvents = new TreeSet<>(moveComparator); //Record encounters that object needs to have as it moves
         if (object.hasCollision() && object.getCollisionHitbox() != null) {
             //Object can collide; check for solid objects in the path of its movement
             Hitbox collisionHitbox = object.getCollisionHitbox();
@@ -2272,9 +2272,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
@@ -2283,9 +2280,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.DOWN, horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
@@ -2309,9 +2303,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
@@ -2320,9 +2311,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.UP, horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
@@ -2343,9 +2331,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && (hitboxLeft < rightEdge + changeX || (pressingRight && hitboxLeft == rightEdge + changeX))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, 0));
                                     }
@@ -2354,9 +2339,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.UP, distance, distance, 0));
@@ -2366,9 +2348,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.DOWN, distance, distance, 0));
@@ -2395,9 +2374,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
@@ -2406,9 +2382,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.DOWN, -horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
@@ -2432,9 +2405,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
@@ -2443,9 +2413,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.UP, -horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
@@ -2466,9 +2433,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && (hitboxRight > leftEdge + changeX || (pressingLeft && hitboxRight == leftEdge + changeX))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, 0));
                                     }
@@ -2477,9 +2441,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.UP, distance, -distance, 0));
@@ -2489,9 +2450,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.DOWN, distance, -distance, 0));
@@ -2515,9 +2473,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && (hitboxTop < bottomEdge + changeY || (pressingDown && hitboxTop == bottomEdge + changeY))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.DOWN, hitboxTop - bottomEdge, 0, hitboxTop - bottomEdge));
                                     }
@@ -2526,9 +2481,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.LEFT, distance, 0, distance));
@@ -2538,9 +2490,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.RIGHT, distance, 0, distance));
@@ -2562,9 +2511,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && (hitboxBottom > topEdge + changeY || (pressingUp && hitboxBottom == topEdge + changeY))) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.UP, topEdge - hitboxBottom, 0, hitboxBottom - topEdge));
                                     }
@@ -2573,9 +2519,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.LEFT, distance, 0, -distance));
@@ -2585,9 +2528,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
                                     SpaceObject<T> hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
                                         moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.RIGHT, distance, 0, -distance));
@@ -2632,36 +2572,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
                                 } else if (solidBottom && hitboxTop >= bottomEdge && hitboxTop < bottomEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitboxTop < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitboxLeft < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, 0, 0, 0));
                                     }
                                 }
@@ -2684,36 +2612,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
                                 } else if (solidTop && hitboxBottom <= topEdge && hitboxBottom > topEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
                                     }
                                 } else if (solidBottom && hitboxObject.isPressingIn(Direction.UP) && hitbox.getTopEdge() == bottomEdge
                                         && hitboxLeft < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, 0, 0, 0));
                                     }
                                 }
@@ -2733,18 +2649,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, distance, distance, 0));
                                     }
@@ -2752,9 +2662,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, distance, distance, 0));
                                     }
@@ -2762,9 +2669,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
                                     }
                                 }
@@ -2789,36 +2693,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
                                 } else if (solidBottom && hitboxTop >= bottomEdge && hitboxTop < bottomEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, -horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
                                 } else if (solidRight && hitboxObject.isPressingIn(Direction.LEFT) && hitbox.getLeftEdge() == rightEdge
                                         && hitboxTop < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, 0, 0, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, 0, 0, 0));
                                     }
                                 }
@@ -2841,36 +2733,24 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
                                 } else if (solidTop && hitboxBottom <= topEdge && hitboxBottom > topEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, -horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
                                 } else if (solidRight && hitboxObject.isPressingIn(Direction.LEFT) && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, 0, 0, 0));
                                     }
                                 } else if (solidBottom && hitboxObject.isPressingIn(Direction.UP) && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, 0, 0, 0));
                                     }
                                 }
@@ -2890,18 +2770,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, distance, -distance, 0));
                                     }
@@ -2909,9 +2783,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, distance, -distance, 0));
                                     }
@@ -2919,9 +2790,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, 0, 0, 0));
                                     }
                                 }
@@ -2943,18 +2811,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, hitboxTop - bottomEdge, 0, hitboxTop - bottomEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, distance, distance, 0));
                                     }
@@ -2962,9 +2824,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, distance, distance, 0));
                                     }
@@ -2972,9 +2831,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, 0, 0, 0));
                                     }
                                 }
@@ -2994,18 +2850,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, topEdge - hitboxBottom, 0, hitboxBottom - topEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, distance, -distance, 0));
                                     }
@@ -3013,9 +2863,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, distance, -distance, 0));
                                     }
@@ -3023,9 +2870,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        if (moveEvents == null) {
-                                            moveEvents = new TreeSet<>(moveComparator);
-                                        }
                                         moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, 0, 0, 0));
                                     }
                                 }
@@ -3039,7 +2883,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             }
         }
         List<MoveData<T>> moveData = null; //Record objects that need to move along with this object
-        if (moveEvents != null) { //Does object need to collide with anything?
+        if (!moveEvents.isEmpty()) { //Does object need to collide with anything?
             boolean blocked = false;
             long blockedMetric = 0;
             int blockedType = 0;
