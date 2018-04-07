@@ -8,7 +8,8 @@ package cell2d;
  * @author Andrew Heyman
  * @param <T> The subclass of CellGame that uses this BasicGameState
  */
-public abstract class BasicGameState<T extends CellGame> extends CellGameState<T,BasicGameState<T>,BasicThinker<T>> {
+public abstract class BasicGameState<T extends CellGame>
+        extends CellGameState<T,BasicGameState<T>,BasicThinker<T>> {
     
     /**
      * Creates a BasicGameState of the specified CellGame with the specified ID.
