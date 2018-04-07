@@ -26,8 +26,8 @@ import java.util.TreeSet;
  * @param <U> The subclass of CellGameState uses this ThinkerGroup's Thinkers
  * @param <V> The subclass of Thinker that this ThinkerGroup's Thinkers are
  */
-public abstract class ThinkerGroup<
-        T extends CellGame, U extends CellGameState<T,U,V>, V extends Thinker<T,U,V>> {
+public abstract class ThinkerGroup<T extends CellGame,
+        U extends CellGameState<T,U,V>, V extends Thinker<T,U,V>> {
     
     private static abstract class GroupComparator<T> implements Comparator<T>, Serializable {}
     
@@ -46,6 +46,11 @@ public abstract class ThinkerGroup<
     private int thinkerIterators = 0;
     private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
     private boolean updatingThinkerList = false;
+    
+    /**
+     * Creates a new ThinkerGroup.
+     */
+    public ThinkerGroup() {}
     
     /**
      * Returns the number of Thinkers that are assigned to this ThinkerGroup.

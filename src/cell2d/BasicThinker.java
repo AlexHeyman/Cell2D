@@ -13,6 +13,13 @@ package cell2d;
  */
 public abstract class BasicThinker<T extends CellGame> extends Thinker<T,BasicGameState<T>,BasicThinker<T>> {
     
+    /**
+     * Creates a new BasicThinker.
+     */
+    public BasicThinker() {
+        super();
+    }
+    
     @Override
     public final BasicThinker<T> getThis() {
         return this;

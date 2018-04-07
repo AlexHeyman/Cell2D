@@ -12,8 +12,9 @@ public abstract class BasicGameState<T extends CellGame>
         extends CellGameState<T,BasicGameState<T>,BasicThinker<T>> {
     
     /**
-     * Creates a BasicGameState of the specified CellGame with the specified ID.
-     * @param game The CellGame of which this BasicGameState is
+     * Creates a new BasicGameState of the specified CellGame with the specified
+     * ID.
+     * @param game The CellGame to which this BasicGameState belongs
      * @param id This BasicGameState's ID
      */
     public BasicGameState(T game, int id) {
@@ -21,7 +22,7 @@ public abstract class BasicGameState<T extends CellGame>
     }
     
     @Override
-    public BasicGameState<T> getThis() {
+    public final BasicGameState<T> getThis() {
         return this;
     }
     
