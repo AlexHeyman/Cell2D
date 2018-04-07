@@ -16,9 +16,7 @@ public abstract class BasicThinker<T extends CellGame> extends Thinker<T,BasicGa
     /**
      * Creates a new BasicThinker.
      */
-    public BasicThinker() {
-        super();
-    }
+    public BasicThinker() {}
     
     @Override
     public final BasicThinker<T> getThis() {
