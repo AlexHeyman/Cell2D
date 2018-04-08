@@ -65,7 +65,7 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
     }
     
     /**
-     * A method which returns this CellGameState as a U, rather than as a
+     * Returns this CellGameState as a U, rather than as a
      * CellGameState&lt;T,U,V&gt;. This must be implemented somewhere in the
      * lineage of every subclass of CellGameState in order to get around Java's
      * limitations with regard to generic types.

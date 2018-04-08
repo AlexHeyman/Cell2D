@@ -74,10 +74,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     }
     
     /**
-     * A method which returns this Thinker as a V, rather than as a
-     * Thinker&lt;T,U,V&gt;. This must be implemented somewhere in the lineage
-     * of every subclass of Thinker in order to get around Java's limitations
-     * with regard to generic types.
+     * Returns this Thinker as a V, rather than as a Thinker&lt;T,U,V&gt;. This
+     * must be implemented somewhere in the lineage of every subclass of Thinker
+     * in order to get around Java's limitations with regard to generic types.
      * @return This Thinker as a V
      */
     public abstract V getThis();
