@@ -193,7 +193,7 @@ public class AnimationInstance implements Drawable {
         if (index < 0) {
             index += length;
         }
-        if (level != 0 && (resetLowerIndices || !frame.framesAreCompatible(indices[level], index))) {
+        if (level > 0 && (resetLowerIndices || !frame.framesAreCompatible(indices[level], index))) {
             for (int i = level - 1; i >= 0; i--) {
                 indices[i] = 0;
                 indexChanges[i] = 0;
