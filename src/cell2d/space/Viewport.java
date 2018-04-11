@@ -6,15 +6,13 @@ import cell2d.Frac;
 import java.awt.Point;
 
 /**
- * <p>A Viewport is a SpaceThinker that represents a rectangular region of the
- * screen through which the space of the SpaceState to which it is assigned can
- * be viewed. The center of a Viewport's rectangular field of view in a
- * SpaceState is the center of a SpaceObject called the Viewport's camera. To
- * render any visuals, including its HUD if it has one, a Viewport must be
- * assigned to a SpaceState through its setViewport() method. To render the
- * region of its SpaceState in its field of view, a Viewport's camera must be
- * assigned to the same SpaceState as it. One pixel in a Viewport's rendering
- * region on the screen is equal to one fracunit in its SpaceState.</p>
+ * <p>A Viewport represents a rectangular region of the screen through which the
+ * space of the SpaceState to which it is assigned can be viewed. The center of
+ * a Viewport's rectangular field of view in a SpaceState is the center of a
+ * SpaceObject called the Viewport's camera. To render the region of its
+ * SpaceState in its field of view, a Viewport's camera must be assigned to the
+ * same SpaceState as it. One pixel in a Viewport's rendering region on the
+ * screen is equal to one fracunit in its SpaceState.</p>
  * 
  * <p>While a Viewport is rendering visuals, the region of the Graphics context
  * to which it is rendering that is outside its rendering region cannot be drawn
@@ -23,18 +21,20 @@ import java.awt.Point;
  * region.</p>
  * 
  * <p>HUDs may be assigned to Viewports to render visuals in front of the
- * Viewport's own. To render visuals, an HUD must be assigned to a Viewport
- * through its setHUD() method. Only one HUD may be assigned to a given Viewport
- * in this way at once. A Viewport's HUD uses the region of the screen that the
+ * Viewport's own. Only one HUD may be assigned to a given Viewport in this
+ * capacity at once. A Viewport's HUD uses the region of the screen that the
  * Viewport occupies as its rendering region.</p>
+ * @see SpaceState#setViewport(int, cell2d.space.Viewport)
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the SpaceStates that this Viewport
- * can be assigned to
+ * @param <T> The type of CellGame that uses this Viewport's SpaceStates
+ * @param <U> The type of SpaceState that uses this Viewport
  */
-public class Viewport<T extends CellGame> extends SpaceThinker<T> {
+public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     
-    private SpaceObject<T> camera = null;
-    private HUD<T> hud = null;
+    private T game = null;
+    private U state = null;
+    private SpaceObject camera = null;
+    private HUD hud = null;
     private long x1, y1, x2, y2;
     int roundX1, roundY1, roundX2, roundY2;
     private int left, right, top, bottom;
@@ -80,10 +80,33 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
     }
     
     /**
+     * Returns the CellGame of the SpaceState to which this Viewport is
+     * assigned, or null if it is not assigned to a SpaceState.
+     * @return This Viewport's SpaceState's CellGame
+     */
+    public final T getGame() {
+        return game;
+    }
+    
+    /**
+     * Returns the SpaceState to which this Viewport is assigned, or null if it
+     * is not assigned to one.
+     * @return The SpaceState to which this Viewport is assigned
+     */
+    public final U getGameState() {
+        return state;
+    }
+    
+    final void setGameState(U state) {
+        this.game = state.getGame();
+        this.state = state;
+    }
+    
+    /**
      * Returns this Viewport's camera, or null if it has none.
      * @return This Viewport's camera
      */
-    public final SpaceObject<T> getCamera() {
+    public final SpaceObject getCamera() {
         return camera;
     }
     
@@ -92,7 +115,7 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * the specified SpaceObject is null.
      * @param camera The new camera
      */
-    public final void setCamera(SpaceObject<T> camera) {
+    public final void setCamera(SpaceObject camera) {
         this.camera = camera;
     }
     
@@ -101,28 +124,19 @@ public class Viewport<T extends CellGame> extends SpaceThinker<T> {
      * none.
      * @return This Viewport's HUD
      */
-    public final HUD<T> getHUD() {
+    public final HUD getHUD() {
         return hud;
     }
     
     /**
-     * Sets the HUD that is assigned to this Viewport to the specified HUD, if
-     * it is not already assigned to a ThinkerGroup. If there is already an HUD
-     * assigned to this Viewport, it will be removed. If the specified HUD is
-     * null, the current HUD will be removed if there is one, but it will not be
-     * replaced with anything.
+     * Sets the HUD that is assigned to this Viewport to the specified one. If
+     * there is already an HUD assigned to this Viewport, it will be removed. If
+     * the specified HUD is null, the current HUD will be removed if there is
+     * one, but it will not be replaced with anything.
      * @param hud The HUD to add
-     * @return Whether the change occurred
      */
-    public final boolean setHUD(HUD<T> hud) {
-        if (hud == null || addThinker(hud)) {
-            if (this.hud != null) {
-                removeThinker(this.hud);
-            }
-            this.hud = hud;
-            return true;
-        }
-        return false;
+    public final void setHUD(HUD hud) {
+        this.hud = hud;
     }
     
     /**

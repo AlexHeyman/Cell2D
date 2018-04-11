@@ -82,9 +82,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.5.5.
+     * The version number of Cell2D, currently 1.6.0.
      */
-    public static final String VERSION = "1.5.5";
+    public static final String VERSION = "1.6.0";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
@@ -572,7 +572,7 @@ public abstract class CellGame {
     private class LoadingState extends cell2d.BasicGameState<CellGame> {
         
         private LoadingState() {
-            super(CellGame.this, -2);
+            super(CellGame.class, CellGame.this, -2);
         }
         
         @Override

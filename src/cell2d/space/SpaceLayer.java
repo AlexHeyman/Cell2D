@@ -1,24 +1,20 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import org.newdawn.slick.Graphics;
 
 /**
- * <p>A SpaceLayer is a SpaceThinker that renders visuals either in front of or
- * behind those of the SpaceObjects in the SpaceState to which it is assigned.
- * SpaceLayers are intended to be used to display objects in the foreground or
- * background of a SpaceState's space.</p>
+ * <p>A SpaceLayer renders visuals either in front of or behind those of the
+ * SpaceObjects in the SpaceState to which it is assigned. SpaceLayers are
+ * intended to be used to display objects in the foreground or background of a
+ * SpaceState's space.</p>
+ * @see SpaceState#setLayer(int, cell2d.space.SpaceLayer)
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the SpaceStates that this
- * SpaceLayer can be assigned to
  */
-public abstract class SpaceLayer<T extends CellGame> extends SpaceThinker<T> {
+public interface SpaceLayer {
     
     /**
      * Actions for this SpaceLayer to take to render its visuals through a
      * Viewport's camera.
-     * @param game This SpaceLayer's SpaceState's CellGame
-     * @param state This SpaceLayer's SpaceState
      * @param g The Graphics context to which this SpaceLayer is rendering its
      * visuals this frame
      * @param cx The camera's center x-coordinate
@@ -36,7 +32,6 @@ public abstract class SpaceLayer<T extends CellGame> extends SpaceThinker<T> {
      * @param y2 The y-coordinate in pixels of the Viewport's bottom edge on the
      * Graphics context
      */
-    public abstract void renderActions(T game, SpaceState<T> state,
-            Graphics g, long cx, long cy, int x, int y, int x1, int y1, int x2, int y2);
+    void renderActions(Graphics g, long cx, long cy, int x, int y, int x1, int y1, int x2, int y2);
     
 }

@@ -1,6 +1,5 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import cell2d.CellVector;
 
 /**
@@ -8,10 +7,8 @@ import cell2d.CellVector;
  * being its position and the other being the sum of its position and a vector
  * called its difference.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the SpaceStates that can use
- * this LineHitbox
  */
-public class LineHitbox<T extends CellGame> extends Hitbox<T> {
+public class LineHitbox extends Hitbox {
     
     private final CellVector relDifference, absDifference;
     private long left, right, top, bottom;
@@ -42,8 +39,8 @@ public class LineHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public Hitbox<T> getCopy() {
-        return new LineHitbox<>(new CellVector(0, 0), relDifference);
+    public Hitbox getCopy() {
+        return new LineHitbox(new CellVector(0, 0), relDifference);
     }
     
     private void updateData() {

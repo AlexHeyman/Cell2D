@@ -1,16 +1,13 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import cell2d.CellVector;
 
 /**
  * A PointHitbox is a Hitbox that consists only of the point that is its
  * absolute position.
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the SpaceStates that can use
- * this PointHitbox
  */
-public class PointHitbox<T extends CellGame> extends Hitbox<T> {
+public class PointHitbox extends Hitbox {
     
     /**
      * Creates a new PointHitbox with the specified relative position.
@@ -30,8 +27,8 @@ public class PointHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public Hitbox<T> getCopy() {
-        return new PointHitbox<>(0, 0);
+    public Hitbox getCopy() {
+        return new PointHitbox(0, 0);
     }
     
     @Override

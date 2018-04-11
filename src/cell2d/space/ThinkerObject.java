@@ -1,92 +1,125 @@
 package cell2d.space;
 
 import cell2d.CellGame;
-import cell2d.CellVector;
+import cell2d.CellGameState;
 import cell2d.SafeIterator;
+import cell2d.Thinker;
 import cell2d.TimedEvent;
 
 /**
- * <p>A ThinkerObject is a MobileObject that acts like a SpaceThinker,
- * possessing timers, various actions in response to events, and the capacity to
- * act like a ThinkerGroup, even though it is not technically one.</p>
+ * <p>A ThinkerObject is a MobileObject that mimics a type of SpaceThinker by
+ * permanently assigning to itself a SpaceThinker of that type. A ThinkerObject
+ * has methods that access and manipulate properties of its assigned
+ * SpaceThinker, such as its timers and list of its own SpaceThinkers, allowing
+ * the ThinkerObject to effectively inherit those properties. A ThinkerObject
+ * will automatically set its assigned SpaceThinker's time factor and add and
+ * remove it from SpaceStates that can use it as appropriate to match the
+ * ThinkerObject's own time factor and assigned SpaceState.</p>
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the SpaceStates that this
- * ThinkerObject can be assigned to
+ * @param <T> The type of CellGame that uses this ThinkerObject's SpaceThinker's
+ * SpaceStates
+ * @param <U> The type of SpaceState that uses this ThinkerObject's SpaceThinker
+ * @param <V> The type of SpaceThinker that this ThinkerObject mimics
  */
-public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> {
+public abstract class ThinkerObject<T extends CellGame, U extends SpaceState<T,U,V>,
+        V extends SpaceThinker<T,U,V>> extends MobileObject {
     
-    private final SpaceThinker<T> thinker = new SpaceThinker<T>() {
-        
-        @Override
-        public final void addedActions(T game, SpaceState<T> state) {
-            ThinkerObject.this.addedActions(game, state);
-        }
-        
-        @Override
-        public final void removedActions(T game, SpaceState<T> state) {
-            ThinkerObject.this.removedActions(game, state);
-        }
-        
-        @Override
-        public final void timeUnitActions(T game, SpaceState<T> state) {
-            ThinkerObject.this.timeUnitActions(game, state);
-        }
-        
-        @Override
-        public final void beforeMovementActions(T game, SpaceState<T> state) {
-            ThinkerObject.this.beforeMovementActions(game, state);
-        }
-        
-        @Override
-        public final void frameActions(T game, SpaceState<T> state) {
-            ThinkerObject.this.frameActions(game, state);
-        }
-        
-    };
+    private U compatibleState = null;
+    private V thinker = null;
     
     /**
-     * Creates a new ThinkerObject with the specified locator Hitbox.
-     * @param locatorHitbox This ThinkerObject's locator Hitbox
+     * Creates a new ThinkerObject with no locator Hitbox or SpaceThinker. This
+     * ThinkerObject must be assigned a locator Hitbox with its
+     * setLocatorHitbox() method and a SpaceThinker with its setThinker() method
+     * before any of its other methods are called.
+     * @see #setLocatorHitbox(cell2d.space.Hitbox)
+     * @see #setThinker(cell2d.space.SpaceThinker)
      */
-    public ThinkerObject(Hitbox<T> locatorHitbox) {
-        super(locatorHitbox);
-    }
+    public ThinkerObject() {}
     
-    /**
-     * Creates a new ThinkerObject with a new PointHitbox at the specified
-     * position as its locator Hitbox.
-     * @param position This ThinkerObject's position
-     */
-    public ThinkerObject(CellVector position) {
-        super(position);
-    }
-    
-    /**
-     * Creates a new ThinkerObject with a new PointHitbox at the specified
-     * position as its locator Hitbox.
-     * @param x The x-coordinate of this ThinkerObject's position
-     * @param y The y-coordinate of this ThinkerObject's position
-     */
-    public ThinkerObject(long x, long y) {
-        super(x, y);
+    private U stateIfCompatible(SpaceState state) {
+        if (state.getGameClass() == getGameClass()
+                && state.getGameClass() == getGameClass()
+                && state.getGameClass() == getGameClass()) {
+            return (U)state;
+        }
+        return null;
     }
     
     @Override
     void addNonCellData() {
         super.addNonCellData();
-        state.addThinker(thinker);
+        compatibleState = stateIfCompatible(state);
+        if (compatibleState != null) {
+            compatibleState.addThinker(thinker);
+        }
     }
     
     @Override
     void removeData() {
         super.removeData();
-        state.removeThinker(thinker);
+        if (compatibleState != null) {
+            compatibleState.removeThinker(thinker);
+            compatibleState = null;
+        }
     }
     
     @Override
     void setTimeFactorActions(long timeFactor) {
         super.setTimeFactorActions(timeFactor);
         thinker.setTimeFactor(timeFactor);
+    }
+    
+    /**
+     * Returns the Class object representing the subclass of CellGame that uses
+     * this ThinkerObject's SpaceThinker's SpaceStates.
+     * @return The subclass of CellGame that uses this ThinkerObject's
+     * SpaceThinker's SpaceStates
+     */
+    public final Class<? extends CellGame> getGameClass() {
+        return thinker.getGameClass();
+    }
+    
+    /**
+     * Returns the Class object representing the subclass of SpaceState that
+     * uses this ThinkerObject's SpaceThinker.
+     * @return The subclass of SpaceState that uses this ThinkerObject's
+     * SpaceThinker
+     */
+    public final Class<? extends CellGameState> getStateClass() {
+        return thinker.getStateClass();
+    }
+    
+    /**
+     * Returns the Class object representing the subclass of SpaceThinker that
+     * this ThinkerObject mimics.
+     * @return The subclass of SpaceThinker that this ThinkerObject mimics
+     */
+    public final Class<? extends Thinker> getThinkerClass() {
+        return thinker.getThinkerClass();
+    }
+    
+    /**
+     * Returns this ThinkerObject's SpaceThinker, or null if it has none.
+     * @return This ThinkerObject's SpaceThinker
+     */
+    public final V getThinker() {
+        return thinker;
+    }
+    
+    /**
+     * Sets this ThinkerObject's assigned SpaceThinker to the specified one, if
+     * this ThinkerObject does not already have a SpaceThinker and the
+     * specified SpaceThinker is not already assigned to a ThinkerGroup.
+     * @param thinker The SpaceThinker to be assigned
+     * @return Whether the assignment occurred
+     */
+    public final boolean setThinker(V thinker) {
+        if (this.thinker == null && thinker.getNewThinkerGroup() == null) {
+            this.thinker = thinker;
+            return true;
+        }
+        return false;
     }
     
     /**
@@ -113,7 +146,7 @@ public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> 
      * Returns a new Iterator over this ThinkerObject's list of SpaceThinkers.
      * @return A new Iterator over this ThinkerObject's list of SpaceThinkers
      */
-    public final SafeIterator<SpaceThinker<T>> thinkerIterator() {
+    public final SafeIterator<V> thinkerIterator() {
         return thinker.thinkerIterator();
     }
     
@@ -123,7 +156,7 @@ public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> 
      * @param thinker The SpaceThinker to be added
      * @return Whether the addition occurred
      */
-    public final boolean addThinker(SpaceThinker<T> thinker) {
+    public final boolean addThinker(V thinker) {
         return this.thinker.addThinker(thinker);
     }
     
@@ -133,7 +166,7 @@ public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> 
      * @param thinker The SpaceThinker to be removed
      * @return Whether the removal occurred
      */
-    public final boolean removeThinker(SpaceThinker<T> thinker) {
+    public final boolean removeThinker(V thinker) {
         return this.thinker.removeThinker(thinker);
     }
     
@@ -170,7 +203,7 @@ public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> 
      * share a lineage of assignments
      * @return Whether any removals occurred
      */
-    public final boolean removeLineage(SpaceThinker<T> thinker) {
+    public final boolean removeLineage(V thinker) {
         return this.thinker.removeLineage(thinker);
     }
     
@@ -220,47 +253,5 @@ public abstract class ThinkerObject<T extends CellGame> extends MobileObject<T> 
     public final void setTimerValue(TimedEvent timedEvent, int value) {
         thinker.setTimerValue(timedEvent, value);
     }
-    
-    /**
-     * Actions for this ThinkerObject to take immediately after being added to a
-     * new SpaceState.
-     * @param game This ThinkerObject's SpaceState's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void addedActions(T game, SpaceState<T> state) {}
-    
-    /**
-     * Actions for this ThinkerObject to take immediately before being removed
-     * from its current SpaceState.
-     * @param game This ThinkerObject's SpaceState's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void removedActions(T game, SpaceState<T> state) {}
-    
-    /**
-     * Actions for this ThinkerObject to take once every time unit, after
-     * AnimationInstances update their indices but before SpaceThinkers take
-     * their beforeMovementActions().
-     * @param game This ThinkerObject's SpaceState's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void timeUnitActions(T game, SpaceState<T> state) {}
-    
-    /**
-     * Actions for this ThinkerObject to take once every frame, after
-     * SpaceThinkers take their timeUnitActions() but before its SpaceState
-     * moves its assigned ThinkerObjects.
-     * @param game This ThinkerObject's SpaceState's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void beforeMovementActions(T game, SpaceState<T> state) {}
-    
-    /**
-     * Actions for this ThinkerObject to take once every frame after its
-     * SpaceState moves its assigned ThinkerObjects.
-     * @param game This ThinkerObject's SpaceState's CellGame
-     * @param state This ThinkerObject's SpaceState
-     */
-    public void frameActions(T game, SpaceState<T> state) {}
     
 }

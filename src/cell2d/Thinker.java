@@ -47,10 +47,14 @@ import java.util.Map;
  * BasicThinker is an example of such a class. This allows a Thinker's
  * CellGameStates to interact with it in ways unique to its subclass of Thinker.
  * </p>
+ * 
+ * <p>It is useful to implicitly extend subclasses of Thinker to override their
+ * methods for single instances without creating completely new class files.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses this Thinker's CellGameStates
- * @param <U> The subclass of CellGameState uses this Thinker
- * @param <V> The subclass of Thinker that this Thinker is
+ * @param <T> The type of CellGame that uses this Thinker's CellGameStates
+ * @param <U> The type of CellGameState that uses this Thinker
+ * @param <V> The type of Thinker that this Thinker is for CellGameState
+ * interaction purposes
  */
 public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>,
         V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
@@ -68,18 +72,26 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     /**
      * Creates a new Thinker.
+     * @param gameClass The Class object representing the subclass of CellGame
+     * that uses this Thinker's CellGameStates
+     * @param stateClass The Class object representing the subclass of
+     * CellGameState that uses this Thinker
+     * @param thinkerClass The Class object representing the subclass of Thinker
+     * that this Thinker is for CellGameState interaction purposes
      */
-    public Thinker() {
-        thisThinker = getThis();
+    public Thinker(Class<? extends CellGame> gameClass,
+            Class<? extends CellGameState> stateClass, Class<? extends Thinker> thinkerClass) {
+        super(gameClass, stateClass, thinkerClass);
+        thisThinker = (V)this;
     }
     
     /**
-     * Returns this Thinker as a V, rather than as a Thinker&lt;T,U,V&gt;. This
-     * must be implemented somewhere in the lineage of every subclass of Thinker
-     * in order to get around Java's limitations with regard to generic types.
+     * Returns this Thinker as a V, rather than as a Thinker&lt;T,U,V&gt;.
      * @return This Thinker as a V
      */
-    public abstract V getThis();
+    public final V getThis() {
+        return thisThinker;
+    }
     
     /**
      * Returns the ThinkerGroup to which this Thinker is assigned, or null if it
@@ -273,7 +285,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     private void timeUnit() {
         if (!timers.isEmpty()) {
-            List<TimedEvent> timedEventsToDo = new ArrayList<>();
+            List<TimedEvent> timedEventsToActivate = new ArrayList<>();
             Iterator<Map.Entry<TimedEvent,Integer>> iterator = timers.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<TimedEvent,Integer> entry = iterator.next();
@@ -282,12 +294,12 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
                     iterator.remove();
                 } else {
                     if (value == 1) {
-                        timedEventsToDo.add(entry.getKey());
+                        timedEventsToActivate.add(entry.getKey());
                     }
                     entry.setValue(value - 1);
                 }
             }
-            for (TimedEvent timedEvent : timedEventsToDo) {
+            for (TimedEvent timedEvent : timedEventsToActivate) {
                 timedEvent.eventActions();
             }
         }

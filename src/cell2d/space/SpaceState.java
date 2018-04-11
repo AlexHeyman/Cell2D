@@ -30,9 +30,8 @@ import org.newdawn.slick.Graphics;
 /**
  * <p>A SpaceState is a CellGameState that handles gameplay in a continuous
  * two-dimensional space. Space in a SpaceState is divided into rectangular
- * cells of equal width and equal height, both of which are specified
- * externally. A SpaceState automatically creates more cells as SpaceObjects
- * enter where they would be if they existed.</p>
+ * cells of equal width and equal height. A SpaceState automatically creates
+ * more cells as SpaceObjects enter where they would be if they existed.</p>
  * 
  * <p>SpaceObjects may be assigned to one SpaceState each in much the same way
  * that Thinkers are assigned to ThinkerGroups. Similarly to Thinkers, the
@@ -59,44 +58,47 @@ import org.newdawn.slick.Graphics;
  * the solid surfaces of SpaceObjects in its path if it has Cell2D's standard
  * collision mechanics enabled.</p>
  * 
- * <p>SpaceLayers may be assigned to one SpaceState each with an integer ID in
- * the context of that SpaceState. Only one SpaceLayer may be assigned to a
- * given SpaceState with a given ID at once. SpaceLayers with higher IDs are
- * rendered in front of those with lower ones. SpaceLayers with positive IDs
- * are rendered in front of the SpaceState's SpaceObjects, and SpaceLayers with
- * negative IDs are rendered behind its SpaceObjects. SpaceLayers may not be
- * added with an ID of 0.</p>
+ * <p>SpaceLayers may be assigned to a SpaceState with an integer ID in the
+ * context of that SpaceState. Only one SpaceLayer may be assigned to a given
+ * SpaceState with a given ID at once. SpaceLayers with higher IDs are rendered
+ * in front of those with lower ones. SpaceLayers with positive IDs are rendered
+ * in front of the SpaceState's SpaceObjects, and SpaceLayers with negative IDs
+ * are rendered behind its SpaceObjects. SpaceLayers may not be assigned with an
+ * ID of 0.</p>
  * 
- * <p>HUDs may be assigned to one SpaceState each to render visuals in front of
- * the SpaceState's own. To render visuals, an HUD must be assigned to a
- * SpaceState through its setHUD() method. Only one HUD may be assigned to a
- * given SpaceState in this way at once. A SpaceState's HUD uses the entire
- * screen as its rendering region.</p>
+ * <p>HUDs may be assigned to a SpaceState to render visuals in front of the
+ * SpaceState's own. Only one HUD may be assigned to a given SpaceState in this
+ * capacity at once. A SpaceState's HUD uses the entire screen as its rendering
+ * region.</p>
  * 
  * <p>Viewports may be assigned to one SpaceState each with an integer ID in
  * the context of that SpaceState. Only one Viewport may be assigned to a
  * given SpaceState with a given ID at once.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses this SpaceState
+ * @param <T> The type of CellGame that uses this SpaceState
+ * @param <U> The type of SpaceState that this SpaceState is for SpaceThinker
+ * interaction purposes
+ * @param <V> The type of SpaceThinker that this SpaceState uses
  */
-public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T>,SpaceThinker<T>> {
+public abstract class SpaceState<T extends CellGame, U extends SpaceState<T,U,V>,
+        V extends SpaceThinker<T,U,V>> extends CellGameState<T,U,V> {
     
     private static abstract class SpaceComparator<T> implements Comparator<T>, Serializable {}
     
-    private Comparator<MobileObject<T>> movementPriorityComparator = new SpaceComparator<MobileObject<T>>() {
+    private Comparator<MobileObject> movementPriorityComparator = new SpaceComparator<MobileObject>() {
         
         @Override
-        public final int compare(MobileObject<T> object1, MobileObject<T> object2) {
+        public final int compare(MobileObject object1, MobileObject object2) {
             int priorityDiff = object2.movementPriority - object1.movementPriority;
             return (priorityDiff == 0 ?
                     System.identityHashCode(object1) - System.identityHashCode(object2) : priorityDiff);
         }
         
     };
-    private Comparator<MoveEvent<T>> moveComparator = new SpaceComparator<MoveEvent<T>>() {
+    private Comparator<MoveEvent> moveComparator = new SpaceComparator<MoveEvent>() {
         
         @Override
-        public final int compare(MoveEvent<T> event1, MoveEvent<T> event2) {
+        public final int compare(MoveEvent event1, MoveEvent event2) {
             long metricDiff = event1.metric - event2.metric;
             if (metricDiff == 0) {
                 int typeDiff = event1.type - event2.type;
@@ -107,30 +109,30 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         
     };
-    private Comparator<Hitbox<T>> drawPriorityComparator = new SpaceComparator<Hitbox<T>>() {
+    private Comparator<Hitbox> drawPriorityComparator = new SpaceComparator<Hitbox>() {
         
         @Override
-        public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
+        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
             int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
             return (priorityDiff == 0 ?
                     System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2) : priorityDiff);
         }
         
     };
-    private Comparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>> drawPriorityIteratorComparator
-            = new SpaceComparator<Pair<Hitbox<T>,Iterator<Hitbox<T>>>>() {
+    private Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawPriorityIteratorComparator
+            = new SpaceComparator<Pair<Hitbox,Iterator<Hitbox>>>() {
         
         @Override
-        public final int compare(Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair1,
-                Pair<Hitbox<T>, Iterator<Hitbox<T>>> pair2) {
+        public final int compare(Pair<Hitbox, Iterator<Hitbox>> pair1,
+                Pair<Hitbox, Iterator<Hitbox>> pair2) {
             return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
         }
         
     };
-    private Comparator<Hitbox<T>> overModeComparator = new SpaceComparator<Hitbox<T>>() {
+    private Comparator<Hitbox> overModeComparator = new SpaceComparator<Hitbox>() {
         
         @Override
-        public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
+        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
             int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
             if (priorityDiff == 0) {
                 long yDiff = hitbox1.getRelY() - hitbox2.getRelY();
@@ -142,10 +144,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         
     };
-    private Comparator<Hitbox<T>> underModeComparator = new SpaceComparator<Hitbox<T>>() {
+    private Comparator<Hitbox> underModeComparator = new SpaceComparator<Hitbox>() {
         
         @Override
-        public final int compare(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
+        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
             int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
             if (priorityDiff == 0) {
                 long yDiff = hitbox2.getRelY() - hitbox1.getRelY();
@@ -158,13 +160,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
     };
     
-    private final Set<SpaceObject<T>> spaceObjects = new HashSet<>();
+    private final Set<SpaceObject> spaceObjects = new HashSet<>();
     private int objectIterators = 0;
-    private final Queue<ObjectChangeData<T>> objectChanges = new LinkedList<>();
+    private final Queue<ObjectChangeData> objectChanges = new LinkedList<>();
     private boolean updatingObjectList = false;
-    private final SortedSet<MobileObject<T>> mobileObjects = new TreeSet<>(movementPriorityComparator);
+    private final SortedSet<MobileObject> mobileObjects = new TreeSet<>(movementPriorityComparator);
     private int mobileObjectIterators = 0;
-    private final Queue<MobileObjectChangeData<T>> mobileObjectChanges = new LinkedList<>();
+    private final Queue<MobileObjectChangeData> mobileObjectChanges = new LinkedList<>();
     private long cellWidth, cellHeight;
     private final Map<Point,Cell> cells = new HashMap<>();
     private int cellLeft = 0;
@@ -172,34 +174,37 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     private int cellTop = 0;
     private int cellBottom = 0;
     private DrawMode drawMode;
-    private final SortedMap<Integer,SpaceLayer<T>> spaceLayers = new TreeMap<>();
-    private HUD<T> hud = null;
-    private final Map<Integer,Viewport<T>> viewports = new HashMap<>();
+    private final SortedMap<Integer,SpaceLayer> spaceLayers = new TreeMap<>();
+    private HUD hud = null;
+    private final Map<Integer,Viewport<T,U>> viewports = new HashMap<>();
     
     /**
      * Creates a new SpaceState of the specified CellGame with the specified ID.
+     * @param gameClass The Class object representing the subclass of CellGame
+     * that uses this SpaceState
+     * @param stateClass The Class object representing the subclass of
+     * SpaceState that this SpaceState is for SpaceThinker interaction purposes
+     * @param thinkerClass The Class object representing the subclass of
+     * SpaceThinker that this SpaceState uses
      * @param game The CellGame to which this SpaceState belongs
      * @param id This SpaceState's ID
      * @param cellWidth The width of each of this SpaceState's cells
      * @param cellHeight The height of each of this SpaceState's cells
      * @param drawMode This SpaceState's DrawMode
      */
-    public SpaceState(T game, int id, long cellWidth, long cellHeight, DrawMode drawMode) {
-        super(game, id);
+    public SpaceState(Class<? extends CellGame> gameClass, Class<? extends SpaceState> stateClass,
+            Class<? extends SpaceThinker> thinkerClass,
+            T game, int id, long cellWidth, long cellHeight, DrawMode drawMode) {
+        super(gameClass, stateClass, thinkerClass, game, id);
         setCellDimensions(cellWidth, cellHeight);
         setDrawMode(drawMode);
-    }
-    
-    @Override
-    public final SpaceState<T> getThis() {
-        return this;
     }
     
     private class Cell {
         
         private int x, y;
         private long left, right, top, bottom;
-        private final Map<HitboxRole,Set<Hitbox<T>>> hitboxes = new EnumMap<>(HitboxRole.class);
+        private final Map<HitboxRole,Set<Hitbox>> hitboxes = new EnumMap<>(HitboxRole.class);
         
         private Cell(int x, int y) {
             this.x = x;
@@ -255,7 +260,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return cellRange;
     }
     
-    private int[] getCellRangeInclusive(Hitbox<T> hitbox) {
+    private int[] getCellRangeInclusive(Hitbox hitbox) {
         return getCellRangeInclusive(hitbox.getLeftEdge(), hitbox.getTopEdge(),
                 hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
@@ -272,12 +277,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return cellRange;
     }
     
-    private int[] getCellRangeExclusive(Hitbox<T> hitbox) {
+    private int[] getCellRangeExclusive(Hitbox hitbox) {
         return getCellRangeExclusive(hitbox.getLeftEdge(), hitbox.getTopEdge(),
                 hitbox.getRightEdge(), hitbox.getBottomEdge());
     }
     
-    private void updateCellRange(Hitbox<T> hitbox) {
+    private void updateCellRange(Hitbox hitbox) {
         hitbox.cellRange = getCellRangeInclusive(hitbox);
     }
     
@@ -402,7 +407,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         this.cellWidth = cellWidth;
         this.cellHeight = cellHeight;
         if (!spaceObjects.isEmpty()) {
-            for (SpaceObject<T> object : spaceObjects) {
+            for (SpaceObject object : spaceObjects) {
                 object.addCellData();
             }
         }
@@ -466,10 +471,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         this.drawMode = drawMode;
         if (!cells.isEmpty()) {
             for (Cell cell : cells.values()) {
-                Set<Hitbox<T>> oldLocatorHitboxes = cell.hitboxes.get(HitboxRole.LOCATOR);
+                Set<Hitbox> oldLocatorHitboxes = cell.hitboxes.get(HitboxRole.LOCATOR);
                 cell.initializeLocatorHitboxes();
-                Set<Hitbox<T>> newLocatorHitboxes = cell.hitboxes.get(HitboxRole.LOCATOR);
-                for (Hitbox<T> hitbox : oldLocatorHitboxes) {
+                Set<Hitbox> newLocatorHitboxes = cell.hitboxes.get(HitboxRole.LOCATOR);
+                for (Hitbox hitbox : oldLocatorHitboxes) {
                     newLocatorHitboxes.add(hitbox);
                 }
             }
@@ -481,7 +486,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param origin The origin point about which to load the Area
      * @param area The Area to load
      */
-    public final void loadArea(CellVector origin, Area<T> area) {
+    public final void loadArea(CellVector origin, Area<T,U> area) {
         loadArea(origin.getX(), origin.getY(), area);
     }
     
@@ -493,8 +498,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * the Area
      * @param area The Area to load
      */
-    public final void loadArea(long originX, long originY, Area<T> area) {
-        for (SpaceObject<T> object : area.load(getGame(), this)) {
+    public final void loadArea(long originX, long originY, Area<T,U> area) {
+        for (SpaceObject object : area.load(getGame(), getThis())) {
             if (object.state == null && object.newState == null) {
                 object.changePosition(originX, originY);
                 object.newState = this;
@@ -504,7 +509,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         updateObjectList();
     }
     
-    final void updateCells(Hitbox<T> hitbox) {
+    final void updateCells(Hitbox hitbox) {
         int[] oldRange = hitbox.cellRange;
         updateCellRange(hitbox);
         int[] newRange = hitbox.cellRange;
@@ -538,7 +543,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
     }
     
-    final void addHitbox(Hitbox<T> hitbox, HitboxRole role) {
+    final void addHitbox(Hitbox hitbox, HitboxRole role) {
         if (hitbox.numCellRoles == 0) {
             updateCellRange(hitbox);
         }
@@ -549,7 +554,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
     }
     
-    final void removeHitbox(Hitbox<T> hitbox, HitboxRole role) {
+    final void removeHitbox(Hitbox hitbox, HitboxRole role) {
         Iterator<Cell> iterator = new WriteCellRangeIterator(hitbox.cellRange);
         while (iterator.hasNext()) {
             iterator.next().hitboxes.get(role).remove(hitbox);
@@ -560,7 +565,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
     }
     
-    final void setLocatorHitboxDrawPriority(Hitbox<T> hitbox, int drawPriority) {
+    final void setLocatorHitboxDrawPriority(Hitbox hitbox, int drawPriority) {
         List<Cell> cellList = getCells(hitbox.cellRange);
         for (Cell cell : cellList) {
             cell.hitboxes.get(HitboxRole.LOCATOR).remove(hitbox);
@@ -584,11 +589,11 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return spaceObjects.size();
     }
     
-    private class ObjectIterator implements SafeIterator<SpaceObject<T>> {
+    private class ObjectIterator implements SafeIterator<SpaceObject> {
         
         private boolean stopped = false;
-        private final Iterator<SpaceObject<T>> iterator = spaceObjects.iterator();
-        private SpaceObject<T> lastObject = null;
+        private final Iterator<SpaceObject> iterator = spaceObjects.iterator();
+        private SpaceObject lastObject = null;
         
         private ObjectIterator() {
             objectIterators++;
@@ -607,7 +612,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
         
         @Override
-        public final SpaceObject<T> next() {
+        public final SpaceObject next() {
             if (stopped) {
                 return null;
             }
@@ -648,17 +653,17 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * Returns a new Iterator over this SpaceState's list of SpaceObjects.
      * @return A new Iterator over this SpaceState's list of SpaceObjects
      */
-    public final SafeIterator<SpaceObject<T>> objectIterator() {
+    public final SafeIterator<SpaceObject> objectIterator() {
         return new ObjectIterator();
     }
     
-    private static class ObjectChangeData<T extends CellGame> {
+    private static class ObjectChangeData {
         
         private boolean used = false;
-        private final SpaceObject<T> object;
-        private final SpaceState<T> newState;
+        private final SpaceObject object;
+        private final SpaceState newState;
         
-        private ObjectChangeData(SpaceObject<T> object, SpaceState<T> newState) {
+        private ObjectChangeData(SpaceObject object, SpaceState newState) {
             this.object = object;
             this.newState = newState;
         }
@@ -671,7 +676,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param object The SpaceObject to be added
      * @return Whether the addition occurred
      */
-    public final boolean addObject(SpaceObject<T> object) {
+    public final boolean addObject(SpaceObject object) {
         if (object.newState == null) {
             addObjectChangeData(object, this);
             return true;
@@ -685,7 +690,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param object The SpaceObject to be removed
      * @return Whether the removal occurred
      */
-    public final boolean removeObject(SpaceObject<T> object) {
+    public final boolean removeObject(SpaceObject object) {
         if (object.newState == this) {
             addObjectChangeData(object, null);
             return true;
@@ -698,7 +703,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * assigned to it.
      */
     public final void removeAllObjects() {
-        for (SpaceObject<T> object : spaceObjects) {
+        for (SpaceObject object : spaceObjects) {
             if (object.newState == this) {
                 object.newState = null;
                 objectChanges.add(new ObjectChangeData(object, null));
@@ -716,12 +721,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param y2 The y-coordinate of the region's bottom edge
      */
     public final void removeRectangle(long x1, long y1, long x2, long y2) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
-            for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
+            for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
-                    SpaceObject<T> object = locatorHitbox.getObject();
+                    SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this
                             && locatorHitbox.getLeftEdge() >= x1
                             && locatorHitbox.getRightEdge() <= x2
@@ -734,7 +739,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         updateObjectList();
@@ -749,12 +754,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param y2 The y-coordinate of the region's bottom edge
      */
     public final void removeOutsideRectangle(long x1, long y1, long x2, long y2) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         for (Cell cell : cells.values()) {
             if (cell.left < x1 || cell.right > x2 || cell.top < y1 || cell.bottom > y2) {
-                for (Hitbox<T> locatorHitbox : cell.hitboxes.get(HitboxRole.LOCATOR)) {
+                for (Hitbox locatorHitbox : cell.hitboxes.get(HitboxRole.LOCATOR)) {
                     if (!locatorHitbox.scanned) {
-                        SpaceObject<T> object = locatorHitbox.getObject();
+                        SpaceObject object = locatorHitbox.getObject();
                         if (object.newState == this
                                 && (locatorHitbox.getLeftEdge() >= x2
                                 || locatorHitbox.getRightEdge() <= x1
@@ -768,7 +773,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         updateObjectList();
@@ -780,13 +785,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param x The line's x-coordinate
      */
     public final void removeLeftOfLine(long x) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
                 cellLeft, cellTop, (int)Math.ceil(x/cellWidth), cellBottom);
         while (iterator.hasNext()) {
-            for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
+            for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
-                    SpaceObject<T> object = locatorHitbox.getObject();
+                    SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getRightEdge() <= x) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -795,7 +800,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         updateObjectList();
@@ -807,13 +812,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param x The line's x-coordinate
      */
     public final void removeRightOfLine(long x) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
                 (int)Math.floor(x/cellWidth), cellTop, cellRight, cellBottom);
         while (iterator.hasNext()) {
-            for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
+            for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
-                    SpaceObject<T> object = locatorHitbox.getObject();
+                    SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getLeftEdge() >= x) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -822,7 +827,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         updateObjectList();
@@ -834,13 +839,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param y The line's y-coordinate
      */
     public final void removeAboveLine(long y) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
                 cellLeft, cellTop, cellRight, (int)Math.ceil(y/cellHeight));
         while (iterator.hasNext()) {
-            for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
+            for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
-                    SpaceObject<T> object = locatorHitbox.getObject();
+                    SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getBottomEdge() <= y) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -849,7 +854,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         updateObjectList();
@@ -861,13 +866,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param y The line's y-coordinate
      */
     public final void removeBelowLine(long y) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
                 cellLeft, (int)Math.floor(y/cellHeight), cellRight, cellBottom);
         while (iterator.hasNext()) {
-            for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
+            for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
-                    SpaceObject<T> object = locatorHitbox.getObject();
+                    SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getTopEdge() >= y) {
                         object.newState = null;
                         objectChanges.add(new ObjectChangeData(object, null));
@@ -876,15 +881,15 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         updateObjectList();
     }
     
-    private void addObjectChangeData(SpaceObject<T> object, SpaceState<T> newState) {
+    private void addObjectChangeData(SpaceObject object, SpaceState newState) {
         object.newState = newState;
-        ObjectChangeData<T> data = new ObjectChangeData<>(object, newState);
+        ObjectChangeData data = new ObjectChangeData(object, newState);
         if (object.state != null) {
             object.state.objectChanges.add(data);
             object.state.updateObjectList();
@@ -895,7 +900,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         }
     }
     
-    private void addActions(SpaceObject<T> object) {
+    private void addActions(SpaceObject object) {
         spaceObjects.add(object);
         object.game = getGame();
         object.state = this;
@@ -903,7 +908,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         object.addNonCellData();
     }
     
-    private void removeActions(SpaceObject<T> object) {
+    private void removeActions(SpaceObject object) {
         object.removeData();
         spaceObjects.remove(object);
         object.game = null;
@@ -915,7 +920,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 && !iteratingThroughThinkers() && !updatingObjectList) {
             updatingObjectList = true;
             while (!objectChanges.isEmpty()) {
-                ObjectChangeData<T> data = objectChanges.remove();
+                ObjectChangeData data = objectChanges.remove();
                 if (!data.used) {
                     data.used = true;
                     if (data.object.state != null) {
@@ -938,10 +943,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return mobileObjects.size();
     }
     
-    private class MobileObjectIterator implements SafeIterator<MobileObject<T>> {
+    private class MobileObjectIterator implements SafeIterator<MobileObject> {
         
         private boolean stopped = false;
-        private final Iterator<MobileObject<T>> iterator = mobileObjects.iterator();
+        private final Iterator<MobileObject> iterator = mobileObjects.iterator();
         private MobileObject lastObject = null;
         
         private MobileObjectIterator() {
@@ -1002,26 +1007,26 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * Returns a new Iterator over this SpaceState's list of MobileObjects.
      * @return A new Iterator over this SpaceState's list of MobileObjects
      */
-    public final SafeIterator<MobileObject<T>> mobileObjectIterator() {
+    public final SafeIterator<MobileObject> mobileObjectIterator() {
         return new MobileObjectIterator();
     }
     
-    private static class MobileObjectChangeData<T extends CellGame> {
+    private static class MobileObjectChangeData {
         
         private boolean used = false;
         private final boolean changePriority;
-        private final MobileObject<T> object;
+        private final MobileObject object;
         private final boolean add;
         private final int movementPriority;
         
-        private MobileObjectChangeData(MobileObject<T> object, boolean add) {
+        private MobileObjectChangeData(MobileObject object, boolean add) {
             changePriority = false;
             this.object = object;
             this.add = add;
             movementPriority = 0;
         }
         
-        private MobileObjectChangeData(MobileObject<T> object, int movementPriority) {
+        private MobileObjectChangeData(MobileObject object, int movementPriority) {
             changePriority = true;
             this.object = object;
             add = false;
@@ -1030,25 +1035,25 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
     }
     
-    final void addMobileObject(MobileObject<T> object) {
-        mobileObjectChanges.add(new MobileObjectChangeData<>(object, true));
+    final void addMobileObject(MobileObject object) {
+        mobileObjectChanges.add(new MobileObjectChangeData(object, true));
         updateMobileObjectList();
     }
     
-    final void removeMobileObject(MobileObject<T> object) {
-        mobileObjectChanges.add(new MobileObjectChangeData<>(object, false));
+    final void removeMobileObject(MobileObject object) {
+        mobileObjectChanges.add(new MobileObjectChangeData(object, false));
         updateMobileObjectList();
     }
     
-    final void changeMobileObjectMovementPriority(MobileObject<T> object, int movementPriority) {
-        mobileObjectChanges.add(new MobileObjectChangeData<>(object, movementPriority));
+    final void changeMobileObjectMovementPriority(MobileObject object, int movementPriority) {
+        mobileObjectChanges.add(new MobileObjectChangeData(object, movementPriority));
         updateMobileObjectList();
     }
     
     private void updateMobileObjectList() {
         if (mobileObjectIterators == 0) {
             while (!mobileObjectChanges.isEmpty()) {
-                MobileObjectChangeData<T> data = mobileObjectChanges.remove();
+                MobileObjectChangeData data = mobileObjectChanges.remove();
                 if (!data.used) {
                     data.used = true;
                     if (data.changePriority) {
@@ -1080,7 +1085,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The nearest SpaceObject of the specified class to the specified
      * point
      */
-    public final <O extends SpaceObject<T>> O nearestObject(CellVector point, Class<O> cls) {
+    public final <O extends SpaceObject> O nearestObject(CellVector point, Class<O> cls) {
         return nearestObject(point.getX(), point.getY(), cls);
     }
     
@@ -1095,10 +1100,10 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The nearest SpaceObject of the specified class to the specified
      * point
      */
-    public final <O extends SpaceObject<T>> O nearestObject(long pointX, long pointY, Class<O> cls) {
+    public final <O extends SpaceObject> O nearestObject(long pointX, long pointY, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        for (SpaceObject<T> object :
+        for (SpaceObject object :
                 (MobileObject.class.isAssignableFrom(cls) ? mobileObjects : spaceObjects)) {
             if (cls.isAssignableFrom(object.getClass())) {
                 long distance = CellVector.distanceBetween(
@@ -1124,7 +1129,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified rectangular region
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinRectangle(
+    public final <O extends SpaceObject> boolean objectIsWithinRectangle(
             long x1, long y1, long x2, long y2, Class<O> cls) {
         return objectWithinRectangle(x1, y1, x2, y2, cls) != null;
     }
@@ -1142,19 +1147,19 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class within the specified
      * rectangular region
      */
-    public final <O extends SpaceObject<T>> O objectWithinRectangle(
+    public final <O extends SpaceObject> O objectWithinRectangle(
             long x1, long y1, long x2, long y2, Class<O> cls) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
-            for (Hitbox<T> centerHitbox : iterator.next().hitboxes.get(HitboxRole.CENTER)) {
+            for (Hitbox centerHitbox : iterator.next().hitboxes.get(HitboxRole.CENTER)) {
                 if (!centerHitbox.scanned) {
                     if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
                             && centerHitbox.getAbsX() >= x1
                             && centerHitbox.getAbsY() >= y1
                             && centerHitbox.getAbsX() <= x2
                             && centerHitbox.getAbsY() <= y2) {
-                        for (Hitbox<T> hitbox : scanned) {
+                        for (Hitbox hitbox : scanned) {
                             hitbox.scanned = false;
                         }
                         return cls.cast(centerHitbox.getObject());
@@ -1164,7 +1169,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> hitbox : scanned) {
+        for (Hitbox hitbox : scanned) {
             hitbox.scanned = false;
         }
         return null;
@@ -1182,13 +1187,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class within the
      * specified rectangular region
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinRectangle(
+    public final <O extends SpaceObject> List<O> objectsWithinRectangle(
             long x1, long y1, long x2, long y2, Class<O> cls) {
         List<O> within = new ArrayList<>();
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
-            for (Hitbox<T> centerHitbox : iterator.next().hitboxes.get(HitboxRole.CENTER)) {
+            for (Hitbox centerHitbox : iterator.next().hitboxes.get(HitboxRole.CENTER)) {
                 if (!centerHitbox.scanned) {
                     centerHitbox.scanned = true;
                     scanned.add(centerHitbox);
@@ -1202,7 +1207,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> hitbox : scanned) {
+        for (Hitbox hitbox : scanned) {
             hitbox.scanned = false;
         }
         return within;
@@ -1222,7 +1227,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(
+    public final <O extends SpaceObject> O nearestObjectWithinRectangle(
             CellVector point, long x1, long y1, long x2, long y2, Class<O> cls) {
         return nearestObjectWithinRectangle(point.getX(), point.getY(), x1, y1, x2, y2, cls);
     }
@@ -1242,18 +1247,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(
+    public final <O extends SpaceObject> O nearestObjectWithinRectangle(
             long pointX, long pointY, long x1, long y1, long x2, long y2, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(x1, y1, x2, y2));
         while (iterator.hasNext()) {
-            for (Hitbox<T> centerHitbox : iterator.next().hitboxes.get(HitboxRole.CENTER)) {
+            for (Hitbox centerHitbox : iterator.next().hitboxes.get(HitboxRole.CENTER)) {
                 if (!centerHitbox.scanned) {
                     centerHitbox.scanned = true;
                     scanned.add(centerHitbox);
-                    SpaceObject<T> object = centerHitbox.getObject();
+                    SpaceObject object = centerHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && centerHitbox.getAbsX() >= x1
                             && centerHitbox.getAbsY() >= y1
@@ -1269,7 +1274,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> hitbox : scanned) {
+        for (Hitbox hitbox : scanned) {
             hitbox.scanned = false;
         }
         return nearest;
@@ -1307,7 +1312,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified circular region
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(
+    public final <O extends SpaceObject> boolean objectIsWithinCircle(
             CellVector center, long radius, Class<O> cls) {
         return objectWithinCircle(center.getX(), center.getY(), radius, cls) != null;
     }
@@ -1323,7 +1328,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified circular region
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinCircle(
+    public final <O extends SpaceObject> boolean objectIsWithinCircle(
             long centerX, long centerY, long radius, Class<O> cls) {
         return objectWithinCircle(centerX, centerY, radius, cls) != null;
     }
@@ -1339,7 +1344,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class within the specified
      * circular region
      */
-    public final <O extends SpaceObject<T>> O objectWithinCircle(
+    public final <O extends SpaceObject> O objectWithinCircle(
             CellVector center, long radius, Class<O> cls) {
         return objectWithinCircle(center.getX(), center.getY(), radius, cls);
     }
@@ -1356,18 +1361,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class within the specified
      * circular region
      */
-    public final <O extends SpaceObject<T>> O objectWithinCircle(
+    public final <O extends SpaceObject> O objectWithinCircle(
             long centerX, long centerY, long radius, Class<O> cls) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
             if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
-                for (Hitbox<T> centerHitbox : cell.hitboxes.get(HitboxRole.CENTER)) {
+                for (Hitbox centerHitbox : cell.hitboxes.get(HitboxRole.CENTER)) {
                     if (!centerHitbox.scanned) {
                         if (cls.isAssignableFrom(centerHitbox.getObject().getClass())
                                 && CellVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
-                            for (Hitbox<T> hitbox : scanned) {
+                            for (Hitbox hitbox : scanned) {
                                 hitbox.scanned = false;
                             }
                             return cls.cast(centerHitbox.getObject());
@@ -1378,7 +1383,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> hitbox : scanned) {
+        for (Hitbox hitbox : scanned) {
             hitbox.scanned = false;
         }
         return null;
@@ -1394,7 +1399,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class within the
      * specified circular region
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(
+    public final <O extends SpaceObject> List<O> objectsWithinCircle(
             CellVector center, long radius, Class<O> cls) {
         return objectsWithinCircle(center.getX(), center.getY(), radius, cls);
     }
@@ -1410,15 +1415,15 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class within the
      * specified circular region
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinCircle(
+    public final <O extends SpaceObject> List<O> objectsWithinCircle(
             long centerX, long centerY, long radius, Class<O> cls) {
         List<O> within = new ArrayList<>();
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
             if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
-                for (Hitbox<T> centerHitbox : cell.hitboxes.get(HitboxRole.CENTER)) {
+                for (Hitbox centerHitbox : cell.hitboxes.get(HitboxRole.CENTER)) {
                     if (!centerHitbox.scanned) {
                         centerHitbox.scanned = true;
                         scanned.add(centerHitbox);
@@ -1430,7 +1435,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> hitbox : scanned) {
+        for (Hitbox hitbox : scanned) {
             hitbox.scanned = false;
         }
         return within;
@@ -1448,7 +1453,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(
+    public final <O extends SpaceObject> O nearestObjectWithinCircle(
             CellVector point, CellVector center, long radius, Class<O> cls) {
         return nearestObjectWithinCircle(
                 point.getX(), point.getY(), center.getX(), center.getY(), radius, cls);
@@ -1468,20 +1473,20 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(
+    public final <O extends SpaceObject> O nearestObjectWithinCircle(
             long pointX, long pointY, long centerX, long centerY, long radius, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(centerX - radius, centerY - radius, centerX + radius, centerY + radius));
         while (iterator.hasNext()) {
             Cell cell = iterator.next();
             if (circleMeetsRectangle(centerX, centerY, radius, cell.left, cell.top, cell.right, cell.bottom)) {
-                for (Hitbox<T> centerHitbox : cell.hitboxes.get(HitboxRole.CENTER)) {
+                for (Hitbox centerHitbox : cell.hitboxes.get(HitboxRole.CENTER)) {
                     if (!centerHitbox.scanned) {
                         centerHitbox.scanned = true;
                         scanned.add(centerHitbox);
-                        SpaceObject<T> object = centerHitbox.getObject();
+                        SpaceObject object = centerHitbox.getObject();
                         if (cls.isAssignableFrom(object.getClass())
                                 && CellVector.distanceBetween(centerX, centerY, centerHitbox.getAbsX(), centerHitbox.getAbsY()) <= radius) {
                             long distance = CellVector.distanceBetween(pointX, pointY, centerHitbox.getAbsX(), centerHitbox.getAbsY());
@@ -1494,7 +1499,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> hitbox : scanned) {
+        for (Hitbox hitbox : scanned) {
             hitbox.scanned = false;
         }
         return nearest;
@@ -1509,7 +1514,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class that
      * overlap the specified Hitbox.
      */
-    public final <O extends SpaceObject<T>> boolean isOverlappingObject(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> boolean isOverlappingObject(Hitbox hitbox, Class<O> cls) {
         return overlappingObject(hitbox, cls) != null;
     }
     
@@ -1522,15 +1527,15 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class that overlaps the specified
      * Hitbox
      */
-    public final <O extends SpaceObject<T>> O overlappingObject(Hitbox<T> hitbox, Class<O> cls) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+    public final <O extends SpaceObject> O overlappingObject(Hitbox hitbox, Class<O> cls) {
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
+            for (Hitbox overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
                 if (!overlapHitbox.scanned) {
                     if (cls.isAssignableFrom(overlapHitbox.getObject().getClass())
                             && Hitbox.overlap(hitbox, overlapHitbox)) {
-                        for (Hitbox<T> scannedHitbox : scanned) {
+                        for (Hitbox scannedHitbox : scanned) {
                             scannedHitbox.scanned = false;
                         }
                         return cls.cast(overlapHitbox.getObject());
@@ -1540,7 +1545,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return null;
@@ -1555,12 +1560,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class that overlap the
      * specified Hitbox
      */
-    public final <O extends SpaceObject<T>> List<O> overlappingObjects(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> List<O> overlappingObjects(Hitbox hitbox, Class<O> cls) {
         List<O> overlapping = new ArrayList<>();
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
+            for (Hitbox overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
                 if (!overlapHitbox.scanned) {
                     overlapHitbox.scanned = true;
                     scanned.add(overlapHitbox);
@@ -1571,7 +1576,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return overlapping;
@@ -1588,7 +1593,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class that overlaps the
      * specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestOverlappingObject(
+    public final <O extends SpaceObject> O nearestOverlappingObject(
             CellVector point, Hitbox hitbox, Class<O> cls) {
         return nearestOverlappingObject(point.getX(), point.getY(), hitbox, cls);
     }
@@ -1605,18 +1610,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class that overlaps the
      * specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestOverlappingObject(
+    public final <O extends SpaceObject> O nearestOverlappingObject(
             long pointX, long pointY, Hitbox hitbox, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
+            for (Hitbox overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
                 if (!overlapHitbox.scanned) {
                     overlapHitbox.scanned = true;
                     scanned.add(overlapHitbox);
-                    SpaceObject<T> object = overlapHitbox.getObject();
+                    SpaceObject object = overlapHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && Hitbox.overlap(hitbox, overlapHitbox)) {
                         long distance = CellVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
@@ -1628,7 +1633,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return nearest;
@@ -1644,12 +1649,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class whose overlap
      * Hitboxes' bounding boxes meet the specified Hitbox's bounding box
      */
-    public final <O extends SpaceObject<T>> List<O> boundingBoxesMeet(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> List<O> boundingBoxesMeet(Hitbox hitbox, Class<O> cls) {
         List<O> meeting = new ArrayList<>();
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
+            for (Hitbox overlapHitbox : iterator.next().hitboxes.get(HitboxRole.OVERLAP)) {
                 if (!overlapHitbox.scanned) {
                     overlapHitbox.scanned = true;
                     scanned.add(overlapHitbox);
@@ -1663,7 +1668,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return meeting;
@@ -1678,7 +1683,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return Whether there are any SpaceObjects of the specified class whose
      * solid Hitboxes overlap the specified Hitbox
      */
-    public final <O extends SpaceObject<T>> boolean isIntersectingSolidObject(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> boolean isIntersectingSolidObject(Hitbox hitbox, Class<O> cls) {
         return intersectingSolidObject(hitbox, cls) != null;
     }
     
@@ -1692,15 +1697,15 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return A SpaceObject of the specified class whose solid Hitbox overlaps
      * the specified Hitbox
      */
-    public final <O extends SpaceObject<T>> O intersectingSolidObject(Hitbox<T> hitbox, Class<O> cls) {
-        List<Hitbox<T>> scanned = new ArrayList<>();
+    public final <O extends SpaceObject> O intersectingSolidObject(Hitbox hitbox, Class<O> cls) {
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
+            for (Hitbox solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
                 if (!solidHitbox.scanned) {
                     if (cls.isAssignableFrom(solidHitbox.getObject().getClass())
                             && Hitbox.overlap(hitbox, solidHitbox)) {
-                        for (Hitbox<T> scannedHitbox : scanned) {
+                        for (Hitbox scannedHitbox : scanned) {
                             scannedHitbox.scanned = false;
                         }
                         return cls.cast(solidHitbox.getObject());
@@ -1710,7 +1715,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return null;
@@ -1725,12 +1730,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the SpaceObjects of the specified class whose solid
      * Hitboxes overlap the specified Hitbox
      */
-    public final <O extends SpaceObject<T>> List<O> intersectingSolidObjects(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> List<O> intersectingSolidObjects(Hitbox hitbox, Class<O> cls) {
         List<O> intersecting = new ArrayList<>();
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
+            for (Hitbox solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
                 if (!solidHitbox.scanned) {
                     solidHitbox.scanned = true;
                     scanned.add(solidHitbox);
@@ -1741,7 +1746,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return intersecting;
@@ -1758,8 +1763,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class whose solid Hitbox
      * overlaps the specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(
-            CellVector point, Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> O nearestIntersectingSolidObject(
+            CellVector point, Hitbox hitbox, Class<O> cls) {
         return nearestIntersectingSolidObject(point.getX(), point.getY(), hitbox, cls);
     }
     
@@ -1775,18 +1780,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceObject of the specified class whose solid Hitbox
      * overlaps the specified Hitbox that is nearest to the specified point
      */
-    public final <O extends SpaceObject<T>> O nearestIntersectingSolidObject(
-            long pointX, long pointY, Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> O nearestIntersectingSolidObject(
+            long pointX, long pointY, Hitbox hitbox, Class<O> cls) {
         O nearest = null;
         long nearestDistance = -1;
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
+            for (Hitbox solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
                 if (!solidHitbox.scanned) {
                     solidHitbox.scanned = true;
                     scanned.add(solidHitbox);
-                    SpaceObject<T> object = solidHitbox.getObject();
+                    SpaceObject object = solidHitbox.getObject();
                     if (cls.isAssignableFrom(object.getClass())
                             && Hitbox.overlap(hitbox, solidHitbox)) {
                         long distance = CellVector.distanceBetween(pointX, pointY, object.getCenterX(), object.getCenterY());
@@ -1798,7 +1803,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return nearest;
@@ -1814,12 +1819,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return All of the solid SpaceObjects of the specified class whose solid
      * Hitboxes' bounding boxes meet the specified Hitbox's bounding box
      */
-    public final <O extends SpaceObject<T>> List<O> solidBoundingBoxesMeet(Hitbox<T> hitbox, Class<O> cls) {
+    public final <O extends SpaceObject> List<O> solidBoundingBoxesMeet(Hitbox hitbox, Class<O> cls) {
         List<O> meeting = new ArrayList<>();
-        List<Hitbox<T>> scanned = new ArrayList<>();
+        List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(hitbox));
         while (iterator.hasNext()) {
-            for (Hitbox<T> solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
+            for (Hitbox solidHitbox : iterator.next().hitboxes.get(HitboxRole.SOLID)) {
                 if (!solidHitbox.scanned) {
                     solidHitbox.scanned = true;
                     scanned.add(solidHitbox);
@@ -1833,7 +1838,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 }
             }
         }
-        for (Hitbox<T> scannedHitbox : scanned) {
+        for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
         return meeting;
@@ -1854,43 +1859,29 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The SpaceLayer that is assigned to this SpaceState with the
      * specified ID
      */
-    public final SpaceLayer<T> getLayer(int id) {
+    public final SpaceLayer getLayer(int id) {
         return spaceLayers.get(id);
     }
     
     /**
      * Sets the SpaceLayer that is assigned to this SpaceState with the
-     * specified ID to the specified SpaceLayer, if it is not already assigned
-     * to a ThinkerGroup. If there is already a SpaceLayer assigned with the
-     * specified ID, it will be removed from this SpaceState. If the specified
-     * SpaceLayer is null, the SpaceLayer with the specified ID will be removed
-     * if there is one, but it will not be replaced with anything.
+     * specified ID to the specified SpaceLayer. If there is already a
+     * SpaceLayer assigned with the specified ID, it will be removed from this
+     * SpaceState. If the specified SpaceLayer is null, the SpaceLayer with the
+     * specified ID will be removed if there is one, but it will not be replaced
+     * with anything.
      * @param id The ID with which to assign the specified SpaceLayer
      * @param layer The SpaceLayer to add with the specified ID
-     * @return Whether the change occurred
      */
-    public final boolean setLayer(int id, SpaceLayer<T> layer) {
+    public final void setLayer(int id, SpaceLayer layer) {
         if (id == 0) {
             throw new RuntimeException("Attempted to set a SpaceLayer with an ID of 0");
         }
         if (layer == null) {
-            SpaceLayer<T> oldLayer = spaceLayers.get(id);
-            if (oldLayer != null) {
-                removeThinker(oldLayer);
-                spaceLayers.remove(id);
-                return true;
-            }
-            return false;
-        }
-        if (addThinker(layer)) {
-            SpaceLayer<T> oldLayer = spaceLayers.get(id);
-            if (oldLayer != null) {
-                removeThinker(oldLayer);
-            }
+            spaceLayers.remove(id);
+        } else {
             spaceLayers.put(id, layer);
-            return true;
         }
-        return false;
     }
     
     /**
@@ -1898,9 +1889,6 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * to it.
      */
     public final void clearLayers() {
-        for (SpaceLayer<T> layer : spaceLayers.values()) {
-            removeThinker(layer);
-        }
         spaceLayers.clear();
     }
     
@@ -1909,28 +1897,19 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * none.
      * @return This SpaceState's HUD
      */
-    public final HUD<T> getHUD() {
+    public final HUD getHUD() {
         return hud;
     }
     
     /**
-     * Sets the HUD that is assigned to this SpaceState to the specified HUD, if
-     * it is not already assigned to a ThinkerGroup. If there is already an HUD
-     * assigned to this SpaceState, it will be removed. If the specified HUD is
-     * null, the current HUD will be removed if there is one, but it will not be
-     * replaced with anything.
+     * Sets the HUD that is assigned to this SpaceState to the specified one. If
+     * there is already an HUD assigned to this SpaceState, it will be removed.
+     * If the specified HUD is null, the current HUD will be removed if there is
+     * one, but it will not be replaced with anything.
      * @param hud The HUD to add
-     * @return Whether the change occurred
      */
-    public final boolean setHUD(HUD<T> hud) {
-        if (hud == null || addThinker(hud)) {
-            if (this.hud != null) {
-                removeThinker(this.hud);
-            }
-            this.hud = hud;
-            return true;
-        }
-        return false;
+    public final void setHUD(HUD hud) {
+        this.hud = hud;
     }
     
     /**
@@ -1948,7 +1927,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @return The Viewport that is assigned to this SpaceState with the
      * specified ID
      */
-    public final Viewport<T> getViewport(int id) {
+    public final Viewport<T,U> getViewport(int id) {
         return viewports.get(id);
     }
     
@@ -1963,20 +1942,21 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * @param viewport The Viewport to add with the specified ID
      * @return Whether the addition occurred
      */
-    public final boolean setViewport(int id, Viewport<T> viewport) {
+    public final boolean setViewport(int id, Viewport<T,U> viewport) {
         if (viewport == null) {
-            Viewport<T> oldViewport = viewports.get(id);
+            Viewport<T,U> oldViewport = viewports.get(id);
             if (oldViewport != null) {
-                removeThinker(oldViewport);
+                oldViewport.setGameState(null);
                 viewports.remove(id);
                 return true;
             }
             return false;
         }
-        if (addThinker(viewport)) {
-            Viewport<T> oldViewport = viewports.get(id);
+        if (viewport.getGameState() == null) {
+            viewport.setGameState(getThis());
+            Viewport<T,U> oldViewport = viewports.get(id);
             if (oldViewport != null) {
-                removeThinker(oldViewport);
+                oldViewport.setGameState(null);
             }
             viewports.put(id, viewport);
             return true;
@@ -1989,8 +1969,8 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
      * it.
      */
     public final void clearViewports() {
-        for (Viewport<T> viewport : viewports.values()) {
-            removeThinker(viewport);
+        for (Viewport<T,U> viewport : viewports.values()) {
+            viewport.setGameState(null);
         }
         viewports.clear();
     }
@@ -2062,7 +2042,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         return false;
     }
     
-    private static class MoveEvent<T extends CellGame> {
+    private static class MoveEvent {
         
         /*
          * Type 0 = hitting the object's solid surface.
@@ -2072,12 +2052,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
          * if the collisions are successful.
          */
         private final int type;
-        private final SpaceObject<T> object;
+        private final SpaceObject object;
         private final Direction direction;
         private final long metric;
         private final long diffX, diffY;
         
-        private MoveEvent(int type, SpaceObject<T> object,
+        private MoveEvent(int type, SpaceObject object,
                 Direction direction, long metric, long diffX, long diffY) {
             this.type = type;
             this.object = object;
@@ -2089,13 +2069,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
     }
     
-    private static class MoveData<T extends CellGame> {
+    private static class MoveData {
         
-        private final MobileObject<T> object;
+        private final MobileObject object;
         private final boolean moveX, moveY;
         private final long diffX, diffY;
         
-        private MoveData(MobileObject<T> object, boolean moveX, boolean moveY, long diffX, long diffY) {
+        private MoveData(MobileObject object, boolean moveX, boolean moveY, long diffX, long diffY) {
             this.object = object;
             this.moveX = moveX;
             this.moveY = moveY;
@@ -2105,7 +2085,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         
     }
     
-    final CellVector move(MobileObject<T> object, long changeX, long changeY) {
+    final CellVector move(MobileObject object, long changeX, long changeY) {
         if (changeX == 0 && changeY == 0) { //Object isn't changing position
             Double pressingAngle = object.getAbsPressingAngle();
             if (object.hasCollision() && object.getCollisionHitbox() != null && pressingAngle != null) {
@@ -2119,12 +2099,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 boolean pressingRight = pressingAngle < 90 || pressingAngle > 270;
                 boolean pressingUp = pressingAngle > 0 && pressingAngle < 180;
                 boolean pressingDown = pressingAngle > 180;
-                List<Hitbox<T>> scanned = new ArrayList<>();
-                Map<SpaceObject<T>,Direction> pressingAgainst = null;
+                List<Hitbox> scanned = new ArrayList<>();
+                Map<SpaceObject,Direction> pressingAgainst = null;
                 Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge, topEdge, rightEdge, bottomEdge));
                 while (iterator.hasNext()) {
                     Cell cell = iterator.next();
-                    for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                    for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                         if (!hitbox.scanned) {
                             hitbox.scanned = true;
                             scanned.add(hitbox);
@@ -2168,15 +2148,15 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         }
                     }
                 }
-                for (Hitbox<T> scannedHitbox : scanned) {
+                for (Hitbox scannedHitbox : scanned) {
                     scannedHitbox.scanned = false;
                 }
                 if (pressingAgainst != null) {
                     //Object is pressing against things; make it collide with them
                     EnumSet<Direction> slideDirections = EnumSet.noneOf(Direction.class);
                     boolean stop = false;
-                    for (Map.Entry<SpaceObject<T>,Direction> entry : pressingAgainst.entrySet()) {
-                        SpaceObject<T> pressingObject = entry.getKey();
+                    for (Map.Entry<SpaceObject,Direction> entry : pressingAgainst.entrySet()) {
+                        SpaceObject pressingObject = entry.getKey();
                         Direction direction = entry.getValue();
                         CollisionResponse response = object.collide(pressingObject, direction);
                         if (response != CollisionResponse.NONE) {
@@ -2234,7 +2214,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             top = changeY;
             bottom = 0;
         }
-        SortedSet<MoveEvent<T>> moveEvents = new TreeSet<>(moveComparator); //Record encounters that object needs to have as it moves
+        SortedSet<MoveEvent> moveEvents = new TreeSet<>(moveComparator); //Record encounters that object needs to have as it moves
         if (object.hasCollision() && object.getCollisionHitbox() != null) {
             //Object can collide; check for solid objects in the path of its movement
             Hitbox collisionHitbox = object.getCollisionHitbox();
@@ -2253,13 +2233,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 pressingUp = pressingAngle > 0 && pressingAngle < 180;
                 pressingDown = pressingAngle > 180;
             }
-            List<Hitbox<T>> scanned = new ArrayList<>();
+            List<Hitbox> scanned = new ArrayList<>();
             Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge + left, topEdge + top, rightEdge + right, bottomEdge + bottom));
             if (changeX > 0) {
                 if (changeY > 0) { //Object is moving diagonally down-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2270,18 +2250,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff
                                         && hitboxLeft < rightEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.UP) && hitboxTop >= bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxTop < bottomEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.DOWN, horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.DOWN, horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
                                 }
                             }
@@ -2290,7 +2270,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else if (changeY < 0) { //Object is moving diagonally up-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2301,18 +2281,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxLeft < rightEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.DOWN) && hitboxBottom <= topEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxBottom > topEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.UP, horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.UP, horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
                                 }
                             }
@@ -2321,7 +2301,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else { //Object is moving right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2329,28 +2309,28 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.LEFT) && hitboxLeft >= rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
                                         && (hitboxLeft < rightEdge + changeX || (pressingRight && hitboxLeft == rightEdge + changeX))) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, 0));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.RIGHT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, 0));
                                     }
                                 } else if (pressingUp && hitbox.surfaceIsSolid(Direction.DOWN)
                                         && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.UP, distance, distance, 0));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.UP, distance, distance, 0));
                                     }
                                 } else if (pressingDown && hitbox.surfaceIsSolid(Direction.UP)
                                         && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.DOWN, distance, distance, 0));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.DOWN, distance, distance, 0));
                                     }
                                 }
                             }
@@ -2361,7 +2341,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 if (changeY > 0) { //Object is moving diagonally down-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2372,18 +2352,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.UP) && hitboxTop >= bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxTop < bottomEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.DOWN, -horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.DOWN, -horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
                                 }
                             }
@@ -2392,7 +2372,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else if (changeY < 0) { //Object is moving diagonally up-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2403,18 +2383,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff
                                         && hitboxRight > leftEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
                                 } else if (hitbox.surfaceIsSolid(Direction.DOWN) && hitboxBottom <= topEdge
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff
                                         && hitboxBottom > topEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.UP, -horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.UP, -horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
                                 }
                             }
@@ -2423,7 +2403,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else { //Object is moving left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2431,28 +2411,28 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.RIGHT) && hitboxRight <= leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge
                                         && (hitboxRight > leftEdge + changeX || (pressingLeft && hitboxRight == leftEdge + changeX))) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, 0));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.LEFT, leftEdge - hitboxRight, hitboxRight - leftEdge, 0));
                                     }
                                 } else if (pressingUp && hitbox.surfaceIsSolid(Direction.DOWN)
                                         && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.UP, distance, -distance, 0));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.UP, distance, -distance, 0));
                                     }
                                 } else if (pressingDown && hitbox.surfaceIsSolid(Direction.UP)
                                         && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.DOWN, distance, -distance, 0));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.DOWN, distance, -distance, 0));
                                     }
                                 }
                             }
@@ -2463,7 +2443,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 if (changeY > 0) { //Object is moving down
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2471,28 +2451,28 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.UP) && hitboxTop >= bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge
                                         && (hitboxTop < bottomEdge + changeY || (pressingDown && hitboxTop == bottomEdge + changeY))) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.DOWN, hitboxTop - bottomEdge, 0, hitboxTop - bottomEdge));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.DOWN, hitboxTop - bottomEdge, 0, hitboxTop - bottomEdge));
                                     }
                                 } else if (pressingLeft && hitbox.surfaceIsSolid(Direction.RIGHT)
                                         && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.LEFT, distance, 0, distance));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.LEFT, distance, 0, distance));
                                     }
                                 } else if (pressingRight && hitbox.surfaceIsSolid(Direction.LEFT)
                                         && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.RIGHT, distance, 0, distance));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.RIGHT, distance, 0, distance));
                                     }
                                 }
                             }
@@ -2501,7 +2481,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else { //Object is moving up
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.SOLID)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2509,28 +2489,28 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 if (hitbox.surfaceIsSolid(Direction.DOWN) && hitboxBottom <= topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge
                                         && (hitboxBottom > topEdge + changeY || (pressingUp && hitboxBottom == topEdge + changeY))) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
-                                        moveEvents.add(new MoveEvent<>(0, hitboxObject, Direction.UP, topEdge - hitboxBottom, 0, hitboxBottom - topEdge));
+                                        moveEvents.add(new MoveEvent(0, hitboxObject, Direction.UP, topEdge - hitboxBottom, 0, hitboxBottom - topEdge));
                                     }
                                 } else if (pressingLeft && hitbox.surfaceIsSolid(Direction.RIGHT)
                                         && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.LEFT, distance, 0, -distance));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.LEFT, distance, 0, -distance));
                                     }
                                 } else if (pressingRight && hitbox.surfaceIsSolid(Direction.LEFT)
                                         && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY) {
-                                    SpaceObject<T> hitboxObject = hitbox.getObject();
+                                    SpaceObject hitboxObject = hitbox.getObject();
                                     if (!(hitboxObject instanceof MobileObject && areRelated(object, (MobileObject)hitboxObject))) {
                                         hitboxObject.solidEvent = true;
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
-                                        moveEvents.add(new MoveEvent<>(1, hitboxObject, Direction.RIGHT, distance, 0, -distance));
+                                        moveEvents.add(new MoveEvent(1, hitboxObject, Direction.RIGHT, distance, 0, -distance));
                                     }
                                 }
                             }
@@ -2538,13 +2518,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             }
-            for (Hitbox<T> scannedHitbox : scanned) {
+            for (Hitbox scannedHitbox : scanned) {
                 scannedHitbox.scanned = false;
             }
         }
         if (object.isSolid()) {
             //Object has solid surfaces; check for colliding objects to move along with it
-            Hitbox<T> solidHitbox = object.getSolidHitbox();
+            Hitbox solidHitbox = object.getSolidHitbox();
             boolean solidLeft = solidHitbox.surfaceIsSolid(Direction.LEFT);
             boolean solidRight = solidHitbox.surfaceIsSolid(Direction.RIGHT);
             boolean solidTop = solidHitbox.surfaceIsSolid(Direction.UP);
@@ -2553,13 +2533,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             long rightEdge = solidHitbox.getRightEdge();
             long topEdge = solidHitbox.getTopEdge();
             long bottomEdge = solidHitbox.getBottomEdge();
-            List<Hitbox<T>> scanned = new ArrayList<>();
+            List<Hitbox> scanned = new ArrayList<>();
             Iterator<Cell> iterator = new ReadCellRangeIterator(getCellRangeExclusive(leftEdge + left, topEdge + top, rightEdge + right, bottomEdge + bottom));
             if (changeX > 0) {
                 if (changeY > 0) { //Object is moving diagonally down-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2567,30 +2547,30 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxTop = hitbox.getTopEdge();
                                 long verticalDiff = Frac.div(Frac.mul(hitboxLeft - rightEdge, changeY), changeX);
                                 long horizontalDiff = Frac.div(Frac.mul(hitboxTop - bottomEdge, changeX), changeY);
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
                                 } else if (solidBottom && hitboxTop >= bottomEdge && hitboxTop < bottomEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitboxTop < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitboxLeft < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2599,7 +2579,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else if (changeY < 0) { //Object is moving diagonally up-right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2607,30 +2587,30 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxBottom = hitbox.getBottomEdge();
                                 long verticalDiff = Frac.div(Frac.mul(hitboxLeft - rightEdge, changeY), changeX);
                                 long horizontalDiff = Frac.div(Frac.mul(hitboxBottom - topEdge, changeX), changeY);
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, verticalDiff));
                                     }
                                 } else if (solidTop && hitboxBottom <= topEdge && hitboxBottom > topEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
                                     }
                                 } else if (solidBottom && hitboxObject.isPressingIn(Direction.UP) && hitbox.getTopEdge() == bottomEdge
                                         && hitboxLeft < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2639,37 +2619,37 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else { //Object is moving right
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxLeft = hitbox.getLeftEdge();
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidRight && hitboxLeft >= rightEdge && hitboxLeft < rightEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, hitboxLeft - rightEdge, hitboxLeft - rightEdge, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, distance, distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, distance, distance, 0));
                                     }
                                 } else if (solidBottom && hitboxObject.isPressingIn(Direction.UP) && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getRightEdge() > leftEdge && hitboxLeft < rightEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(hitboxLeft - rightEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, distance, distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, distance, distance, 0));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2680,7 +2660,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 if (changeY > 0) { //Object is moving diagonally down-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2688,30 +2668,30 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxTop = hitbox.getTopEdge();
                                 long verticalDiff = Frac.div(Frac.mul(hitboxRight - leftEdge, changeY), changeX);
                                 long horizontalDiff = Frac.div(Frac.mul(hitboxTop - bottomEdge, changeX), changeY);
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() <= bottomEdge + verticalDiff && hitbox.getBottomEdge() > topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
                                 } else if (solidBottom && hitboxTop >= bottomEdge && hitboxTop < bottomEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, -horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, -horizontalDiff, horizontalDiff, hitboxTop - bottomEdge));
                                     }
                                 } else if (solidRight && hitboxObject.isPressingIn(Direction.LEFT) && hitbox.getLeftEdge() == rightEdge
                                         && hitboxTop < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, 0, 0, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2720,7 +2700,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else if (changeY < 0) { //Object is moving diagonally up-left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
@@ -2728,30 +2708,30 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 long hitboxBottom = hitbox.getBottomEdge();
                                 long verticalDiff = Frac.div(Frac.mul(hitboxRight - leftEdge, changeY), changeX);
                                 long horizontalDiff = Frac.div(Frac.mul(hitboxBottom - topEdge, changeX), changeY);
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge + verticalDiff && hitbox.getBottomEdge() >= topEdge + verticalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, verticalDiff));
                                     }
                                 } else if (solidTop && hitboxBottom <= topEdge && hitboxBottom > topEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge + horizontalDiff && hitbox.getRightEdge() > leftEdge + horizontalDiff) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, -horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, -horizontalDiff, horizontalDiff, hitboxBottom - topEdge));
                                     }
                                 } else if (solidRight && hitboxObject.isPressingIn(Direction.LEFT) && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, 0, 0, 0));
                                     }
                                 } else if (solidBottom && hitboxObject.isPressingIn(Direction.UP) && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2760,37 +2740,37 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else { //Object is moving left
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxRight = hitbox.getRightEdge();
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidLeft && hitboxRight <= leftEdge && hitboxRight > leftEdge + changeX
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, leftEdge - hitboxRight, hitboxRight - leftEdge, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, distance, -distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, distance, -distance, 0));
                                     }
                                 } else if (solidBottom && hitboxObject.isPressingIn(Direction.UP) && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitboxRight > leftEdge + changeX && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(leftEdge - hitboxRight, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, distance, -distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, distance, -distance, 0));
                                     }
                                 } else if (solidRight && hitboxObject.isPressingIn(Direction.LEFT) && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitbox.getBottomEdge() > topEdge && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2801,37 +2781,37 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 if (changeY > 0) { //Object is moving down
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxTop = hitbox.getTopEdge();
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidBottom && hitboxTop >= bottomEdge && hitboxTop < bottomEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, hitboxTop - bottomEdge, 0, hitboxTop - bottomEdge));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, hitboxTop - bottomEdge, 0, hitboxTop - bottomEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, distance, distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, distance, distance, 0));
                                     }
                                 } else if (solidRight && hitboxObject.isPressingIn(Direction.LEFT) && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getBottomEdge() > topEdge && hitboxTop < bottomEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(hitboxTop - bottomEdge, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, distance, distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, distance, distance, 0));
                                     }
                                 } else if (solidTop && hitboxObject.isPressingIn(Direction.DOWN) && hitbox.getBottomEdge() == topEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2840,37 +2820,37 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 } else { //Object is moving up
                     while (iterator.hasNext()) {
                         Cell cell = iterator.next();
-                        for (Hitbox<T> hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
+                        for (Hitbox hitbox : cell.hitboxes.get(HitboxRole.COLLISION)) {
                             if (!hitbox.scanned) {
                                 hitbox.scanned = true;
                                 scanned.add(hitbox);
                                 long hitboxBottom = hitbox.getBottomEdge();
-                                MobileObject<T> hitboxObject = (MobileObject)hitbox.getObject();
+                                MobileObject hitboxObject = (MobileObject)hitbox.getObject();
                                 if (solidTop && hitboxBottom <= topEdge && hitboxBottom > topEdge + changeY
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.DOWN, topEdge - hitboxBottom, 0, hitboxBottom - topEdge));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.DOWN, topEdge - hitboxBottom, 0, hitboxBottom - topEdge));
                                     }
                                 } else if (solidLeft && hitboxObject.isPressingIn(Direction.RIGHT) && hitbox.getRightEdge() == leftEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() >= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.RIGHT, distance, -distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.RIGHT, distance, -distance, 0));
                                     }
                                 } else if (solidRight && hitboxObject.isPressingIn(Direction.LEFT) && hitbox.getLeftEdge() == rightEdge
                                         && hitbox.getTopEdge() < bottomEdge && hitboxBottom > topEdge + changeY && hitboxObject.getVelocityX() + hitboxObject.getStepX() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
                                         long distance = Math.max(topEdge - hitboxBottom, -1);
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.LEFT, distance, -distance, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.LEFT, distance, -distance, 0));
                                     }
                                 } else if (solidBottom && hitboxObject.isPressingIn(Direction.UP) && hitbox.getTopEdge() == bottomEdge
                                         && hitbox.getLeftEdge() < rightEdge && hitbox.getRightEdge() > leftEdge && hitboxObject.getVelocityY() + hitboxObject.getStepY() <= 0) {
                                     if (!areRelated(object, hitboxObject)
                                             && (!hitboxObject.solidEvent || movementPriorityComparator.compare(object, hitboxObject) > 0)) {
-                                        moveEvents.add(new MoveEvent<>(2, hitboxObject, Direction.UP, 0, 0, 0));
+                                        moveEvents.add(new MoveEvent(2, hitboxObject, Direction.UP, 0, 0, 0));
                                     }
                                 }
                             }
@@ -2878,11 +2858,11 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     }
                 }
             }
-            for (Hitbox<T> scannedHitbox : scanned) {
+            for (Hitbox scannedHitbox : scanned) {
                 scannedHitbox.scanned = false;
             }
         }
-        List<MoveData<T>> moveData = null; //Record objects that need to move along with this object
+        List<MoveData> moveData = null; //Record objects that need to move along with this object
         if (!moveEvents.isEmpty()) { //Does object need to collide with anything?
             boolean blocked = false;
             long blockedMetric = 0;
@@ -2892,13 +2872,13 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             EnumSet<Direction> slideDirections = EnumSet.noneOf(Direction.class);
             boolean stop = false;
             //Make object collide with things
-            for (MoveEvent<T> event : moveEvents) {
+            for (MoveEvent event : moveEvents) {
                 if (blocked && (event.metric > blockedMetric || event.type > blockedType)) {
                     break;
                 }
                 Direction direction = event.direction;
                 if (event.type == 2) { //Colliding object that will collide with this object
-                    MobileObject<T> objectToMove = (MobileObject<T>)event.object;
+                    MobileObject objectToMove = (MobileObject)event.object;
                     CollisionResponse response = objectToMove.collide(object, direction);
                     if (response != CollisionResponse.NONE) {
                         switch (response) {
@@ -2937,11 +2917,11 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             moveData = new ArrayList<>();
                         }
                         boolean objectPressing = objectToMove.isPressingIn(direction);
-                        moveData.add(new MoveData<>(objectToMove, objectPressing || direction == Direction.LEFT || direction == Direction.RIGHT,
+                        moveData.add(new MoveData(objectToMove, objectPressing || direction == Direction.LEFT || direction == Direction.RIGHT,
                                 objectPressing || direction == Direction.UP || direction == Direction.DOWN, event.diffX, event.diffY));
                     }
                 } else { //Solid object that this object will collide with
-                    SpaceObject<T> solidObject = event.object;
+                    SpaceObject solidObject = event.object;
                     if (solidObject.moved) {
                         continue;
                     }
@@ -2998,7 +2978,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                 changeX = realChangeX;
                 changeY = realChangeY;
             }
-            for (MoveEvent<T> event : moveEvents) {
+            for (MoveEvent event : moveEvents) {
                 event.object.solidEvent = false;
                 event.object.moved = false;
             }
@@ -3007,16 +2987,16 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
         object.setPosition(object.getX() + changeX, object.getY() + changeY); //Move object
         if (!object.followers.isEmpty()) {
             //Object has followers; move them along with it
-            for (MobileObject<T> follower : object.followers) {
+            for (MobileObject follower : object.followers) {
                 move(follower, changeX, changeY);
             }
         }
         if (moveData != null) {
             //Object needs to move certain colliding objects along with it; do so
-            for (MoveData<T> data : moveData) {
+            for (MoveData data : moveData) {
                 move(data.object, (data.moveX ? changeX - data.diffX : 0), (data.moveY ? changeY - data.diffY : 0));
             }
-            for (MoveData<T> data : moveData) {
+            for (MoveData data : moveData) {
                 data.object.effLeader = data.object.getLeader();
             }
         }
@@ -3029,7 +3009,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
     
     @Override
     public void frameActions(T game) {
-        Iterator<SpaceThinker<T>> thinkerIterator = thinkerIterator();
+        Iterator<V> thinkerIterator = thinkerIterator();
         while (thinkerIterator.hasNext()) {
             thinkerIterator.next().beforeMovement();
         }
@@ -3038,7 +3018,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
             object.collisionDirections.clear();
             object.displacement.clear();
         }
-        Iterator<MobileObject<T>> iterator = mobileObjectIterator();
+        Iterator<MobileObject> iterator = mobileObjectIterator();
         while (iterator.hasNext()) {
             MobileObject object = iterator.next();
             long objectTimeFactor = object.getEffectiveTimeFactor();
@@ -3073,12 +3053,12 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                     int scx = vx1 + Frac.toInt(cx - leftEdge);
                     int scy = vy1 + Frac.toInt(cy - topEdge);
                     for (SpaceLayer layer : spaceLayers.headMap(0).values()) {
-                        layer.renderActions(game, this, g, cx, cy, scx, scy, vx1, vy1, vx2, vy2);
+                        layer.renderActions(g, cx, cy, scx, scy, vx1, vy1, vx2, vy2);
                     }
                     int[] cellRange = getCellRangeExclusive(leftEdge, topEdge, rightEdge, bottomEdge);
                     if (drawMode == DrawMode.FLAT) {
                         if (cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
-                            for (Hitbox<T> locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).hitboxes.get(HitboxRole.LOCATOR)) {
+                            for (Hitbox locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).hitboxes.get(HitboxRole.LOCATOR)) {
                                 if (locatorHitbox.getLeftEdge() < rightEdge
                                         && locatorHitbox.getRightEdge() > leftEdge
                                         && locatorHitbox.getTopEdge() < bottomEdge
@@ -3090,17 +3070,17 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                 }
                             }
                         } else {
-                            List<Set<Hitbox<T>>> hitboxesList = new ArrayList<>((cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
+                            List<Set<Hitbox>> hitboxesList = new ArrayList<>((cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
                             Iterator<Cell> iterator = new ReadCellRangeIterator(cellRange);
                             while (iterator.hasNext()) {
                                 hitboxesList.add(iterator.next().hitboxes.get(HitboxRole.LOCATOR));
                             }
                             if (hitboxesList.size() == 2) {
-                                Iterator<Hitbox<T>> iterator1 = hitboxesList.get(0).iterator();
-                                Hitbox<T> hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
-                                Iterator<Hitbox<T>> iterator2 = hitboxesList.get(1).iterator();
-                                Hitbox<T> hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
-                                Hitbox<T> lastHitbox = null;
+                                Iterator<Hitbox> iterator1 = hitboxesList.get(0).iterator();
+                                Hitbox hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
+                                Iterator<Hitbox> iterator2 = hitboxesList.get(1).iterator();
+                                Hitbox hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
+                                Hitbox lastHitbox = null;
                                 while (hitbox1 != null || hitbox2 != null) {
                                     if (hitbox1 == null) {
                                         do {
@@ -3163,17 +3143,17 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                     }
                                 }
                             } else {
-                                PriorityQueue<Pair<Hitbox<T>,Iterator<Hitbox<T>>>> queue = new PriorityQueue<>(drawPriorityIteratorComparator);
-                                for (Set<Hitbox<T>> locatorHitboxes : hitboxesList) {
+                                PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawPriorityIteratorComparator);
+                                for (Set<Hitbox> locatorHitboxes : hitboxesList) {
                                     if (!locatorHitboxes.isEmpty()) {
-                                        Iterator<Hitbox<T>> hitboxIterator = locatorHitboxes.iterator();
+                                        Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
                                         queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
                                     }
                                 }
-                                Hitbox<T> lastHitbox = null;
+                                Hitbox lastHitbox = null;
                                 while (!queue.isEmpty()) {
-                                    Pair<Hitbox<T>,Iterator<Hitbox<T>>> pair = queue.poll();
-                                    Hitbox<T> locatorHitbox = pair.getKey();
+                                    Pair<Hitbox,Iterator<Hitbox>> pair = queue.poll();
+                                    Hitbox locatorHitbox = pair.getKey();
                                     if (locatorHitbox != lastHitbox) {
                                         if (locatorHitbox.getLeftEdge() < rightEdge
                                                 && locatorHitbox.getRightEdge() > leftEdge
@@ -3186,7 +3166,7 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                                         }
                                         lastHitbox = locatorHitbox;
                                     }
-                                    Iterator<Hitbox<T>> hitboxIterator = pair.getValue();
+                                    Iterator<Hitbox> hitboxIterator = pair.getValue();
                                     if (hitboxIterator.hasNext()) {
                                         queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
                                     }
@@ -3194,14 +3174,14 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                             }
                         }
                     } else {
-                        SortedSet<Hitbox<T>> toDraw = new TreeSet<>(drawMode == DrawMode.OVER ? overModeComparator : underModeComparator);
+                        SortedSet<Hitbox> toDraw = new TreeSet<>(drawMode == DrawMode.OVER ? overModeComparator : underModeComparator);
                         Iterator<Cell> iterator = new ReadCellRangeIterator(cellRange);
                         while (iterator.hasNext()) {
-                            for (Hitbox<T> locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
+                            for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                                 toDraw.add(locatorHitbox);
                             }
                         }
-                        for (Hitbox<T> locatorHitbox : toDraw) {
+                        for (Hitbox locatorHitbox : toDraw) {
                             if (locatorHitbox.getLeftEdge() < rightEdge
                                     && locatorHitbox.getRightEdge() > leftEdge
                                     && locatorHitbox.getTopEdge() < bottomEdge
@@ -3214,18 +3194,18 @@ public class SpaceState<T extends CellGame> extends CellGameState<T,SpaceState<T
                         }
                     }
                     for (SpaceLayer layer : spaceLayers.tailMap(0).values()) {
-                        layer.renderActions(game, this, g, cx, cy, scx, scy, vx1, vy1, vx2, vy2);
+                        layer.renderActions(g, cx, cy, scx, scy, vx1, vy1, vx2, vy2);
                     }
                 }
-                if (viewport.getHUD() != null && viewport.getHUD().getGameState() == this) {
-                    viewport.getHUD().renderActions(game, this, g, vx1, vy1, vx2, vy2);
+                if (viewport.getHUD() != null) {
+                    viewport.getHUD().renderActions(g, vx1, vy1, vx2, vy2);
                 }
                 g.clearWorldClip();
             }
         }
         g.setWorldClip(x1, y1, x2 - x1, y2 - y1);
-        if (hud != null && hud.getGameState() == this) {
-            hud.renderActions(game, this, g, x1, y1, x2, y2);
+        if (hud != null) {
+            hud.renderActions(g, x1, y1, x2, y2);
         }
     }
     

@@ -10,10 +10,11 @@ import java.util.Collection;
  * positions of an Area's SpaceObjects are changed upon addition to their new
  * SpaceState to be relative to this origin.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the SpaceStates that can load
- * this Area
+ * @param <T> The type of CellGame that uses the SpaceStates that can load this
+ * Area
+ * @param <U> The type of SpaceState that can load this Area
  */
-public abstract class Area<T extends CellGame> {
+public abstract class Area<T extends CellGame, U extends SpaceState<T,U,?>> {
     
     /**
      * Actions for this Area to take in order for the specified SpaceState to
@@ -27,6 +28,6 @@ public abstract class Area<T extends CellGame> {
      * @return All of the SpaceObjects to be added to the SpaceState as part of
      * this Area
      */
-    public abstract Collection<SpaceObject<T>> load(T game, SpaceState<T> state);
+    public abstract Collection<SpaceObject> load(T game, U state);
     
 }

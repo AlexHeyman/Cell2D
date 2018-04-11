@@ -1,6 +1,5 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import cell2d.CellVector;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -56,51 +55,30 @@ import java.util.Set;
  * moves again, or when it is removed from the SpaceState whose space the
  * records reflect.</p>
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the SpaceStates that this
- * MobileObject can be assigned to
  */
-public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
+public abstract class MobileObject extends SpaceObject {
     
     int movementPriority = 0;
     int newMovementPriority = 0;
     private boolean hasCollision = false;
-    private Hitbox<T> collisionHitbox = null;
+    private Hitbox collisionHitbox = null;
     private Double relPressingAngle = null;
     private MobileObject leader = null;
-    final Set<MobileObject<T>> followers = new HashSet<>();
+    final Set<MobileObject> followers = new HashSet<>();
     MobileObject effLeader = null;
-    final Map<SpaceObject<T>,Set<Direction>> collisions = new HashMap<>();
+    final Map<SpaceObject,Set<Direction>> collisions = new HashMap<>();
     final Set<Direction> collisionDirections = EnumSet.noneOf(Direction.class);
     private final CellVector velocity = new CellVector();
     private final CellVector step = new CellVector();
     final CellVector displacement = new CellVector();
     
     /**
-     * Creates a new MobileObject with the specified locator Hitbox.
-     * @param locatorHitbox This MobileObject's locator Hitbox
+     * Creates a new MobileObject with no locator Hitbox. This MobileObject must
+     * be assigned a locator Hitbox with its setLocatorHitbox() method before
+     * any of its other methods are called.
+     * @see #setLocatorHitbox(cell2d.space.Hitbox)
      */
-    public MobileObject(Hitbox<T> locatorHitbox) {
-        super(locatorHitbox);
-    }
-    
-    /**
-     * Creates a new MobileObject with a new PointHitbox at the specified
-     * position as its locator Hitbox.
-     * @param position This MobileObject's position
-     */
-    public MobileObject(CellVector position) {
-        super(position);
-    }
-    
-    /**
-     * Creates a new MobileObject with a new PointHitbox at the specified
-     * position as its locator Hitbox.
-     * @param x The x-coordinate of this MobileObject's position
-     * @param y The y-coordinate of this MobileObject's position
-     */
-    public MobileObject(long x, long y) {
-        super(x, y);
-    }
+    public MobileObject() {}
     
     @Override
     void addNonCellData() {
@@ -207,7 +185,7 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
      * Returns this MobileObject's collision Hitbox, or null if it has none.
      * @return This MobileObject's collision Hitbox
      */
-    public final Hitbox<T> getCollisionHitbox() {
+    public final Hitbox getCollisionHitbox() {
         return collisionHitbox;
     }
     
@@ -220,15 +198,15 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
      * @param collisionHitbox The new collision Hitbox
      * @return Whether the change occurred
      */
-    public final boolean setCollisionHitbox(Hitbox<T> collisionHitbox) {
+    public final boolean setCollisionHitbox(Hitbox collisionHitbox) {
         if (collisionHitbox != this.collisionHitbox) {
             boolean acceptable;
             Hitbox locatorHitbox = getLocatorHitbox();
             if (collisionHitbox == null) {
                 acceptable = true;
             } else {
-                SpaceObject<T> object = collisionHitbox.getObject();
-                Hitbox<T> parent = collisionHitbox.getParent();
+                SpaceObject object = collisionHitbox.getObject();
+                Hitbox parent = collisionHitbox.getParent();
                 acceptable = (object == null && parent == null)
                         || (collisionHitbox == locatorHitbox)
                         || (object == this && parent == locatorHitbox
@@ -260,7 +238,7 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
      * Hitboxes' bounding boxes meet this MobileObject's collision Hitbox's
      * bounding box
      */
-    public final <O extends SpaceObject<T>> List<O> solidBoundingBoxesMeet(Class<O> cls) {
+    public final <O extends SpaceObject> List<O> solidBoundingBoxesMeet(Class<O> cls) {
         return (state == null || collisionHitbox == null ? new ArrayList<>() : state.solidBoundingBoxesMeet(collisionHitbox, cls));
     }
     
@@ -443,7 +421,7 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
      * @param bringFollowers If true, all of this MobileObject's followers and
      * sub-followers will be assigned to the same SpaceState (false by default)
      */
-    public final void setGameState(SpaceState<T> state, boolean bringFollowers) {
+    public final void setGameState(SpaceState state, boolean bringFollowers) {
         setGameState(state);
         if (bringFollowers && !followers.isEmpty()) {
             for (MobileObject follower : followers) {
@@ -634,11 +612,11 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
      * the surface
      * @return The CollisionResponse to the collision (SLIDE by default)
      */
-    public CollisionResponse collide(SpaceObject<T> object, Direction direction) {
+    public CollisionResponse collide(SpaceObject object, Direction direction) {
         return CollisionResponse.SLIDE;
     }
     
-    final void addCollision(SpaceObject<T> object, Direction direction) {
+    final void addCollision(SpaceObject object, Direction direction) {
         Set<Direction> collisionsWithObject = collisions.get(object);
         if (collisionsWithObject == null) {
             collisionsWithObject = EnumSet.of(direction);
@@ -656,9 +634,9 @@ public abstract class MobileObject<T extends CellGame> extends SpaceObject<T> {
      * reflected in this MobileObject.
      * @return A Map of this MobileObject's collisions during its last movement
      */
-    public final Map<SpaceObject<T>,Set<Direction>> getCollisions() {
-        Map<SpaceObject<T>,Set<Direction>> collisionMap = new HashMap<>();
-        for (Map.Entry<SpaceObject<T>,Set<Direction>> entry : collisions.entrySet()) {
+    public final Map<SpaceObject,Set<Direction>> getCollisions() {
+        Map<SpaceObject,Set<Direction>> collisionMap = new HashMap<>();
+        for (Map.Entry<SpaceObject,Set<Direction>> entry : collisions.entrySet()) {
             collisionMap.put(entry.getKey(), EnumSet.copyOf(entry.getValue()));
         }
         return collisionMap;

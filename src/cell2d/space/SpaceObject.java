@@ -28,7 +28,7 @@ import org.newdawn.slick.Graphics;
  * and rectangular bounding box of a locator Hitbox that is relative to no other
  * Hitbox. A SpaceObject may also have an overlap Hitbox that represents it for
  * purposes of overlapping other SpaceObjects and/or a solid Hitbox that
- * represents it for purposes of surface solidity and ThinkerObjects colliding
+ * represents it for purposes of surface solidity and MobileObjects colliding
  * with it. The solid Hitbox's rectangular bounding box, rather than its exact
  * shape, is what represents the SpaceObject in Cell2D's standard collision
  * mechanics. A SpaceObject may use a single Hitbox for more than one purpose,
@@ -61,19 +61,17 @@ import org.newdawn.slick.Graphics;
  * SpaceStates as appropriate to match its own time factor and assigned
  * SpaceState.</p>
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses the SpaceStates that this
- * SpaceObject can be assigned to
  */
-public abstract class SpaceObject<T extends CellGame> {
+public abstract class SpaceObject {
     
-    T game = null;
-    SpaceState<T> state = null;
-    SpaceState<T> newState = null;
+    CellGame game = null;
+    SpaceState state = null;
+    SpaceState newState = null;
     private long timeFactor = -1;
-    private Hitbox<T> locatorHitbox = null;
-    private final Hitbox<T> centerHitbox;
-    private Hitbox<T> overlapHitbox = null;
-    private Hitbox<T> solidHitbox = null;
+    private Hitbox locatorHitbox = null;
+    private final Hitbox centerHitbox;
+    private Hitbox overlapHitbox = null;
+    private Hitbox solidHitbox = null;
     boolean solidEvent = false;
     boolean moved = false;
     private int drawPriority = 0;
@@ -83,34 +81,14 @@ public abstract class SpaceObject<T extends CellGame> {
     private Filter filter = null;
     
     /**
-     * Creates a new SpaceObject with the specified locator Hitbox.
-     * @param locatorHitbox This SpaceObject's locator Hitbox
+     * Creates a new SpaceObject with no locator Hitbox. This SpaceObject must
+     * be assigned a locator Hitbox with its setLocatorHitbox() method before
+     * any of its other methods are called.
+     * @see #setLocatorHitbox(cell2d.space.Hitbox)
      */
-    public SpaceObject(Hitbox<T> locatorHitbox) {
-        centerHitbox = new PointHitbox<>(0, 0);
+    public SpaceObject() {
+        centerHitbox = new PointHitbox(0, 0);
         centerHitbox.add(HitboxRole.CENTER);
-        if (!setLocatorHitbox(locatorHitbox)) {
-            throw new RuntimeException("Attempted to create a SpaceObject with an invalid locator Hitbox");
-        }
-    }
-    
-    /**
-     * Creates a new SpaceObject with a new PointHitbox at the specified
-     * position as its locator Hitbox.
-     * @param position This SpaceObject's position
-     */
-    public SpaceObject(CellVector position) {
-        this(new PointHitbox<>(position));
-    }
-    
-    /**
-     * Creates a new SpaceObject with a new PointHitbox at the specified
-     * position as its locator Hitbox.
-     * @param x The x-coordinate of this SpaceObject's position
-     * @param y The y-coordinate of this SpaceObject's position
-     */
-    public SpaceObject(long x, long y) {
-        this(new PointHitbox<>(x, y));
     }
     
     /**
@@ -118,7 +96,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * assigned, or null if it is not assigned to a SpaceState.
      * @return This SpaceObject's SpaceState's CellGame
      */
-    public final T getGame() {
+    public final CellGame getGame() {
         return game;
     }
     
@@ -127,7 +105,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * it is not assigned to one.
      * @return The SpaceState to which this SpaceObject is assigned
      */
-    public final SpaceState<T> getGameState() {
+    public final SpaceState getGameState() {
         return state;
     }
     
@@ -140,7 +118,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * simply return its current SpaceState.
      * @return The SpaceState to which this SpaceObject is about to be assigned
      */
-    public final SpaceState<T> getNewGameState() {
+    public final SpaceState getNewGameState() {
         return newState;
     }
     
@@ -150,7 +128,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * SpaceState if it has one.
      * @param state The SpaceState to which this SpaceObject should be assigned
      */
-    public final void setGameState(SpaceState<T> state) {
+    public final void setGameState(SpaceState state) {
         if (newState != null) {
             newState.removeObject(this);
         }
@@ -246,10 +224,10 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param locatorHitbox The new locator Hitbox
      * @return Whether the change occurred
      */
-    public final boolean setLocatorHitbox(Hitbox<T> locatorHitbox) {
+    public final boolean setLocatorHitbox(Hitbox locatorHitbox) {
         if (locatorHitbox != null) {
-            SpaceObject<T> object = locatorHitbox.getObject();
-            Hitbox<T> parent = locatorHitbox.getParent();
+            SpaceObject object = locatorHitbox.getObject();
+            Hitbox parent = locatorHitbox.getParent();
             if ((object == null && parent == null)
                     || (object == this && parent == this.locatorHitbox
                     && locatorHitbox.getComponentOf() != this.locatorHitbox)) {
@@ -638,8 +616,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class that is nearest to this
      * SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObject(Class<O> cls) {
-        return (state == null ? null : state.nearestObject(centerHitbox.getAbsX(), centerHitbox.getAbsY(), cls));
+    public final <O extends SpaceObject> O nearestObject(Class<O> cls) {
+        return (state == null ? null : (O)state.nearestObject(centerHitbox.getAbsX(), centerHitbox.getAbsY(), cls));
     }
     
     /**
@@ -655,8 +633,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * rectangular region that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRectangle(long x1, long y1, long x2, long y2, Class<O> cls) {
-        return (state == null ? null : state.nearestObjectWithinRectangle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), x1, y1, x2, y2, cls));
+    public final <O extends SpaceObject> O nearestObjectWithinRectangle(long x1, long y1, long x2, long y2, Class<O> cls) {
+        return (state == null ? null : (O)state.nearestObjectWithinRectangle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), x1, y1, x2, y2, cls));
     }
     
     /**
@@ -669,8 +647,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(CellVector center, long radius, Class<O> cls) {
-        return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), center.getX(), center.getY(), radius, cls));
+    public final <O extends SpaceObject> O nearestObjectWithinCircle(CellVector center, long radius, Class<O> cls) {
+        return (state == null ? null : (O)state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), center.getX(), center.getY(), radius, cls));
     }
     
     /**
@@ -684,8 +662,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * circular region that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinCircle(long centerX, long centerY, long radius, Class<O> cls) {
-        return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerX, centerY, radius, cls));
+    public final <O extends SpaceObject> O nearestObjectWithinCircle(long centerX, long centerY, long radius, Class<O> cls) {
+        return (state == null ? null : (O)state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerX, centerY, radius, cls));
     }
     
     /**
@@ -697,8 +675,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return the SpaceObject of the specified class that overlaps the
      * specified Hitbox that is nearest to this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O nearestOverlappingObject(Hitbox hitbox, Class<O> cls) {
-        return (state == null ? null : state.nearestOverlappingObject(centerHitbox.getAbsX(), centerHitbox.getAbsY(), hitbox, cls));
+    public final <O extends SpaceObject> O nearestOverlappingObject(Hitbox hitbox, Class<O> cls) {
+        return (state == null ? null : (O)state.nearestOverlappingObject(centerHitbox.getAbsX(), centerHitbox.getAbsY(), hitbox, cls));
     }
     
     /**
@@ -710,8 +688,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return Whether there are any SpaceObjects of the specified class within
      * the specified radius of this SpaceObject
      */
-    public final <O extends SpaceObject<T>> boolean objectIsWithinRadius(long radius, Class<O> cls) {
-        return (state == null ? false : state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls) != null);
+    public final <O extends SpaceObject> boolean objectIsWithinRadius(long radius, Class<O> cls) {
+        return (state == null ? false : (O)state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls) != null);
     }
     
     /**
@@ -723,8 +701,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return A SpaceObject of the specified class within the specified radius
      * of this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O objectWithinRadius(long radius, Class<O> cls) {
-        return (state == null ? null : state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
+    public final <O extends SpaceObject> O objectWithinRadius(long radius, Class<O> cls) {
+        return (state == null ? null : (O)state.objectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
     /**
@@ -736,7 +714,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return All of the SpaceObjects of the specified class within the
      * specified radius of this SpaceObject
      */
-    public final <O extends SpaceObject<T>> List<O> objectsWithinRadius(long radius, Class<O> cls) {
+    public final <O extends SpaceObject> List<O> objectsWithinRadius(long radius, Class<O> cls) {
         return (state == null ? new ArrayList<>() : state.objectsWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
@@ -749,8 +727,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return The SpaceObject of the specified class within the specified
      * radius of this SpaceObject that is nearest to it
      */
-    public final <O extends SpaceObject<T>> O nearestObjectWithinRadius(long radius, Class<O> cls) {
-        return (state == null ? null : state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
+    public final <O extends SpaceObject> O nearestObjectWithinRadius(long radius, Class<O> cls) {
+        return (state == null ? null : (O)state.nearestObjectWithinCircle(centerHitbox.getAbsX(), centerHitbox.getAbsY(), centerHitbox.getAbsX(), centerHitbox.getAbsY(), radius, cls));
     }
     
     /**
@@ -770,14 +748,14 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param overlapHitbox The new overlap Hitbox
      * @return Whether the change occurred
      */
-    public final boolean setOverlapHitbox(Hitbox<T> overlapHitbox) {
+    public final boolean setOverlapHitbox(Hitbox overlapHitbox) {
         if (overlapHitbox != this.overlapHitbox) {
             boolean acceptable;
             if (overlapHitbox == null) {
                 acceptable = true;
             } else {
-                SpaceObject<T> object = overlapHitbox.getObject();
-                Hitbox<T> parent = overlapHitbox.getParent();
+                SpaceObject object = overlapHitbox.getObject();
+                Hitbox parent = overlapHitbox.getParent();
                 acceptable = (object == null && parent == null)
                         || (overlapHitbox == locatorHitbox)
                         || (object == this && parent == locatorHitbox
@@ -803,19 +781,17 @@ public abstract class SpaceObject<T extends CellGame> {
      * @param object The SpaceObject to check for an overlap
      * @return Whether this SpaceObject overlaps the specified SpaceObject
      */
-    public final boolean overlaps(SpaceObject<T> object) {
+    public final boolean overlaps(SpaceObject object) {
         return overlap(this, object);
     }
     
     /**
      * Returns whether the two specified SpaceObjects overlap.
-     * @param <T> The subclass of CellGame that uses the SpaceStates that the
-     * two SpaceObjects can be assigned to
      * @param object1 The first SpaceObject
      * @param object2 The second SpaceObject
      * @return Whether the two SpaceObjects overlap
      */
-    public static <T extends CellGame> boolean overlap(SpaceObject<T> object1, SpaceObject<T> object2) {
+    public static boolean overlap(SpaceObject object1, SpaceObject object2) {
         return object1.overlapHitbox != null && object2.overlapHitbox != null
                 && Hitbox.overlap(object1.overlapHitbox, object2.overlapHitbox);
     }
@@ -828,7 +804,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return Whether this SpaceObject is overlapping a SpaceObject of the
      * specified class
      */
-    public final <O extends SpaceObject<T>> boolean isOverlappingObject(Class<O> cls) {
+    public final <O extends SpaceObject> boolean isOverlappingObject(Class<O> cls) {
         return (state == null || overlapHitbox == null ? false : state.overlappingObject(overlapHitbox, cls) != null);
     }
     
@@ -840,8 +816,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return A SpaceObject of the specified class that is overlapping this
      * SpaceObject
      */
-    public final <O extends SpaceObject<T>> O overlappingObject(Class<O> cls) {
-        return (state == null || overlapHitbox == null ? null : state.overlappingObject(overlapHitbox, cls));
+    public final <O extends SpaceObject> O overlappingObject(Class<O> cls) {
+        return (state == null || overlapHitbox == null ? null : (O)state.overlappingObject(overlapHitbox, cls));
     }
     
     /**
@@ -852,7 +828,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return All of the SpaceObjects of the specified class in this
      * SpaceObject's SpaceState that are overlapping it
      */
-    public final <O extends SpaceObject<T>> List<O> overlappingObjects(Class<O> cls) {
+    public final <O extends SpaceObject> List<O> overlappingObjects(Class<O> cls) {
         return (state == null || overlapHitbox == null ? new ArrayList<>() : state.overlappingObjects(overlapHitbox, cls));
     }
     
@@ -867,7 +843,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * Hitboxes' bounding boxes meet this SpaceObject's overlap Hitbox's
      * bounding box
      */
-    public final <O extends SpaceObject<T>> List<O> boundingBoxesMeet(Class<O> cls) {
+    public final <O extends SpaceObject> List<O> boundingBoxesMeet(Class<O> cls) {
         return (state == null || overlapHitbox == null ? new ArrayList<>() : state.boundingBoxesMeet(overlapHitbox, cls));
     }
     
@@ -879,7 +855,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return Whether this SpaceObject is overlapping the solid Hitbox of a
      * solid SpaceObject of the specified class
      */
-    public final <O extends SpaceObject<T>> boolean isIntersectingSolidObject(Class<O> cls) {
+    public final <O extends SpaceObject> boolean isIntersectingSolidObject(Class<O> cls) {
         return (state == null || overlapHitbox == null ? false : state.intersectingSolidObject(overlapHitbox, cls) != null);
     }
     
@@ -892,8 +868,8 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return A solid SpaceObject of the specified class whose solid Hitbox is
      * overlapping this SpaceObject
      */
-    public final <O extends SpaceObject<T>> O intersectingSolidObject(Class<O> cls) {
-        return (state == null || overlapHitbox == null ? null : state.intersectingSolidObject(overlapHitbox, cls));
+    public final <O extends SpaceObject> O intersectingSolidObject(Class<O> cls) {
+        return (state == null || overlapHitbox == null ? null : (O)state.intersectingSolidObject(overlapHitbox, cls));
     }
     
     /**
@@ -904,7 +880,7 @@ public abstract class SpaceObject<T extends CellGame> {
      * @return All of the solid SpaceObjects of the specified class whose solid
      * Hitboxes are overlapping this SpaceObject
      */
-    public final <O extends SpaceObject<T>> List<O> intersectingSolidObjects(Class<O> cls) {
+    public final <O extends SpaceObject> List<O> intersectingSolidObjects(Class<O> cls) {
         return (state == null || overlapHitbox == null ? new ArrayList<>() : state.intersectingSolidObjects(overlapHitbox, cls));
     }
     

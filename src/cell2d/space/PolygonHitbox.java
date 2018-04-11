@@ -1,6 +1,5 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import cell2d.CellVector;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,8 @@ import java.util.List;
  * PolygonHitbox's position. A PolygonHitbox with no vertices is a point at its
  * absolute position.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the SpaceStates that can use
- * this PolygonHitbox
  */
-public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
+public class PolygonHitbox extends Hitbox {
     
     private static class RelAbsPair {
         
@@ -118,12 +115,12 @@ public class PolygonHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public Hitbox<T> getCopy() {
+    public Hitbox getCopy() {
         List<RelAbsPair> newVertices = new ArrayList<>(vertices.size());
         for (RelAbsPair vertex : vertices) {
             newVertices.add(new RelAbsPair(new CellVector(vertex.rel), null));
         }
-        return new PolygonHitbox<>(0, 0, newVertices);
+        return new PolygonHitbox(0, 0, newVertices);
     }
     
     private void updateData() {

@@ -7,22 +7,35 @@ import java.util.Iterator;
 /**
  * <p>A SpaceThinker is the type of Thinker that is used by SpaceStates. A
  * SpaceThinker can take beforeMovementActions() every frame before its
- * SpaceState moves its assigned ThinkerObjects.</p>
+ * SpaceState moves its assigned MobileObjects.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that this SpaceThinker's SpaceState is
- used by
+ * @param <T> The type of CellGame that uses this SpaceThinker's SpaceStates
+ * @param <U> The type of SpaceState that uses this SpaceThinker
+ * @param <V> The type of SpaceThinker that this SpaceThinker is for SpaceState
+ * interaction purposes
  */
-public abstract class SpaceThinker<T extends CellGame> extends Thinker<T,SpaceState<T>,SpaceThinker<T>> {
+public abstract class SpaceThinker<T extends CellGame, U extends SpaceState<T,U,V>,
+        V extends SpaceThinker<T,U,V>> extends Thinker<T,U,V> {
     
-    @Override
-    public final SpaceThinker<T> getThis() {
-        return this;
+    /**
+     * Creates a new SpaceThinker.
+     * @param gameClass The Class object representing the subclass of CellGame
+     * that uses this SpaceThinker's SpaceStates
+     * @param stateClass The Class object representing the subclass of
+     * SpaceState that uses this SpaceThinker
+     * @param thinkerClass The Class object representing the subclass of
+     * SpaceThinker that this SpaceThinker is for SpaceState interaction
+     * purposes
+     */
+    public SpaceThinker(Class<? extends CellGame> gameClass,
+            Class<? extends SpaceState> stateClass, Class<? extends SpaceThinker> thinkerClass) {
+        super(gameClass, stateClass, thinkerClass);
     }
     
     final void beforeMovement() {
         beforeMovementActions(getGame(), getGameState());
         if (getNumThinkers() > 0) {
-            Iterator<SpaceThinker<T>> iterator = thinkerIterator();
+            Iterator<V> iterator = thinkerIterator();
             while (iterator.hasNext()) {
                 iterator.next().beforeMovement();
             }
@@ -32,10 +45,10 @@ public abstract class SpaceThinker<T extends CellGame> extends Thinker<T,SpaceSt
     /**
      * Actions for this SpaceThinker to take once every frame, after
      * SpaceThinkers take their timeUnitActions() but before its SpaceState
-     * moves its assigned ThinkerObjects.
+     * moves its assigned MobileObjects.
      * @param game This SpaceThinker's SpaceState's CellGame
      * @param state This SpaceThinker's SpaceState
      */
-    public void beforeMovementActions(T game, SpaceState<T> state) {}
+    public void beforeMovementActions(T game, U state) {}
     
 }

@@ -21,10 +21,10 @@ import java.util.TreeSet;
  * ThinkerGroups regarding the same Thinker without having to wait until all
  * iterations have finished.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses this ThinkerGroup's Thinkers'
+ * @param <T> The type of CellGame that uses this ThinkerGroup's Thinkers'
  * CellGameStates
- * @param <U> The subclass of CellGameState uses this ThinkerGroup's Thinkers
- * @param <V> The subclass of Thinker that this ThinkerGroup's Thinkers are
+ * @param <U> The type of CellGameState that uses this ThinkerGroup's Thinkers
+ * @param <V> The type of Thinker that this ThinkerGroup's Thinkers are
  */
 public abstract class ThinkerGroup<T extends CellGame,
         U extends CellGameState<T,U,V>, V extends Thinker<T,U,V>> {
@@ -42,6 +42,9 @@ public abstract class ThinkerGroup<T extends CellGame,
         
     };
     
+    private final Class<? extends CellGame> gameClass;
+    private final Class<? extends CellGameState> stateClass;
+    private final Class<? extends Thinker> thinkerClass;
     private final SortedSet<V> thinkers = new TreeSet<>(actionPriorityComparator);
     private int thinkerIterators = 0;
     private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
@@ -49,8 +52,48 @@ public abstract class ThinkerGroup<T extends CellGame,
     
     /**
      * Creates a new ThinkerGroup.
+     * @param gameClass The Class object representing the subclass of CellGame
+     * that uses this ThinkerGroup's Thinkers' CellGameStates
+     * @param stateClass The Class object representing the subclass of
+     * CellGameState that uses this ThinkerGroup's Thinkers
+     * @param thinkerClass The Class object representing the subclass of Thinker
+     * that this ThinkerGroup's Thinkers are
      */
-    public ThinkerGroup() {}
+    public ThinkerGroup(Class<? extends CellGame> gameClass,
+            Class<? extends CellGameState> stateClass, Class<? extends Thinker> thinkerClass) {
+        this.gameClass = gameClass;
+        this.stateClass = stateClass;
+        this.thinkerClass = thinkerClass;
+    }
+    
+    /**
+     * Returns the subclass of CellGame that uses this ThinkerGroup's Thinkers'
+     * CellGameStates.
+     * @return The subclass of CellGame that uses this ThinkerGroup's Thinkers'
+     * CellGameStates
+     */
+    public final Class<? extends CellGame> getGameClass() {
+        return gameClass;
+    }
+    
+    /**
+     * Returns the Class object representing the subclass of CellGameState that
+     * uses this ThinkerGroup's Thinkers.
+     * @return The subclass of CellGameState that uses this ThinkerGroup's
+     * Thinkers
+     */
+    public final Class<? extends CellGameState> getStateClass() {
+        return stateClass;
+    }
+    
+    /**
+     * Returns the Class object representing the subclass of Thinker that this
+     * ThinkerGroup's Thinkers are.
+     * @return The subclass of Thinker that this ThinkerGroup's Thinkers are
+     */
+    public final Class<? extends Thinker> getThinkerClass() {
+        return thinkerClass;
+    }
     
     /**
      * Returns the number of Thinkers that are assigned to this ThinkerGroup.

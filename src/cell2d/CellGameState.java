@@ -32,9 +32,10 @@ import org.newdawn.slick.Graphics;
  * Thinkers to interact with it in ways unique to its subclass of CellGameState.
  * </p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses this CellGameState
- * @param <U> The subclass of CellGameState that this CellGameState is
- * @param <V> The subclass of Thinker that this CellGameState uses
+ * @param <T> The type of CellGame that uses this CellGameState
+ * @param <U> The type of CellGameState that this CellGameState is for Thinker
+ * interaction purposes
+ * @param <V> The type of Thinker that this CellGameState uses
  */
 public abstract class CellGameState<T extends CellGame, U extends CellGameState<T,U,V>,
         V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
@@ -51,27 +52,35 @@ public abstract class CellGameState<T extends CellGame, U extends CellGameState<
      * Creates a new CellGameState of the specified CellGame with the specified
      * ID. CellGameStates automatically register themselves with their CellGames
      * upon creation.
+     * @param gameClass The Class object representing the subclass of CellGame
+     * that uses this CellGameState
+     * @param stateClass The Class object representing the subclass of
+     * CellGameState that this CellGameState is for Thinker interaction purposes
+     * @param thinkerClass The Class object representing the subclass of Thinker
+     * that this CellGameState uses
      * @param game The CellGame to which this CellGameState belongs
      * @param id This CellGameState's ID
      */
-    public CellGameState(T game, int id) {
+    public CellGameState(Class<? extends CellGame> gameClass, Class<? extends CellGameState> stateClass,
+            Class<? extends Thinker> thinkerClass, T game, int id) {
+        super(gameClass, stateClass, thinkerClass);
+        thisState = (U)this;
         if (game == null) {
             throw new RuntimeException("Attempted to create a CellGameState with no CellGame");
         }
         this.game = game;
         this.id = id;
         game.addState(this);
-        thisState = getThis();
     }
     
     /**
      * Returns this CellGameState as a U, rather than as a
-     * CellGameState&lt;T,U,V&gt;. This must be implemented somewhere in the
-     * lineage of every subclass of CellGameState in order to get around Java's
-     * limitations with regard to generic types.
+     * CellGameState&lt;T,U,V&gt;.
      * @return This CellGameState as a U
      */
-    public abstract U getThis();
+    public final U getThis() {
+        return thisState;
+    }
     
     /**
      * Returns the CellGame to which this CellGameState belongs.

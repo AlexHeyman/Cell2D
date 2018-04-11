@@ -1,16 +1,13 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import cell2d.CellVector;
 
 /**
  * <p>A CircleHitbox is a circular Hitbox with its origin at its center. A
  * CircleHitbox's radius cannot be negative.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the SpaceStates that can use
- * this CircleHitbox
  */
-public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
+public class CircleHitbox extends Hitbox {
     
     private long radius;
     
@@ -40,8 +37,8 @@ public class CircleHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public Hitbox<T> getCopy() {
-        return new CircleHitbox<>(0, 0, radius);
+    public Hitbox getCopy() {
+        return new CircleHitbox(0, 0, radius);
     }
     
     /**

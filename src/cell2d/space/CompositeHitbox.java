@@ -1,6 +1,5 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import cell2d.CellVector;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +13,10 @@ import java.util.Map;
  * with a given ID at once. A CompositeHitbox with no component Hitboxes is a
  * point at its absolute position that cannot overlap other Hitboxes.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the SpaceStates that can use
- * this CompositeHitbox
  */
-public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
+public class CompositeHitbox extends Hitbox {
     
-    final Map<Integer,Hitbox<T>> components = new HashMap<>();
+    final Map<Integer,Hitbox> components = new HashMap<>();
     private long left = 0;
     private long right = 0;
     private long top = 0;
@@ -43,11 +40,11 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
     }
     
     @Override
-    public Hitbox<T> getCopy() {
-        CompositeHitbox<T> copy = new CompositeHitbox(0, 0);
-        for (Map.Entry<Integer,Hitbox<T>> entry : components.entrySet()) {
-            Hitbox<T> component = entry.getValue();
-            Hitbox<T> componentCopy = component.getCopy();
+    public Hitbox getCopy() {
+        CompositeHitbox copy = new CompositeHitbox(0, 0);
+        for (Map.Entry<Integer,Hitbox> entry : components.entrySet()) {
+            Hitbox component = entry.getValue();
+            Hitbox componentCopy = component.getCopy();
             componentCopy.setRelPosition(component.getRelX(), component.getRelY());
             componentCopy.setRelXFlip(component.getRelXFlip());
             componentCopy.setRelYFlip(component.getRelYFlip());
@@ -99,7 +96,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
      * reflected in this CompositeHitbox.
      * @return A Map to this CompositeHitbox's components from their IDs
      */
-    public final Map<Integer,Hitbox<T>> getComponents() {
+    public final Map<Integer,Hitbox> getComponents() {
         return new HashMap<>(components);
     }
     
@@ -110,7 +107,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
      * @return The component Hitbox that is assigned to this CompositeHitbox
      * with the specified ID
      */
-    public final Hitbox<T> getComponent(int id) {
+    public final Hitbox getComponent(int id) {
         return components.get(id);
     }
     
@@ -127,9 +124,9 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
      * @param hitbox The Hitbox to add as a component with the specified ID
      * @return Whether the addition occurred
      */
-    public final boolean setComponent(int id, Hitbox<T> hitbox) {
+    public final boolean setComponent(int id, Hitbox hitbox) {
         if (hitbox == null) {
-            Hitbox<T> oldHitbox = components.remove(id);
+            Hitbox oldHitbox = components.remove(id);
             if (oldHitbox != null) {
                 removeChild(oldHitbox);
                 oldHitbox.componentOf = null;
@@ -138,7 +135,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
             }
         } else if (addChild(hitbox)) {
             hitbox.componentOf = this;
-            Hitbox<T> oldHitbox = components.put(id, hitbox);
+            Hitbox oldHitbox = components.put(id, hitbox);
             if (oldHitbox == null) {
                 long x = getAbsX();
                 long y = getAbsY();
@@ -161,7 +158,7 @@ public class CompositeHitbox<T extends CellGame> extends Hitbox<T> {
      * Removes all of this CompositeHitbox's component Hitboxes from it.
      */
     public final void clearComponents() {
-        for (Hitbox<T> hitbox : components.values()) {
+        for (Hitbox hitbox : components.values()) {
             removeChild(hitbox);
         }
         components.clear();

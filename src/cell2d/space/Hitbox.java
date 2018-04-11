@@ -1,6 +1,5 @@
 package cell2d.space;
 
-import cell2d.CellGame;
 import cell2d.CellVector;
 import cell2d.Frac;
 import java.util.EnumSet;
@@ -30,18 +29,16 @@ import java.util.Set;
  * solid, but this only affects its behavior when being used as a SpaceObject's
  * solid Hitbox.</p>
  * @author Andrew Heyman
- * @param <T> The subclass of CellGame that uses the SpaceStates that can use
- * this Hitbox
  */
-public abstract class Hitbox<T extends CellGame> {
+public abstract class Hitbox {
     
-    private Hitbox<T> parent = null;
-    private final Set<Hitbox<T>> children = new HashSet<>();
-    CompositeHitbox<T> componentOf = null;
+    private Hitbox parent = null;
+    private final Set<Hitbox> children = new HashSet<>();
+    CompositeHitbox componentOf = null;
     EnumSet<Direction> solidSurfaces = EnumSet.noneOf(Direction.class);
-    private SpaceObject<T> object = null;
+    private SpaceObject object = null;
     final Set<HitboxRole> roles = EnumSet.noneOf(HitboxRole.class);
-    SpaceState<T> state = null;
+    SpaceState state = null;
     int[] cellRange = null;
     boolean scanned = false;
     int drawPriority = 0;
@@ -82,15 +79,15 @@ public abstract class Hitbox<T extends CellGame> {
      * that is not flipped or rotated.
      * @return A copy of this Hitbox
      */
-    public abstract Hitbox<T> getCopy();
+    public abstract Hitbox getCopy();
     
-    final Hitbox<T> getParent() {
+    final Hitbox getParent() {
         return parent;
     }
     
-    final boolean addChild(Hitbox<T> child) {
+    final boolean addChild(Hitbox child) {
         if (child.parent == null && child.object == null) {
-            Hitbox<T> ancestor = this;
+            Hitbox ancestor = this;
             do {
                 if (ancestor == child) {
                     return false;
@@ -105,7 +102,7 @@ public abstract class Hitbox<T extends CellGame> {
         return false;
     }
     
-    final boolean removeChild(Hitbox<T> child) {
+    final boolean removeChild(Hitbox child) {
         if (child.parent == this) {
             children.remove(child);
             child.parent = null;
@@ -130,7 +127,7 @@ public abstract class Hitbox<T extends CellGame> {
         updateAbsAngle();
         updateAbsPosition();
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateData();
             }
         }
@@ -144,7 +141,7 @@ public abstract class Hitbox<T extends CellGame> {
      * if it is not a component of one.
      * @return The CompositeHitbox that this Hitbox is a component of
      */
-    public final CompositeHitbox<T> getComponentOf() {
+    public final CompositeHitbox getComponentOf() {
         return componentOf;
     }
     
@@ -211,21 +208,21 @@ public abstract class Hitbox<T extends CellGame> {
      * SpaceObject.
      * @return This Hitbox's SpaceObject
      */
-    public final SpaceObject<T> getObject() {
+    public final SpaceObject getObject() {
         return object;
     }
     
-    final void setObject(SpaceObject<T> object) {
+    final void setObject(SpaceObject object) {
         if (object != this.object) {
             recursivelySetObject(object);
         }
     }
     
-    private void recursivelySetObject(SpaceObject<T> object) {
+    private void recursivelySetObject(SpaceObject object) {
         this.object = object;
         state = (object == null ? null : object.state);
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelySetObject(object);
             }
         }
@@ -294,14 +291,14 @@ public abstract class Hitbox<T extends CellGame> {
      * Hitbox is not being used by a SpaceObject.
      * @return This Hitbox's SpaceObject's SpaceState
      */
-    public final SpaceState<T> getGameState() {
+    public final SpaceState getGameState() {
         return state;
     }
     
-    final void setGameState(SpaceState<T> state) {
+    final void setGameState(SpaceState state) {
         this.state = state;
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.setGameState(state);
             }
         }
@@ -450,7 +447,7 @@ public abstract class Hitbox<T extends CellGame> {
     private void recursivelyUpdateAbsPosition() {
         updateAbsPosition();
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsPosition();
             }
         }
@@ -483,7 +480,7 @@ public abstract class Hitbox<T extends CellGame> {
         this.relXFlip = relXFlip;
         absXFlip = (parent == null ? false : parent.absXFlip) ^ relXFlip;
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsXFlip();
             }
         }
@@ -498,7 +495,7 @@ public abstract class Hitbox<T extends CellGame> {
         relXFlip = !relXFlip;
         absXFlip = !absXFlip;
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsXFlip();
             }
         }
@@ -529,7 +526,7 @@ public abstract class Hitbox<T extends CellGame> {
         absXFlip = parent.absXFlip ^ relXFlip;
         updateAbsPosition();
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsXFlip();
             }
         }
@@ -563,7 +560,7 @@ public abstract class Hitbox<T extends CellGame> {
         this.relYFlip = relYFlip;
         absYFlip = (parent == null ? false : parent.absYFlip) ^ relYFlip;
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsYFlip();
             }
         }
@@ -609,7 +606,7 @@ public abstract class Hitbox<T extends CellGame> {
         absYFlip = parent.absYFlip ^ relYFlip;
         updateAbsPosition();
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsYFlip();
             }
         }
@@ -658,7 +655,7 @@ public abstract class Hitbox<T extends CellGame> {
         relAngleY = Frac.units(-Math.sin(radians));
         updateAbsAngle();
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsAngle();
             }
         }
@@ -728,7 +725,7 @@ public abstract class Hitbox<T extends CellGame> {
         updateAbsAngle();
         updateAbsPosition();
         if (!children.isEmpty()) {
-            for (Hitbox<T> child : children) {
+            for (Hitbox child : children) {
                 child.recursivelyUpdateAbsAngle();
             }
         }
@@ -1253,7 +1250,7 @@ public abstract class Hitbox<T extends CellGame> {
      * @param hitbox The Hitbox to check for an overlap
      * @return Whether this Hitbox overlaps the specified Hitbox
      */
-    public final boolean overlaps(Hitbox<T> hitbox) {
+    public final boolean overlaps(Hitbox hitbox) {
         return overlap(this, hitbox);
     }
     
@@ -1261,27 +1258,25 @@ public abstract class Hitbox<T extends CellGame> {
      * Returns whether the two specified Hitboxes overlap. Two Hitboxes are not
      * considered to overlap if they are both being used by the same
      * SpaceObject.
-     * @param <T> The subclass of CellGame that uses the SpaceStates that the
-     * two Hitboxes can be used by
      * @param hitbox1 The first Hitbox
      * @param hitbox2 The second Hitbox
      * @return Whether the two Hitboxes overlap
      */
-    public static <T extends CellGame> boolean overlap(Hitbox<T> hitbox1, Hitbox<T> hitbox2) {
+    public static boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
         if ((hitbox1.getObject() != hitbox2.getObject() || hitbox1.getObject() == null)
                 && hitbox1.getLeftEdge() <= hitbox2.getRightEdge()
                 && hitbox1.getRightEdge() >= hitbox2.getLeftEdge()
                 && hitbox1.getTopEdge() <= hitbox2.getBottomEdge()
                 && hitbox1.getBottomEdge() >= hitbox2.getTopEdge()) {
             if (hitbox1 instanceof CompositeHitbox) {
-                for (Hitbox<T> component : ((CompositeHitbox<T>)hitbox1).components.values()) {
+                for (Hitbox component : ((CompositeHitbox)hitbox1).components.values()) {
                     if (overlap(component, hitbox2)) {
                         return true;
                     }
                 }
                 return false;
             } else if (hitbox2 instanceof CompositeHitbox) {
-                for (Hitbox<T> component : ((CompositeHitbox<T>)hitbox2).components.values()) {
+                for (Hitbox component : ((CompositeHitbox)hitbox2).components.values()) {
                     if (overlap(hitbox1, component)) {
                         return true;
                     }
