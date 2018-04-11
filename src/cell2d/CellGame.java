@@ -111,7 +111,8 @@ public abstract class CellGame {
             Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
             fieldSysPath.setAccessible(true);
             fieldSysPath.set(null, null);
-        } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
+        } catch (IllegalAccessException | IllegalArgumentException
+                | NoSuchFieldException | SecurityException e) {
             throw new RuntimeException("Failed to load native libraries");
         }
         System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
