@@ -25,6 +25,7 @@ import java.awt.Point;
  * capacity at once. A Viewport's HUD uses the region of the screen that the
  * Viewport occupies as its rendering region.</p>
  * @see SpaceState#setViewport(int, cell2d.space.Viewport)
+ * @see HUD
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this Viewport's SpaceStates
  * @param <U> The type of SpaceState that uses this Viewport

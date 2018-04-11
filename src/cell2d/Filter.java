@@ -9,6 +9,8 @@ import java.awt.image.BufferedImage;
  * in a set of Filters that is provided to a Sprite or SpriteSheet upon its
  * creation, allowing that Sprite or that SpriteSheet's Sprites to be drawn to
  * a Graphics context using that Filter.</p>
+ * @see Sprite
+ * @see SpriteSheet
  * @author Andrew Heyman
  */
 public abstract class Filter {

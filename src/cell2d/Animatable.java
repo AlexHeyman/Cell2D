@@ -8,6 +8,7 @@ package cell2d;
  * own duration in fracunits. Durations of 0 or less are interpreted as
  * infinite. An Animatable object that is not an Animation has exactly one
  * frame, namely itself, with a duration of 0.</p>
+ * @see Animation
  * @author Andrew Heyman
  */
 public interface Animatable {

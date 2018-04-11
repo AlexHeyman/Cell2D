@@ -15,6 +15,8 @@ import org.newdawn.slick.Image;
  * Loading may take a moment, but a SpriteSheet's Sprites cannot be loaded and
  * drawn if the SpriteSheet itself is not loaded. Thus, loading a Sprite that is
  * part of a SpriteSheet will also load its SpriteSheet.</p>
+ * @see Sprite
+ * @see Filter
  * @author Andrew Heyman
  */
 public class SpriteSheet {

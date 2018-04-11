@@ -15,6 +15,9 @@ import org.newdawn.slick.Image;
  * Sprite is not loaded, it cannot be drawn. A Sprite may also be treated as an
  * Animatable with exactly one frame, namely itself, that has a duration of 0.
  * </p>
+ * @see Filter
+ * @see SpriteSheet
+ * @see Animation
  * @author Andrew Heyman
  */
 public class Sprite implements Animatable, Drawable {

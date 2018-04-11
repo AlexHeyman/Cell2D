@@ -31,6 +31,8 @@ import org.newdawn.slick.Graphics;
  * BasicGameState is an example of such a class. This allows a CellGameState's
  * Thinkers to interact with it in ways unique to its subclass of CellGameState.
  * </p>
+ * @see CellGame
+ * @see AnimationInstance
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this CellGameState
  * @param <U> The type of CellGameState that this CellGameState is for Thinker

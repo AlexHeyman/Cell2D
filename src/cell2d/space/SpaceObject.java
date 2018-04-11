@@ -60,6 +60,10 @@ import org.newdawn.slick.Graphics;
  * assigned AnimationInstances' time factors and add and remove them from
  * SpaceStates as appropriate to match its own time factor and assigned
  * SpaceState.</p>
+ * @see Hitbox
+ * @see SpaceState#addObject(cell2d.space.SpaceObject)
+ * @see #setAppearance(cell2d.Drawable)
+ * @see Area
  * @author Andrew Heyman
  */
 public abstract class SpaceObject {

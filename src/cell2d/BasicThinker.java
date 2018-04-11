@@ -4,6 +4,7 @@ package cell2d;
  * <p>A BasicThinker is a type of Thinker that is used by BasicGameStates, which
  * have no special capabilities. It does not automatically share any custom
  * fields or methods between itself and its CellGameStates.</p>
+ * @see BasicGameState
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this BasicThinker's BasicGameStates
  */

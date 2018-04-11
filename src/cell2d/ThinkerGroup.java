@@ -20,6 +20,7 @@ import java.util.TreeSet;
  * been completed. Multiple delayed instructions may be successfully given to
  * ThinkerGroups regarding the same Thinker without having to wait until all
  * iterations have finished.</p>
+ * @see Thinker
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this ThinkerGroup's Thinkers'
  * CellGameStates

@@ -9,6 +9,8 @@ import java.util.Collection;
  * SpaceState's space. Areas are loaded about a specified origin point, and the
  * positions of an Area's SpaceObjects are changed upon addition to their new
  * SpaceState to be relative to this origin.</p>
+ * @see SpaceObject
+ * @see SpaceState
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses the SpaceStates that can load this
  * Area

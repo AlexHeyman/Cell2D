@@ -77,6 +77,8 @@ import org.newdawn.slick.util.Log;
  * tracks assigned to the greatest priority in the stack will play at any given
  * time. If a currently playing Music track finishes, it will automatically be
  * removed from the top of the music stack.</p>
+ * @see CellGameState
+ * @see Music
  * @author Andrew Heyman
  */
 public abstract class CellGame {

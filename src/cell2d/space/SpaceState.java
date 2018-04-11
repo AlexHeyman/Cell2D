@@ -58,6 +58,15 @@ import org.newdawn.slick.Graphics;
  * the solid surfaces of SpaceObjects in its path if it has Cell2D's standard
  * collision mechanics enabled.</p>
  * 
+ * <p>Viewports may be assigned to one SpaceState each with an integer ID in
+ * the context of that SpaceState. Only one Viewport may be assigned to a
+ * given SpaceState with a given ID at once.</p>
+ * 
+ * <p>HUDs may be assigned to a SpaceState to render visuals in front of the
+ * SpaceState's own. Only one HUD may be assigned to a given SpaceState in this
+ * capacity at once. A SpaceState's HUD uses the entire screen as its rendering
+ * region.</p>
+ * 
  * <p>SpaceLayers may be assigned to a SpaceState with an integer ID in the
  * context of that SpaceState. Only one SpaceLayer may be assigned to a given
  * SpaceState with a given ID at once. SpaceLayers with higher IDs are rendered
@@ -65,15 +74,11 @@ import org.newdawn.slick.Graphics;
  * in front of the SpaceState's SpaceObjects, and SpaceLayers with negative IDs
  * are rendered behind its SpaceObjects. SpaceLayers may not be assigned with an
  * ID of 0.</p>
- * 
- * <p>HUDs may be assigned to a SpaceState to render visuals in front of the
- * SpaceState's own. Only one HUD may be assigned to a given SpaceState in this
- * capacity at once. A SpaceState's HUD uses the entire screen as its rendering
- * region.</p>
- * 
- * <p>Viewports may be assigned to one SpaceState each with an integer ID in
- * the context of that SpaceState. Only one Viewport may be assigned to a
- * given SpaceState with a given ID at once.</p>
+ * @see SpaceThinker
+ * @see SpaceObject
+ * @see Viewport
+ * @see HUD
+ * @see SpaceLayer
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this SpaceState
  * @param <U> The type of SpaceState that this SpaceState is for SpaceThinker
@@ -174,9 +179,9 @@ public abstract class SpaceState<T extends CellGame, U extends SpaceState<T,U,V>
     private int cellTop = 0;
     private int cellBottom = 0;
     private DrawMode drawMode;
-    private final SortedMap<Integer,SpaceLayer> spaceLayers = new TreeMap<>();
-    private HUD hud = null;
     private final Map<Integer,Viewport<T,U>> viewports = new HashMap<>();
+    private HUD hud = null;
+    private final SortedMap<Integer,SpaceLayer> spaceLayers = new TreeMap<>();
     
     /**
      * Creates a new SpaceState of the specified CellGame with the specified ID.
@@ -1845,74 +1850,6 @@ public abstract class SpaceState<T extends CellGame, U extends SpaceState<T,U,V>
     }
     
     /**
-     * Returns the number of SpaceLayers that are assigned to this SpaceState.
-     * @return The number of SpaceLayers that are assigned to this SpaceState
-     */
-    public final int getNumLayers() {
-        return spaceLayers.size();
-    }
-    
-    /**
-     * Returns the SpaceLayer that is assigned to this SpaceState with the
-     * specified ID.
-     * @param id The ID of the SpaceLayer to be returned
-     * @return The SpaceLayer that is assigned to this SpaceState with the
-     * specified ID
-     */
-    public final SpaceLayer getLayer(int id) {
-        return spaceLayers.get(id);
-    }
-    
-    /**
-     * Sets the SpaceLayer that is assigned to this SpaceState with the
-     * specified ID to the specified SpaceLayer. If there is already a
-     * SpaceLayer assigned with the specified ID, it will be removed from this
-     * SpaceState. If the specified SpaceLayer is null, the SpaceLayer with the
-     * specified ID will be removed if there is one, but it will not be replaced
-     * with anything.
-     * @param id The ID with which to assign the specified SpaceLayer
-     * @param layer The SpaceLayer to add with the specified ID
-     */
-    public final void setLayer(int id, SpaceLayer layer) {
-        if (id == 0) {
-            throw new RuntimeException("Attempted to set a SpaceLayer with an ID of 0");
-        }
-        if (layer == null) {
-            spaceLayers.remove(id);
-        } else {
-            spaceLayers.put(id, layer);
-        }
-    }
-    
-    /**
-     * Removes from this SpaceState all SpaceLayers that are currently assigned
-     * to it.
-     */
-    public final void clearLayers() {
-        spaceLayers.clear();
-    }
-    
-    /**
-     * Returns the HUD that is assigned to this SpaceState, or null if there is
-     * none.
-     * @return This SpaceState's HUD
-     */
-    public final HUD getHUD() {
-        return hud;
-    }
-    
-    /**
-     * Sets the HUD that is assigned to this SpaceState to the specified one. If
-     * there is already an HUD assigned to this SpaceState, it will be removed.
-     * If the specified HUD is null, the current HUD will be removed if there is
-     * one, but it will not be replaced with anything.
-     * @param hud The HUD to add
-     */
-    public final void setHUD(HUD hud) {
-        this.hud = hud;
-    }
-    
-    /**
      * Returns the number of Viewports that are assigned to this SpaceState.
      * @return The number of Viewports that are assigned to this SpaceState
      */
@@ -2022,6 +1959,74 @@ public abstract class SpaceState<T extends CellGame, U extends SpaceState<T,U,V>
             }
         }
         return false;
+    }
+    
+    /**
+     * Returns the HUD that is assigned to this SpaceState, or null if there is
+     * none.
+     * @return This SpaceState's HUD
+     */
+    public final HUD getHUD() {
+        return hud;
+    }
+    
+    /**
+     * Sets the HUD that is assigned to this SpaceState to the specified one. If
+     * there is already an HUD assigned to this SpaceState, it will be removed.
+     * If the specified HUD is null, the current HUD will be removed if there is
+     * one, but it will not be replaced with anything.
+     * @param hud The HUD to add
+     */
+    public final void setHUD(HUD hud) {
+        this.hud = hud;
+    }
+    
+    /**
+     * Returns the number of SpaceLayers that are assigned to this SpaceState.
+     * @return The number of SpaceLayers that are assigned to this SpaceState
+     */
+    public final int getNumLayers() {
+        return spaceLayers.size();
+    }
+    
+    /**
+     * Returns the SpaceLayer that is assigned to this SpaceState with the
+     * specified ID.
+     * @param id The ID of the SpaceLayer to be returned
+     * @return The SpaceLayer that is assigned to this SpaceState with the
+     * specified ID
+     */
+    public final SpaceLayer getLayer(int id) {
+        return spaceLayers.get(id);
+    }
+    
+    /**
+     * Sets the SpaceLayer that is assigned to this SpaceState with the
+     * specified ID to the specified SpaceLayer. If there is already a
+     * SpaceLayer assigned with the specified ID, it will be removed from this
+     * SpaceState. If the specified SpaceLayer is null, the SpaceLayer with the
+     * specified ID will be removed if there is one, but it will not be replaced
+     * with anything.
+     * @param id The ID with which to assign the specified SpaceLayer
+     * @param layer The SpaceLayer to add with the specified ID
+     */
+    public final void setLayer(int id, SpaceLayer layer) {
+        if (id == 0) {
+            throw new RuntimeException("Attempted to set a SpaceLayer with an ID of 0");
+        }
+        if (layer == null) {
+            spaceLayers.remove(id);
+        } else {
+            spaceLayers.put(id, layer);
+        }
+    }
+    
+    /**
+     * Removes from this SpaceState all SpaceLayers that are currently assigned
+     * to it.
+     */
+    public final void clearLayers() {
+        spaceLayers.clear();
     }
     
     private boolean areRelated(MobileObject object1, MobileObject object2) {

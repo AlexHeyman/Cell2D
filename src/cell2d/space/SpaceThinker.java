@@ -8,6 +8,8 @@ import java.util.Iterator;
  * <p>A SpaceThinker is the type of Thinker that is used by SpaceStates. A
  * SpaceThinker can take beforeMovementActions() every frame before its
  * SpaceState moves its assigned MobileObjects.</p>
+ * @see SpaceState
+ * @see ThinkerObject
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this SpaceThinker's SpaceStates
  * @param <U> The type of SpaceState that uses this SpaceThinker

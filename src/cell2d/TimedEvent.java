@@ -6,6 +6,7 @@ package cell2d;
  * instance within the class of the Thinker that uses it and override its
  * eventActions() method when creating it, allowing that method to easily access
  * the internal fields and methods of the Thinker.</p>
+ * @see Thinker#setTimerValue(cell2d.TimedEvent, int)
  * @author Andrew Heyman
  */
 public abstract class TimedEvent {

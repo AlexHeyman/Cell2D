@@ -28,6 +28,8 @@ import java.util.Set;
  * <p>A Hitbox stores information on whether its surfaces in each Direction are
  * solid, but this only affects its behavior when being used as a SpaceObject's
  * solid Hitbox.</p>
+ * @see SpaceObject
+ * @see CompositeHitbox
  * @author Andrew Heyman
  */
 public abstract class Hitbox {

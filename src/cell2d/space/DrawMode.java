@@ -3,6 +3,8 @@ package cell2d.space;
 /**
  * <p>A DrawMode is a procedure by which a SpaceState determines the order in
  * which to draw SpaceObjects with the same draw priority over one another.</p>
+ * @see SpaceState
+ * @see SpaceObject
  * @author Andrew Heyman
  */
 public enum DrawMode {

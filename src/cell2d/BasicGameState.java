@@ -5,6 +5,7 @@ package cell2d;
  * have no special capabilities. It is designed to be easily extended by types
  * of CellGameStates that do not require custom fields or methods to be
  * automatically shared between themselves and their Thinkers.</p>
+ * @see BasicThinker
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this BasicGameState
  */

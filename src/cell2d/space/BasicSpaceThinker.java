@@ -7,6 +7,8 @@ import cell2d.CellGame;
  * BasicSpaceStates, which have no special capabilities. It does not
  * automatically share any custom fields or methods between itself and its
  * SpaceStates.</p>
+ * @see BasicSpaceState
+ * @see BasicThinkerObject
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this BasicSpaceThinker's
  * BasicSpaceStates

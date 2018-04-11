@@ -15,6 +15,7 @@ import cell2d.TimedEvent;
  * will automatically set its assigned SpaceThinker's time factor and add and
  * remove it from SpaceStates that can use it as appropriate to match the
  * ThinkerObject's own time factor and assigned SpaceState.</p>
+ * @see SpaceThinker
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this ThinkerObject's SpaceThinker's
  * SpaceStates

@@ -37,6 +37,7 @@ import org.newdawn.slick.Graphics;
  * 
  * <p>All operations on an AnimationInstance return the AnimationInstance itself
  * to allow operations to be easily strung together.</p>
+ * @see CellGameState
  * @author Andrew Heyman
  */
 public class AnimationInstance implements Drawable {

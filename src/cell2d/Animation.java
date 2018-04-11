@@ -24,6 +24,8 @@ import java.util.Arrays;
  * 
  * <p>All of Animation's constructors treat a null Animatable as equivalent to
  * Sprite.BLANK, and thus no frame of an Animation may be null.</p>
+ * @see Animatable
+ * @see Sprite
  * @author Andrew Heyman
  */
 public class Animation implements Animatable {
