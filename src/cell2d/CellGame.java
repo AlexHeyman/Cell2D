@@ -4,8 +4,8 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1369,16 +1369,15 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns the Set of Music tracks that are assigned to the specified
-     * priority in this CellGame's music stack, or an empty Set if the music
-     * stack is empty. Changes to the returned Set will not be reflected in the
-     * music stack.
+     * Returns an unmodifiable Set view of the Music tracks that are assigned to
+     * the specified priority in this CellGame's music stack, or an unmodifiable
+     * empty Set if the music stack is empty.
      * @param priority The priority of the Music tracks to return
      * @return The Set of Music tracks assigned to the specified priority
      */
     public final Set<Music> getMusicTracks(int priority) {
         Map<Music,MusicInstance> musics = musicStack.get(priority);
-        return (musics == null ? new HashSet<>() : new HashSet<>(musics.keySet()));
+        return (musics == null ? Collections.emptySet() : Collections.unmodifiableSet(musics.keySet()));
     }
     
     /**

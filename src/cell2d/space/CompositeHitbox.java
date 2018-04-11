@@ -1,6 +1,7 @@
 package cell2d.space;
 
 import cell2d.CellVector;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,13 +92,12 @@ public class CompositeHitbox extends Hitbox {
     }
     
     /**
-     * Returns all of this CompositeHitbox's components as values in a Map with
-     * their respective IDs as keys. Changes to the returned Map will not be
-     * reflected in this CompositeHitbox.
+     * Returns an unmodifiable Map to this CompositeHitbox's components from
+     * their respective IDs.
      * @return A Map to this CompositeHitbox's components from their IDs
      */
     public final Map<Integer,Hitbox> getComponents() {
-        return new HashMap<>(components);
+        return Collections.unmodifiableMap(components);
     }
     
     /**

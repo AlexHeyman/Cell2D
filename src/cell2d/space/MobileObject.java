@@ -2,6 +2,7 @@ package cell2d.space;
 
 import cell2d.CellVector;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -341,12 +342,11 @@ public abstract class MobileObject extends SpaceObject {
     }
     
     /**
-     * Returns the Set of this MobileObject's followers. Changes to the returned
-     * Set will not be reflected in this MobileObject.
+     * Returns an unmodifiable Set view of this MobileObject's followers.
      * @return The Set of this MobileObject's followers
      */
     public final Set<MobileObject> getFollowers() {
-        return new HashSet<>(followers);
+        return Collections.unmodifiableSet(followers);
     }
     
     /**
@@ -643,14 +643,13 @@ public abstract class MobileObject extends SpaceObject {
     }
     
     /**
-     * Returns the Set of the Directions in which this MobileObject collided
-     * with solid surfaces during its last movement. Changes to the returned set
-     * will not be reflected in this MobileObject.
+     * Returns an unmodifiable Set view of the Directions in which this
+     * MobileObject collided with solid surfaces during its last movement.
      * @return The Set of the Directions in which this MobileObject collided
      * with solid surfaces during its last movement
      */
     public final Set<Direction> getCollisionDirections() {
-        return EnumSet.copyOf(collisionDirections);
+        return Collections.unmodifiableSet(collisionDirections);
     }
     
     /**

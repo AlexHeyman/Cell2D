@@ -1,6 +1,7 @@
 package cell2d;
 
 import java.awt.image.BufferedImage;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -312,14 +313,13 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Returns the Set of Filters that will have an effect on this Sprite when
-     * applied to it with draw(). Changes to the returned Set will not be
-     * reflected in this Sprite.
+     * Returns an unmodifiable Set view of the Filters that will have an effect
+     * on this Sprite when applied to it with draw().
      * @return The Set of Filters that will have an effect on this Sprite when
      * applied to it with draw()
      */
     public final Set<Filter> getFilters() {
-        return (filters == null ? new HashSet<>() : new HashSet<>(filters));
+        return (filters == null ? Collections.emptySet() : Collections.unmodifiableSet(filters));
     }
     
     /**
