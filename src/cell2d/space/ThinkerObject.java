@@ -38,20 +38,13 @@ public abstract class ThinkerObject<T extends CellGame, U extends SpaceState<T,U
      */
     public ThinkerObject() {}
     
-    private U stateIfCompatible(SpaceState state) {
-        if (state.getGameClass() == getGameClass()
-                && state.getGameClass() == getGameClass()
-                && state.getGameClass() == getGameClass()) {
-            return (U)state;
-        }
-        return null;
-    }
-    
     @Override
     void addNonCellData() {
         super.addNonCellData();
-        compatibleState = stateIfCompatible(state);
-        if (compatibleState != null) {
+        if (state.getGameClass() == getGameClass()
+                && state.getStateClass() == getStateClass()
+                && state.getThinkerClass() == getThinkerClass()) {
+            compatibleState = (U)state;
             compatibleState.addThinker(thinker);
         }
     }
