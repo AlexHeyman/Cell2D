@@ -47,7 +47,8 @@ public class SpriteSheet {
      * @param originX The x-coordinate in pixels on each Sprite of its origin
      * @param originY The y-coordinate in pixels on each Sprite of its origin
      * @param filters The Set of Filters that will have an effect on this
-     * SpriteSheet's Sprites when applied to them with draw()
+     * SpriteSheet's Sprites when applied to them with draw(), or null if no
+     * Filters should have an effect
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(String path, int width, int height, int spriteWidth, int spriteHeight,
@@ -70,7 +71,8 @@ public class SpriteSheet {
      * @param transColor The transparent color of this SpriteSheet's Sprites, or
      * null if there should be none
      * @param filters The Set of Filters that will have an effect on this
-     * SpriteSheet's Sprites when applied to them with draw()
+     * SpriteSheet's Sprites when applied to them with draw(), or null if no
+     * Filters should have an effect
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(String path, int width, int height,
@@ -98,7 +100,8 @@ public class SpriteSheet {
      * @param transB The B value (0-255) of this SpriteSheet's Sprites'
      * transparent color
      * @param filters The Set of Filters that will have an effect on this
-     * SpriteSheet's Sprites when applied to them with draw()
+     * SpriteSheet's Sprites when applied to them with draw(), or null if no
+     * Filters should have an effect
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(String path, int width, int height,
