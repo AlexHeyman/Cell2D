@@ -438,11 +438,7 @@ public class CellVector {
      * CellVector
      */
     public final double angleTo(CellVector point) {
-        double angle = Math.toDegrees(Math.atan2(y - point.y, point.x - x)) % 360;
-        if (angle < 0) {
-            angle += 360;
-        }
-        return angle;
+        return angleBetween(x, y, point.x, point.y);
     }
     
     /**
