@@ -33,7 +33,7 @@ public class SpriteSheet {
     private int width = 0;
     private int height = 0;
     private final Sprite[][] sprites;
-    private final Sprite[] spriteList;
+    private int numSpritesLoaded = 0;
     
     /**
      * Creates a new SpriteSheet from an image file.
@@ -141,14 +141,10 @@ public class SpriteSheet {
         this.originX = originX;
         this.originY = originY;
         sprites = new Sprite[width][height];
-        spriteList = new Sprite[width*height];
-        int i = 0;
         for (int x = 0; x < sprites.length; x++) {
             Sprite[] column = sprites[x];
             for (int y = 0; y < column.length; y++) {
-                spriteList[i] = new Sprite(this);
-                column[y] = spriteList[i];
-                i++;
+                column[y] = new Sprite(this);
             }
         }
         if (load) {
@@ -180,9 +176,12 @@ public class SpriteSheet {
                 gameImage = basedFilter.getFilteredImage(basedOn.bufferedImage);
             }
             bufferedImage = gameImage.getBufferedImage();
-            for (Sprite sprite : spriteList) {
-                sprite.loaded = true;
+            for (Sprite[] column : sprites) {
+                for (Sprite sprite : column) {
+                    sprite.loaded = true;
+                }
             }
+            numSpritesLoaded = width*height;
             loadFilter(null, gameImage.getImage());
             if (filters != null) {
                 for (Filter filter : filters) {
@@ -215,26 +214,28 @@ public class SpriteSheet {
         if (loaded) {
             loaded = false;
             bufferedImage = null;
-            for (Sprite sprite : spriteList) {
-                sprite.loaded = false;
-                sprite.clear();
+            for (Sprite[] column : sprites) {
+                for (Sprite sprite : column) {
+                    sprite.loaded = false;
+                    sprite.clear();
+                }
             }
+            numSpritesLoaded = 0;
             return true;
         }
         return false;
     }
     
-    final void tryUnload() {
-        for (Sprite sprite : spriteList) {
-            if (sprite.loaded) {
-                return;
+    final void unloadSprite() {
+        numSpritesLoaded--;
+        if (numSpritesLoaded == 0) {
+            loaded = false;
+            bufferedImage = null;
+            for (Sprite[] column : sprites) {
+                for (Sprite sprite : column) {
+                    sprite.clear();
+                }
             }
-        }
-        loaded = false;
-        bufferedImage = null;
-        for (Sprite sprite : spriteList) {
-            sprite.loaded = false;
-            sprite.clear();
         }
     }
     

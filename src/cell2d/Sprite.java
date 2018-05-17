@@ -258,7 +258,7 @@ public class Sprite implements Animatable, Drawable {
         if (blank || !loaded) {
             return false;
         } else if (spriteSheet != null) {
-            spriteSheet.tryUnload();
+            spriteSheet.unloadSprite();
         } else if (bufferedImage != null) {
             clear();
         } else {
