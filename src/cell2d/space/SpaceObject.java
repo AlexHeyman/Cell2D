@@ -16,8 +16,8 @@ import org.newdawn.slick.Graphics;
 /**
  * <p>A SpaceObject is a physical object in a SpaceState's space. SpaceObjects
  * may be assigned to one SpaceState each in much the same way that Thinkers are
- * assigned to CellGameStates. A SpaceObject's assigned SpaceState will keep
- * track of time for it and its AnimationInstances. A SpaceObject's time factor
+ * assigned to GameStates. A SpaceObject's assigned SpaceState will keep track
+ * of time for it and its AnimationInstances. A SpaceObject's time factor
  * represents the average number of discrete time units the SpaceObject will
  * experience every frame while assigned to an active SpaceState. If its own
  * time factor is negative, a SpaceObject will use its assigned SpaceState's
@@ -53,8 +53,8 @@ import org.newdawn.slick.Graphics;
  * SpaceObjects with higher draw priorities are drawn in front of those with
  * lower ones.</p>
  * 
- * <p>If an AnimationInstance is not already assigned to a CellGameState, it
- * may be assigned to a SpaceObject with an integer ID in the context of that
+ * <p>If an AnimationInstance is not already assigned to a GameState, it may be
+ * assigned to a SpaceObject with an integer ID in the context of that
  * SpaceObject. Only one AnimationInstance may be assigned to a given
  * SpaceObject with a given ID at once. A SpaceObject will automatically set its
  * assigned AnimationInstances' time factors and add and remove them from
@@ -1044,7 +1044,7 @@ public abstract class SpaceObject {
     /**
      * Sets the AnimationInstance that is assigned to this SpaceObject with the
      * specified ID to the specified AnimationInstance, if it is not already
-     * assigned to a CellGameState. If there is already an AnimationInstance
+     * assigned to a GameState. If there is already an AnimationInstance
      * assigned with the specified ID, it will be removed from this SpaceObject.
      * @param id The ID with which to assign the specified AnimationInstance
      * @param instance The AnimationInstance to add with the specified ID
@@ -1075,7 +1075,7 @@ public abstract class SpaceObject {
     /**
      * Sets both this SpaceObject's appearance and its AnimationInstance with ID
      * 0 to the specified AnimationInstance, if it is not already assigned to a
-     * CellGameState.
+     * GameState.
      * @param instance The new appearance and AnimationInstance with ID 0
      * @return Whether the change occurred
      */

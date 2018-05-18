@@ -8,22 +8,22 @@ import java.util.Map;
 
 /**
  * <p>A Thinker is a collection of methods that contributes to the mechanics of
- * the CellGameState to which it is assigned. A Thinker is also a ThinkerGroup,
+ * the GameState to which it is assigned. A Thinker is also a ThinkerGroup,
  * which means that Thinkers may be directly assigned to one other Thinker each.
- * A Thinker is considered indirectly assigned to a CellGameState if it is
- * assigned to another Thinker that is itself assigned to the CellGameState,
- * directly or indirectly.</p>
+ * A Thinker is considered indirectly assigned to a GameState if it is assigned
+ * to another Thinker that is itself assigned to the GameState, directly or
+ * indirectly.</p>
  * 
- * <p>A Thinker's assigned CellGameState will keep track of time for it, thus
- * allowing it to take its own time-dependent actions, while the CellGameState
- * is active. A Thinker's time factor represents the average number of discrete
+ * <p>A Thinker's assigned GameState will keep track of time for it, thus
+ * allowing it to take its own time-dependent actions, while the GameState is
+ * active. A Thinker's time factor represents the average number of discrete
  * time units the Thinker will experience every frame while directly assigned to
- * an active CellGameState. If its own time factor is negative, a Thinker will
- * use its assigned CellGameState's time factor instead. If a Thinker is
- * indirectly assigned to an active CellGameState, it will use the time factor
- * of the Thinker that it is assigned to that is directly assigned to the
- * CellGameState. If a Thinker is assigned to an inactive CellGameState or none
- * at all, time will not pass for it.</p>
+ * an active GameState. If its own time factor is negative, a Thinker will use
+ * its assigned GameState's time factor instead. If a Thinker is indirectly
+ * assigned to an active GameState, it will use the time factor of the Thinker
+ * that it is assigned to that is directly assigned to the GameState. If a
+ * Thinker is assigned to an inactive GameState or none at all, time will not
+ * pass for it.</p>
  * 
  * <p>A Thinker's action priority determines when it will take time-dependent
  * actions, such as timeUnitActions() or frameActions(), relative to the other
@@ -43,22 +43,21 @@ import java.util.Map;
  * have reached 0 are performed.</p>
  * 
  * <p>The Thinker class is intended to be directly extended by classes V that
- * extend Thinker&lt;T,U,V&gt; and interact with CellGameStates of class U.
+ * extend Thinker&lt;T,U,V&gt; and interact with GameStates of class U.
  * BasicThinker is an example of such a class. This allows a Thinker's
- * CellGameStates to interact with it in ways unique to its subclass of Thinker.
- * </p>
+ * GameStates to interact with it in ways unique to its subclass of Thinker.</p>
  * 
  * <p>It is useful to implicitly extend subclasses of Thinker to override their
  * methods for single instances without creating completely new class files.</p>
  * @see Event
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses this Thinker's CellGameStates
- * @param <U> The type of CellGameState that uses this Thinker
- * @param <V> The type of Thinker that this Thinker is for CellGameState
- * interaction purposes
+ * @param <T> The type of CellGame that uses this Thinker's GameStates
+ * @param <U> The type of GameState that uses this Thinker
+ * @param <V> The type of Thinker that this Thinker is for GameState interaction
+ * purposes
  */
-public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>,
-        V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
+public abstract class Thinker<T extends CellGame,
+        U extends GameState<T,U,V>, V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
     
     private final V thisThinker;
     ThinkerGroup<T,U,V> group = null;
@@ -74,14 +73,14 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     /**
      * Creates a new Thinker.
      * @param gameClass The Class object representing the subclass of CellGame
-     * that uses this Thinker's CellGameStates
-     * @param stateClass The Class object representing the subclass of
-     * CellGameState that uses this Thinker
+     * that uses this Thinker's GameStates
+     * @param stateClass The Class object representing the subclass of GameState
+     * that uses this Thinker
      * @param thinkerClass The Class object representing the subclass of Thinker
-     * that this Thinker is for CellGameState interaction purposes
+     * that this Thinker is for GameState interaction purposes
      */
     public Thinker(Class<? extends CellGame> gameClass,
-            Class<? extends CellGameState> stateClass, Class<? extends Thinker> thinkerClass) {
+            Class<? extends GameState> stateClass, Class<? extends Thinker> thinkerClass) {
         super(gameClass, stateClass, thinkerClass);
         thisThinker = (V)this;
     }
@@ -132,19 +131,18 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     }
     
     /**
-     * Returns the CellGame of the CellGameState to which this Thinker is
-     * directly or indirectly assigned, or null if it is not assigned to a
-     * CellGameState.
-     * @return This Thinker's CellGameState's CellGame
+     * Returns the CellGame of the GameState to which this Thinker is directly
+     * or indirectly assigned, or null if it is not assigned to a GameState.
+     * @return This Thinker's GameState's CellGame
      */
     public final T getGame() {
         return game;
     }
     
     /**
-     * Returns the CellGameState to which this Thinker is directly or indirectly
+     * Returns the GameState to which this Thinker is directly or indirectly
      * assigned, or null if it is not assigned to one.
-     * @return The CellGameState to which this Thinker is assigned
+     * @return The GameState to which this Thinker is assigned
      */
     public final U getGameState() {
         return state;
@@ -172,7 +170,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     /**
      * Returns this Thinker's effective time factor; that is, the average number
      * of time units it experiences every frame. If it is not directly or
-     * indirectly assigned to a CellGameState, this will be 0.
+     * indirectly assigned to a GameState, this will be 0.
      * @return This Thinker's effective time factor
      */
     public final long getEffectiveTimeFactor() {
@@ -263,9 +261,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     /**
      * Actions for this Thinker to take after being added to a new ThinkerGroup,
      * immediately after the ThinkerGroup takes its addThinkerActions().
-     * @param game This Thinker's CellGameState's CellGame, or null if it has no
-     * CellGameState
-     * @param state This Thinker's CellGameState, or null if it has none
+     * @param game This Thinker's GameState's CellGame, or null if it has no
+     * GameState
+     * @param state This Thinker's GameState, or null if it has none
      */
     public void addedActions(T game, U state) {}
     
@@ -277,9 +275,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
      * Actions for this Thinker to take before being removed from its current
      * ThinkerGroup, immediately before the ThinkerGroup takes its
      * removeThinkerActions().
-     * @param game This Thinker's CellGameState's CellGame, or null if it has no
-     * CellGameState
-     * @param state This Thinker's CellGameState, or null if it has none
+     * @param game This Thinker's GameState's CellGame, or null if it has no
+     * GameState
+     * @param state This Thinker's GameState, or null if it has none
      */
     public void removedActions(T game, U state) {}
     
@@ -323,10 +321,10 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     /**
      * Actions for this Thinker to take once every time unit, after
-     * AnimationInstances update their indices but before its CellGameState
-     * takes its frameActions().
-     * @param game This Thinker's CellGameState's CellGame
-     * @param state This Thinker's CellGameState
+     * AnimationInstances update their indices but before its GameState takes
+     * its frameActions().
+     * @param game This Thinker's GameState's CellGame
+     * @param state This Thinker's GameState
      */
     public void timeUnitActions(T game, U state) {}
     
@@ -341,10 +339,10 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     }
     
     /**
-     * Actions for this Thinker to take once every frame after its CellGameState
+     * Actions for this Thinker to take once every frame after its GameState
      * takes its own frameActions().
-     * @param game This Thinker's CellGameState's CellGame
-     * @param state This Thinker's CellGameState
+     * @param game This Thinker's GameState's CellGame
+     * @param state This Thinker's GameState
      */
     public void frameActions(T game, U state) {}
     
@@ -357,9 +355,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     /**
      * Actions for this Thinker to take immediately after adding a Thinker to
      * itself, before the added Thinker takes its addedActions().
-     * @param game This Thinker's CellGameState's CellGame, or null if it has no
-     * CellGameState
-     * @param state This Thinker's CellGameState, or null if it has none
+     * @param game This Thinker's GameState's CellGame, or null if it has no
+     * GameState
+     * @param state This Thinker's GameState, or null if it has none
      * @param thinker The Thinker that was added
      */
     public final void addThinkerActions(T game, U state, V thinker) {}
@@ -374,9 +372,9 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
      * Actions for this ThinkerGroup to take immediately before removing a
      * Thinker from itself, after the soon-to-be-removed Thinker takes its
      * removedActions().
-     * @param game This Thinker's CellGameState's CellGame, or null if it has no
-     * CellGameState
-     * @param state This Thinker's CellGameState, or null if it has none
+     * @param game This Thinker's GameState's CellGame, or null if it has no
+     * GameState
+     * @param state This Thinker's GameState, or null if it has none
      * @param thinker The Thinker that is about to be removed
      */
     public final void removeThinkerActions(T game, U state, V thinker) {}

@@ -25,19 +25,19 @@ import org.newdawn.slick.Graphics;
  * AnimationInstance are the same ones as when the Sprite is drawn by itself.
  * </p>
  * 
- * <p>AnimationInstances keep track of time by being added to one CellGameState
+ * <p>AnimationInstances keep track of time by being added to one GameState
  * each. An AnimationInstance's time factor represents the average number of
  * discrete time units the AnimationInstance will experience every frame while
- * assigned to an active CellGameState. If its own time factor is negative, an
- * AnimationInstance will use its assigned CellGameState's time factor instead.
- * If an AnimationInstance is assigned to an inactive CellGameState or none at
- * all, time will not pass for it. AnimationInstances assigned to the active
- * CellGameState update their indices at the beginning of each frame, before
+ * assigned to an active GameState. If its own time factor is negative, an
+ * AnimationInstance will use its assigned GameState's time factor instead. If
+ * an AnimationInstance is assigned to an inactive GameState or none at all,
+ * time will not pass for it. AnimationInstances assigned to the active
+ * GameState update their indices at the beginning of each frame, before
  * Thinkers' timeUnitActions() are taken.</p>
  * 
  * <p>All operations on an AnimationInstance return the AnimationInstance itself
  * to allow operations to be easily strung together.</p>
- * @see CellGameState
+ * @see GameState
  * @author Andrew Heyman
  */
 public class AnimationInstance implements Drawable {
@@ -48,7 +48,7 @@ public class AnimationInstance implements Drawable {
     public static final AnimationInstance BLANK = new AnimationInstance();
     
     private final boolean blank;
-    CellGameState state = null;
+    GameState state = null;
     private long timeFactor = -1;
     private final Animation animation;
     private final int level;
@@ -104,23 +104,23 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Returns the CellGameState to which this AnimationInstance is assigned, or
+     * Returns the GameState to which this AnimationInstance is assigned, or
      * null if it is not assigned to one.
-     * @return The CellGameState to which this AnimationInstance is assigned
+     * @return The GameState to which this AnimationInstance is assigned
      */
-    public final CellGameState getGameState() {
+    public final GameState getGameState() {
         return state;
     }
     
     /**
-     * Sets the CellGameState to which this AnimationInstance is assigned. If it
-     * is set to a null CellGameState, this AnimationInstance will be removed
-     * from its current CellGameState if it has one.
-     * @param state The CellGameState to which this AnimationInstance should be
+     * Sets the GameState to which this AnimationInstance is assigned. If it is
+     * set to a null GameState, this AnimationInstance will be removed from its
+     * current GameState if it has one.
+     * @param state The GameState to which this AnimationInstance should be
      * assigned
      * @return This AnimationInstance
      */
-    public final AnimationInstance setGameState(CellGameState state) {
+    public final AnimationInstance setGameState(GameState state) {
         if (this.state != null) {
             this.state.removeAnimInstance(this);
         }
@@ -141,7 +141,7 @@ public class AnimationInstance implements Drawable {
     /**
      * Returns this AnimationInstance's effective time factor; that is, the
      * average number of time units it experiences every frame. If it is not
-     * assigned to a CellGameState, this will be 0.
+     * assigned to a GameState, this will be 0.
      * @return This AnimationInstance's effective time factor
      */
     public final long getEffectiveTimeFactor() {

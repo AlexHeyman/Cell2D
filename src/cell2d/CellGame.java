@@ -39,14 +39,14 @@ import org.newdawn.slick.util.Log;
  * second, a CellGame executes a frame, in which it processes input, updates the
  * logic of the game, and renders visuals.</p>
  * 
- * <p>A CellGame has one or more CellGameStates, each with a non-negative
- * integer ID that is unique within the CellGame. A CellGame is in exactly one
- * of these CellGameStates at any given time, and can transition between them.
- * Each CellGameState has its own actions to take every frame and in response to
- * specific events, but it only takes these actions while the CellGame is in
- * that state and it is thus active. If a CellGameState is created with an ID
- * that another CellGameState of the same CellGame already has, the old
- * CellGameState is replaced and can no longer be entered.</p>
+ * <p>A CellGame has one or more GameStates, each with a non-negative integer ID
+ * that is unique within the CellGame. A CellGame is in exactly one of these
+ * GameStates at any given time, and can transition between them. Each GameState
+ * has its own actions to take every frame and in response to specific events,
+ * but it only takes these actions while the CellGame is in that state and it is
+ * thus active. If a GameState is created with an ID that another GameState of
+ * the same CellGame already has, the old GameState is replaced and can no
+ * longer be entered.</p>
  * 
  * <p>A CellGame renders visuals on a rectangular grid of pixels called its
  * screen. Points on the screen have x-coordinates that increase from left to
@@ -77,7 +77,7 @@ import org.newdawn.slick.util.Log;
  * tracks assigned to the greatest priority in the stack will play at any given
  * time. If a currently playing Music track finishes, it will automatically be
  * removed from the top of the music stack.</p>
- * @see CellGameState
+ * @see GameState
  * @see Music
  * @author Andrew Heyman
  */
@@ -141,8 +141,8 @@ public abstract class CellGame {
     
     private boolean closeRequested = false;
     private final StateBasedGame game;
-    private final Map<Integer,CellGameState> states = new HashMap<>();
-    private CellGameState currentState = null;
+    private final Map<Integer,GameState> states = new HashMap<>();
+    private GameState currentState = null;
     private boolean negativeIDsOffLimits = false;
     private boolean loaded = false;
     private InputProvider provider = null;
@@ -374,7 +374,7 @@ public abstract class CellGame {
                 newMouseY = input.getMouseY();
                 initActions();
                 if (currentState == null) {
-                    throw new RuntimeException("A CellGame did not enter any of its CellGameStates during "
+                    throw new RuntimeException("A CellGame did not enter any of its GameStates during "
                             + "initialization");
                 }
                 loaded = true;
@@ -535,9 +535,9 @@ public abstract class CellGame {
     
     private class State extends BasicGameState {
         
-        private final CellGameState state;
+        private final GameState state;
         
-        private State(CellGameState state) {
+        private State(GameState state) {
             this.state = state;
         }
         
@@ -572,7 +572,7 @@ public abstract class CellGame {
         
     }
     
-    private class LoadingState extends cell2d.BasicGameState<CellGame> {
+    private class LoadingState extends cell2d.BasicState<CellGame> {
         
         private LoadingState() {
             super(CellGame.class, CellGame.this, -2);
@@ -589,58 +589,58 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns this CellGame's CellGameState with the specified ID, or null if
-     * there is none.
-     * @param id The ID of the CellGameState to return
-     * @return The CellGameState with the specified ID
+     * Returns this CellGame's GameState with the specified ID, or null if there
+     * is none.
+     * @param id The ID of the GameState to return
+     * @return The GameState with the specified ID
      */
-    public final CellGameState getState(int id) {
+    public final GameState getState(int id) {
         return (id < 0 ? null : states.get(id));
     }
     
     /**
-     * Returns the CellGameState that this CellGame is currently in - in other
-     * words, this CellGame's only active CellGameState.
-     * @return The CellGameState that this CellGame is currently in
+     * Returns the GameState that this CellGame is currently in - in other
+     * words, this CellGame's only active GameState.
+     * @return The GameState that this CellGame is currently in
      */
-    public final CellGameState getCurrentState() {
+    public final GameState getCurrentState() {
         return currentState;
     }
     
-    final void addState(CellGameState state) {
+    final void addState(GameState state) {
         int id = state.getID();
         if (id < 0 && negativeIDsOffLimits) {
-            throw new RuntimeException("Attempted to add a CellGameState with negative ID " + id);
+            throw new RuntimeException("Attempted to add a GameState with negative ID " + id);
         }
         states.put(id, state);
         game.addState(new State(state));
     }
     
     /**
-     * Instructs this CellGame to enter its CellGameState with the specified ID
-     * at the end of the current frame. If this CellGame has no CellGameState
-     * with the specified ID, this method will do nothing.
-     * @param id The ID of the CellGameState to enter
+     * Instructs this CellGame to enter its GameState with the specified ID at
+     * the end of the current frame. If this CellGame has no GameState with the
+     * specified ID, this method will do nothing.
+     * @param id The ID of the GameState to enter
      */
     public final void enterState(int id) {
         enterState(id, null, null);
     }
     
     /**
-     * Instructs this CellGame to enter its CellGameState with the specified ID,
+     * Instructs this CellGame to enter its GameState with the specified ID,
      * using the specified Slick2D Transitions when leaving the current
-     * CellGameState and entering the new one, at the end of the current frame.
-     * If this CellGame has no CellGameState with the specified ID, this method
-     * will do nothing.
-     * @param id The ID of the CellGameState to enter
-     * @param leave The Transition to use when leaving the current CellGameState
-     * @param enter The Transition to use when entering the new CellGameState
+     * GameState and entering the new one, at the end of the current frame.
+     * If this CellGame has no GameState with the specified ID, this method will
+     * do nothing.
+     * @param id The ID of the GameState to enter
+     * @param leave The Transition to use when leaving the current GameState
+     * @param enter The Transition to use when entering the new GameState
      */
     public final void enterState(int id, Transition leave, Transition enter) {
         if (id < 0 && negativeIDsOffLimits) {
             return;
         }
-        CellGameState state = states.get(id);
+        GameState state = states.get(id);
         if (state != null) {
             currentState = state;
             game.enterState(id, leave, enter);
@@ -667,17 +667,16 @@ public abstract class CellGame {
     
     /**
      * Actions for this CellGame to take when initializing itself before
-     * entering its first state. This should include creating at least one
-     * CellGameState for it, binding default controls to its commands, loading
+     * entering its first GameState. This should include creating at least one
+     * GameState for it, binding default controls to its commands, loading
      * assets, etc. enterState() must be called during this method to tell the
-     * CellGame which CellGameState to start out in, or an Exception will be
-     * thrown.
+     * CellGame which GameState to start out in, or an Exception will be thrown.
      */
     public abstract void initActions();
     
     /**
      * Actions for this CellGame to take each frame to render visuals after its
-     * current CellGameState has finished rendering.
+     * current GameState has finished rendering.
      * @param g The Graphics context to which this CellGame is rendering its
      * visuals this frame
      * @param x1 The x-coordinate in pixels of the screen's left edge on the
@@ -764,9 +763,9 @@ public abstract class CellGame {
     /**
      * Instructs this CellGame to bind the next valid control pressed to the
      * specified command. After that control is bound, the bindFinishedActions()
-     * method of this CellGame's current CellGameState will be called. This
-     * method will throw an Exception if this CellGame is already being used to
-     * type a string.
+     * method of this CellGame's current GameState will be called. This method
+     * will throw an Exception if this CellGame is already being used to type a
+     * String.
      * @param commandNum The number of the command to which the next valid
      * control pressed should be bound
      */
@@ -1156,10 +1155,10 @@ public abstract class CellGame {
      * Instructs this CellGame to interpret all inputs as typing a String with a
      * specified maximum length until further notice. While typing, the
      * Backspace key deletes individual characters, the Delete key resets the
-     * String to the empty string, the Escape key calls cancelTypingString(),
+     * String to the empty String, the Escape key calls cancelTypingString(),
      * and the Enter key finishes the typing and calls the
-     * stringFinishedActions() method of this CellGame's current CellGameState.
-     * This method will throw an Exception if this CellGame has already been
+     * stringFinishedActions() method of this CellGame's current GameState. This
+     * method will throw an Exception if this CellGame has already been
      * instructed to bind the next control pressed to a specified command.
      * @param maxLength The maximum length in characters of the String to be
      * typed
@@ -1172,10 +1171,10 @@ public abstract class CellGame {
      * Instructs this CellGame to interpret all inputs as typing a String with a
      * specified initial value and maximum length until further notice. While
      * typing, the Backspace key deletes individual characters, the Delete key
-     * resets the String to the empty string, the Escape key calls
+     * resets the String to the empty String, the Escape key calls
      * cancelTypingString(), and the Enter key finishes the typing and calls the
-     * stringFinishedActions() method of this CellGame's current CellGameState.
-     * This method will throw an Exception if this CellGame has already been
+     * stringFinishedActions() method of this CellGame's current GameState. This
+     * method will throw an Exception if this CellGame has already been
      * instructed to bind the next control pressed to a specified command.
      * @param initialString The initial value of the String to be typed
      * @param maxLength The maximum length in characters of the String to be
@@ -1205,7 +1204,7 @@ public abstract class CellGame {
     /**
      * Instructs this CellGame to stop interpreting inputs as typing a String,
      * if it was doing so, and consider the typing canceled. This will call the
-     * stringCanceledActions() method of this CellGame's current CellGameState.
+     * stringCanceledActions() method of this CellGame's current GameState.
      */
     public final void cancelTypingString() {
         if (typingString != null) {

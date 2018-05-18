@@ -1,7 +1,7 @@
 package cell2d.space;
 
 import cell2d.CellGame;
-import cell2d.CellGameState;
+import cell2d.GameState;
 import cell2d.Event;
 import cell2d.SafeIterator;
 import cell2d.Thinker;
@@ -22,8 +22,8 @@ import cell2d.Thinker;
  * @param <U> The type of SpaceState that uses this ThinkerObject's SpaceThinker
  * @param <V> The type of SpaceThinker that this ThinkerObject mimics
  */
-public abstract class ThinkerObject<T extends CellGame, U extends SpaceState<T,U,V>,
-        V extends SpaceThinker<T,U,V>> extends MobileObject {
+public abstract class ThinkerObject<T extends CellGame,
+        U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends MobileObject {
     
     private U compatibleState = null;
     private V thinker = null;
@@ -80,7 +80,7 @@ public abstract class ThinkerObject<T extends CellGame, U extends SpaceState<T,U
      * @return The subclass of SpaceState that uses this ThinkerObject's
      * SpaceThinker
      */
-    public final Class<? extends CellGameState> getStateClass() {
+    public final Class<? extends GameState> getStateClass() {
         return thinker.getStateClass();
     }
     

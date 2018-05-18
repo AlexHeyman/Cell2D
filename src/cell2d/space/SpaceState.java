@@ -1,7 +1,7 @@
 package cell2d.space;
 
 import cell2d.CellGame;
-import cell2d.CellGameState;
+import cell2d.GameState;
 import cell2d.CellVector;
 import cell2d.Frac;
 import cell2d.SafeIterator;
@@ -28,7 +28,7 @@ import javafx.util.Pair;
 import org.newdawn.slick.Graphics;
 
 /**
- * <p>A SpaceState is a CellGameState that handles gameplay in a continuous
+ * <p>A SpaceState is a GameState that handles gameplay in a continuous
  * two-dimensional space. Space in a SpaceState is divided into rectangular
  * cells of equal width and equal height. A SpaceState automatically creates
  * more cells as SpaceObjects enter where they would be if they existed.</p>
@@ -85,8 +85,8 @@ import org.newdawn.slick.Graphics;
  * interaction purposes
  * @param <V> The type of SpaceThinker that this SpaceState uses
  */
-public abstract class SpaceState<T extends CellGame, U extends SpaceState<T,U,V>,
-        V extends SpaceThinker<T,U,V>> extends CellGameState<T,U,V> {
+public abstract class SpaceState<T extends CellGame,
+        U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends GameState<T,U,V> {
     
     private static abstract class SpaceComparator<T> implements Comparator<T>, Serializable {}
     
