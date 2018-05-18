@@ -33,14 +33,14 @@ import java.util.Map;
  * type of time-dependent actions after its assignee Thinker, but before the
  * next Thinker assigned to its assignee Thinker's ThinkerGroup.</p>
  * 
- * <p>A Thinker has timers that can activate TimedEvents after a certain number
- * of time units. Timers have integer values, with a positive value x indicating
- * that the TimedEvent will be activated in x time units, a negative value
- * indicating that the timer is not running, and a value of 0 indicating that
- * either the TimedEvent was activated or the value was deliberately set to 0
- * this time unit. Each time unit, before a Thinker takes its timeUnitActions(),
- * its non-negative timers' values are decreased by 1 and the TimedEvents whose
- * timers have reached 0 are activated.</p>
+ * <p>A Thinker has timers that can perform Events after a certain number of
+ * time units. Timers have integer values, with a positive value x indicating
+ * that the Event will be performed in x time units, a negative value indicating
+ * that the timer is not running, and a value of 0 indicating that either the
+ * Event was performed or the value was deliberately set to 0 this time unit.
+ * Each time unit, before a Thinker takes its timeUnitActions(), its
+ * non-negative timers' values are decreased by 1 and the Events whose timers
+ * have reached 0 are performed.</p>
  * 
  * <p>The Thinker class is intended to be directly extended by classes V that
  * extend Thinker&lt;T,U,V&gt; and interact with CellGameStates of class U.
@@ -51,7 +51,7 @@ import java.util.Map;
  * <p>It is useful to implicitly extend subclasses of Thinker to override their
  * methods for single instances without creating completely new class files.</p>
  * @see ThinkerGroup
- * @see TimedEvent
+ * @see Event
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this Thinker's CellGameStates
  * @param <U> The type of CellGameState that uses this Thinker
@@ -70,7 +70,7 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     private long timeToRun = 0;
     int actionPriority = 0;
     int newActionPriority = 0;
-    private final Map<TimedEvent,Integer> timers = new HashMap<>();
+    private final Map<Event,Integer> timers = new HashMap<>();
     
     /**
      * Creates a new Thinker.
@@ -232,29 +232,28 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     /**
      * Returns the current value of this Thinker's timer for the specified
-     * TimedEvent.
-     * @param timedEvent The TimedEvent whose timer value should be returned
-     * @return The current value of the timer for the specified TimedEvent
+     * Event.
+     * @param event The Event whose timer value should be returned
+     * @return The current value of the timer for the specified Event
      */
-    public final int getTimerValue(TimedEvent timedEvent) {
-        Integer value = timers.get(timedEvent);
-        return (value == null ? -1 : value);
+    public final int getTimerValue(Event event) {
+        return timers.getOrDefault(event, -1);
     }
     
     /**
-     * Sets the value of this Thinker's timer for the specified TimedEvent to
-     * the specified value.
-     * @param timedEvent The TimedEvent whose timer value should be set
-     * @param value The new value of the specified TimedEvent's timer
+     * Sets the value of this Thinker's timer for the specified Event to the
+     * specified value.
+     * @param event The Event whose timer value should be set
+     * @param value The new value of the specified Event's timer
      */
-    public final void setTimerValue(TimedEvent timedEvent, int value) {
-        if (timedEvent == null) {
-            throw new RuntimeException("Attempted to set the value of a timer for a null TimedEvent");
+    public final void setTimerValue(Event event, int value) {
+        if (event == null) {
+            throw new RuntimeException("Attempted to set the value of a timer for a null Event");
         }
         if (value < 0) {
-            timers.remove(timedEvent);
+            timers.remove(event);
         } else {
-            timers.put(timedEvent, value);
+            timers.put(event, value);
         }
     }
     
@@ -287,22 +286,22 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
     
     private void timeUnit() {
         if (!timers.isEmpty()) {
-            List<TimedEvent> timedEventsToActivate = new ArrayList<>();
-            Iterator<Map.Entry<TimedEvent,Integer>> iterator = timers.entrySet().iterator();
+            List<Event> eventsToPerform = new ArrayList<>();
+            Iterator<Map.Entry<Event,Integer>> iterator = timers.entrySet().iterator();
             while (iterator.hasNext()) {
-                Map.Entry<TimedEvent,Integer> entry = iterator.next();
+                Map.Entry<Event,Integer> entry = iterator.next();
                 int value = entry.getValue();
                 if (value == 0) {
                     iterator.remove();
                 } else {
                     if (value == 1) {
-                        timedEventsToActivate.add(entry.getKey());
+                        eventsToPerform.add(entry.getKey());
                     }
                     entry.setValue(value - 1);
                 }
             }
-            for (TimedEvent timedEvent : timedEventsToActivate) {
-                timedEvent.eventActions();
+            for (Event event : eventsToPerform) {
+                event.actions(game, state);
             }
         }
         timeUnitActions(game, state);
@@ -312,6 +311,14 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
                 Thinker<T,U,V> thinker = iterator.next();
                 thinker.timeUnit();
             }
+        }
+    }
+    
+    final void update() {
+        timeToRun += (timeFactor < 0 ? state.getTimeFactor() : timeFactor);
+        while (timeToRun >= Frac.UNIT) {
+            timeUnit();
+            timeToRun -= Frac.UNIT;
         }
     }
     
@@ -374,13 +381,5 @@ public abstract class Thinker<T extends CellGame, U extends CellGameState<T,U,V>
      * @param thinker The Thinker that is about to be removed
      */
     public final void removeThinkerActions(T game, U state, V thinker) {}
-    
-    final void update() {
-        timeToRun += (timeFactor < 0 ? state.getTimeFactor() : timeFactor);
-        while (timeToRun >= Frac.UNIT) {
-            timeUnit();
-            timeToRun -= Frac.UNIT;
-        }
-    }
     
 }

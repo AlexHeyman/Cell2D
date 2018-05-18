@@ -2,9 +2,9 @@ package cell2d.space;
 
 import cell2d.CellGame;
 import cell2d.CellGameState;
+import cell2d.Event;
 import cell2d.SafeIterator;
 import cell2d.Thinker;
-import cell2d.TimedEvent;
 
 /**
  * <p>A ThinkerObject is a MobileObject that mimics a type of SpaceThinker by
@@ -230,22 +230,22 @@ public abstract class ThinkerObject<T extends CellGame, U extends SpaceState<T,U
     
     /**
      * Returns the current value of this ThinkerObject's timer for the specified
-     * TimedEvent.
-     * @param timedEvent The TimedEvent whose timer value should be returned
-     * @return The current value of the timer for the specified TimedEvent
+     * Event.
+     * @param event The Event whose timer value should be returned
+     * @return The current value of the timer for the specified Event
      */
-    public final int getTimerValue(TimedEvent timedEvent) {
-        return thinker.getTimerValue(timedEvent);
+    public final int getTimerValue(Event event) {
+        return thinker.getTimerValue(event);
     }
     
     /**
-     * Sets the value of this ThinkerObject's timer for the specified TimedEvent
-     * to the specified value.
-     * @param timedEvent The TimedEvent whose timer value should be set
-     * @param value The new value of the specified TimedEvent's timer
+     * Sets the value of this ThinkerObject's timer for the specified Event to
+     * the specified value.
+     * @param event The Event whose timer value should be set
+     * @param value The new value of the specified Event's timer
      */
-    public final void setTimerValue(TimedEvent timedEvent, int value) {
-        thinker.setTimerValue(timedEvent, value);
+    public final void setTimerValue(Event event, int value) {
+        thinker.setTimerValue(event, value);
     }
     
 }
