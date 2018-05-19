@@ -49,6 +49,7 @@ import java.util.Map;
  * 
  * <p>It is useful to implicitly extend subclasses of Thinker to override their
  * methods for single instances without creating completely new class files.</p>
+ * @see ThinkerGroup#addThinker(cell2d.Thinker)
  * @see Event
  * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this Thinker's GameStates
