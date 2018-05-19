@@ -1,4 +1,7 @@
-package cell2d;
+package cell2d.basic;
+
+import cell2d.CellGame;
+import cell2d.Thinker;
 
 /**
  * <p>A BasicThinker is a type of Thinker that is used by BasicStates, which

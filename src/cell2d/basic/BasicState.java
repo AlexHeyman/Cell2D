@@ -1,4 +1,7 @@
-package cell2d;
+package cell2d.basic;
+
+import cell2d.CellGame;
+import cell2d.GameState;
 
 /**
  * <p>A BasicState is a type of GameState that uses BasicThinkers, which have no

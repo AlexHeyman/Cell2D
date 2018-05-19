@@ -1,9 +1,9 @@
 package cell2d.space;
 
 import cell2d.CellGame;
-import cell2d.GameState;
 import cell2d.CellVector;
 import cell2d.Frac;
+import cell2d.GameState;
 import cell2d.SafeIterator;
 import java.awt.Point;
 import java.io.Serializable;

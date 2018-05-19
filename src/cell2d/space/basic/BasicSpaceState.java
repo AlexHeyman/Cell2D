@@ -1,6 +1,8 @@
-package cell2d.space;
+package cell2d.space.basic;
 
 import cell2d.CellGame;
+import cell2d.space.DrawMode;
+import cell2d.space.SpaceState;
 
 /**
  * <p>A BasicSpaceState is a type of SpaceState that uses BasicSpaceThinkers,

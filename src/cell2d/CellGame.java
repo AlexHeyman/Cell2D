@@ -143,7 +143,6 @@ public abstract class CellGame {
     private final StateBasedGame game;
     private final Map<Integer,GameState> states = new HashMap<>();
     private GameState currentState = null;
-    private boolean negativeIDsOffLimits = false;
     private boolean loaded = false;
     private InputProvider provider = null;
     private Input input = null;
@@ -311,8 +310,7 @@ public abstract class CellGame {
         
         @Override
         public final void initStatesList(GameContainer container) throws SlickException {
-            new LoadingState();
-            negativeIDsOffLimits = true;
+            game.addState(new LoadingState());
         }
         
         @Override
@@ -533,6 +531,34 @@ public abstract class CellGame {
         
     }
     
+    private class LoadingState extends BasicGameState {
+        
+        private LoadingState() {}
+        
+        @Override
+        public int getID() {
+            return -1;
+        }
+        
+        @Override
+        public final void init(GameContainer container, StateBasedGame game) throws SlickException {}
+        
+        @Override
+        public final void update(
+                GameContainer container, StateBasedGame game, int delta) throws SlickException {}
+        
+        @Override
+        public final void render(
+                GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+            if (!loadingVisualsRendered) {
+                renderLoadingVisuals(g, screenXOffset, screenYOffset,
+                        screenXOffset + screenWidth, screenYOffset + screenHeight);
+                loadingVisualsRendered = true;
+            }
+        }
+        
+    }
+    
     private class State extends BasicGameState {
         
         private final GameState state;
@@ -550,10 +576,12 @@ public abstract class CellGame {
         public final void init(GameContainer container, StateBasedGame game) throws SlickException {}
         
         @Override
-        public final void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {}
+        public final void update(
+                GameContainer container, StateBasedGame game, int delta) throws SlickException {}
         
         @Override
-        public final void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+        public final void render(
+                GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
             state.renderActions(state.getGame(), g, screenXOffset, screenYOffset,
                     screenXOffset + screenWidth, screenYOffset + screenHeight);
         }
@@ -568,22 +596,6 @@ public abstract class CellGame {
         public final void leave(GameContainer container, StateBasedGame game) {
             state.leftActions(state.getGame());
             state.active = false;
-        }
-        
-    }
-    
-    private class LoadingState extends cell2d.BasicState {
-        
-        private LoadingState() {
-            super(CellGame.this, -2);
-        }
-        
-        @Override
-        public final void renderActions(CellGame game, Graphics g, int x1, int y1, int x2, int y2) {
-            if (!loadingVisualsRendered) {
-                renderLoadingVisuals(g, x1, y1, x2, y2);
-                loadingVisualsRendered = true;
-            }
         }
         
     }
@@ -609,7 +621,7 @@ public abstract class CellGame {
     
     final void addState(GameState state) {
         int id = state.getID();
-        if (id < 0 && negativeIDsOffLimits) {
+        if (id < 0) {
             throw new RuntimeException("Attempted to add a GameState with negative ID " + id);
         }
         states.put(id, state);
@@ -637,7 +649,7 @@ public abstract class CellGame {
      * @param enter The Transition to use when entering the new GameState
      */
     public final void enterState(int id, Transition leave, Transition enter) {
-        if (id < 0 && negativeIDsOffLimits) {
+        if (id < 0) {
             return;
         }
         GameState state = states.get(id);

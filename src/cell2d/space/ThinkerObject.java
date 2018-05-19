@@ -1,8 +1,8 @@
 package cell2d.space;
 
 import cell2d.CellGame;
-import cell2d.GameState;
 import cell2d.Event;
+import cell2d.GameState;
 import cell2d.SafeIterator;
 import cell2d.Thinker;
 

@@ -1,6 +1,7 @@
-package cell2d.space;
+package cell2d.space.basic;
 
 import cell2d.CellGame;
+import cell2d.space.SpaceThinker;
 
 /**
  * <p>A BasicSpaceThinker is a type of SpaceThinker that is used by

@@ -1,6 +1,7 @@
-package cell2d.space;
+package cell2d.space.basic;
 
 import cell2d.CellGame;
+import cell2d.space.ThinkerObject;
 
 /**
  * <p>A BasicThinkerObject is a type of ThinkerObject that mimics a
