@@ -4,25 +4,19 @@ import cell2d.CellGame;
 
 /**
  * <p>A BasicSpaceThinker is a type of SpaceThinker that is used by
- * BasicSpaceStates, which have no special capabilities. It does not
- * automatically share any custom fields or methods between itself and its
- * SpaceStates.</p>
- * @see BasicSpaceState
+ * BasicSpaceStates, which have no special capabilities, and treats their
+ * CellGames as basic CellGames. It does not automatically share any custom
+ * fields or methods between itself and its SpaceStates or their CellGames.</p>
  * @see BasicThinkerObject
  * @author Andrew Heyman
- * @param <T> The type of CellGame that uses this BasicSpaceThinker's
- * BasicSpaceStates
  */
-public abstract class BasicSpaceThinker<T extends CellGame>
-        extends SpaceThinker<T,BasicSpaceState<T>,BasicSpaceThinker<T>> {
+public abstract class BasicSpaceThinker extends SpaceThinker<CellGame,BasicSpaceState,BasicSpaceThinker> {
     
     /**
      * Creates a new BasicSpaceThinker.
-     * @param gameClass The Class object representing the subclass of CellGame
-     * that uses this BasicSpaceThinker's BasicSpaceStates
      */
-    public BasicSpaceThinker(Class<? extends CellGame> gameClass) {
-        super(gameClass, BasicSpaceState.class, BasicSpaceThinker.class);
+    public BasicSpaceThinker() {
+        super(CellGame.class, BasicSpaceState.class, BasicSpaceThinker.class);
     }
     
 }

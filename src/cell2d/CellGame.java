@@ -572,10 +572,10 @@ public abstract class CellGame {
         
     }
     
-    private class LoadingState extends cell2d.BasicState<CellGame> {
+    private class LoadingState extends cell2d.BasicState {
         
         private LoadingState() {
-            super(CellGame.class, CellGame.this, -2);
+            super(CellGame.this, -2);
         }
         
         @Override
