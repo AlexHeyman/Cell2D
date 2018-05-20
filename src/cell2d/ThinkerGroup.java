@@ -1,6 +1,5 @@
 package cell2d;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -30,17 +29,10 @@ import java.util.TreeSet;
 public abstract class ThinkerGroup<T extends CellGame,
         U extends GameState<T,U,V>, V extends Thinker<T,U,V>> {
     
-    private static abstract class GroupComparator<T> implements Comparator<T>, Serializable {}
-    
-    private final Comparator<V> actionPriorityComparator = new GroupComparator<V>() {
-        
-        @Override
-        public final int compare(V thinker1, V thinker2) {
-            int priorityDiff = thinker2.actionPriority - thinker1.actionPriority;
-            return (priorityDiff == 0 ?
-                    System.identityHashCode(thinker1) - System.identityHashCode(thinker2) : priorityDiff);
-        }
-        
+    private final Comparator<V> actionPriorityComparator = (thinker1, thinker2) -> {
+        int priorityDiff = thinker2.actionPriority - thinker1.actionPriority;
+        return (priorityDiff == 0 ?
+                System.identityHashCode(thinker1) - System.identityHashCode(thinker2) : priorityDiff);
     };
     
     private final Class<? extends CellGame> gameClass;

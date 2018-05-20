@@ -6,7 +6,6 @@ import cell2d.Frac;
 import cell2d.GameState;
 import cell2d.SafeIterator;
 import java.awt.Point;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -88,81 +87,52 @@ import org.newdawn.slick.Graphics;
 public abstract class SpaceState<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends GameState<T,U,V> {
     
-    private static abstract class SpaceComparator<T> implements Comparator<T>, Serializable {}
+    private Comparator<MobileObject> movementPriorityComparator = (object1, object2) -> {
+        int priorityDiff = object2.movementPriority - object1.movementPriority;
+        return (priorityDiff == 0 ?
+                System.identityHashCode(object1) - System.identityHashCode(object2) : priorityDiff);
+    };
     
-    private Comparator<MobileObject> movementPriorityComparator = new SpaceComparator<MobileObject>() {
-        
-        @Override
-        public final int compare(MobileObject object1, MobileObject object2) {
-            int priorityDiff = object2.movementPriority - object1.movementPriority;
-            return (priorityDiff == 0 ?
-                    System.identityHashCode(object1) - System.identityHashCode(object2) : priorityDiff);
+    private Comparator<MoveEvent> moveComparator = (event1, event2) -> {
+        long metricDiff = event1.metric - event2.metric;
+        if (metricDiff == 0) {
+            int typeDiff = event1.type - event2.type;
+            return (typeDiff == 0 ?
+                    System.identityHashCode(event1) - System.identityHashCode(event2) : typeDiff);
         }
-        
+        return (int)Math.signum(metricDiff);        
     };
-    private Comparator<MoveEvent> moveComparator = new SpaceComparator<MoveEvent>() {
-        
-        @Override
-        public final int compare(MoveEvent event1, MoveEvent event2) {
-            long metricDiff = event1.metric - event2.metric;
-            if (metricDiff == 0) {
-                int typeDiff = event1.type - event2.type;
-                return (typeDiff == 0 ?
-                        System.identityHashCode(event1) - System.identityHashCode(event2) : typeDiff);
-            }
-            return (int)Math.signum(metricDiff);
-        }
-        
+    
+    private Comparator<Hitbox> drawPriorityComparator = (hitbox1, hitbox2) -> {
+        int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+        return (priorityDiff == 0 ?
+                System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2) : priorityDiff);
     };
-    private Comparator<Hitbox> drawPriorityComparator = new SpaceComparator<Hitbox>() {
-        
-        @Override
-        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
-            int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
-            return (priorityDiff == 0 ?
-                    System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2) : priorityDiff);
-        }
-        
+    
+    private Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawPriorityIteratorComparator = (pair1, pair2) -> {
+        return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
     };
-    private Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawPriorityIteratorComparator
-            = new SpaceComparator<Pair<Hitbox,Iterator<Hitbox>>>() {
-        
-        @Override
-        public final int compare(Pair<Hitbox, Iterator<Hitbox>> pair1,
-                Pair<Hitbox, Iterator<Hitbox>> pair2) {
-            return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
+    
+    private Comparator<Hitbox> overModeComparator = (hitbox1, hitbox2) -> {
+        int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+        if (priorityDiff == 0) {
+            long yDiff = hitbox1.getRelY() - hitbox2.getRelY();
+            return (yDiff == 0 ?
+                    System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
+                    : (int)Math.signum(yDiff));
         }
-        
+        return priorityDiff;        
     };
-    private Comparator<Hitbox> overModeComparator = new SpaceComparator<Hitbox>() {
-        
-        @Override
-        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
-            int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
-            if (priorityDiff == 0) {
-                long yDiff = hitbox1.getRelY() - hitbox2.getRelY();
-                return (yDiff == 0 ?
-                        System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
-                        : (int)Math.signum(yDiff));
-            }
-            return priorityDiff;
+    
+    private Comparator<Hitbox> underModeComparator = (hitbox1, hitbox2) -> {
+        int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
+        if (priorityDiff == 0) {
+            long yDiff = hitbox2.getRelY() - hitbox1.getRelY();
+            return (yDiff == 0 ?
+                    System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
+                    : (int)Math.signum(yDiff));
         }
-        
-    };
-    private Comparator<Hitbox> underModeComparator = new SpaceComparator<Hitbox>() {
-        
-        @Override
-        public final int compare(Hitbox hitbox1, Hitbox hitbox2) {
-            int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
-            if (priorityDiff == 0) {
-                long yDiff = hitbox2.getRelY() - hitbox1.getRelY();
-                return (yDiff == 0 ?
-                        System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
-                        : (int)Math.signum(yDiff));
-            }
-            return priorityDiff;
-        }
-        
+        return priorityDiff;        
     };
     
     private final Set<SpaceObject> spaceObjects = new HashSet<>();
