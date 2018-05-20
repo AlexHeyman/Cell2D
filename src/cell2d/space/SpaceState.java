@@ -625,8 +625,8 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Returns a new Iterator over this SpaceState's list of SpaceObjects.
-     * @return A new Iterator over this SpaceState's list of SpaceObjects
+     * Returns a new SafeIterator over this SpaceState's list of SpaceObjects.
+     * @return A new SafeIterator over this SpaceState's list of SpaceObjects
      */
     public final SafeIterator<SpaceObject> objectIterator() {
         return new ObjectIterator();
@@ -979,8 +979,8 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Returns a new Iterator over this SpaceState's list of MobileObjects.
-     * @return A new Iterator over this SpaceState's list of MobileObjects
+     * Returns a new SafeIterator over this SpaceState's list of MobileObjects.
+     * @return A new SafeIterator over this SpaceState's list of MobileObjects
      */
     public final SafeIterator<MobileObject> mobileObjectIterator() {
         return new MobileObjectIterator();

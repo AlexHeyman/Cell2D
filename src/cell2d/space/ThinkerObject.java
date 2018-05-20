@@ -137,8 +137,10 @@ public abstract class ThinkerObject<T extends CellGame,
     }
     
     /**
-     * Returns a new Iterator over this ThinkerObject's list of SpaceThinkers.
-     * @return A new Iterator over this ThinkerObject's list of SpaceThinkers
+     * Returns a new SafeIterator over this ThinkerObject's list of
+     * SpaceThinkers.
+     * @return A new SafeIterator over this ThinkerObject's list of
+     * SpaceThinkers
      */
     public final SafeIterator<V> thinkerIterator() {
         return thinker.thinkerIterator();

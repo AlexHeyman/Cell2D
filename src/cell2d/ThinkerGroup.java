@@ -156,8 +156,8 @@ public abstract class ThinkerGroup<T extends CellGame,
     }
     
     /**
-     * Returns a new Iterator over this ThinkerGroup's list of Thinkers.
-     * @return A new Iterator over this ThinkerGroup's list of Thinkers
+     * Returns a new SafeIterator over this ThinkerGroup's list of Thinkers.
+     * @return A new SafeIterator over this ThinkerGroup's list of Thinkers
      */
     public final SafeIterator<V> thinkerIterator() {
         return new ThinkerIterator();
