@@ -62,8 +62,7 @@ public abstract class GameState<T extends CellGame,
      * @param game The CellGame to which this GameState belongs
      * @param id This GameState's ID
      */
-    public GameState(Class<? extends CellGame> gameClass, Class<? extends GameState> stateClass,
-            Class<? extends Thinker> thinkerClass, T game, int id) {
+    public GameState(Class<T> gameClass, Class<U> stateClass, Class<V> thinkerClass, T game, int id) {
         super(gameClass, stateClass, thinkerClass);
         thisState = (U)this;
         if (game == null) {

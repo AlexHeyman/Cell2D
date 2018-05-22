@@ -167,8 +167,7 @@ public abstract class SpaceState<T extends CellGame,
      * @param cellHeight The height of each of this SpaceState's cells
      * @param drawMode This SpaceState's DrawMode
      */
-    public SpaceState(Class<? extends CellGame> gameClass, Class<? extends SpaceState> stateClass,
-            Class<? extends SpaceThinker> thinkerClass,
+    public SpaceState(Class<T> gameClass, Class<U> stateClass, Class<V> thinkerClass,
             T game, int id, long cellWidth, long cellHeight, DrawMode drawMode) {
         super(gameClass, stateClass, thinkerClass, game, id);
         setCellDimensions(cellWidth, cellHeight);

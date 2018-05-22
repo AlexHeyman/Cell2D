@@ -70,7 +70,7 @@ public abstract class ThinkerObject<T extends CellGame,
      * @return The subclass of CellGame that uses this ThinkerObject's
      * SpaceThinker's SpaceStates
      */
-    public final Class<? extends CellGame> getGameClass() {
+    public final Class<T> getGameClass() {
         return thinker.getGameClass();
     }
     
@@ -80,7 +80,7 @@ public abstract class ThinkerObject<T extends CellGame,
      * @return The subclass of SpaceState that uses this ThinkerObject's
      * SpaceThinker
      */
-    public final Class<? extends GameState> getStateClass() {
+    public final Class<U> getStateClass() {
         return thinker.getStateClass();
     }
     
@@ -89,7 +89,7 @@ public abstract class ThinkerObject<T extends CellGame,
      * this ThinkerObject mimics.
      * @return The subclass of SpaceThinker that this ThinkerObject mimics
      */
-    public final Class<? extends Thinker> getThinkerClass() {
+    public final Class<V> getThinkerClass() {
         return thinker.getThinkerClass();
     }
     

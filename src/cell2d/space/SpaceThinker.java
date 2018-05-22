@@ -29,8 +29,7 @@ public abstract class SpaceThinker<T extends CellGame, U extends SpaceState<T,U,
      * SpaceThinker that this SpaceThinker is for SpaceState interaction
      * purposes
      */
-    public SpaceThinker(Class<? extends CellGame> gameClass,
-            Class<? extends SpaceState> stateClass, Class<? extends SpaceThinker> thinkerClass) {
+    public SpaceThinker(Class<T> gameClass, Class<U> stateClass, Class<V> thinkerClass) {
         super(gameClass, stateClass, thinkerClass);
     }
     

@@ -35,9 +35,9 @@ public abstract class ThinkerGroup<T extends CellGame,
                 System.identityHashCode(thinker1) - System.identityHashCode(thinker2) : priorityDiff);
     };
     
-    private final Class<? extends CellGame> gameClass;
-    private final Class<? extends GameState> stateClass;
-    private final Class<? extends Thinker> thinkerClass;
+    private final Class<T> gameClass;
+    private final Class<U> stateClass;
+    private final Class<V> thinkerClass;
     private final SortedSet<V> thinkers = new TreeSet<>(actionPriorityComparator);
     private int thinkerIterators = 0;
     private final Queue<ThinkerChangeData<T,U,V>> thinkerChanges = new LinkedList<>();
@@ -52,8 +52,7 @@ public abstract class ThinkerGroup<T extends CellGame,
      * @param thinkerClass The Class object representing the subclass of Thinker
      * that this ThinkerGroup's Thinkers are
      */
-    public ThinkerGroup(Class<? extends CellGame> gameClass,
-            Class<? extends GameState> stateClass, Class<? extends Thinker> thinkerClass) {
+    public ThinkerGroup(Class<T> gameClass, Class<U> stateClass, Class<V> thinkerClass) {
         this.gameClass = gameClass;
         this.stateClass = stateClass;
         this.thinkerClass = thinkerClass;
@@ -65,7 +64,7 @@ public abstract class ThinkerGroup<T extends CellGame,
      * @return The subclass of CellGame that uses this ThinkerGroup's Thinkers'
      * GameStates
      */
-    public final Class<? extends CellGame> getGameClass() {
+    public final Class<T> getGameClass() {
         return gameClass;
     }
     
@@ -74,7 +73,7 @@ public abstract class ThinkerGroup<T extends CellGame,
      * this ThinkerGroup's Thinkers.
      * @return The subclass of GameState that uses this ThinkerGroup's Thinkers
      */
-    public final Class<? extends GameState> getStateClass() {
+    public final Class<U> getStateClass() {
         return stateClass;
     }
     
@@ -83,7 +82,7 @@ public abstract class ThinkerGroup<T extends CellGame,
      * ThinkerGroup's Thinkers are.
      * @return The subclass of Thinker that this ThinkerGroup's Thinkers are
      */
-    public final Class<? extends Thinker> getThinkerClass() {
+    public final Class<V> getThinkerClass() {
         return thinkerClass;
     }
     

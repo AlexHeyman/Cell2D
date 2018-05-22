@@ -80,8 +80,7 @@ public abstract class Thinker<T extends CellGame,
      * @param thinkerClass The Class object representing the subclass of Thinker
      * that this Thinker is for GameState interaction purposes
      */
-    public Thinker(Class<? extends CellGame> gameClass,
-            Class<? extends GameState> stateClass, Class<? extends Thinker> thinkerClass) {
+    public Thinker(Class<T> gameClass, Class<U> stateClass, Class<V> thinkerClass) {
         super(gameClass, stateClass, thinkerClass);
         thisThinker = (V)this;
     }
