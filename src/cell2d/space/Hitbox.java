@@ -8,13 +8,13 @@ import java.util.Set;
 
 /**
  * <p>A Hitbox is a region of space that can be checked for intersection with
- * other regions. A Hitbox has a position at a single point that acts as an
- * origin point for the Hitbox's shape. This point is usually inside the Hitbox,
- * but may not always be. Hitboxes can be rotated around their positions and
- * flipped across horizontal and vertical axes through their positions. Rotating
- * a Hitbox will also rotate the axes along which it is flipped. As with
- * CellVectors, Hitboxes measure angles in degrees going counterclockwise from
- * directly right and normalize them to be between 0 and 360.</p>
+ * other regions. A Hitbox has a <i>position</i> at a single point that acts as
+ * an origin point for the Hitbox's shape. This point is usually inside the
+ * Hitbox, but may not always be. Hitboxes can be rotated around their positions
+ * and flipped across horizontal and vertical axes through their positions.
+ * Rotating a Hitbox will also rotate the axes along which it is flipped. As
+ * with CellVectors, Hitboxes measure angles in degrees going counterclockwise
+ * from directly right and normalize them to be between 0 and 360.</p>
  * 
  * <p>If a Hitbox is a component of a CompositeHitbox, its position, flipped
  * status, and angle of rotation are all relative to those of the

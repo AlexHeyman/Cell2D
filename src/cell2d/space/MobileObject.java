@@ -16,37 +16,37 @@ import java.util.Set;
  * collision mechanics enabled for it, this movement will be blocked by any
  * solid surfaces of SpaceObjects in the MobileObject's path.</p>
  * 
- * <p>A MobileObject may have a collision Hitbox that represents it for purposes
- * of colliding with solid surfaces. The collision Hitbox's rectangular bounding
- * box, rather than its exact shape, is what represents the MobileObject in
- * Cell2D's standard collision mechanics, and thus standard collision only
- * handles interactions between rectangular shapes. A MobileObject with no
- * collision Hitbox cannot collide with solid surfaces, even if collision is
- * enabled for it.</p>
+ * <p>A MobileObject may have a <i>collision Hitbox</i> that represents it for
+ * purposes of colliding with solid surfaces. The collision Hitbox's rectangular
+ * bounding box, rather than its exact shape, is what represents the
+ * MobileObject in Cell2D's standard collision mechanics, and thus standard
+ * collision only handles interactions between rectangular shapes. A
+ * MobileObject with no collision Hitbox cannot collide with solid surfaces,
+ * even if collision is enabled for it.</p>
  * 
- * <p>A MobileObject may have a pressing angle that causes it to press against
- * and collide with solid surfaces in the angle's direction during movement, as
- * long as it is touching them and not moving away from them. The pressing angle
- * is specified as relative (to the MobileObject's flipped status and angle of
- * rotation) or absolute.</p>
+ * <p>A MobileObject may have a <i>pressing angle</i> that causes it to press
+ * against and collide with solid surfaces in the angle's direction during
+ * movement, as long as it is touching them and not moving away from them. The
+ * pressing angle is specified as relative (to the MobileObject's flipped status
+ * and angle of rotation) or absolute.</p>
  * 
- * <p>A MobileObject may have one or more MobileObject followers, and if it
- * does, it is called those followers' leader. When a MobileObject moves, all of
- * its followers automatically move to maintain their relative positions to it.
- * A MobileObject cannot collide with its leader, super-leaders, followers, or
- * sub-followers.</p>
+ * <p>A MobileObject may have one or more MobileObject <i>followers</i>, and if
+ * it does, it is called those followers' leader. When a MobileObject moves, all
+ * of its followers automatically move to maintain their relative positions to
+ * it. A MobileObject cannot collide with its leader, super-leaders, followers,
+ * or sub-followers.</p>
  * 
- * <p>A MobileObject has a velocity, as well as a vector called a step that acts
- * as a short-term adjustment to its velocity, both in fracunits per time unit.
- * Every frame, between the periods in which its SpaceState's SpaceThinkers
- * perform their beforeMovementActions() and their frameActions(), a
- * MobileObject assigned to an active SpaceState moves by the sum of its
+ * <p>A MobileObject has a <i>velocity</i>, as well as a vector called a <i>step
+ * </i> that acts as a short-term adjustment to its velocity, both in fracunits
+ * per time unit. Every frame, between the periods in which its SpaceState's
+ * SpaceThinkers perform their beforeMovementActions() and their frameActions(),
+ * a MobileObject assigned to an active SpaceState moves by the sum of its
  * velocity and step multiplied by its time factor, then resets its step to (0,
- * 0). A MobileObject's movement priority determines when it will move relative
- * to other MobileObjects. MobileObjects with higher movement priorities move
- * before those with lower ones. Also, if two solid MobileObjects would
- * otherwise collide with each other, the one with the higher movement priority
- * will push the other one along with it.</p>
+ * 0). A MobileObject's <i>movement priority</i> determines when it will move
+ * relative to other MobileObjects. MobileObjects with higher movement
+ * priorities move before those with lower ones. Also, if two solid
+ * MobileObjects would otherwise collide with each other, the one with the
+ * higher movement priority will push the other one along with it.</p>
  * 
  * <p>Every time a MobileObject moves, it records the SpaceObjects whose solid
  * surfaces it collided with and the Directions of the surfaces relative to it
@@ -82,17 +82,17 @@ public abstract class MobileObject extends SpaceObject {
     public MobileObject() {}
     
     @Override
-    void addNonCellData() {
-        super.addNonCellData();
-        state.addMobileObject(this);
-    }
-    
-    @Override
     void addCellData() {
         super.addCellData();
         if (hasCollision && collisionHitbox != null) {
             state.addHitbox(collisionHitbox, HitboxRole.COLLISION);
         }
+    }
+    
+    @Override
+    void addNonCellData() {
+        super.addNonCellData();
+        state.addMobileObject(this);
     }
     
     @Override
@@ -327,10 +327,11 @@ public abstract class MobileObject extends SpaceObject {
     }
     
     /**
-     * Sets this MobileObject's leader to the specified MobileObject. If it is
-     * set to a null MobileObject, this MobileObject will be removed from its
-     * current leader if it has one.
-     * @param leader The new leader
+     * Sets this MobileObject's leader to the specified one. If it is set to a
+     * null MobileObject, or if this MobileObject cannot be added to the
+     * specified one as its follower, this MobileObject will simply be removed
+     * from its current leader if it has one.
+     * @param leader This MobileObject's new leader
      */
     public final void setLeader(MobileObject leader) {
         if (this.leader != null) {
@@ -359,7 +360,9 @@ public abstract class MobileObject extends SpaceObject {
     
     /**
      * Adds the specified MobileObject as this MobileObject's follower if it
-     * does not have a leader already.
+     * does not have a leader already, and if doing so would not create a loop
+     * of followers in which MobileObjects directly or indirectly follow
+     * themselves.
      * @param follower The new follower
      * @return Whether the addition occurred
      */

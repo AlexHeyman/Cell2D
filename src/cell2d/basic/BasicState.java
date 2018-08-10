@@ -8,7 +8,7 @@ import cell2d.GameState;
  * special capabilities, and treats its CellGame as a basic CellGame. It is
  * designed to be easily extended by types of GameStates that do not require
  * custom fields or methods to be automatically shared between themselves and
- * their Thinkers or CellGames.</p>
+ * their SubThinkers or CellGames.</p>
  * @author Andrew Heyman
  */
 public abstract class BasicState extends GameState<CellGame,BasicState,BasicThinker> {

@@ -4,7 +4,7 @@ import org.newdawn.slick.Graphics;
 
 /**
  * <p>A SpaceLayer renders visuals either in front of or behind those of the
- * SpaceObjects in the SpaceState to which it is assigned. SpaceLayers are
+ * SpaceObjects in the SpaceStates to which it is assigned. SpaceLayers are
  * intended to be used to display objects in the foreground or background of a
  * SpaceState's space.</p>
  * @see SpaceState#setLayer(int, cell2d.space.SpaceLayer)

@@ -3,11 +3,11 @@ package cell2d;
 import java.math.BigInteger;
 
 /**
- * <p>The Frac class contains constants and methods related to fracunits.
- * Fracunits are Cell2D's units of "continuous" length and time. Typically, one
- * fracunit of length corresponds to one pixel on the screen, and one fracunit
- * of time corresponds to one frame. Fracunits are units of the primitive type
- * <code>long</code>, and one fracunit is equal to 2 to the power of 32, or
+ * <p>The Frac class contains constants and methods related to <i>fracunits</i>,
+ * Cell2D's units of "continuous" length and time. Typically, one fracunit of
+ * length corresponds to one pixel on the screen, and one fracunit of time
+ * corresponds to one frame. Fracunits are units of the primitive type <code>
+ * long</code>, and one fracunit is equal to 2 to the power of 32, or
  * 4294967296. In other words, fracunit arithmetic is fixed-point number
  * arithmetic in which numbers have 32 bits after the decimal point.
  * Fracunit-scale numbers may be correctly added and subtracted with the + and -

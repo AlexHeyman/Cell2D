@@ -15,9 +15,9 @@ import org.newdawn.slick.Graphics;
 
 /**
  * <p>A SpaceObject is a physical object in a SpaceState's space. SpaceObjects
- * may be assigned to one SpaceState each in much the same way that Thinkers are
- * assigned to GameStates. A SpaceObject's assigned SpaceState will keep track
- * of time for it and its AnimationInstances. A SpaceObject's time factor
+ * may be assigned to one SpaceState each in much the same way that SubThinkers
+ * are assigned to Thinkers. A SpaceObject's assigned SpaceState will keep track
+ * of time for it and its AnimationInstances. A SpaceObject's <i>time factor</i>
  * represents the average number of discrete time units the SpaceObject will
  * experience every frame while assigned to an active SpaceState. If its own
  * time factor is negative, a SpaceObject will use its assigned SpaceState's
@@ -25,33 +25,34 @@ import org.newdawn.slick.Graphics;
  * or none at all, time will not pass for it.</p>
  * 
  * <p>A SpaceObject inherits the position, flipped status, angle of rotation,
- * and rectangular bounding box of a locator Hitbox that is relative to no other
- * Hitbox. A SpaceObject may also have an overlap Hitbox that represents it for
- * purposes of overlapping other SpaceObjects and/or a solid Hitbox that
- * represents it for purposes of surface solidity and MobileObjects colliding
- * with it. The solid Hitbox's rectangular bounding box, rather than its exact
- * shape, is what represents the SpaceObject in Cell2D's standard collision
- * mechanics. A SpaceObject may use a single Hitbox for more than one purpose,
- * but a Hitbox may not be used by multiple SpaceObjects at once. All of a
- * SpaceObject's Hitboxes other than its locator Hitbox have positions, flipped
- * statuses, and angles of rotation that are relative to those of its locator
- * Hitbox.</p>
+ * and rectangular bounding box of a <i>locator Hitbox</i> that is relative to
+ * no other Hitbox. A SpaceObject may also have an <i>overlap Hitbox</i> that
+ * represents it for purposes of overlapping other SpaceObjects and/or a <i>
+ * solid Hitbox</i> that represents it for purposes of surface solidity and
+ * MobileObjects colliding with it. The solid Hitbox's rectangular bounding box,
+ * rather than its exact shape, is what represents the SpaceObject in Cell2D's
+ * standard collision mechanics. A SpaceObject may use a single Hitbox for more
+ * than one purpose, but a Hitbox may not be used by multiple SpaceObjects at
+ * once. All of a SpaceObject's Hitboxes other than its locator Hitbox have
+ * positions, flipped statuses, and angles of rotation that are relative to
+ * those of its locator Hitbox.</p>
  * 
- * <p>A SpaceObject has a point called a center that summarizes its location.
- * Its center has an offset that is relative to the SpaceObject's position,
- * flipped status, and angle of rotation. SpaceObjects' centers are the points
- * from which their distances and angles to other SpaceObjects are measured.</p>
+ * <p>A SpaceObject has a point called a <i>center</i> that summarizes its
+ * location. Its center has an offset that is relative to the SpaceObject's
+ * position, flipped status, and angle of rotation. SpaceObjects' centers are
+ * the points from which their distances and angles to other SpaceObjects are
+ * measured.</p>
  * 
- * <p>A SpaceObject has a Drawable appearance that represents it as seen through
- * a Viewport's camera, as well as an alpha (opacity) value that is normalized
- * to be between 0 to 1 and a Filter that apply to its appearance. The use of a
- * SpaceObject's appearance, alpha value, and Filter to represent it is a result
- * of its default draw() method, which can be overridden. A SpaceObject will
- * only be drawn if its locator Hitbox's rectangular bounding box intersects the
- * Viewport's field of view. A SpaceObject's draw priority determines whether it
- * will be drawn in front of or behind other SpaceObjects that intersect it.
- * SpaceObjects with higher draw priorities are drawn in front of those with
- * lower ones.</p>
+ * <p>A SpaceObject has a Drawable <i>appearance</i> that represents it as seen
+ * through a Viewport's camera, as well as an alpha (opacity) value that is
+ * normalized to be between 0 to 1 and a Filter that apply to its appearance.
+ * The use of a SpaceObject's appearance, alpha value, and Filter to represent
+ * it is a result of its default draw() method, which can be overridden. A
+ * SpaceObject will only be drawn if its locator Hitbox's rectangular bounding
+ * box intersects the Viewport's field of view. A SpaceObject's <i>draw priority
+ * </i> determines whether it will be drawn in front of or behind other
+ * SpaceObjects that intersect it. SpaceObjects with higher draw priorities are
+ * drawn in front of those with lower ones.</p>
  * 
  * <p>If an AnimationInstance is not already assigned to a GameState, it may be
  * assigned to a SpaceObject with an integer ID in the context of that
@@ -141,15 +142,6 @@ public abstract class SpaceObject {
         }
     }
     
-    void addNonCellData() {
-        locatorHitbox.setGameState(state);
-        if (!animInstances.isEmpty()) {
-            for (AnimationInstance instance : animInstances.values()) {
-                state.addAnimInstance(instance);
-            }
-        }
-    }
-    
     void addCellData() {
         state.addHitbox(locatorHitbox, HitboxRole.LOCATOR);
         state.addHitbox(centerHitbox, HitboxRole.CENTER);
@@ -158,6 +150,15 @@ public abstract class SpaceObject {
         }
         if (solidHitbox != null) {
             state.addHitbox(solidHitbox, HitboxRole.SOLID);
+        }
+    }
+    
+    void addNonCellData() {
+        locatorHitbox.setGameState(state);
+        if (!animInstances.isEmpty()) {
+            for (AnimationInstance instance : animInstances.values()) {
+                state.addAnimInstance(instance);
+            }
         }
     }
     
@@ -193,7 +194,7 @@ public abstract class SpaceObject {
      * @return This SpaceObject's effective time factor
      */
     public final long getEffectiveTimeFactor() {
-        return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
+        return (state == null ? 0 : (timeFactor < 0 ? state.getEffectiveTimeFactor() : timeFactor));
     }
     
     /**

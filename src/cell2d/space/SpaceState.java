@@ -2,6 +2,7 @@ package cell2d.space;
 
 import cell2d.CellGame;
 import cell2d.CellVector;
+import cell2d.EventGroup;
 import cell2d.Frac;
 import cell2d.GameState;
 import cell2d.SafeIterator;
@@ -16,6 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -27,13 +29,14 @@ import javafx.util.Pair;
 import org.newdawn.slick.Graphics;
 
 /**
- * <p>A SpaceState is a GameState that handles gameplay in a continuous
+ * <p>A SpaceState is a type of GameState that handles gameplay in a continuous
  * two-dimensional space. Space in a SpaceState is divided into rectangular
- * cells of equal width and equal height. A SpaceState automatically creates
- * more cells as SpaceObjects enter where they would be if they existed.</p>
+ * <i>cells</i> of equal width and equal height. A SpaceState automatically
+ * creates more cells as SpaceObjects enter where they would be if they existed.
+ * </p>
  * 
  * <p>SpaceObjects may be assigned to one SpaceState each in much the same way
- * that Thinkers are assigned to ThinkerGroups. Similarly to Thinkers, the
+ * that SubThinkers are assigned to Thinkers. Similarly to SubThinkers, the
  * actual addition or removal of a SpaceObject to or from a SpaceState is
  * delayed until any and all current iterations over its SpaceThinkers,
  * SpaceObjects, or MobileObjects, such as the periods during which
@@ -49,13 +52,14 @@ import org.newdawn.slick.Graphics;
  * they are in too frequently, but small enough that not too many SpaceObjects
  * are in each cell at any one time.</p>
  * 
- * <p>Every frame, between the periods in which its SpaceThinkers perform their
- * beforeMovementActions() and their frameActions(), a SpaceState moves each of
- * its MobileObjects by the sum of its velocity and step multiplied by its time
- * factor, then resets its step to (0, 0). This, along with manual calls to the
- * MobileObject's doMovement() method, is when the MobileObject interacts with
- * the solid surfaces of SpaceObjects in its path if it has Cell2D's standard
- * collision mechanics enabled.</p>
+ * <p>Like the SpaceThinkers that it uses, a SpaceState has an EventGroup of
+ * <i>before-movement Events</i> that it performs once each frame. A SpaceState
+ * performs these Events at the beginning of its frameActions(). Immediately
+ * afterward, the SpaceState moves each of its MobileObjects by the sum of its
+ * velocity and step multiplied by its time factor, then resets its step to (0,
+ * 0). This, along with manual calls to the MobileObject's doMovement() method,
+ * is when the MobileObject interacts with the solid surfaces of SpaceObjects in
+ * its path if it has Cell2D's standard collision mechanics enabled.</p>
  * 
  * <p>Viewports may be assigned to one SpaceState each with an integer ID in
  * the context of that SpaceState. Only one Viewport may be assigned to a
@@ -78,11 +82,11 @@ import org.newdawn.slick.Graphics;
  * @see Viewport
  * @see HUD
  * @see SpaceLayer
- * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this SpaceState
  * @param <U> The type of SpaceState that this SpaceState is for SpaceThinker
  * interaction purposes
  * @param <V> The type of SpaceThinker that this SpaceState uses
+ * @author Andrew Heyman
  */
 public abstract class SpaceState<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends GameState<T,U,V> {
@@ -135,13 +139,14 @@ public abstract class SpaceState<T extends CellGame,
         return priorityDiff;        
     };
     
+    private final EventGroup<T,U> beforeMovementEvents = new EventGroup<>();
     private final Set<SpaceObject> spaceObjects = new HashSet<>();
     private int objectIterators = 0;
-    private final Queue<ObjectChangeData> objectChanges = new LinkedList<>();
-    private boolean updatingObjectList = false;
+    private final Queue<ObjectChange> objectChanges = new LinkedList<>();
+    private boolean updatingObjects = false;
     private final SortedSet<MobileObject> mobileObjects = new TreeSet<>(movementPriorityComparator);
     private int mobileObjectIterators = 0;
-    private final Queue<MobileObjectChangeData> mobileObjectChanges = new LinkedList<>();
+    private final Queue<MobileObjectChange> mobileObjectChanges = new LinkedList<>();
     private long cellWidth, cellHeight;
     private final Map<Point,Cell> cells = new HashMap<>();
     private int cellLeft = 0;
@@ -155,11 +160,11 @@ public abstract class SpaceState<T extends CellGame,
     
     /**
      * Creates a new SpaceState of the specified CellGame with the specified ID.
-     * @param gameClass The Class object representing the subclass of CellGame
-     * that uses this SpaceState
-     * @param stateClass The Class object representing the subclass of
-     * SpaceState that this SpaceState is for SpaceThinker interaction purposes
-     * @param thinkerClass The Class object representing the subclass of
+     * @param gameClass The Class object representing the type of CellGame that
+     * uses this SpaceState
+     * @param stateClass The Class object representing the type of SpaceState
+     * that this SpaceState is for SpaceThinker interaction purposes
+     * @param subThinkerClass The Class object representing the type of
      * SpaceThinker that this SpaceState uses
      * @param game The CellGame to which this SpaceState belongs
      * @param id This SpaceState's ID
@@ -167,11 +172,31 @@ public abstract class SpaceState<T extends CellGame,
      * @param cellHeight The height of each of this SpaceState's cells
      * @param drawMode This SpaceState's DrawMode
      */
-    public SpaceState(Class<T> gameClass, Class<U> stateClass, Class<V> thinkerClass,
+    public SpaceState(Class<T> gameClass, Class<U> stateClass, Class<V> subThinkerClass,
             T game, int id, long cellWidth, long cellHeight, DrawMode drawMode) {
-        super(gameClass, stateClass, thinkerClass, game, id);
+        super(gameClass, stateClass, subThinkerClass, game, id);
         setCellDimensions(cellWidth, cellHeight);
         setDrawMode(drawMode);
+    }
+    
+    @Override
+    public void addSubThinkerActions(T game, U state, V subThinker) {
+        beforeMovementEvents.add(subThinker.beforeMovement, subThinker.getBeforeMovementPriority());
+        subThinker.superBeforeMovementEvents = beforeMovementEvents;
+    }
+    
+    @Override
+    public void removeSubThinkerActions(T game, U state, V subThinker) {
+        beforeMovementEvents.remove(subThinker.beforeMovement, subThinker.getBeforeMovementPriority());
+        subThinker.superBeforeMovementEvents = null;
+    }
+    
+    /**
+     * Returns the EventGroup of this SpaceState's before-movement Events.
+     * @return The EventGroup of this SpaceState's before-movement Events
+     */
+    public final EventGroup<T,U> getBeforeMovementEvents() {
+        return beforeMovementEvents;
     }
     
     private class Cell {
@@ -477,10 +502,10 @@ public abstract class SpaceState<T extends CellGame,
             if (object.state == null && object.newState == null) {
                 object.changePosition(originX, originY);
                 object.newState = this;
-                objectChanges.add(new ObjectChangeData(object, this));
+                objectChanges.add(new ObjectChange(object, this));
             }
         }
-        updateObjectList();
+        updateObjects();
     }
     
     final void updateCells(Hitbox hitbox) {
@@ -550,11 +575,6 @@ public abstract class SpaceState<T extends CellGame,
         }
     }
     
-    @Override
-    public void updateThinkerListActions() {
-        updateObjectList();
-    }
-    
     /**
      * Returns the number of SpaceObjects that are assigned to this SpaceState.
      * @return The number of SpaceObjects that are assigned to this SpaceState
@@ -588,7 +608,7 @@ public abstract class SpaceState<T extends CellGame,
         @Override
         public final SpaceObject next() {
             if (stopped) {
-                return null;
+                throw new NoSuchElementException();
             }
             lastObject = iterator.next();
             return lastObject;
@@ -607,7 +627,7 @@ public abstract class SpaceState<T extends CellGame,
             if (!stopped) {
                 stopped = true;
                 objectIterators--;
-                updateObjectList();
+                updateObjects();
             }
         }
         
@@ -631,13 +651,13 @@ public abstract class SpaceState<T extends CellGame,
         return new ObjectIterator();
     }
     
-    private static class ObjectChangeData {
+    private static class ObjectChange {
         
-        private boolean used = false;
+        private boolean made = false;
         private final SpaceObject object;
         private final SpaceState newState;
         
-        private ObjectChangeData(SpaceObject object, SpaceState newState) {
+        private ObjectChange(SpaceObject object, SpaceState newState) {
             this.object = object;
             this.newState = newState;
         }
@@ -652,7 +672,7 @@ public abstract class SpaceState<T extends CellGame,
      */
     public final boolean addObject(SpaceObject object) {
         if (object.newState == null) {
-            addObjectChangeData(object, this);
+            addObjectChange(object, this);
             return true;
         }
         return false;
@@ -666,7 +686,7 @@ public abstract class SpaceState<T extends CellGame,
      */
     public final boolean removeObject(SpaceObject object) {
         if (object.newState == this) {
-            addObjectChangeData(object, null);
+            addObjectChange(object, null);
             return true;
         }
         return false;
@@ -680,10 +700,10 @@ public abstract class SpaceState<T extends CellGame,
         for (SpaceObject object : spaceObjects) {
             if (object.newState == this) {
                 object.newState = null;
-                objectChanges.add(new ObjectChangeData(object, null));
+                objectChanges.add(new ObjectChange(object, null));
             }
         }
-        updateObjectList();
+        updateObjects();
     }
     
     /**
@@ -707,7 +727,7 @@ public abstract class SpaceState<T extends CellGame,
                             && locatorHitbox.getTopEdge() >= y1
                             && locatorHitbox.getBottomEdge() <= y2) {
                         object.newState = null;
-                        objectChanges.add(new ObjectChangeData(object, null));
+                        objectChanges.add(new ObjectChange(object, null));
                     }
                     locatorHitbox.scanned = true;
                 }
@@ -716,7 +736,7 @@ public abstract class SpaceState<T extends CellGame,
         for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
-        updateObjectList();
+        updateObjects();
     }
     
     /**
@@ -740,7 +760,7 @@ public abstract class SpaceState<T extends CellGame,
                                 || locatorHitbox.getTopEdge() >= y2
                                 || locatorHitbox.getBottomEdge() <= y1)) {
                             object.newState = null;
-                            objectChanges.add(new ObjectChangeData(object, null));
+                            objectChanges.add(new ObjectChange(object, null));
                         }
                         locatorHitbox.scanned = true;
                     }
@@ -750,7 +770,7 @@ public abstract class SpaceState<T extends CellGame,
         for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
-        updateObjectList();
+        updateObjects();
     }
     
     /**
@@ -768,7 +788,7 @@ public abstract class SpaceState<T extends CellGame,
                     SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getRightEdge() <= x) {
                         object.newState = null;
-                        objectChanges.add(new ObjectChangeData(object, null));
+                        objectChanges.add(new ObjectChange(object, null));
                     }
                     locatorHitbox.scanned = true;
                 }
@@ -777,7 +797,7 @@ public abstract class SpaceState<T extends CellGame,
         for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
-        updateObjectList();
+        updateObjects();
     }
     
     /**
@@ -795,7 +815,7 @@ public abstract class SpaceState<T extends CellGame,
                     SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getLeftEdge() >= x) {
                         object.newState = null;
-                        objectChanges.add(new ObjectChangeData(object, null));
+                        objectChanges.add(new ObjectChange(object, null));
                     }
                     locatorHitbox.scanned = true;
                 }
@@ -804,7 +824,7 @@ public abstract class SpaceState<T extends CellGame,
         for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
-        updateObjectList();
+        updateObjects();
     }
     
     /**
@@ -822,7 +842,7 @@ public abstract class SpaceState<T extends CellGame,
                     SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getBottomEdge() <= y) {
                         object.newState = null;
-                        objectChanges.add(new ObjectChangeData(object, null));
+                        objectChanges.add(new ObjectChange(object, null));
                     }
                     locatorHitbox.scanned = true;
                 }
@@ -831,7 +851,7 @@ public abstract class SpaceState<T extends CellGame,
         for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
-        updateObjectList();
+        updateObjects();
     }
     
     /**
@@ -849,7 +869,7 @@ public abstract class SpaceState<T extends CellGame,
                     SpaceObject object = locatorHitbox.getObject();
                     if (object.newState == this && locatorHitbox.getTopEdge() >= y) {
                         object.newState = null;
-                        objectChanges.add(new ObjectChangeData(object, null));
+                        objectChanges.add(new ObjectChange(object, null));
                     }
                     locatorHitbox.scanned = true;
                 }
@@ -858,23 +878,23 @@ public abstract class SpaceState<T extends CellGame,
         for (Hitbox scannedHitbox : scanned) {
             scannedHitbox.scanned = false;
         }
-        updateObjectList();
+        updateObjects();
     }
     
-    private void addObjectChangeData(SpaceObject object, SpaceState newState) {
+    private void addObjectChange(SpaceObject object, SpaceState newState) {
         object.newState = newState;
-        ObjectChangeData data = new ObjectChangeData(object, newState);
+        ObjectChange change = new ObjectChange(object, newState);
         if (object.state != null) {
-            object.state.objectChanges.add(data);
-            object.state.updateObjectList();
+            object.state.objectChanges.add(change);
+            object.state.updateObjects();
         }
         if (newState != null) {
-            newState.objectChanges.add(data);
-            newState.updateObjectList();
+            newState.objectChanges.add(change);
+            newState.updateObjects();
         }
     }
     
-    private void addActions(SpaceObject object) {
+    private void add(SpaceObject object) {
         spaceObjects.add(object);
         object.game = getGame();
         object.state = this;
@@ -882,30 +902,29 @@ public abstract class SpaceState<T extends CellGame,
         object.addNonCellData();
     }
     
-    private void removeActions(SpaceObject object) {
+    private void remove(SpaceObject object) {
         object.removeData();
         spaceObjects.remove(object);
         object.game = null;
         object.state = null;
     }
     
-    private void updateObjectList() {
-        if (objectIterators == 0 && mobileObjectIterators == 0
-                && !iteratingThroughThinkers() && !updatingObjectList) {
-            updatingObjectList = true;
+    private void updateObjects() {
+        if (objectIterators == 0 && !updatingObjects) {
+            updatingObjects = true;
             while (!objectChanges.isEmpty()) {
-                ObjectChangeData data = objectChanges.remove();
-                if (!data.used) {
-                    data.used = true;
-                    if (data.object.state != null) {
-                        data.object.state.removeActions(data.object);
+                ObjectChange change = objectChanges.remove();
+                if (!change.made) {
+                    change.made = true;
+                    if (change.object.state != null) {
+                        change.object.state.remove(change.object);
                     }
-                    if (data.newState != null) {
-                        data.newState.addActions(data.object);
+                    if (change.newState != null) {
+                        change.newState.add(change.object);
                     }
                 }
             }
-            updatingObjectList = false;
+            updatingObjects = false;
         }
     }
     
@@ -942,7 +961,7 @@ public abstract class SpaceState<T extends CellGame,
         @Override
         public final MobileObject next() {
             if (stopped) {
-                return null;
+                throw new NoSuchElementException();
             }
             lastObject = iterator.next();
             return lastObject;
@@ -961,7 +980,7 @@ public abstract class SpaceState<T extends CellGame,
             if (!stopped) {
                 stopped = true;
                 mobileObjectIterators--;
-                updateMobileObjectList();
+                updateMobileObjects();
             }
         }
         
@@ -985,22 +1004,22 @@ public abstract class SpaceState<T extends CellGame,
         return new MobileObjectIterator();
     }
     
-    private static class MobileObjectChangeData {
+    private static class MobileObjectChange {
         
-        private boolean used = false;
+        private boolean made = false;
         private final boolean changePriority;
         private final MobileObject object;
         private final boolean add;
         private final int movementPriority;
         
-        private MobileObjectChangeData(MobileObject object, boolean add) {
+        private MobileObjectChange(MobileObject object, boolean add) {
             changePriority = false;
             this.object = object;
             this.add = add;
             movementPriority = 0;
         }
         
-        private MobileObjectChangeData(MobileObject object, int movementPriority) {
+        private MobileObjectChange(MobileObject object, int movementPriority) {
             changePriority = true;
             this.object = object;
             add = false;
@@ -1010,42 +1029,41 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     final void addMobileObject(MobileObject object) {
-        mobileObjectChanges.add(new MobileObjectChangeData(object, true));
-        updateMobileObjectList();
+        mobileObjectChanges.add(new MobileObjectChange(object, true));
+        updateMobileObjects();
     }
     
     final void removeMobileObject(MobileObject object) {
-        mobileObjectChanges.add(new MobileObjectChangeData(object, false));
-        updateMobileObjectList();
+        mobileObjectChanges.add(new MobileObjectChange(object, false));
+        updateMobileObjects();
     }
     
     final void changeMobileObjectMovementPriority(MobileObject object, int movementPriority) {
-        mobileObjectChanges.add(new MobileObjectChangeData(object, movementPriority));
-        updateMobileObjectList();
+        mobileObjectChanges.add(new MobileObjectChange(object, movementPriority));
+        updateMobileObjects();
     }
     
-    private void updateMobileObjectList() {
+    private void updateMobileObjects() {
         if (mobileObjectIterators == 0) {
             while (!mobileObjectChanges.isEmpty()) {
-                MobileObjectChangeData data = mobileObjectChanges.remove();
-                if (!data.used) {
-                    data.used = true;
-                    if (data.changePriority) {
-                        if (data.object.state == null) {
-                            data.object.movementPriority = data.movementPriority;
+                MobileObjectChange change = mobileObjectChanges.remove();
+                if (!change.made) {
+                    change.made = true;
+                    if (change.changePriority) {
+                        if (change.object.state == null) {
+                            change.object.movementPriority = change.movementPriority;
                         } else {
-                            mobileObjects.remove(data.object);
-                            data.object.movementPriority = data.movementPriority;
-                            mobileObjects.add(data.object);
+                            mobileObjects.remove(change.object);
+                            change.object.movementPriority = change.movementPriority;
+                            mobileObjects.add(change.object);
                         }
-                    } else if (data.add) {
-                        mobileObjects.add(data.object);
+                    } else if (change.add) {
+                        mobileObjects.add(change.object);
                     } else {
-                        mobileObjects.remove(data.object);
+                        mobileObjects.remove(change.object);
                     }
                 }
             }
-            updateObjectList();
         }
     }
     
@@ -2982,11 +3000,8 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     @Override
-    public void frameActions(T game) {
-        Iterator<V> thinkerIterator = thinkerIterator();
-        while (thinkerIterator.hasNext()) {
-            thinkerIterator.next().beforeMovement();
-        }
+    public void frameActions(T game, U state) {
+        beforeMovementEvents.perform(state);
         for (MobileObject object : mobileObjects) {
             object.collisions.clear();
             object.collisionDirections.clear();

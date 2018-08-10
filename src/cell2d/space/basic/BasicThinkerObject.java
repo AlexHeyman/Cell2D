@@ -20,6 +20,25 @@ public abstract class BasicThinkerObject extends ThinkerObject<CellGame,BasicSpa
         setThinker(new BasicSpaceThinker() {
             
             @Override
+            public final void frameActions(CellGame game, BasicSpaceState state) {
+                BasicThinkerObject.this.frameActions(game, state);
+            }
+            
+            @Override
+            public final void addSubThinkerActions(CellGame game,
+                    BasicSpaceState state, BasicSpaceThinker subThinker) {
+                super.addSubThinkerActions(game, state, subThinker);
+                BasicThinkerObject.this.addSubThinkerActions(game, state, subThinker);
+            }
+            
+            @Override
+            public final void removeSubThinkerActions(CellGame game,
+                    BasicSpaceState state, BasicSpaceThinker subThinker) {
+                BasicThinkerObject.this.removeSubThinkerActions(game, state, subThinker);
+                super.removeSubThinkerActions(game, state, subThinker);
+            }
+            
+            @Override
             public final void addedActions(CellGame game, BasicSpaceState state) {
                 BasicThinkerObject.this.addedActions(game, state);
             }
@@ -30,22 +49,45 @@ public abstract class BasicThinkerObject extends ThinkerObject<CellGame,BasicSpa
             }
             
             @Override
-            public final void timeUnitActions(CellGame game, BasicSpaceState state) {
-                BasicThinkerObject.this.timeUnitActions(game, state);
-            }
-            
-            @Override
             public final void beforeMovementActions(CellGame game, BasicSpaceState state) {
                 BasicThinkerObject.this.beforeMovementActions(game, state);
             }
             
-            @Override
-            public final void frameActions(CellGame game, BasicSpaceState state) {
-                BasicThinkerObject.this.frameActions(game, state);
-            }
-            
         });
     }
+    
+    /**
+     * Actions for this BasicThinkerObject to take once each frame after its
+     * BasicSpaceState moves its assigned MobileObjects.
+     * @param game This BasicThinkerObject's BasicSpaceState's CellGame
+     * @param state This BasicThinkerObject's BasicSpaceState
+     */
+    public void frameActions(CellGame game, BasicSpaceState state) {}
+    
+    /**
+     * Actions for this BasicThinkerObject to take immediately after adding a
+     * BasicSpaceThinker to itself, before the added BasicSpaceThinker takes its
+     * addedActions().
+     * @param game This BasicThinkerObject's BasicSpaceState's CellGame, or null
+     * if it has no BasicSpaceState
+     * @param state This BasicThinkerObject's BasicSpaceState, or null if it has
+     * none
+     * @param subThinker The BasicSpaceThinker that was added
+     */
+    public void addSubThinkerActions(CellGame game, BasicSpaceState state, BasicSpaceThinker subThinker) {}
+    
+    /**
+     * Actions for this BasicThinkerObject to take immediately before removing a
+     * BasicSpaceThinker from itself, after the soon-to-be-removed
+     * BasicSpaceThinker takes its removedActions().
+     * @param game This BasicThinkerObject's BasicSpaceState's CellGame, or null
+     * if it has no BasicSpaceState
+     * @param state This BasicThinkerObject's BasicSpaceState, or null if it has
+     * none
+     * @param subThinker The BasicSpaceThinker that is about to be removed
+     */
+    public void removeSubThinkerActions(CellGame game,
+            BasicSpaceState state, BasicSpaceThinker subThinker) {}
     
     /**
      * Actions for this BasicThinkerObject to take immediately after being added
@@ -64,29 +106,12 @@ public abstract class BasicThinkerObject extends ThinkerObject<CellGame,BasicSpa
     public void removedActions(CellGame game, BasicSpaceState state) {}
     
     /**
-     * Actions for this BasicThinkerObject to take once every time unit, after
-     * AnimationInstances update their indices but before BasicSpaceThinkers
-     * take their beforeMovementActions().
-     * @param game This BasicThinkerObject's BasicSpaceState's CellGame
-     * @param state This BasicThinkerObject's BasicSpaceState
-     */
-    public void timeUnitActions(CellGame game, BasicSpaceState state) {}
-    
-    /**
-     * Actions for this BasicThinkerObject to take once every frame, after
-     * BasicSpaceThinkers take their timeUnitActions() but before its
-     * BasicSpaceState moves its assigned MobileObjects.
+     * Actions for this BasicThinkerObject to take once each frame, after all
+     * Thinkers have experienced all of their time units for that frame, but
+     * before its BasicSpaceState moves its assigned MobileObjects.
      * @param game This BasicThinkerObject's BasicSpaceState's CellGame
      * @param state This BasicThinkerObject's BasicSpaceState
      */
     public void beforeMovementActions(CellGame game, BasicSpaceState state) {}
-    
-    /**
-     * Actions for this BasicThinkerObject to take once every frame after its
-     * BasicSpaceState moves its assigned MobileObjects.
-     * @param game This BasicThinkerObject's BasicSpaceState's CellGame
-     * @param state This BasicThinkerObject's BasicSpaceState
-     */
-    public void frameActions(CellGame game, BasicSpaceState state) {}
     
 }

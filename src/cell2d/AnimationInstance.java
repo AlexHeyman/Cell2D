@@ -5,19 +5,19 @@ import org.newdawn.slick.Graphics;
 /**
  * <p>An AnimationInstance is an instance of an Animation that represents a
  * point in the Animation and rates at which that point progresses through the
- * Animation. An AnimationInstance has one level for each dimension of its
- * Animation, numbered 0 through the number of dimensions minus 1 inclusive. For
- * example, an instance of a level 2 Animation (an Animation of Animations) has
- * two levels: level 0 for the component Animations, and level 1 for the
+ * Animation. An AnimationInstance has one <i>level</i> for each dimension of
+ * its Animation, numbered 0 through the number of dimensions minus 1 inclusive.
+ * For example, an instance of a level 2 Animation (an Animation of Animations)
+ * has two levels: level 0 for the component Animations, and level 1 for the
  * Animation of Animations.</p>
  * 
- * <p>At each of its levels, an AnimationInstance has an index of its current
- * position in that level of the Animation, as well as a speed that represents
- * how fast, in fracunits per time unit, it advances through that level. If a
- * level's speed is negative, the AnimationInstance will cycle through the
- * Animation at that level backward. If an AnimationInstance moves forward past
- * a level's end or backward past its beginning, it will loop back to the
- * beginning or end, respectively.</p>
+ * <p>At each of its levels, an AnimationInstance has an <i>index</i> of its
+ * current position in that level of the Animation, as well as a <i>speed</i>
+ * that represents how fast, in fracunits per time unit, it advances through
+ * that level. If a level's speed is negative, the AnimationInstance will cycle
+ * through the Animation at that level backward. If an AnimationInstance moves
+ * forward past a level's end or backward past its beginning, it will loop back
+ * to the beginning or end, respectively.</p>
  * 
  * <p>When an AnimationInstance is drawn, it will appear as the Sprite in its
  * Animation that its current indices specify. The Filters that can be
@@ -25,15 +25,15 @@ import org.newdawn.slick.Graphics;
  * AnimationInstance are the same ones as when the Sprite is drawn by itself.
  * </p>
  * 
- * <p>AnimationInstances keep track of time by being added to one GameState
- * each. An AnimationInstance's time factor represents the average number of
- * discrete time units the AnimationInstance will experience every frame while
- * assigned to an active GameState. If its own time factor is negative, an
+ * <p>AnimationInstances keep track of time by being assigned to one GameState
+ * each. An AnimationInstance's <i>time factor</i> represents the average number
+ * of discrete time units the AnimationInstance will experience every frame
+ * while assigned to an active GameState. If its own time factor is negative, an
  * AnimationInstance will use its assigned GameState's time factor instead. If
  * an AnimationInstance is assigned to an inactive GameState or none at all,
  * time will not pass for it. AnimationInstances assigned to the active
  * GameState update their indices at the beginning of each frame, before
- * Thinkers' timeUnitActions() are taken.</p>
+ * Thinkers' timer values are updated.</p>
  * 
  * <p>All operations on an AnimationInstance return the AnimationInstance itself
  * to allow operations to be easily strung together.</p>
@@ -145,7 +145,7 @@ public class AnimationInstance implements Drawable {
      * @return This AnimationInstance's effective time factor
      */
     public final long getEffectiveTimeFactor() {
-        return (state == null ? 0 : (timeFactor < 0 ? state.getTimeFactor() : timeFactor));
+        return (state == null ? 0 : (timeFactor < 0 ? state.getEffectiveTimeFactor() : timeFactor));
     }
     
     /**
@@ -299,7 +299,7 @@ public class AnimationInstance implements Drawable {
         if (blank) {
             return;
         }
-        long timeToRun = (timeFactor < 0 ? state.getTimeFactor() : timeFactor);
+        long timeToRun = getEffectiveTimeFactor();
         if (timeToRun == 0) {
             return;
         }

@@ -36,21 +36,20 @@ import org.newdawn.slick.util.Log;
 
 /**
  * <p>A CellGame is a game made with Cell2D. A certain number of times per
- * second, a CellGame executes a frame, in which it processes input, updates the
- * logic of the game, and renders visuals.</p>
+ * second, a CellGame executes a <i>frame</i>, in which it processes input,
+ * updates the logic of the game, and renders visuals.</p>
  * 
  * <p>A CellGame has one or more GameStates, each with a non-negative integer ID
  * that is unique within the CellGame. A CellGame is in exactly one of these
  * GameStates at any given time, and can transition between them. Each GameState
  * has its own actions to take every frame and in response to specific events,
- * but it only takes these actions while the CellGame is in that state and it is
- * thus active. If a GameState is created with an ID that another GameState of
- * the same CellGame already has, the old GameState is replaced and can no
- * longer be entered.</p>
+ * but it only takes these actions while the CellGame is in it. If a GameState
+ * is created with an ID that another GameState of the same CellGame already
+ * has, the old GameState can no longer be entered.</p>
  * 
  * <p>A CellGame renders visuals on a rectangular grid of pixels called its
- * screen. Points on the screen have x-coordinates that increase from left to
- * right, as well as y-coordinates that increase from top to bottom. The
+ * <i>screen</i>. Points on the screen have x-coordinates that increase from
+ * left to right, as well as y-coordinates that increase from top to bottom. The
  * dimensions of the screen are not necessarily the same as the dimensions of
  * the CellGame's program window, as the screen may be scaled to different
  * apparent sizes using the CellGame's scale factor. A CellGame may be displayed
@@ -62,21 +61,21 @@ import org.newdawn.slick.util.Log;
  * clipped so that they do not extend beyond the screen.</p>
  * 
  * <p>A CellGame processes input in the form of a fixed number of binary
- * commands, numbered from 0 to getNumCommands() - 1 inclusive, as well as the
- * position of the mouse cursor on the screen and the movement of the mouse
- * wheel. Slick2D objects called Controls, which represent keys, mouse buttons,
- * controller buttons, etc. may be bound to at most one command at a time so
- * that when they are pressed, held, and released, so too are the commands to
- * which they are bound. A CellGame also allows for the temporary processing of
- * input as assignments of Controls to specific commands, or as the typing of
- * text to a specific String.</p>
+ * <i>commands</i>, numbered from 0 to getNumCommands() - 1 inclusive, as well
+ * as the position of the mouse cursor on the screen and the movement of the
+ * mouse wheel. Slick2D objects called Controls, which represent keys, mouse
+ * buttons, controller buttons, etc. may be bound to at most one command at a
+ * time so that when they are pressed, held, and released, so too are the
+ * commands to which they are bound. A CellGame also allows for the temporary
+ * processing of input as assignments of Controls to specific commands, or as
+ * the typing of text to a specific String.</p>
  * 
  * <p>A CellGame also controls the playing and stopping of Music tracks. It
- * contains a data structure called a music stack in which different integer
- * priority values may be assigned one or more Music tracks each. Only the Music
- * tracks assigned to the greatest priority in the stack will play at any given
- * time. If a currently playing Music track finishes, it will automatically be
- * removed from the top of the music stack.</p>
+ * contains a data structure called a <i>music stack</i> in which different
+ * integer priority values may be assigned one or more Music tracks each. Only
+ * the Music tracks assigned to the greatest priority in the stack will play at
+ * any given time. If a currently playing Music track finishes, it will
+ * automatically be removed from the top of the music stack.</p>
  * @see GameState
  * @see Music
  * @author Andrew Heyman
@@ -355,7 +354,7 @@ public abstract class CellGame {
                             (int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
                     mouseWheelChange = newMouseWheelChange;
                     newMouseWheelChange = 0;
-                    currentState.frame();
+                    currentState.doFrame();
                     msToRun -= msPerFrame;
                     if (closeRequested) {
                         Audio.close();
@@ -611,8 +610,7 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns the GameState that this CellGame is currently in - in other
-     * words, this CellGame's only active GameState.
+     * Returns the GameState that this CellGame is currently in.
      * @return The GameState that this CellGame is currently in
      */
     public final GameState getCurrentState() {

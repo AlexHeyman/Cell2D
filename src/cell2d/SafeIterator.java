@@ -7,8 +7,8 @@ import java.util.Iterator;
  * some means other than the Iterator's own remove() method while the Iterator
  * is active. Changes to the Collection will be delayed until after all of its
  * SafeIterators stop iterating over it.</p>
- * @author Andrew Heyman
  * @param <E> The type of element that this SafeIterator returns
+ * @author Andrew Heyman
  */
 public interface SafeIterator<E> extends Iterator<E> {
     

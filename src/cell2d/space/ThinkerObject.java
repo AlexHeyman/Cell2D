@@ -2,9 +2,8 @@ package cell2d.space;
 
 import cell2d.CellGame;
 import cell2d.Event;
-import cell2d.GameState;
+import cell2d.EventGroup;
 import cell2d.SafeIterator;
-import cell2d.Thinker;
 
 /**
  * <p>A ThinkerObject is a MobileObject that mimics a type of SpaceThinker by
@@ -16,11 +15,11 @@ import cell2d.Thinker;
  * remove it from SpaceStates that can use it as appropriate to match the
  * ThinkerObject's own time factor and assigned SpaceState.</p>
  * @see SpaceThinker
- * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this ThinkerObject's SpaceThinker's
  * SpaceStates
  * @param <U> The type of SpaceState that uses this ThinkerObject's SpaceThinker
  * @param <V> The type of SpaceThinker that this ThinkerObject mimics
+ * @author Andrew Heyman
  */
 public abstract class ThinkerObject<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends MobileObject {
@@ -29,10 +28,10 @@ public abstract class ThinkerObject<T extends CellGame,
     private V thinker = null;
     
     /**
-     * Creates a new ThinkerObject with no locator Hitbox or SpaceThinker. This
-     * ThinkerObject must be assigned a locator Hitbox with its
-     * setLocatorHitbox() method and a SpaceThinker with its setThinker() method
-     * before any of its other methods are called.
+     * Creates a new ThinkerObject with no locator Hitbox or assigned
+     * SpaceThinker. This ThinkerObject must be assigned a locator Hitbox with
+     * its setLocatorHitbox() method and a SpaceThinker with its setThinker()
+     * method before any of its other methods are called.
      * @see #setLocatorHitbox(cell2d.space.Hitbox)
      * @see #setThinker(cell2d.space.SpaceThinker)
      */
@@ -43,9 +42,9 @@ public abstract class ThinkerObject<T extends CellGame,
         super.addNonCellData();
         if (state.getGameClass() == getGameClass()
                 && state.getStateClass() == getStateClass()
-                && state.getThinkerClass() == getThinkerClass()) {
+                && state.getSubThinkerClass() == getSubThinkerClass()) {
             compatibleState = (U)state;
-            compatibleState.addThinker(thinker);
+            compatibleState.addSubThinker(thinker);
         }
     }
     
@@ -53,7 +52,7 @@ public abstract class ThinkerObject<T extends CellGame,
     void removeData() {
         super.removeData();
         if (compatibleState != null) {
-            compatibleState.removeThinker(thinker);
+            compatibleState.removeSubThinker(thinker);
             compatibleState = null;
         }
     }
@@ -65,37 +64,39 @@ public abstract class ThinkerObject<T extends CellGame,
     }
     
     /**
-     * Returns the Class object representing the subclass of CellGame that uses
-     * this ThinkerObject's SpaceThinker's SpaceStates.
-     * @return The subclass of CellGame that uses this ThinkerObject's
-     * SpaceThinker's SpaceStates
+     * Returns the Class object representing the type of CellGame that uses this
+     * ThinkerObject's SpaceThinker's SpaceStates.
+     * @return The Class object representing the type of CellGame that uses this
+     * ThinkerObject's SpaceThinker's SpaceStates
      */
     public final Class<T> getGameClass() {
         return thinker.getGameClass();
     }
     
     /**
-     * Returns the Class object representing the subclass of SpaceState that
-     * uses this ThinkerObject's SpaceThinker.
-     * @return The subclass of SpaceState that uses this ThinkerObject's
-     * SpaceThinker
+     * Returns the Class object representing the type of SpaceState that uses
+     * this ThinkerObject's SpaceThinker.
+     * @return The Class object representing the type of SpaceState that uses
+     * this ThinkerObject's SpaceThinker
      */
     public final Class<U> getStateClass() {
         return thinker.getStateClass();
     }
     
     /**
-     * Returns the Class object representing the subclass of SpaceThinker that
+     * Returns the Class object representing the type of SpaceThinker that
      * this ThinkerObject mimics.
-     * @return The subclass of SpaceThinker that this ThinkerObject mimics
+     * @return The Class object representing the type of SpaceThinker that
+     * this ThinkerObject mimics
      */
-    public final Class<V> getThinkerClass() {
-        return thinker.getThinkerClass();
+    public final Class<V> getSubThinkerClass() {
+        return thinker.getSubThinkerClass();
     }
     
     /**
-     * Returns this ThinkerObject's SpaceThinker, or null if it has none.
-     * @return This ThinkerObject's SpaceThinker
+     * Returns this ThinkerObject's assigned SpaceThinker, or null if it has
+     * none.
+     * @return This ThinkerObject's assigned SpaceThinker
      */
     public final V getThinker() {
         return thinker;
@@ -104,130 +105,16 @@ public abstract class ThinkerObject<T extends CellGame,
     /**
      * Sets this ThinkerObject's assigned SpaceThinker to the specified one, if
      * this ThinkerObject does not already have a SpaceThinker and the
-     * specified SpaceThinker is not already assigned to a ThinkerGroup.
+     * specified SpaceThinker is not already assigned to a Thinker.
      * @param thinker The SpaceThinker to be assigned
      * @return Whether the assignment occurred
      */
     public final boolean setThinker(V thinker) {
-        if (this.thinker == null && thinker.getNewThinkerGroup() == null) {
+        if (this.thinker == null && thinker.getNewSuperThinker() == null) {
             this.thinker = thinker;
             return true;
         }
         return false;
-    }
-    
-    /**
-     * Returns the number of SpaceThinkers that are assigned to this
-     * ThinkerObject.
-     * @return The number of SpaceThinkers that are assigned to this
-     * ThinkerObject
-     */
-    public final int getNumThinkers() {
-        return thinker.getNumThinkers();
-    }
-    
-    /**
-     * Returns whether any Iterators over this ThinkerObject's list of
-     * SpaceThinkers are in progress.
-     * @return Whether any Iterators over this ThinkerObject's list of
-     * SpaceThinkers are in progress
-     */
-    public final boolean iteratingThroughThinkers() {
-        return thinker.iteratingThroughThinkers();
-    }
-    
-    /**
-     * Returns a new SafeIterator over this ThinkerObject's list of
-     * SpaceThinkers.
-     * @return A new SafeIterator over this ThinkerObject's list of
-     * SpaceThinkers
-     */
-    public final SafeIterator<V> thinkerIterator() {
-        return thinker.thinkerIterator();
-    }
-    
-    /**
-     * Adds the specified SpaceThinker to this ThinkerObject if it is not
-     * already assigned to a ThinkerGroup.
-     * @param thinker The SpaceThinker to be added
-     * @return Whether the addition occurred
-     */
-    public final boolean addThinker(V thinker) {
-        return this.thinker.addThinker(thinker);
-    }
-    
-    /**
-     * Removes the specified SpaceThinker from this ThinkerObject if it is
-     * currently assigned to it.
-     * @param thinker The SpaceThinker to be removed
-     * @return Whether the removal occurred
-     */
-    public final boolean removeThinker(V thinker) {
-        return this.thinker.removeThinker(thinker);
-    }
-    
-    /**
-     * Removes from this ThinkerObject all of the SpaceThinkers that are
-     * currently assigned to it.
-     */
-    public final void removeAllThinkers() {
-        thinker.removeAllThinkers();
-    }
-    
-    /**
-     * Removes from their ThinkerGroups all of the SpaceThinkers that are
-     * directly or indirectly assigned to this ThinkerObject. For instance, if a
-     * SpaceThinker is assigned to a SpaceThinker that is assigned to this
-     * ThinkerObject, the first SpaceThinker will be removed from the second,
-     * and the second will be removed from this ThinkerObject.
-     */
-    public final void removeAllSubThinkers() {
-        thinker.removeAllSubThinkers();
-    }
-    
-    /**
-     * Removes from their ThinkerGroups all of the SpaceThinkers that are
-     * directly or indirectly assigned to this ThinkerObject, and are either
-     * assigned to or assignees of the specified SpaceThinker. For instance, if
-     * a SpaceThinker is assigned to a SpaceThinker that is assigned to a
-     * SpaceThinker that is assigned to this ThinkerObject, and the second
-     * SpaceThinker is the specified SpaceThinker, the first SpaceThinker will
-     * be removed from the second, the second from the third, and the third from
-     * this ThinkerObject. This method is useful for ThinkerObjects that use
-     * SpaceThinker to model a hierarchy of states in which they can exist.
-     * @param thinker The SpaceThinker with which the removed SpaceThinkers must
-     * share a lineage of assignments
-     * @return Whether any removals occurred
-     */
-    public final boolean removeLineage(V thinker) {
-        return this.thinker.removeLineage(thinker);
-    }
-    
-    /**
-     * Returns this ThinkerObject's action priority.
-     * @return This ThinkerObject's action priority
-     */
-    public final int getActionPriority() {
-        return thinker.getActionPriority();
-    }
-    
-    /**
-     * Returns the action priority that this ThinkerObject is about to have, but
-     * does not yet have due to its SpaceState's SpaceThinker list being
-     * iterated over. If this ThinkerObject is not about to change its action
-     * priority, this method will simply return its current action priority.
-     * @return The action priority that this ThinkerObject is about to have
-     */
-    public final int getNewActionPriority() {
-        return thinker.getNewActionPriority();
-    }
-    
-    /**
-     * Sets this ThinkerObject's action priority to the specified value.
-     * @param actionPriority The new action priority
-     */
-    public final void setActionPriority(int actionPriority) {
-        thinker.setActionPriority(actionPriority);
     }
     
     /**
@@ -248,6 +135,145 @@ public abstract class ThinkerObject<T extends CellGame,
      */
     public final void setTimerValue(Event event, int value) {
         thinker.setTimerValue(event, value);
+    }
+    
+    /**
+     * Returns the EventGroup of this ThinkerObject's frame Events.
+     * @return The EventGroup of this ThinkerObject's frame Events
+     */
+    public final EventGroup<T,U> getFrameEvents() {
+        return thinker.getFrameEvents();
+    }
+    
+    /**
+     * Returns the number of SpaceThinkers that are assigned to this
+     * ThinkerObject.
+     * @return The number of SpaceThinkers that are assigned to this
+     * ThinkerObject
+     */
+    public final int getNumSubThinkers() {
+        return thinker.getNumSubThinkers();
+    }
+    
+    /**
+     * Returns whether any Iterators over this ThinkerObject's list of
+     * SpaceThinkers are in progress.
+     * @return Whether any Iterators over this ThinkerObject's list of
+     * SpaceThinkers are in progress
+     */
+    public final boolean iteratingThroughSubThinkers() {
+        return thinker.iteratingThroughSubThinkers();
+    }
+    
+    /**
+     * Returns a new SafeIterator over this ThinkerObject's list of
+     * SpaceThinkers.
+     * @return A new SafeIterator over this ThinkerObject's list of
+     * SpaceThinkers
+     */
+    public final SafeIterator<V> subThinkerIterator() {
+        return thinker.subThinkerIterator();
+    }
+    
+    /**
+     * Adds the specified SpaceThinker to this ThinkerObject if it is not
+     * already assigned to a Thinker, and if doing so would not create a loop of
+     * assignments in which SpaceThinkers are directly or indirectly assigned to
+     * themselves.
+     * @param subThinker The SpaceThinker to be added
+     * @return Whether the addition occurred
+     */
+    public final boolean addSubThinker(V subThinker) {
+        return this.thinker.addSubThinker(subThinker);
+    }
+    
+    /**
+     * Removes the specified SpaceThinker from this ThinkerObject if it is
+     * currently assigned to it.
+     * @param subThinker The SpaceThinker to be removed
+     * @return Whether the removal occurred
+     */
+    public final boolean removeSubThinker(V subThinker) {
+        return this.thinker.removeSubThinker(subThinker);
+    }
+    
+    /**
+     * Removes from this ThinkerObject all of the SpaceThinkers that are
+     * currently assigned to it.
+     */
+    public final void clearSubThinkers() {
+        thinker.clearSubThinkers();
+    }
+    
+    /**
+     * Removes from their super-Thinkers all of the SpaceThinkers that are
+     * directly or indirectly assigned to this ThinkerObject, and are either
+     * assigned to or assignees of the specified SpaceThinker. For instance, if
+     * a SpaceThinker is assigned to a SpaceThinker that is assigned to a
+     * SpaceThinker that is assigned to this ThinkerObject, and the second
+     * SpaceThinker is the specified SubThinker, the first SpaceThinker will be
+     * removed from the second, the second from the third, and the third from
+     * this ThinkerObject. This method is useful for ThinkerObjects that use
+     * SpaceThinkers to model a hierarchy of states in which they can exist.
+     * @param subThinker The SpaceThinker with which the removed SpaceThinkers
+     * must share a lineage of assignments
+     * @return Whether any removals occurred
+     */
+    public final boolean removeLineage(V subThinker) {
+        return this.thinker.removeLineage(subThinker);
+    }
+    
+    /**
+     * Removes from their super-Thinkers all of the SpaceThinkers that are
+     * directly or indirectly assigned to this Thinker. For instance, if a
+     * SpaceThinker is assigned to a SpaceThinker that is assigned to this
+     * ThinkerObject, the first SpaceThinker will be removed from the second,
+     * and the second will be removed from this ThinkerObject.
+     */
+    public final void clearLineages() {
+        thinker.clearLineages();
+    }
+    
+    /**
+     * Returns this ThinkerObject's frame priority.
+     * @return This ThinkerObject's frame priority
+     */
+    public int getFramePriority() {
+        return thinker.getFramePriority();
+    }
+    
+    /**
+     * Sets this ThinkerObject's frame priority to the specified value.
+     * @param framePriority This ThinkerObject's new frame priority
+     */
+    public void setFramePriority(int framePriority) {
+        thinker.setFramePriority(framePriority);
+    }
+    
+    /**
+     * Returns the EventGroup of this ThinkerObject's before-movement Events.
+     * @return The EventGroup of this ThinkerObject's before-movement Events
+     */
+    public final EventGroup<T,U> getBeforeMovementEvents() {
+        return thinker.getBeforeMovementEvents();
+    }
+    
+    /**
+     * Returns this ThinkerObject's before-movement priority.
+     * @return This ThinkerObject's before-movement priority
+     */
+    public final int getBeforeMovementPriority() {
+        return thinker.getBeforeMovementPriority();
+    }
+    
+    /**
+     * Sets this ThinkerObject's before-movement priority to the specified
+     * value.
+     * @param beforeMovementPriority This ThinkerObject's new before-movement
+     * priority
+     */
+    public final void setBeforeMovementPriority(int beforeMovementPriority) {
+        thinker.setBeforeMovementPriority(beforeMovementPriority);
     }
     
 }

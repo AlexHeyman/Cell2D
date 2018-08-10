@@ -2,7 +2,6 @@ package cell2d;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.newdawn.slick.Graphics;
@@ -12,40 +11,39 @@ import org.newdawn.slick.Graphics;
  * main menu, the options menu, in the middle of a level, etc. GameStates are
  * permanent parts of a specific CellGame and referenced by a specific
  * non-negative integer ID, both of which are specified upon the GameState's
- * creation.</p>
+ * creation. If a CellGame is in a GameState, that GameState is considered
+ * <i>active</i>.</p>
  * 
- * <p>A GameState has its own actions to take every time its CellGame executes a
- * frame and in response to specific events, but it only takes these actions
- * while the CellGame is in that state and it is thus active.</p>
+ * <p>A GameState is also a Thinker that is considered assigned to itself. This
+ * means that it has timers, frameActions(), frame events, etc. A GameState will
+ * take its frameActions() immediately after all Thinkers have experienced all
+ * of their time units for that frame, first among the Thinkers assigned to it.
+ * </p>
  * 
  * <p>AnimationInstances may be assigned to one GameState each. An
  * AnimationInstance may be assigned to a GameState with or without an integer
  * ID in the context of that GameState. Only one AnimationInstance may be
  * assigned to a given GameState with a given ID at once.</p>
  * 
- * <p>A GameState is also a ThinkerGroup, which means that Thinkers may be
- * directly assigned to one GameState each.</p>
- * 
- * <p>The GameState class is intended to be directly extended by classes U that
- * extend GameState&lt;T,U,V&gt; and interact with Thinkers of class V.
- * BasicState is an example of such a class. This allows a GameState's Thinkers
- * to interact with it in ways unique to its subclass of GameState.</p>
+ * <p>The GameState class is intended to be extended by classes U that extend
+ * GameState&lt;T,U,V&gt; and interact with SubThinkers of class V. BasicState
+ * is an example of such a class. This allows a GameState's SubThinkers to
+ * interact with it in ways unique to its subclass of GameState.</p>
  * @see CellGame
  * @see AnimationInstance
- * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this GameState
- * @param <U> The type of GameState that this GameState is for Thinker
+ * @param <U> The type of GameState that this GameState is for SubThinker
  * interaction purposes
- * @param <V> The type of Thinker that this GameState uses
+ * @param <V> The type of SubThinker that can be assigned to this GameState
+ * @author Andrew Heyman
  */
 public abstract class GameState<T extends CellGame,
-        U extends GameState<T,U,V>, V extends Thinker<T,U,V>> extends ThinkerGroup<T,U,V> {
+        U extends GameState<T,U,V>, V extends SubThinker<T,U,V>> extends Thinker<T,U,V> {
     
     private final U thisState;
     final T game;
     private final int id;
     boolean active = false;
-    private long timeFactor = Frac.UNIT;
     private final Set<AnimationInstance> animInstances = new HashSet<>();
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
     
@@ -53,17 +51,17 @@ public abstract class GameState<T extends CellGame,
      * Creates a new GameState of the specified CellGame with the specified ID.
      * GameStates automatically register themselves with their CellGames upon
      * creation.
-     * @param gameClass The Class object representing the subclass of CellGame
-     * that uses this GameState
-     * @param stateClass The Class object representing the subclass of GameState
-     * that this GameState is for Thinker interaction purposes
-     * @param thinkerClass The Class object representing the subclass of Thinker
-     * that this GameState uses
+     * @param gameClass The Class object representing the type of CellGame that
+     * uses this GameState
+     * @param stateClass The Class object representing the type of GameState
+     * that this GameState is for SubThinker interaction purposes
+     * @param subThinkerClass The Class object representing the type of
+     * SubThinker that can be assigned to this GameState
      * @param game The CellGame to which this GameState belongs
      * @param id This GameState's ID
      */
-    public GameState(Class<T> gameClass, Class<U> stateClass, Class<V> thinkerClass, T game, int id) {
-        super(gameClass, stateClass, thinkerClass);
+    public GameState(Class<T> gameClass, Class<U> stateClass, Class<V> subThinkerClass, T game, int id) {
+        super(gameClass, stateClass, subThinkerClass);
         thisState = (U)this;
         if (game == null) {
             throw new RuntimeException("Attempted to create a GameState with no CellGame");
@@ -81,12 +79,20 @@ public abstract class GameState<T extends CellGame,
         return thisState;
     }
     
-    /**
-     * Returns the CellGame to which this GameState belongs.
-     * @return The CellGame to which this GameState belongs
-     */
+    @Override
     public final T getGame() {
         return game;
+    }
+    
+    @Override
+    public final U getGameState() {
+        return thisState;
+    }
+    
+    @Override
+    public final long getEffectiveTimeFactor() {
+        long timeFactor = getTimeFactor();
+        return (timeFactor < 0 ? Frac.UNIT : timeFactor);
     }
     
     /**
@@ -98,32 +104,11 @@ public abstract class GameState<T extends CellGame,
     }
     
     /**
-     * Returns whether this GameState is active - that is, whether its CellGame
-     * is currently in this state.
+     * Returns whether this GameState is active.
      * @return Whether this GameState is active
      */
     public final boolean isActive() {
         return active;
-    }
-    
-    /**
-     * Returns this GameState's time factor; that is, the average number of
-     * discrete time units it experiences every frame.
-     * @return This GameState's time factor
-     */
-    public final long getTimeFactor() {
-        return timeFactor;
-    }
-    
-    /**
-     * Sets this GameState's time factor to the specified value.
-     * @param timeFactor The new time factor
-     */
-    public final void setTimeFactor(long timeFactor) {
-        if (timeFactor < 0) {
-            throw new RuntimeException("Attempted to give a GameState a negative time factor");
-        }
-        this.timeFactor = timeFactor;
     }
     
     /**
@@ -302,56 +287,13 @@ public abstract class GameState<T extends CellGame,
      */
     public void leftActions(T game) {}
     
-    @Override
-    public final void addThinkerActions(V thinker) {
-        thinker.setGameAndState(game, thisState);
-        addThinkerActions(game, thinker);
-    }
-    
-    /**
-     * Actions for this GameState to take immediately after adding a Thinker to
-     * itself.
-     * @param game This GameState's CellGame
-     * @param thinker The Thinker that was added
-     */
-    public final void addThinkerActions(T game, V thinker) {}
-    
-    @Override
-    public final void removeThinkerActions(V thinker) {
-        removeThinkerActions(game, thinker);
-        thinker.setGameAndState(null, null);
-    }
-    
-    /**
-     * Actions for this GameState to take immediately before removing a Thinker
-     * from itself.
-     * @param game This GameState's CellGame
-     * @param thinker The Thinker that is about to be removed
-     */
-    public final void removeThinkerActions(T game, V thinker) {}
-    
-    final void frame() {
+    final void doFrame() {
         for (AnimationInstance instance : animInstances) {
             instance.update();
         }
-        Iterator<V> iterator = thinkerIterator();
-        while (iterator.hasNext()) {
-            iterator.next().update();
-        }
-        frameActions(game);
-        iterator = thinkerIterator();
-        while (iterator.hasNext()) {
-            iterator.next().frame();
-        }
+        update(game, thisState, Frac.UNIT);
+        frame.actions(game, thisState);
     }
-    
-    /**
-     * Actions for this GameState to take once every frame, after all of its
-     * Thinkers have taken their timeUnitActions() but before they take their
-     * frameActions().
-     * @param game This GameState's CellGame
-     */
-    public void frameActions(T game) {}
     
     /**
      * Actions for this GameState to take each frame to render its visuals.

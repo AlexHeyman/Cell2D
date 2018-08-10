@@ -9,7 +9,7 @@ import java.awt.Point;
  * <p>A Viewport represents a rectangular region of the screen through which the
  * space of the SpaceState to which it is assigned can be viewed. The center of
  * a Viewport's rectangular field of view in a SpaceState is the center of a
- * SpaceObject called the Viewport's camera. To render the region of its
+ * SpaceObject called the Viewport's <i>camera</i>. To render the region of its
  * SpaceState in its field of view, a Viewport's camera must be assigned to the
  * same SpaceState as it. One pixel in a Viewport's rendering region on the
  * screen is equal to one fracunit in its SpaceState.</p>
@@ -26,9 +26,9 @@ import java.awt.Point;
  * Viewport occupies as its rendering region.</p>
  * @see SpaceState#setViewport(int, cell2d.space.Viewport)
  * @see HUD
- * @author Andrew Heyman
  * @param <T> The type of CellGame that uses this Viewport's SpaceStates
  * @param <U> The type of SpaceState that uses this Viewport
+ * @author Andrew Heyman
  */
 public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     

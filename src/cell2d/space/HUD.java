@@ -4,9 +4,9 @@ import org.newdawn.slick.Graphics;
 
 /**
  * <p>An HUD (heads-up display) renders visuals in front of those of the
- * Viewport or SpaceState to which it is assigned. HUDs are intended to be used
- * to display information about a SpaceState's space, as opposed to displaying
- * physical objects in it.</p>
+ * Viewports or SpaceStates to which it is assigned. HUDs are intended to be
+ * used to display information about a SpaceState's space, as opposed to
+ * displaying physical objects in it.</p>
  * @see Viewport#setHUD(cell2d.space.HUD)
  * @see SpaceState#setHUD(cell2d.space.HUD)
  * @author Andrew Heyman

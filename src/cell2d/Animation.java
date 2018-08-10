@@ -3,10 +3,10 @@ package cell2d;
 import java.util.Arrays;
 
 /**
- * <p>An Animation is a sequence of one or more Animatable frames that may be
- * instantiated in an AnimationInstance in order to be displayed one after
- * another and/or smoothly transitioned between. The frames are indexed by the
- * integers from 0 to getNumFrames() - 1 inclusive, and each has its own
+ * <p>An Animation is a sequence of one or more Animatable <i>frames</i> that
+ * may be instantiated in an AnimationInstance in order to be displayed one
+ * after another and/or smoothly transitioned between. The frames are indexed by
+ * the integers from 0 to getNumFrames() - 1 inclusive, and each has its own
  * duration in fracunits. Durations of 0 or less are interpreted as infinite.
  * </p>
  * 

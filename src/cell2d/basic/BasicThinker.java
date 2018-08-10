@@ -1,16 +1,16 @@
 package cell2d.basic;
 
 import cell2d.CellGame;
-import cell2d.Thinker;
+import cell2d.SubThinker;
 
 /**
- * <p>A BasicThinker is a type of Thinker that is used by BasicStates, which
+ * <p>A BasicThinker is a type of SubThinker that is used by BasicStates, which
  * have no special capabilities, and treats their CellGames as basic CellGames.
  * It does not automatically share any custom fields or methods between itself
  * and its GameStates or their CellGames.</p>
  * @author Andrew Heyman
  */
-public abstract class BasicThinker extends Thinker<CellGame,BasicState,BasicThinker> {
+public abstract class BasicThinker extends SubThinker<CellGame,BasicState,BasicThinker> {
     
     /**
      * Creates a new BasicThinker.

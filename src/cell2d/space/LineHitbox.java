@@ -5,7 +5,7 @@ import cell2d.CellVector;
 /**
  * <p>A LineHitbox is a Hitbox shaped like a line segment, with one endpoint
  * being its position and the other being the sum of its position and a vector
- * called its difference.</p>
+ * called its <i>difference</i>.</p>
  * @author Andrew Heyman
  */
 public class LineHitbox extends Hitbox {

@@ -11,10 +11,10 @@ import java.util.Collection;
  * SpaceState to be relative to this origin.</p>
  * @see SpaceObject
  * @see SpaceState
- * @author Andrew Heyman
  * @param <T> The type of CellGame that uses the SpaceStates that can load this
  * Area
  * @param <U> The type of SpaceState that can load this Area
+ * @author Andrew Heyman
  */
 public abstract class Area<T extends CellGame, U extends SpaceState<T,U,?>> {
     
