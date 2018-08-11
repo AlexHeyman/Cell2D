@@ -514,23 +514,16 @@ public abstract class SpaceState<T extends CellGame,
         int[] newRange = hitbox.cellRange;
         if (oldRange[0] != newRange[0] || oldRange[1] != newRange[1]
                 || oldRange[2] != newRange[2] || oldRange[3] != newRange[3]) {
-            int[] addRange;
-            if (oldRange == null) {
-                addRange = newRange;
-            } else {
-                int[] removeRange = oldRange;
-                Iterator<Cell> iterator = new WriteCellRangeIterator(removeRange);
-                while (iterator.hasNext()) {
-                    Cell cell = iterator.next();
-                    for (HitboxRole role : HitboxRole.values()) {
-                        if (hitbox.roles.contains(role)) {
-                            cell.hitboxes.get(role).remove(hitbox);
-                        }
+            Iterator<Cell> iterator = new WriteCellRangeIterator(oldRange);
+            while (iterator.hasNext()) {
+                Cell cell = iterator.next();
+                for (HitboxRole role : HitboxRole.values()) {
+                    if (hitbox.roles.contains(role)) {
+                        cell.hitboxes.get(role).remove(hitbox);
                     }
                 }
-                addRange = newRange;
             }
-            Iterator<Cell> iterator = new WriteCellRangeIterator(addRange);
+            iterator = new WriteCellRangeIterator(newRange);
             while (iterator.hasNext()) {
                 Cell cell = iterator.next();
                 for (HitboxRole role : HitboxRole.values()) {
