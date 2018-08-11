@@ -132,6 +132,7 @@ public abstract class CellGame {
             if (game.iconPath != null) {
                 container.setIcon(game.iconPath);
             }
+            container.setAlwaysRender(true);
             container.start();
         } catch (SlickException e) {
             throw new RuntimeException("Failed to start a CellGame");
