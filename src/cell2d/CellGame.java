@@ -1661,9 +1661,9 @@ public abstract class CellGame {
     
     /**
      * Removes from this CellGame's music stack all Music tracks assigned to any
-     * priority.
+     * priority, leaving the stack empty.
      */
-    public final void removeAllMusic() {
+    public final void clearMusic() {
         if (!musicStack.isEmpty()) {
             Map<Music,MusicInstance> musics = musicStack.get(getMusicStackTop());
             for (Music music : musics.keySet()) {

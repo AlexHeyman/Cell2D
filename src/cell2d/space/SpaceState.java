@@ -696,7 +696,7 @@ public abstract class SpaceState<T extends CellGame,
      * Removes from this SpaceState all of the SpaceObjects that are currently
      * assigned to it.
      */
-    public final void removeAllObjects() {
+    public final void clearObjects() {
         for (SpaceObject object : spaceObjects) {
             if (object.newState == this) {
                 object.newState = null;
