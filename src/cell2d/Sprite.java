@@ -5,9 +5,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
@@ -260,6 +263,11 @@ public class Sprite implements Animatable, Drawable {
         } else if (spriteSheet != null) {
             spriteSheet.unloadSprite();
         } else if (bufferedImage != null) {
+            for (Image[] imageArray : images.values()) {
+                try {
+                    imageArray[0].destroy();
+                } catch (SlickException e) {}
+            }
             clear();
         } else {
             return false;

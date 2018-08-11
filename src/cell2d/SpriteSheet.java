@@ -2,10 +2,12 @@ package cell2d;
 
 import java.awt.image.BufferedImage;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
 
 /**
  * <p>A SpriteSheet is a rectangular grid of Sprites. Each Sprite has an
@@ -28,6 +30,7 @@ public class SpriteSheet {
     private final String path;
     private final Color transColor;
     private final Set<Filter> filters;
+    private final HashMap<Filter,Image> images = new HashMap<>();
     private BufferedImage bufferedImage = null;
     private final int spriteWidth, spriteHeight, spriteSpacing, originX, originY;
     private int width = 0;
@@ -203,6 +206,7 @@ public class SpriteSheet {
                 column[y].loadFilter(filter, spriteSheet.getSubImage(x, y), null);
             }
         }
+        images.put(filter, image);
     }
     
     /**
@@ -213,7 +217,7 @@ public class SpriteSheet {
     public final boolean unload() {
         if (loaded) {
             loaded = false;
-            bufferedImage = null;
+            destroyAndClear();
             for (Sprite[] column : sprites) {
                 for (Sprite sprite : column) {
                     sprite.loaded = false;
@@ -230,13 +234,25 @@ public class SpriteSheet {
         numSpritesLoaded--;
         if (numSpritesLoaded == 0) {
             loaded = false;
-            bufferedImage = null;
+            destroyAndClear();
             for (Sprite[] column : sprites) {
                 for (Sprite sprite : column) {
                     sprite.clear();
                 }
             }
         }
+    }
+    
+    private void destroyAndClear() {
+        for (Image image : images.values()) {
+            try {
+                image.destroy();
+            } catch (SlickException e) {}
+        }
+        images.clear();
+        bufferedImage = null;
+        width = 0;
+        height = 0;
     }
     
     /**
@@ -247,22 +263,6 @@ public class SpriteSheet {
      */
     public final Set<Filter> getFilters() {
         return (filters == null ? Collections.emptySet() : Collections.unmodifiableSet(filters));
-    }
-    
-    /**
-     * Returns the width in Sprites of this SpriteSheet.
-     * @return The width in Sprites of this SpriteSheet
-     */
-    public final int getWidth() {
-        return width;
-    }
-    
-    /**
-     * Returns the height in Sprites of this SpriteSheet.
-     * @return The height in Sprites of this SpriteSheet
-     */
-    public final int getHeight() {
-        return height;
     }
     
     /**
@@ -283,6 +283,22 @@ public class SpriteSheet {
      */
     public final int getOriginY() {
         return originY;
+    }
+    
+    /**
+     * Returns the width in Sprites of this SpriteSheet.
+     * @return The width in Sprites of this SpriteSheet
+     */
+    public final int getWidth() {
+        return width;
+    }
+    
+    /**
+     * Returns the height in Sprites of this SpriteSheet.
+     * @return The height in Sprites of this SpriteSheet
+     */
+    public final int getHeight() {
+        return height;
     }
     
     /**
