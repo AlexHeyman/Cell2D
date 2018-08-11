@@ -16,7 +16,7 @@ import java.util.Collection;
  * @param <U> The type of SpaceState that can load this Area
  * @author Andrew Heyman
  */
-public abstract class Area<T extends CellGame, U extends SpaceState<T,U,?>> {
+public interface Area<T extends CellGame, U extends SpaceState<T,U,?>> {
     
     /**
      * Actions for this Area to take in order for the specified SpaceState to
@@ -30,6 +30,6 @@ public abstract class Area<T extends CellGame, U extends SpaceState<T,U,?>> {
      * @return All of the SpaceObjects to be added to the SpaceState as part of
      * this Area
      */
-    public abstract Collection<SpaceObject> load(T game, U state);
+    Collection<SpaceObject> load(T game, U state);
     
 }
