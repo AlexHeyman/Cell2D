@@ -39,7 +39,7 @@ public class SpriteSheet {
     private int numSpritesLoaded = 0;
     
     /**
-     * Creates a new SpriteSheet from an image file.
+     * Constructs a SpriteSheet from an image file.
      * @param path The relative path to the image file
      * @param width The width in Sprites of this SpriteSheet
      * @param height The height in Sprites of this SpriteSheet
@@ -61,7 +61,7 @@ public class SpriteSheet {
     }
     
     /**
-     * Creates a new SpriteSheet from an image file.
+     * Constructs a SpriteSheet from an image file.
      * @param path The relative path to the image file
      * @param width The width in Sprites of this SpriteSheet
      * @param height The height in Sprites of this SpriteSheet
@@ -86,7 +86,7 @@ public class SpriteSheet {
     }
     
     /**
-     * Creates a new SpriteSheet from an image file.
+     * Constructs a SpriteSheet from an image file.
      * @param path The relative path to the image file
      * @param width The width in Sprites of this SpriteSheet
      * @param height The height in Sprites of this SpriteSheet
@@ -115,7 +115,7 @@ public class SpriteSheet {
     }
     
     /**
-     * Creates a new SpriteSheet from an existing SpriteSheet with a Filter
+     * Constructs a SpriteSheet from an existing SpriteSheet with a Filter
      * applied to it. The new SpriteSheet will have the same Set of Filters that
      * are usable with its Sprites' draw() methods as the existing Sprite.
      * @param spriteSheet The SpriteSheet to create this SpriteSheet from

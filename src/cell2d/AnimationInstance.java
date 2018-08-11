@@ -68,7 +68,7 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Creates a new AnimationInstance of the specified Animation. The
+     * Constructs an AnimationInstance of the specified Animation. The
      * instance's indices and speeds at each level will start at 0.
      * @param animation The animation to make the AnimationInstance of
      */

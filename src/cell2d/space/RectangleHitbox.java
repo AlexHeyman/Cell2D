@@ -16,7 +16,7 @@ public class RectangleHitbox extends Hitbox {
     private long relLeft, relRight, relTop, relBottom, absLeft, absRight, absTop, absBottom;
     
     /**
-     * Creates a new RectangleHitbox with the specified relative position and
+     * Constructs a RectangleHitbox with the specified relative position and
      * dimensions.
      * @param relPosition This RectangleHitbox's relative position
      * @param relLeft The difference of the x-coordinates of this
@@ -33,7 +33,7 @@ public class RectangleHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new RectangleHitbox with the specified relative position and
+     * Constructs a RectangleHitbox with the specified relative position and
      * dimensions.
      * @param relX The x-coordinate of this RectangleHitbox's relative position
      * @param relY The y-coordinate of this RectangleHitbox's relative position

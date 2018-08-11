@@ -58,7 +58,7 @@ public abstract class Hitbox {
     private long absAngleY = 0;
     
     /**
-     * Creates a new Hitbox with the specified relative position.
+     * Constructs a Hitbox with the specified relative position.
      * @param relPosition This Hitbox's relative position
      */
     public Hitbox(CellVector relPosition) {
@@ -67,7 +67,7 @@ public abstract class Hitbox {
     }
     
     /**
-     * Creates a new Hitbox with the specified relative position.
+     * Constructs a Hitbox with the specified relative position.
      * @param relX The x-coordinate of this Hitbox's relative position
      * @param relY The y-coordinate of this Hitbox's relative position
      */

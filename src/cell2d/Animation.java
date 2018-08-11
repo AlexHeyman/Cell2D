@@ -63,7 +63,7 @@ public class Animation implements Animatable {
     }
     
     /**
-     * Creates a new Animation with the specified Animatable object, duration 0,
+     * Constructs an Animation with the specified Animatable object, duration 0,
      * as its only frame.
      * @param frame The Animatable object out of which to make the Animation
      */
@@ -72,7 +72,7 @@ public class Animation implements Animatable {
     }
     
     /**
-     * Creates a new Animation with the Animatable objects in the specified
+     * Constructs an Animation with the Animatable objects in the specified
      * array as its frames. Each frame will have a duration of one fracunit.
      * @param frames The array of the Animation's frames
      */
@@ -81,7 +81,7 @@ public class Animation implements Animatable {
     }
     
     /**
-     * Creates a new Animation out of the Animatable objects in the specified
+     * Constructs an Animation out of the Animatable objects in the specified
      * array of frames. Each frame will have a duration that is the value at its
      * corresponding index in the array of frame durations.
      * @param frames The array of the Animation's frames
@@ -144,8 +144,9 @@ public class Animation implements Animatable {
     }
     
     /**
-     * Creates an Animation with the Sprites in a rectangular region of a
-     * SpriteSheet as its frames. Each frame will have a duration of 1.
+     * Constructs an Animation with the Sprites in a rectangular region of a
+     * SpriteSheet as its frames. Each frame will have a duration of one
+     * fracunit.
      * @param spriteSheet The SpriteSheet out of which to make the Animation
      * @param x1 The x-coordinate, in Sprites, of the region's left edge
      * @param y1 The y-coordinate, in Sprites, of the region's top edge
@@ -162,7 +163,7 @@ public class Animation implements Animatable {
     }
     
     /**
-     * Creates an Animation with the Sprites in a rectangular region of a
+     * Constructs an Animation with the Sprites in a rectangular region of a
      * SpriteSheet as its frames. Each frame will have a duration that is the
      * value at its corresponding index in the array of frame durations.
      * @param spriteSheet The SpriteSheet out of which to make the Animation

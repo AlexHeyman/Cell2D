@@ -24,7 +24,7 @@ public class CompositeHitbox extends Hitbox {
     private long bottom = 0;
     
     /**
-     * Creates a new CompositeHitbox with the specified relative position.
+     * Constructs a CompositeHitbox with the specified relative position.
      * @param relPosition This CompositeHitbox's relative position
      */
     public CompositeHitbox(CellVector relPosition) {
@@ -32,7 +32,7 @@ public class CompositeHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new CompositeHitbox with the specified relative position.
+     * Constructs a CompositeHitbox with the specified relative position.
      * @param relX The x-coordinate of this CompositeHitbox's relative position
      * @param relY The y-coordinate of this CompositeHitbox's relative position
      */

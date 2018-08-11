@@ -10,7 +10,7 @@ import cell2d.CellVector;
 public class PointHitbox extends Hitbox {
     
     /**
-     * Creates a new PointHitbox with the specified relative position.
+     * Constructs a PointHitbox with the specified relative position.
      * @param relPosition This PointHitbox's relative position
      */
     public PointHitbox(CellVector relPosition) {
@@ -18,7 +18,7 @@ public class PointHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new PointHitbox with the specified relative position.
+     * Constructs a PointHitbox with the specified relative position.
      * @param relX The x-coordinate of this PointHitbox's relative position
      * @param relY The y-coordinate of this PointHitbox's relative position
      */

@@ -21,7 +21,7 @@ public class CellVector {
     private long x, y;
     
     /**
-     * Creates a new CellVector that represents the origin.
+     * Constructs a CellVector that represents the origin.
      */
     public CellVector() {
         x = 0;
@@ -29,7 +29,7 @@ public class CellVector {
     }
     
     /**
-     * Creates a new CellVector that represents the specified point.
+     * Constructs a CellVector that represents the specified point.
      * @param point The point that this CellVector represents
      */
     public CellVector(CellVector point) {
@@ -38,7 +38,7 @@ public class CellVector {
     }
     
     /**
-     * Creates a new CellVector that represents the specified point.
+     * Constructs a CellVector that represents the specified point.
      * @param x The x-coordinate of the point that this CellVector represents
      * @param y The y-coordinate of the point that this CellVector represents
      */
@@ -48,7 +48,7 @@ public class CellVector {
     }
     
     /**
-     * Creates a new CellVector that represents the point on the unit circle at
+     * Constructs a CellVector that represents the point on the unit circle at
      * the specified angle from the origin.
      * @param angle The angle from the origin of the point on the unit circle
      * that this CellVector represents

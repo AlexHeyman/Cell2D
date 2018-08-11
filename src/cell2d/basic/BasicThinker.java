@@ -13,7 +13,7 @@ import cell2d.SubThinker;
 public abstract class BasicThinker extends SubThinker<CellGame,BasicState,BasicThinker> {
     
     /**
-     * Creates a new BasicThinker.
+     * Constructs a BasicThinker.
      */
     public BasicThinker() {
         super(CellGame.class, BasicState.class, BasicThinker.class);

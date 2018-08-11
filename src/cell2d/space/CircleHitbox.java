@@ -12,7 +12,7 @@ public class CircleHitbox extends Hitbox {
     private long radius;
     
     /**
-     * Creates a new CircleHitbox with the specified relative position and
+     * Constructs a CircleHitbox with the specified relative position and
      * radius.
      * @param relPosition This CircleHitbox's relative position
      * @param radius This CircleHitbox's radius
@@ -23,7 +23,7 @@ public class CircleHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new CircleHitbox with the specified relative position and
+     * Constructs a CircleHitbox with the specified relative position and
      * radius.
      * @param relX The x-coordinate of this CircleHitbox's relative position
      * @param relY The y-coordinate of this CircleHitbox's relative position

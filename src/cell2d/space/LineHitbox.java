@@ -14,7 +14,7 @@ public class LineHitbox extends Hitbox {
     private long left, right, top, bottom;
     
     /**
-     * Creates a new LineHitbox with the specified relative position and
+     * Constructs a LineHitbox with the specified relative position and
      * difference.
      * @param relPosition This LineHitbox's relative position
      * @param relDifference This LineHitbox's relative difference
@@ -24,7 +24,7 @@ public class LineHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new LineHitbox with the specified relative position and
+     * Constructs a LineHitbox with the specified relative position and
      * difference.
      * @param relX The x-coordinate of this LineHitbox's relative position
      * @param relY The y-coordinate of this LineHitbox's relative position

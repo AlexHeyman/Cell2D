@@ -176,7 +176,7 @@ public abstract class CellGame {
     private final SortedMap<Integer,Map<Music,MusicInstance>> musicStack = new TreeMap<>();
     
     /**
-     * Creates a new CellGame.
+     * Constructs a CellGame.
      * @param name The name of this CellGame as seen on its program window
      * @param numCommands The total number of input commands that this CellGame
      * needs to keep track of

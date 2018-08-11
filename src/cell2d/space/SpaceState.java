@@ -159,7 +159,7 @@ public abstract class SpaceState<T extends CellGame,
     private final SortedMap<Integer,SpaceLayer> spaceLayers = new TreeMap<>();
     
     /**
-     * Creates a new SpaceState of the specified CellGame with the specified ID.
+     * Constructs a SpaceState of the specified CellGame with the specified ID.
      * @param gameClass The Class object representing the type of CellGame that
      * uses this SpaceState
      * @param stateClass The Class object representing the type of SpaceState

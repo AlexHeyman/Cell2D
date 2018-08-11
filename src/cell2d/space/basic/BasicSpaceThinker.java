@@ -14,7 +14,7 @@ import cell2d.space.SpaceThinker;
 public abstract class BasicSpaceThinker extends SpaceThinker<CellGame,BasicSpaceState,BasicSpaceThinker> {
     
     /**
-     * Creates a new BasicSpaceThinker.
+     * Constructs a BasicSpaceThinker.
      */
     public BasicSpaceThinker() {
         super(CellGame.class, BasicSpaceState.class, BasicSpaceThinker.class);

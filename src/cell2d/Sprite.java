@@ -76,7 +76,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Creates a new Sprite from an image file.
+     * Constructs a Sprite from an image file.
      * @param path The relative path to the image file
      * @param originX The x-coordinate in pixels of the origin on the image
      * @param originY The y-coordinate in pixels of the origin on the image
@@ -90,7 +90,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Creates a new Sprite from an image file.
+     * Constructs a Sprite from an image file.
      * @param path The relative path to the image file
      * @param originX The x-coordinate in pixels of the origin on the image
      * @param originY The y-coordinate in pixels of the origin on the image
@@ -119,7 +119,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Creates a new Sprite from an image file.
+     * Constructs a Sprite from an image file.
      * @param path The relative path to the image file
      * @param originX The x-coordinate in pixels of the origin on the image
      * @param originY The y-coordinate in pixels of the origin on the image
@@ -137,7 +137,7 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Creates a new Sprite from a Slick2D Image. This Sprite's origin will be
+     * Constructs a Sprite from a Slick2D Image. This Sprite's origin will be
      * the Image's center of rotation with its coordinates rounded to the
      * nearest integer. This Sprite will be considered to always be loaded and
      * cannot be unloaded. It will also be considered non-copyable, which means
@@ -160,10 +160,10 @@ public class Sprite implements Animatable, Drawable {
     }
     
     /**
-     * Creates a new Sprite from an existing Sprite with a Filter applied to it.
-     * The existing Sprite must have been created as an individual Sprite rather
-     * than as part of a SpriteSheet. The new Sprite will have the same Set of
-     * Filters that are usable with draw() as the existing Sprite.
+     * Constructs a Sprite from an existing Sprite with a Filter applied to it.
+     * The existing Sprite must have been created as an individual Sprite from
+     * an image file. The new Sprite will have the same Set of Filters that are
+     * usable with draw() as the existing Sprite.
      * @param sprite The Sprite to create this Sprite from
      * @param filter The Filter to apply to the existing Sprite
      * @param load Whether this Sprite should load upon creation

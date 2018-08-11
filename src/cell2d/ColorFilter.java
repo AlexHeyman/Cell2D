@@ -18,7 +18,7 @@ public class ColorFilter extends Filter {
     private final Color color;
     
     /**
-     * Creates a new ColorFilter that uses the specified Color.
+     * Constructs a ColorFilter that uses the specified Color.
      * @param color The used Color
      */
     public ColorFilter(Color color) {
@@ -26,8 +26,7 @@ public class ColorFilter extends Filter {
     }
     
     /**
-     * Creates a new ColorFilter that uses a Color with the specified RGBA
-     * value.
+     * Constructs a ColorFilter that uses a Color with the specified RGBA value.
      * @param colorR The R value (0-255) of the used Color
      * @param colorG The G value (0-255) of the used Color
      * @param colorB The B value (0-255) of the used Color
@@ -38,7 +37,7 @@ public class ColorFilter extends Filter {
     }
     
     /**
-     * Creates a new ColorFilter that uses a Color with the specified RGB value
+     * Constructs a ColorFilter that uses a Color with the specified RGB value
      * and an alpha value of 255.
      * @param colorR The R value (0-255) of the used Color
      * @param colorG The G value (0-255) of the used Color

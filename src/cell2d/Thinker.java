@@ -78,7 +78,7 @@ public abstract class Thinker<T extends CellGame, U extends GameState<T,U,V>, V 
     };
     
     /**
-     * Creates a new Thinker.
+     * Constructs a Thinker.
      * @param gameClass The Class object representing the type of CellGame that
      * uses this Thinker's GameStates
      * @param stateClass The Class object representing the type of GameState

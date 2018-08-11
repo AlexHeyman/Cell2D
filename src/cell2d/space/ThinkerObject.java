@@ -28,7 +28,7 @@ public abstract class ThinkerObject<T extends CellGame,
     private V thinker = null;
     
     /**
-     * Creates a new ThinkerObject with no locator Hitbox or assigned
+     * Constructs a ThinkerObject with no locator Hitbox or assigned
      * SpaceThinker. This ThinkerObject must be assigned a locator Hitbox with
      * its setLocatorHitbox() method and a SpaceThinker with its setThinker()
      * method before any of its other methods are called.

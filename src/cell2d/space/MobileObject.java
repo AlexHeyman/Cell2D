@@ -74,7 +74,7 @@ public abstract class MobileObject extends SpaceObject {
     final CellVector displacement = new CellVector();
     
     /**
-     * Creates a new MobileObject with no locator Hitbox. This MobileObject must
+     * Constructs a MobileObject with no locator Hitbox. This MobileObject must
      * be assigned a locator Hitbox with its setLocatorHitbox() method before
      * any of its other methods are called.
      * @see #setLocatorHitbox(cell2d.space.Hitbox)

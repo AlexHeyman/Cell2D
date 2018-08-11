@@ -48,7 +48,7 @@ public abstract class SpaceThinker<T extends CellGame,
     };
     
     /**
-     * Creates a new SpaceThinker.
+     * Constructs a SpaceThinker.
      * @param gameClass The Class object representing the type of CellGame that
      * uses this SpaceThinker's SpaceStates
      * @param stateClass The Class object representing the type of SpaceState

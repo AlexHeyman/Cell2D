@@ -41,7 +41,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     private int left, right, top, bottom;
     
     /**
-     * Creates a new Viewport that occupies the specified region of the screen.
+     * Constructs a Viewport that occupies the specified region of the screen.
      * @param x1 The x-coordinate in pixels of this Viewport's left edge on the
      * screen
      * @param y1 The y-coordinate in pixels of this Viewport's top edge on the

@@ -33,7 +33,7 @@ public class PolygonHitbox extends Hitbox {
     private long left, right, top, bottom;
     
     /**
-     * Creates a new PolygonHitbox with the specified relative position and
+     * Constructs a PolygonHitbox with the specified relative position and
      * vertices.
      * @param relPosition This PolygonHitbox's relative position
      * @param relVertices This PolygonHitbox's relative vertices
@@ -43,7 +43,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new PolygonHitbox with the specified relative position and
+     * Constructs a PolygonHitbox with the specified relative position and
      * vertices.
      * @param relX The x-coordinate of this PolygonHitbox's relative position
      * @param relY The y-coordinate of this PolygonHitbox's relative position
@@ -59,7 +59,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new PolygonHitbox with the specified relative position and no
+     * Constructs a PolygonHitbox with the specified relative position and no
      * vertices.
      * @param relPosition This PolygonHitbox's relative position
      */
@@ -68,7 +68,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     /**
-     * Creates a new PolygonHitbox with the specified relative position and no
+     * Constructs a PolygonHitbox with the specified relative position and no
      * vertices.
      * @param relX The x-coordinate of this PolygonHitbox's relative position
      * @param relY The y-coordinate of this PolygonHitbox's relative position

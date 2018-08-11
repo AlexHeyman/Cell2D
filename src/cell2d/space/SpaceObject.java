@@ -86,9 +86,9 @@ public abstract class SpaceObject {
     private Filter filter = null;
     
     /**
-     * Creates a new SpaceObject with no locator Hitbox. This SpaceObject must
-     * be assigned a locator Hitbox with its setLocatorHitbox() method before
-     * any of its other methods are called.
+     * Constructs a SpaceObject with no locator Hitbox. This SpaceObject must be
+     * assigned a locator Hitbox with its setLocatorHitbox() method before any
+     * of its other methods are called.
      * @see #setLocatorHitbox(cell2d.space.Hitbox)
      */
     public SpaceObject() {

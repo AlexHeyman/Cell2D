@@ -13,7 +13,7 @@ import cell2d.space.ThinkerObject;
 public abstract class BasicThinkerObject extends ThinkerObject<CellGame,BasicSpaceState,BasicSpaceThinker> {
     
     /**
-     * Creates a new BasicThinkerObject with an assigned BasicSpaceThinker whose
+     * Constructs a BasicThinkerObject with an assigned BasicSpaceThinker whose
      * Actions() methods call the BasicThinkerObject's own.
      */
     public BasicThinkerObject() {

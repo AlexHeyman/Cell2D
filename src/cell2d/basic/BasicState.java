@@ -14,7 +14,7 @@ import cell2d.GameState;
 public abstract class BasicState extends GameState<CellGame,BasicState,BasicThinker> {
     
     /**
-     * Creates a new BasicState of the specified CellGame with the specified ID.
+     * Constructs a BasicState of the specified CellGame with the specified ID.
      * @param game The CellGame to which this BasicState belongs
      * @param id This BasicState's ID
      */

@@ -48,7 +48,7 @@ public abstract class GameState<T extends CellGame,
     private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
     
     /**
-     * Creates a new GameState of the specified CellGame with the specified ID.
+     * Constructs a GameState of the specified CellGame with the specified ID.
      * GameStates automatically register themselves with their CellGames upon
      * creation.
      * @param gameClass The Class object representing the type of CellGame that

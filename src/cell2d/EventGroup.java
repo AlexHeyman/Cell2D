@@ -61,7 +61,7 @@ public class EventGroup<T extends CellGame, U extends GameState<T,U,?>> {
     private final SortedSet<Entry<T,U>> entriesToRemove = new TreeSet<>(priorityComparator);
     
     /**
-     * Creates an empty EventGroup.
+     * Constructs an empty EventGroup.
      */
     public EventGroup() {}
     

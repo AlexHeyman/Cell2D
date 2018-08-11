@@ -44,7 +44,7 @@ public abstract class SubThinker<T extends CellGame,
     private int framePriority = 0;
     
     /**
-     * Creates a new SubThinker.
+     * Constructs a SubThinker.
      * @param gameClass The Class object representing the type of CellGame that
      * uses this SubThinker's GameStates
      * @param stateClass The Class object representing the type of GameState

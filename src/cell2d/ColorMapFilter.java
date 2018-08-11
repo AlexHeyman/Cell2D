@@ -21,7 +21,7 @@ public class ColorMapFilter extends Filter {
     private final Map<Color,Color> colorMap;
     
     /**
-     * Creates a new ColorMapFilter that uses the specified Map.
+     * Constructs a ColorMapFilter that uses the specified Map.
      * @param colorMap The used Map
      */
     public ColorMapFilter(Map<Color,Color> colorMap) {

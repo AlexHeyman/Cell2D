@@ -15,8 +15,8 @@ import cell2d.space.SpaceState;
 public class BasicSpaceState extends SpaceState<CellGame,BasicSpaceState,BasicSpaceThinker> {
     
     /**
-     * Creates a new BasicSpaceState of the specified CellGame with the
-     * specified ID.
+     * Constructs a BasicSpaceState of the specified CellGame with the specified
+     * ID.
      * @param game The CellGame to which this BasicSpaceState belongs
      * @param id This BasicSpaceState's ID
      * @param cellWidth The width of each of this BasicSpaceState's cells

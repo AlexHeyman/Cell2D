@@ -78,7 +78,7 @@ public class Music {
     }
     
     /**
-     * Creates a new Music track from an audio file. Files of WAV, OGG, and
+     * Constructs a Music track from an audio file. Files of WAV, OGG, and
      * AIF(F) formats are supported. When this Music track is looping, it will
      * return to the start of the track once it reaches the end.
      * @param path The relative path to the audio file
@@ -89,7 +89,7 @@ public class Music {
     }
     
     /**
-     * Creates a new Music track from an audio file. Files of WAV, OGG, and
+     * Constructs a Music track from an audio file. Files of WAV, OGG, and
      * AIF(F) formats are supported.
      * @param path The relative path to the audio file
      * @param loopStart The position in seconds in this Music track to which it
