@@ -31,10 +31,10 @@ import java.util.Set;
  * and angle of rotation) or absolute.</p>
  * 
  * <p>A MobileObject may have one or more MobileObject <i>followers</i>, and if
- * it does, it is called those followers' leader. When a MobileObject moves, all
- * of its followers automatically move to maintain their relative positions to
- * it. A MobileObject cannot collide with its leader, super-leaders, followers,
- * or sub-followers.</p>
+ * it does, it is called its followers' <i>leader</i>. When a MobileObject
+ * moves, all of its followers automatically move to maintain their relative
+ * positions to it. A MobileObject cannot collide with its leader,
+ * super-leaders, followers, or sub-followers.</p>
  * 
  * <p>A MobileObject has a <i>velocity</i>, as well as a vector called a <i>step
  * </i> that acts as a short-term adjustment to its velocity, both in fracunits
