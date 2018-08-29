@@ -72,22 +72,22 @@ public class Animation implements Animatable {
     }
     
     /**
-     * Constructs an Animation with the Animatable objects in the specified
-     * array as its frames. Each frame will have a duration of one fracunit.
-     * @param frames The array of the Animation's frames
+     * Constructs an Animation with the specified sequence of Animatable objects
+     * as its frames. Each frame will have a duration of one fracunit.
+     * @param frames The sequence of the Animation's frames
      */
-    public Animation(Animatable[] frames) {
+    public Animation(Animatable... frames) {
         this(frames, arrayOfFracunits(frames.length));
     }
     
     /**
      * Constructs an Animation out of the Animatable objects in the specified
      * array of frames. Each frame will have a duration that is the value at its
-     * corresponding index in the array of frame durations.
+     * corresponding index in the sequence of frame durations.
      * @param frames The array of the Animation's frames
-     * @param frameDurations The array of the Animation's frame durations
+     * @param frameDurations The sequence of the Animation's frame durations
      */
-    public Animation(Animatable[] frames, long[] frameDurations) {
+    public Animation(Animatable[] frames, long... frameDurations) {
         if (frames.length == 0) {
             throw new RuntimeException("Attempted to create an empty Animation");
         }
@@ -165,7 +165,7 @@ public class Animation implements Animatable {
     /**
      * Constructs an Animation with the Sprites in a rectangular region of a
      * SpriteSheet as its frames. Each frame will have a duration that is the
-     * value at its corresponding index in the array of frame durations.
+     * value at its corresponding index in the sequence of frame durations.
      * @param spriteSheet The SpriteSheet out of which to make the Animation
      * @param x1 The x-coordinate, in Sprites, of the region's left edge
      * @param y1 The y-coordinate, in Sprites, of the region's top edge
@@ -176,16 +176,18 @@ public class Animation implements Animatable {
      * Otherwise, they will be read in rows from left to right, the rows going
      * from top to bottom. The Sprites will appear in the Animation in the order
      * in which they are read.
-     * @param frameDurations The array of the Animation's frame durations
+     * @param frameDurations The sequence of the Animation's frame durations
      */
-    public Animation(SpriteSheet spriteSheet, int x1, int y1, int x2, int y2, boolean columns, long[] frameDurations) {
+    public Animation(SpriteSheet spriteSheet, int x1, int y1, int x2, int y2, boolean columns,
+            long... frameDurations) {
         this(spriteSheetToFrames(spriteSheet, x1, y1, x2, y2, columns), frameDurations);
     }
     
     private boolean checkCompatibility(Animatable frame1, Animatable frame2) {
         if (frame1.getLevel() == 0 && frame2.getLevel() == 0) {
             return true;
-        } else if (frame1.getLevel() != frame2.getLevel() || frame1.getNumFrames() != frame2.getNumFrames()) {
+        } else if (frame1.getLevel() != frame2.getLevel()
+                || frame1.getNumFrames() != frame2.getNumFrames()) {
             return false;
         }
         for (int i = 0; i < frame1.getNumFrames(); i++) {

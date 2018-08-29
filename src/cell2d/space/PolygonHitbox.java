@@ -34,22 +34,22 @@ public class PolygonHitbox extends Hitbox {
     
     /**
      * Constructs a PolygonHitbox with the specified relative position and
-     * vertices.
+     * sequence of relative vertices.
      * @param relPosition This PolygonHitbox's relative position
-     * @param relVertices This PolygonHitbox's relative vertices
+     * @param relVertices The sequence of this PolygonHitbox's relative vertices
      */
-    public PolygonHitbox(CellVector relPosition, CellVector[] relVertices) {
+    public PolygonHitbox(CellVector relPosition, CellVector... relVertices) {
         this(relPosition.getX(), relPosition.getY(), relVertices);
     }
     
     /**
      * Constructs a PolygonHitbox with the specified relative position and
-     * vertices.
+     * sequence of relative vertices.
      * @param relX The x-coordinate of this PolygonHitbox's relative position
      * @param relY The y-coordinate of this PolygonHitbox's relative position
-     * @param relVertices This PolygonHitbox's relative vertices
+     * @param relVertices The sequence of this PolygonHitbox's relative vertices
      */
-    public PolygonHitbox(long relX, long relY, CellVector[] relVertices) {
+    public PolygonHitbox(long relX, long relY, CellVector... relVertices) {
         super(relX, relY);
         vertices = new ArrayList<>(relVertices.length);
         for (CellVector relVertex : relVertices) {
@@ -64,7 +64,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relPosition This PolygonHitbox's relative position
      */
     public PolygonHitbox(CellVector relPosition) {
-        this(relPosition.getX(), relPosition.getY());
+        this(relPosition.getX(), relPosition.getY(), new ArrayList<>());
     }
     
     /**
@@ -74,9 +74,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relY The y-coordinate of this PolygonHitbox's relative position
      */
     public PolygonHitbox(long relX, long relY) {
-        super(relX, relY);
-        vertices = new ArrayList<>();
-        updateData();
+        this(relX, relY, new ArrayList<>());
     }
     
     private PolygonHitbox(long relX, long relY, List<RelAbsPair> vertices) {
