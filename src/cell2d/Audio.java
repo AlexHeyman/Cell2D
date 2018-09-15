@@ -1,5 +1,10 @@
 package cell2d;
 
+import celick.openal.AiffData;
+import celick.openal.OggData;
+import celick.openal.OggDecoder;
+import celick.openal.WaveData;
+import celick.util.ResourceLoader;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.IntBuffer;
@@ -8,11 +13,6 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
-import org.newdawn.slick.openal.AiffData;
-import org.newdawn.slick.openal.OggData;
-import org.newdawn.slick.openal.OggDecoder;
-import org.newdawn.slick.openal.WaveData;
-import org.newdawn.slick.util.ResourceLoader;
 
 /**
  * @author Andrew Heyman

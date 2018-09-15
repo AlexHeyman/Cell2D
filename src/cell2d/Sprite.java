@@ -1,16 +1,14 @@
 package cell2d;
 
+import celick.Color;
+import celick.Graphics;
+import celick.Image;
+import celick.SlickException;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like

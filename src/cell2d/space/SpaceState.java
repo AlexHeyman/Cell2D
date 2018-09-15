@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import celick.Graphics;
 import cell2d.CellGame;
 import cell2d.CellVector;
 import cell2d.EventGroup;
@@ -26,7 +27,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import javafx.util.Pair;
-import org.newdawn.slick.Graphics;
 
 /**
  * <p>A SpaceState is a type of GameState that handles gameplay in a continuous

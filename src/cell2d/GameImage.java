@@ -1,15 +1,15 @@
 package cell2d;
 
+import celick.Color;
+import celick.Graphics;
+import celick.Image;
+import celick.SlickException;
+import celick.opengl.pbuffer.GraphicsFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import javax.imageio.ImageIO;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.opengl.pbuffer.GraphicsFactory;
 
 /**
  * @author Andrew Heyman

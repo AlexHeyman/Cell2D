@@ -1,1 +1,1 @@
-Cell2D is a 2D game development library built around Slick2D.
+Cell2D is a 2D game development library based on Slick2D.

@@ -1,7 +1,7 @@
 package cell2d;
 
+import celick.Color;
 import java.awt.image.BufferedImage;
-import org.newdawn.slick.Color;
 
 /**
  * <p>A ColorFilter is a Filter that blends the RGB value of each pixel in the

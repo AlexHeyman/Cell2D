@@ -1,13 +1,13 @@
 package cell2d;
 
+import celick.Color;
+import celick.Image;
+import celick.SlickException;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
 
 /**
  * <p>A SpriteSheet is a rectangular grid of Sprites. Each Sprite has an
@@ -198,7 +198,7 @@ public class SpriteSheet {
     }
     
     private void loadFilter(Filter filter, Image image) {
-        org.newdawn.slick.SpriteSheet spriteSheet = new org.newdawn.slick.SpriteSheet(
+        celick.SpriteSheet spriteSheet = new celick.SpriteSheet(
                 image, spriteWidth, spriteHeight, spriteSpacing);
         for (int x = 0; x < sprites.length; x++) {
             Sprite[] column = sprites[x];

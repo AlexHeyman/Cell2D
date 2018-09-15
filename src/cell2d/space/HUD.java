@@ -1,6 +1,6 @@
 package cell2d.space;
 
-import org.newdawn.slick.Graphics;
+import celick.Graphics;
 
 /**
  * <p>An HUD (heads-up display) renders visuals in front of those of the

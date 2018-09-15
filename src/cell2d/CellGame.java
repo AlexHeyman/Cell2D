@@ -1,5 +1,23 @@
 package cell2d;
 
+import celick.AppGameContainer;
+import celick.GameContainer;
+import celick.Graphics;
+import celick.Input;
+import celick.SlickException;
+import celick.command.BasicCommand;
+import celick.command.Command;
+import celick.command.Control;
+import celick.command.ControllerButtonControl;
+import celick.command.ControllerDirectionControl;
+import celick.command.InputProvider;
+import celick.command.InputProviderListener;
+import celick.command.KeyControl;
+import celick.command.MouseButtonControl;
+import celick.state.BasicGameState;
+import celick.state.StateBasedGame;
+import celick.state.transition.Transition;
+import celick.util.Log;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -15,24 +33,6 @@ import java.util.TreeMap;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.command.BasicCommand;
-import org.newdawn.slick.command.Command;
-import org.newdawn.slick.command.Control;
-import org.newdawn.slick.command.ControllerButtonControl;
-import org.newdawn.slick.command.ControllerDirectionControl;
-import org.newdawn.slick.command.InputProvider;
-import org.newdawn.slick.command.InputProviderListener;
-import org.newdawn.slick.command.KeyControl;
-import org.newdawn.slick.command.MouseButtonControl;
-import org.newdawn.slick.state.BasicGameState;
-import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.Transition;
-import org.newdawn.slick.util.Log;
 
 /**
  * <p>A CellGame is a game made with Cell2D. A certain number of times per
@@ -83,9 +83,9 @@ import org.newdawn.slick.util.Log;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 1.6.0.
+     * The version number of Cell2D, currently 2.0.0.
      */
-    public static final String VERSION = "1.6.0";
+    public static final String VERSION = "2.0.0";
     
     private static enum CommandState {
         NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED

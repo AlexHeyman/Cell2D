@@ -1,10 +1,10 @@
 package cell2d;
 
+import celick.Color;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.newdawn.slick.Color;
 
 /**
  * <p>A ColorMapFilter is a Filter that uses a Map&lt;Color,Color&gt; to replace

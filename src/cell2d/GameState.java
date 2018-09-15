@@ -1,10 +1,10 @@
 package cell2d;
 
+import celick.Graphics;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.newdawn.slick.Graphics;
 
 /**
  * <p>A GameState represents one state that a CellGame can be in, such as the

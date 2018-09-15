@@ -1,6 +1,6 @@
 package cell2d;
 
-import org.newdawn.slick.Graphics;
+import celick.Graphics;
 
 /**
  * <p>An AnimationInstance is an instance of an Animation that represents a

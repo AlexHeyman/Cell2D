@@ -1,5 +1,6 @@
 package cell2d.space;
 
+import celick.Graphics;
 import cell2d.Animation;
 import cell2d.AnimationInstance;
 import cell2d.CellGame;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.newdawn.slick.Graphics;
 
 /**
  * <p>A SpaceObject is a physical object in a SpaceState's space. SpaceObjects

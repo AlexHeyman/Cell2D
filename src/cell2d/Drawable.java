@@ -1,6 +1,6 @@
 package cell2d;
 
-import org.newdawn.slick.Graphics;
+import celick.Graphics;
 
 /**
  * <p>A Drawable object is one that visually represents itself with an image

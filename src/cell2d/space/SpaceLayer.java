@@ -1,6 +1,6 @@
 package cell2d.space;
 
-import org.newdawn.slick.Graphics;
+import celick.Graphics;
 
 /**
  * <p>A SpaceLayer renders visuals either in front of or behind those of the
