@@ -824,8 +824,8 @@ public abstract class Hitbox {
     
     private static boolean circleIntersectsPolygon(CellVector center, long radius, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
-        if (numVertices == 0) { //Polygon is a point at its position
-            return center.distanceTo(polygon.getAbsPosition()) < radius; //Point is in circle
+        if (numVertices == 0) { //Polygon can't overlap
+            return false;
         } else if (numVertices == 1) { //Polygon is a point at its first vertex
             return center.distanceTo(polygon.getAbsVertex(0)) < radius; //Point is in circle
         }
@@ -928,8 +928,8 @@ public abstract class Hitbox {
     private static boolean lineSegmentIntersectsPolygon(
             CellVector start, CellVector diff, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
-        if (numVertices == 0) { //Polygon is a point at its position
-            return lineSegmentIntersectsPoint(start, diff, polygon.getAbsPosition()); //Point is on segment
+        if (numVertices == 0) { //Polygon can't overlap
+            return false;
         } else if (numVertices == 1) { //Polygon is a point at its first vertex
             return lineSegmentIntersectsPoint(start, diff, polygon.getAbsVertex(0)); //Point is on segment
         }
@@ -1043,12 +1043,8 @@ public abstract class Hitbox {
     
     private static boolean pointIntersectsPolygon(CellVector point, PolygonHitbox polygon) {
         int numVertices = polygon.getNumVertices();
-        if (numVertices == 0) { //Polygon is a point at its position
-            //Point is identical to polygon
-            return point.equals(polygon.getAbsPosition());
-        } else if (numVertices == 1) { //Polygon is a point at its first vertex
-            //Point is identical to polygon
-            return point.equals(polygon.getAbsVertex(0));
+        if (numVertices <= 1) { //Polygon can't overlap points
+            return false;
         }
         CellVector firstVertex = polygon.getAbsVertex(0);
         if (numVertices == 2) { //Polygon is a line segment
@@ -1072,11 +1068,6 @@ public abstract class Hitbox {
             intersects = !intersects;
         }
         return intersects;
-    }
-    
-    private static boolean pointIntersectsRectangle(CellVector point, long x1, long y1, long x2, long y2) {
-        return point.getX() > x1 && point.getX() < x2
-                && point.getY() > y1 && point.getY() < y2;
     }
     
     private static boolean polygonsIntersect(PolygonHitbox polygon1, PolygonHitbox polygon2) {
@@ -1161,13 +1152,12 @@ public abstract class Hitbox {
     
     private static boolean polygonIntersectsRectangle(
             PolygonHitbox polygon, long x1, long y1, long x2, long y2) {
+        //Assumption: polygon and rectangle's bounding boxes intersect
         int numVertices = polygon.getNumVertices();
-        if (numVertices == 0) { //Polygon is a point at its position
-            //Point is in rectangle
-            return pointIntersectsRectangle(polygon.getAbsPosition(), x1, y1, x2, y2);
-        } else if (numVertices == 1) { //Polygon is a point at its first vertex
-            //Point is in rectangle
-            return pointIntersectsRectangle(polygon.getAbsVertex(0), x1, y1, x2, y2);
+        if (numVertices == 0) { //Polygon can't overlap
+            return false;
+        } else if (numVertices == 1) { //Polygon is a point, which must be in the rectangle's bounding box
+            return true;
         }
         if (numVertices == 2) { //Polygon is a line segment
             CellVector firstVertex = polygon.getAbsVertex(0);
@@ -1179,7 +1169,9 @@ public abstract class Hitbox {
         //Any of polygon's vertices are in rectangle
         for (int i = 0; i < numVertices; i++) {
             vertices[i] = polygon.getAbsVertex(i);
-            if (pointIntersectsRectangle(vertices[i], x1, y1, x2, y2)) {
+            long vertexX = vertices[i].getX();
+            long vertexY = vertices[i].getY();
+            if (vertexX > x1 && vertexX < x2 && vertexY > y1 && vertexY < y2) {
                 return true;
             }
         }
@@ -1240,15 +1232,13 @@ public abstract class Hitbox {
         return pointIntersectsPolygon(topLeft, polygon.getLeftEdge() - 1, vertices, diffs);
     }
     
-    private static boolean rectanglesIntersect(
-            long x1_1, long y1_1, long x2_1, long y2_1, long x1_2, long y1_2, long x2_2, long y2_2) {
-        return x2_1 > x1_2 && x1_1 < x2_2 && y2_1 > y1_2 && y1_1 < y2_2;
-    }
-    
     /**
      * Returns whether this Hitbox overlaps the specified Hitbox. Two Hitboxes
-     * are not considered to overlap if they are both being used by the same
-     * SpaceObject.
+     * overlap if they share any points that are in the interior of at least one
+     * of them. If both Hitboxes are PointHitboxes or otherwise consist only of
+     * single points, then they have no interiors and thus cannot overlap. Two
+     * Hitboxes are not considered to overlap if they are both being used by the
+     * same SpaceObject.
      * @param hitbox The Hitbox to check for an overlap
      * @return Whether this Hitbox overlaps the specified Hitbox
      */
@@ -1257,19 +1247,22 @@ public abstract class Hitbox {
     }
     
     /**
-     * Returns whether the two specified Hitboxes overlap. Two Hitboxes are not
-     * considered to overlap if they are both being used by the same
-     * SpaceObject.
+     * Returns whether the two specified Hitboxes overlap. Two Hitboxes overlap
+     * if they share any points that are in the interior of at least one of
+     * them. If both Hitboxes are PointHitboxes or otherwise consist only of
+     * single points, then they have no interiors and thus cannot overlap. Two
+     * Hitboxes are not considered to overlap if they are both being used by the
+     * same SpaceObject.
      * @param hitbox1 The first Hitbox
      * @param hitbox2 The second Hitbox
      * @return Whether the two Hitboxes overlap
      */
     public static boolean overlap(Hitbox hitbox1, Hitbox hitbox2) {
         if ((hitbox1.getObject() != hitbox2.getObject() || hitbox1.getObject() == null)
-                && hitbox1.getLeftEdge() <= hitbox2.getRightEdge()
-                && hitbox1.getRightEdge() >= hitbox2.getLeftEdge()
-                && hitbox1.getTopEdge() <= hitbox2.getBottomEdge()
-                && hitbox1.getBottomEdge() >= hitbox2.getTopEdge()) {
+                && hitbox1.getLeftEdge() < hitbox2.getRightEdge()
+                && hitbox1.getRightEdge() > hitbox2.getLeftEdge()
+                && hitbox1.getTopEdge() < hitbox2.getBottomEdge()
+                && hitbox1.getBottomEdge() > hitbox2.getTopEdge()) {
             if (hitbox1 instanceof CompositeHitbox) {
                 for (Hitbox component : ((CompositeHitbox)hitbox1).components.values()) {
                     if (overlap(component, hitbox2)) {
@@ -1313,12 +1306,10 @@ public abstract class Hitbox {
                     return hitbox1.distanceTo(hitbox2) < ((CircleHitbox)hitbox2).getRadius();
                 } else if (hitbox2 instanceof LineHitbox) {
                     return lineSegmentIntersectsPoint(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), hitbox1.absPosition);
-                } else if (hitbox2 instanceof PointHitbox) {
-                    return true;
                 } else if (hitbox2 instanceof PolygonHitbox) {
                     return pointIntersectsPolygon(hitbox1.absPosition, (PolygonHitbox)hitbox2);
                 } else if (hitbox2 instanceof RectangleHitbox) {
-                    return pointIntersectsRectangle(hitbox1.absPosition, hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
+                    return true;
                 }
             } else if (hitbox1 instanceof PolygonHitbox) {
                 if (hitbox2 instanceof CircleHitbox) {
@@ -1338,12 +1329,11 @@ public abstract class Hitbox {
                 } else if (hitbox2 instanceof LineHitbox) {
                     return lineSegmentIntersectsRectangle(hitbox2.absPosition, ((LineHitbox)hitbox2).getAbsDifference(), hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
                 } else if (hitbox2 instanceof PointHitbox) {
-                    return pointIntersectsRectangle(hitbox2.absPosition, hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
+                    return true;
                 } else if (hitbox2 instanceof PolygonHitbox) {
                     return polygonIntersectsRectangle((PolygonHitbox)hitbox2, hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge());
                 } else if (hitbox2 instanceof RectangleHitbox) {
-                    return rectanglesIntersect(hitbox1.getLeftEdge(), hitbox1.getTopEdge(), hitbox1.getRightEdge(), hitbox1.getBottomEdge(),
-                            hitbox2.getLeftEdge(), hitbox2.getTopEdge(), hitbox2.getRightEdge(), hitbox2.getBottomEdge());
+                    return true;
                 }
             }
         }

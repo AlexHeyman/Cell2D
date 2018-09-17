@@ -12,7 +12,7 @@ import java.util.List;
  * ensure that its vertices are not positioned in such a way that this loop
  * crosses itself. Both relative and absolute vertices are relative to their
  * PolygonHitbox's position. A PolygonHitbox with no vertices is a point at its
- * absolute position.</p>
+ * absolute position that cannot overlap other Hitboxes.</p>
  * @author Andrew Heyman
  */
 public class PolygonHitbox extends Hitbox {
