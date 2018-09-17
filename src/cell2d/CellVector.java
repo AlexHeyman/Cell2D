@@ -372,11 +372,11 @@ public class CellVector {
     }
     
     /**
-     * Returns the magnitude in fracunits of the cross product of this
+     * Returns the non-zero component in fracunits of the cross product of this
      * CellVector and the specified one.
      * @param vector The CellVector to take the cross product with
-     * @return The magnitude of the cross product of this CellVector and the
-     * specified one
+     * @return The non-zero component of the cross product of this CellVector
+     * and the specified one
      */
     public final long cross(CellVector vector) {
         return Frac.mul(x, vector.y) - Frac.mul(y, vector.x);
