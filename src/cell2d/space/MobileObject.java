@@ -1,6 +1,7 @@
 package cell2d.space;
 
 import cell2d.CellVector;
+import cell2d.Direction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;

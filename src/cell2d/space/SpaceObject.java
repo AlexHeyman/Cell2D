@@ -5,6 +5,7 @@ import cell2d.Animation;
 import cell2d.AnimationInstance;
 import cell2d.CellGame;
 import cell2d.CellVector;
+import cell2d.Direction;
 import cell2d.Drawable;
 import cell2d.Filter;
 import cell2d.Sprite;

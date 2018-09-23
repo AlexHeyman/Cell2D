@@ -3,6 +3,7 @@ package cell2d.space;
 import celick.Graphics;
 import cell2d.CellGame;
 import cell2d.CellVector;
+import cell2d.Direction;
 import cell2d.EventGroup;
 import cell2d.Frac;
 import cell2d.GameState;
