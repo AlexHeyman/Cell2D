@@ -2,7 +2,6 @@ package celick.state;
 
 import celick.GameContainer;
 import celick.Graphics;
-import celick.InputListener;
 import celick.SlickException;
 
 /**
@@ -11,7 +10,7 @@ import celick.SlickException;
  *
  * @author kevin
  */
-public interface GameState extends InputListener {
+public interface GameState {
 	/**
 	 * Get the ID of this state
 	 * 

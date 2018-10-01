@@ -361,14 +361,6 @@ public class AppGameContainer extends GameContainer {
 		
 		initSystem();
 		enterOrtho();
-
-		try {
-			getInput().initControllers();
-		} catch (SlickException e) {
-			Log.info("Controllers not available");
-		} catch (Throwable e) {
-			Log.info("Controllers not available");
-		}
 		
 		try {
 			game.init(this);

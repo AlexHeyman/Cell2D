@@ -52,8 +52,6 @@ public abstract class GameContainer implements GUIContext {
 	/** The graphics context to be passed to the game */
 	private Graphics graphics;
 	
-	/** The input system to pass to the game */
-	protected Input input;
 	/** The FPS we want to lock to */
 	protected int targetFPS = -1;
 	/** True if we should show the fps */
@@ -466,15 +464,6 @@ public abstract class GameContainer implements GUIContext {
 	 * cursor was set
 	 */
 	public abstract void setDefaultMouseCursor();
-	
-	/**
-	 * Get the input system
-	 * 
-	 * @return The input system available to this game container
-	 */
-	public Input getInput() {
-		return input;
-	}
 
 	/**
 	 * Get the current recorded FPS (frames per second)
@@ -560,7 +549,6 @@ public abstract class GameContainer implements GUIContext {
 			}
 		}
 		
-		input.poll(width, height);
 		if (!paused) {
 			storedDelta += delta;
 			
@@ -648,18 +636,6 @@ public abstract class GameContainer implements GUIContext {
 	protected void initGL() {
 		Log.info("Starting display "+width+"x"+height);
 		GL.initDisplay(width, height);
-		
-		if (input == null) {
-			input = new Input(height);
-		}
-		input.init(height);
-		// no need to remove listeners?
-		//input.removeAllListeners();
-		if (game instanceof InputListener) {
-			input.removeListener((InputListener) game);
-			input.addListener((InputListener) game);
-		}
-
 		if (graphics != null) {
 			graphics.setDimensions(getWidth(), getHeight());
 		}

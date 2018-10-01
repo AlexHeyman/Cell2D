@@ -1,7 +1,6 @@
 package celick.gui;
 
 import celick.Font;
-import celick.Input;
 import celick.SlickException;
 import celick.opengl.ImageData;
 import org.lwjgl.input.Cursor;
@@ -12,13 +11,6 @@ import org.lwjgl.input.Cursor;
  * @author kevin
  */
 public interface GUIContext {
-
-	/**
-	 * Get the input system
-	 * 
-	 * @return The input system available to this game container
-	 */
-	public Input getInput();
 	
 	/**
 	 * Get the accurate system time

@@ -3,8 +3,6 @@ package celick.state;
 import celick.Game;
 import celick.GameContainer;
 import celick.Graphics;
-import celick.Input;
-import celick.InputListener;
 import celick.SlickException;
 import celick.state.transition.EmptyTransition;
 import celick.state.transition.Transition;
@@ -17,7 +15,7 @@ import java.util.Iterator;
  *
  * @author kevin
  */
-public abstract class StateBasedGame implements Game, InputListener {
+public abstract class StateBasedGame implements Game {
 	/** The list of states making up this game */
 	private HashMap states = new HashMap();
 	/** The current state */
@@ -89,12 +87,6 @@ public abstract class StateBasedGame implements Game, InputListener {
 	 */
 	public GameState getCurrentState() {
 		return currentState;
-	}
-	
-	/**
-	 * @see celick.InputListener#setInput(celick.Input)
-	 */
-	public void setInput(Input input) {
 	}
 	
 	/**
@@ -321,220 +313,6 @@ public abstract class StateBasedGame implements Game, InputListener {
 	 */
 	public GameContainer getContainer() {
 		return container;
-	}
-	
-	/**
-	 * @see celick.InputListener#controllerButtonPressed(int, int)
-	 */
-	public void controllerButtonPressed(int controller, int button) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerButtonPressed(controller, button);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerButtonReleased(int, int)
-	 */
-	public void controllerButtonReleased(int controller, int button) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerButtonReleased(controller, button);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerDownPressed(int)
-	 */
-	public void controllerDownPressed(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerDownPressed(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerDownReleased(int)
-	 */
-	public void controllerDownReleased(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerDownReleased(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerLeftPressed(int)
-	 */
-	public void controllerLeftPressed(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerLeftPressed(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerLeftReleased(int)
-	 */
-	public void controllerLeftReleased(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerLeftReleased(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerRightPressed(int)
-	 */
-	public void controllerRightPressed(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerRightPressed(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerRightReleased(int)
-	 */
-	public void controllerRightReleased(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerRightReleased(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerUpPressed(int)
-	 */
-	public void controllerUpPressed(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerUpPressed(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#controllerUpReleased(int)
-	 */
-	public void controllerUpReleased(int controller) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.controllerUpReleased(controller);
-	}
-
-	/**
-	 * @see celick.InputListener#keyPressed(int, char)
-	 */
-	public void keyPressed(int key, char c) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.keyPressed(key, c);
-	}
-
-	/**
-	 * @see celick.InputListener#keyReleased(int, char)
-	 */
-	public void keyReleased(int key, char c) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.keyReleased(key, c);
-	}
-
-	/**
-	 * @see celick.InputListener#mouseMoved(int, int, int, int)
-	 */
-	public void mouseMoved(int oldx, int oldy, int newx, int newy) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.mouseMoved(oldx, oldy, newx, newy);
-	}
-
-	/**
-	 * @see celick.InputListener#mouseDragged(int, int, int, int)
-	 */
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.mouseDragged(oldx, oldy, newx, newy);
-	}
-	/**
-	 * @see celick.InputListener#mouseClicked(int, int, int, int)
-	 */
-	public void mouseClicked(int button, int x, int y, int clickCount) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.mouseClicked(button, x, y, clickCount);
-	}
-	
-	/**
-	 * @see celick.InputListener#mousePressed(int, int, int)
-	 */
-	public void mousePressed(int button, int x, int y) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.mousePressed(button, x, y);
-	}
-
-	/**
-	 * @see celick.InputListener#mouseReleased(int, int, int)
-	 */
-	public void mouseReleased(int button, int x, int y) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.mouseReleased(button, x, y);
-	}
-
-	/**
-	 * @see celick.InputListener#isAcceptingInput()
-	 */
-	public boolean isAcceptingInput() {		
-		if (transitioning()) {
-			return false;
-		}
-
-		return currentState.isAcceptingInput();
-	}
-	
-	/**
-	 * @see celick.InputListener#inputEnded()
-	 */
-	public void inputEnded() {
-	}
-	
-	/**
-	 * @see celick.InputListener#mouseWheelMoved(int)
-	 */
-	public void mouseWheelMoved(int newValue) {
-		if (transitioning()) {
-			return;
-		}
-		
-		currentState.mouseWheelMoved(newValue);
 	}
 
 }

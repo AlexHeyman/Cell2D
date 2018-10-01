@@ -9,8 +9,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 
@@ -66,11 +64,6 @@ class Audio {
     
     private static void init() {
         initialized = true;
-        try {
-            AL.create();
-        } catch (LWJGLException e) {
-            throw new RuntimeException(e);
-        }
         sources = BufferUtils.createIntBuffer(NUM_SOURCES);
         for (int i = 0; i < NUM_SOURCES; i++) {
             IntBuffer buf = BufferUtils.createIntBuffer(1);
@@ -81,12 +74,6 @@ class Audio {
             sources.put(buf.get(0));
         }
         timesSourcesPlayed = new int[NUM_SOURCES];
-    }
-    
-    static void close() {
-        if (initialized) {
-            AL.destroy();
-        }
     }
     
     final void unload() {

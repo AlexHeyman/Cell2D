@@ -3,27 +3,24 @@ package cell2d;
 import celick.AppGameContainer;
 import celick.GameContainer;
 import celick.Graphics;
-import celick.Input;
 import celick.SlickException;
-import celick.command.BasicCommand;
-import celick.command.Command;
-import celick.command.Control;
-import celick.command.ControllerButtonControl;
-import celick.command.ControllerDirectionControl;
-import celick.command.InputProvider;
-import celick.command.InputProviderListener;
-import celick.command.KeyControl;
-import celick.command.MouseButtonControl;
 import celick.state.BasicGameState;
 import celick.state.StateBasedGame;
 import celick.state.transition.Transition;
 import celick.util.Log;
+import cell2d.control.Control;
+import cell2d.control.ControllerButtonControl;
+import cell2d.control.ControllerDirectionControl;
+import cell2d.control.InvalidControlException;
+import cell2d.control.KeyControl;
+import cell2d.control.MouseButtonControl;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +28,11 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Controller;
+import org.lwjgl.input.Controllers;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
@@ -87,15 +89,22 @@ public abstract class CellGame {
      */
     public static final String VERSION = "2.0.0";
     
-    private static enum CommandState {
-        NOTHELD, PRESSED, HELD, RELEASED, TAPPED, UNTAPPED
+    private static class CommandState {
+        
+        private int numControlsHeld;
+        private boolean pressed, released;
+        
+        private CommandState() {
+            reset();
+        }
+        
+        private void reset() {
+            numControlsHeld = 0;
+            pressed = false;
+            released = false;
+        }
+        
     }
-    
-    private static Map<Integer,String> KEYCODE_NAMES = null;
-    private static Map<String,Integer> NAME_KEYCODES = null;
-    private static final int MAX_CONTROLLERS = 16;
-    private static final int NORMAL_CTLR_BUTTONS = 16;
-    private static final int MAX_CTLR_BUTTONS = 100;
     
     /**
      * Loads the native libraries that are necessary for LWJGL 2, and thus
@@ -115,6 +124,40 @@ public abstract class CellGame {
             throw new RuntimeException("Failed to load native libraries");
         }
         System.setProperty("org.lwjgl.librarypath", new File(path).getAbsolutePath());
+    }
+    
+    private static void create() {
+        try {
+            if (!AL.isCreated()) {
+                AL.create();
+            }
+            if (!Keyboard.isCreated()) {
+                Keyboard.create();
+            }
+            if (!Mouse.isCreated()) {
+                Mouse.create();
+            }
+            if (!Controllers.isCreated()) {
+                Controllers.create();
+            }
+        } catch (LWJGLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static void destroy() {
+        if (AL.isCreated()) {
+            AL.destroy();
+        }
+        if (Keyboard.isCreated()) {
+            Keyboard.destroy();
+        }
+        if (Mouse.isCreated()) {
+            Mouse.destroy();
+        }
+        if (Controllers.isCreated()) {
+            Controllers.destroy();
+        }
     }
     
     /**
@@ -144,22 +187,17 @@ public abstract class CellGame {
     private final Map<Integer,GameState> states = new HashMap<>();
     private GameState currentState = null;
     private boolean loaded = false;
-    private InputProvider provider = null;
-    private Input input = null;
-    private Command[] commands;
-    private CommandState[] commandStates;
-    private CommandState[] commandChanges;
+    private final CommandState[] commandStates;
+    private final Set<Control> controlsHeld = new HashSet<>();
+    private final Map<Integer,Set<Direction>> controllerDirections = new HashMap<>();
+    private List<Set<Control>> commandControls;
+    private final Map<Control,Integer> controlCommands = new HashMap<>();
     private int bindingCommandNum = -1;
-    private int boundCommandNum = -1;
-    private int adjustedMouseX = 0;
-    private int newMouseX = 0;
-    private int adjustedMouseY = 0;
-    private int newMouseY = 0;
+    private int mouseX = 0;
+    private int mouseY = 0;
     private int mouseWheelChange = 0;
-    private int newMouseWheelChange = 0;
     private String typingString = null;
     private int maxTypingStringLength = 0;
-    private boolean finishTypingString = false;
     private int fps;
     private boolean showFPS = false;
     private double msPerFrame;
@@ -199,13 +237,11 @@ public abstract class CellGame {
         if (numCommands < 0) {
             throw new RuntimeException("Attempted to create a CellGame with a negative number of commands");
         }
-        commands = new Command[numCommands];
         commandStates = new CommandState[numCommands];
-        commandChanges = new CommandState[numCommands];
+        commandControls = new ArrayList<>(numCommands);
         for (int i = 0; i < numCommands; i++) {
-            commands[i] = new BasicCommand("Command " + i);
-            commandStates[i] = CommandState.NOTHELD;
-            commandChanges[i] = CommandState.NOTHELD;
+            commandStates[i] = new CommandState();
+            commandControls.add(new HashSet<>());
         }
         setFPS(fps);
         try {
@@ -228,10 +264,11 @@ public abstract class CellGame {
         closeRequested = true;
     }
     
-    private void resetCommandChanges() {
-        for (int i = 0; i < commandChanges.length; i++) {
-            commandChanges[i] = CommandState.NOTHELD;
+    private void resetCommands() {
+        for (CommandState commandState : commandStates) {
+            commandState.reset();
         }
+        controlsHeld.clear();
     }
     
     private void updateScreen(GameContainer container) throws SlickException {
@@ -277,7 +314,7 @@ public abstract class CellGame {
                     screenXOffset = newXOffset;
                     screenYOffset = newYOffset;
                     appContainer.setDisplayMode(newWidth, newHeight, true);
-                    resetCommandChanges();
+                    resetCommands();
                     return;
                 }
             }
@@ -285,7 +322,7 @@ public abstract class CellGame {
             screenXOffset = 0;
             screenYOffset = 0;
             appContainer.setDisplayMode((int)(screenWidth*scaleFactor), (int)(screenHeight*scaleFactor), false);
-            resetCommandChanges();
+            resetCommands();
             return;
         }
         double screenRatio = ((double)screenHeight)/screenWidth;
@@ -302,7 +339,160 @@ public abstract class CellGame {
         screenYOffset = 0;
     }
     
-    private class Game extends StateBasedGame implements InputProviderListener {
+    private void updateControl(Control control, boolean pressed) {
+        if (bindingCommandNum >= 0) {
+            if (pressed) {
+                finishBindToCommand(control);
+            }
+        } else if (typingString == null) {
+            int commandNum = controlCommands.getOrDefault(control, -1);
+            if (commandNum < 0) {
+                return;
+            }
+            CommandState commandState = commandStates[commandNum];
+            if (pressed) {
+                if (controlsHeld.add(control)) {
+                    if (commandState.numControlsHeld == 0) {
+                        commandState.pressed = true;
+                    }
+                    commandState.numControlsHeld++;
+                }
+            } else {
+                if (controlsHeld.remove(control)) {
+                    commandState.numControlsHeld--;
+                    if (commandState.numControlsHeld == 0) {
+                        commandState.released = true;
+                    }
+                }
+            }
+        }
+    }
+    
+    private void updateInput() {
+        for (CommandState commandState : commandStates) {
+            commandState.pressed = false;
+            commandState.released = false;
+        }
+        Keyboard.poll();
+        Mouse.poll();
+        Controllers.poll();
+        while (Keyboard.next()) {
+            int keyCode = Keyboard.getEventKey();
+            boolean keyPressed = Keyboard.getEventKeyState();
+            if (typingString != null) {
+                if (keyPressed) {
+                    String s;
+                    switch (keyCode) {
+                        case KeyControl.KEY_ESCAPE:
+                            cancelTypingString();
+                            break;
+                        case KeyControl.KEY_BACK:
+                            if (typingString.length() > 0) {
+                                char toDelete = typingString.charAt(typingString.length() - 1);
+                                typingString = typingString.substring(0, typingString.length() - 1);
+                                if (currentState != null) {
+                                    currentState.charDeletedActions(currentState.game, toDelete);
+                                }
+                            }
+                            break;
+                        case KeyControl.KEY_DELETE:
+                            s = typingString;
+                            typingString = "";
+                            if (currentState != null) {
+                                currentState.stringDeletedActions(currentState.game, s);
+                            }
+                            break;
+                        case KeyControl.KEY_ENTER:
+                            s = typingString;
+                            typingString = null;
+                            maxTypingStringLength = 0;
+                            if (currentState != null) {
+                                currentState.stringFinishedActions(currentState.game, s);
+                            }
+                            break;
+                        default:
+                            char c = Keyboard.getEventCharacter();
+                            if (c != '\u0000' && typingString.length() < maxTypingStringLength) {
+                                typingString += c;
+                                if (currentState != null) {
+                                    currentState.charTypedActions(currentState.game, c);
+                                }
+                            }
+                            break;
+                    }
+                }
+            } else {
+                try {
+                    updateControl(new KeyControl(keyCode), keyPressed);
+                } catch (InvalidControlException e) {}
+            }
+        }
+        mouseWheelChange = 0;
+        while (Mouse.next()) {
+            mouseWheelChange += Mouse.getEventDWheel();
+            int buttonNum = Mouse.getEventButton();
+            if (buttonNum >= 0) {
+                boolean buttonPressed = Mouse.getEventButtonState();
+                try {
+                    updateControl(new MouseButtonControl(buttonNum), buttonPressed);
+                } catch (InvalidControlException e) {}
+            }
+        }
+        mouseX = Math.min(Math.max(
+                (int)(Mouse.getX()/effectiveScaleFactor) - screenXOffset, 0), screenWidth - 1);
+        mouseY = Math.min(Math.max(
+                (int)(Mouse.getY()/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
+        while (Controllers.next()) {
+            Controller controller = Controllers.getEventSource();
+            int controllerNum = controller.getIndex();
+            if (Controllers.isEventButton()) {
+                int buttonNum = Controllers.getEventControlIndex();
+                boolean buttonPressed = Controllers.getEventButtonState();
+                try {
+                    updateControl(new ControllerButtonControl(controllerNum, buttonNum), buttonPressed);
+                } catch (InvalidControlException e) {}
+            } else if (Controllers.isEventXAxis() || Controllers.isEventYAxis()) {
+                float x = Controllers.getEventXAxisValue();
+                float y = Controllers.getEventYAxisValue();
+                double angle = Math.toDegrees(Math.atan2(-y, x)) % 360;
+                if (angle < 0) {
+                    angle += 360;
+                }
+                float deadZoneX = controller.getXAxisDeadZone();
+                float deadZoneY = controller.getYAxisDeadZone();
+                Set<Direction> directions = EnumSet.noneOf(Direction.class);
+                if (x > deadZoneX && (angle < 67.5 || angle > 292.5)) {
+                    directions.add(Direction.RIGHT);
+                } else if (x < -deadZoneX && angle > 112.5 && angle < 247.5) {
+                    directions.add(Direction.LEFT);
+                }
+                if (y > deadZoneY && angle > 202.5 && angle < 337.5) {
+                    directions.add(Direction.DOWN);
+                } else if (y < -deadZoneY && angle > 22.5 && angle < 157.5) {
+                    directions.add(Direction.UP);
+                }
+                Set<Direction> oldDirections = controllerDirections.getOrDefault(
+                        controllerNum, EnumSet.noneOf(Direction.class));
+                controllerDirections.put(controllerNum, directions);
+                for (Direction direction : Direction.values()) {
+                    if (directions.contains(direction)) {
+                        if (!oldDirections.contains(direction)) {
+                            try {
+                                updateControl(
+                                        new ControllerDirectionControl(controllerNum, direction), true);
+                            } catch (InvalidControlException e) {}
+                        }
+                    } else if (oldDirections.contains(direction)) {
+                        try {
+                            updateControl(new ControllerDirectionControl(controllerNum, direction), false);
+                        } catch (InvalidControlException e) {}
+                    }
+                }
+            }
+        }
+    }
+    
+    private class Game extends StateBasedGame {
         
         private Game(String name) {
             super(name);
@@ -316,14 +506,14 @@ public abstract class CellGame {
         @Override
         public final void postUpdateState(GameContainer container, int delta) throws SlickException {
             if (loaded) {
-                double msElapsed = Math.min(delta, msPerFrame);
+                //Update music stack
                 if (!musicStack.isEmpty()) {
                     int top = musicStack.lastKey();
                     Map<Music,MusicInstance> musics = musicStack.get(top);
                     Iterator<Music> iterator = musics.keySet().iterator();
                     while (iterator.hasNext()) {
                         Music music = iterator.next();
-                        if (music.update(msElapsed)) {
+                        if (music.update(delta)) {
                             iterator.remove();
                         }
                     }
@@ -337,39 +527,20 @@ public abstract class CellGame {
                         }
                     }
                 }
-                msToRun += msElapsed;
+                //Execute a frame if it's been long enough since the last one
+                msToRun += Math.min(delta, msPerFrame);
                 if (msToRun >= msPerFrame) {
-                    for (int i = 0; i < commandChanges.length; i++) {
-                        commandStates[i] = commandChanges[i];
-                        if (commandChanges[i] == CommandState.PRESSED
-                                || commandChanges[i] == CommandState.UNTAPPED) {
-                            commandChanges[i] = CommandState.HELD;
-                        } else if (commandChanges[i] == CommandState.RELEASED
-                                || commandChanges[i] == CommandState.TAPPED) {
-                            commandChanges[i] = CommandState.NOTHELD;
-                        }
-                    }
-                    adjustedMouseX = Math.min(Math.max(
-                            (int)(newMouseX/effectiveScaleFactor) - screenXOffset, 0), screenWidth - 1);
-                    adjustedMouseY = Math.min(Math.max(
-                            (int)(newMouseY/effectiveScaleFactor) - screenYOffset, 0), screenHeight - 1);
-                    mouseWheelChange = newMouseWheelChange;
-                    newMouseWheelChange = 0;
+                    updateInput();
                     currentState.doFrame();
                     msToRun -= msPerFrame;
                     if (closeRequested) {
-                        Audio.close();
+                        destroy();
                         container.exit();
                     } else if (updateScreen) {
                         updateScreen(container);
                     }
                 }
             } else if (loadingVisualsRendered) {
-                provider = new InputProvider(container.getInput());
-                provider.addListener(this);
-                input = new Input(container.getScreenHeight());
-                newMouseX = input.getMouseX();
-                newMouseY = input.getMouseY();
                 initActions();
                 if (currentState == null) {
                     throw new RuntimeException("A CellGame did not enter any of its GameStates during "
@@ -395,140 +566,6 @@ public abstract class CellGame {
             g.clearWorldClip();
         }
         
-        @Override
-        public final void mouseMoved(int oldx, int oldy, int newx, int newy) {
-            newMouseX = newx;
-            newMouseY = newy;
-        }
-        
-        @Override
-        public final void mouseWheelMoved(int delta) {
-            newMouseWheelChange += delta;
-        }
-        
-        @Override
-        public final void keyPressed(int key, char c) {
-            if (bindingCommandNum >= 0) {
-                finishBindToCommand(new KeyControl(key));
-            } else if (typingString != null) {
-                if (key == Input.KEY_ESCAPE) {
-                    cancelTypingString();
-                } else if (key == Input.KEY_BACK) {
-                    if (typingString.length() > 0) {
-                        char toDelete = typingString.charAt(typingString.length() - 1);
-                        typingString = typingString.substring(0, typingString.length() - 1);
-                        if (currentState != null) {
-                            currentState.charDeletedActions(currentState.game, toDelete);
-                        }
-                    }
-                } else if (key == Input.KEY_DELETE) {
-                    String s = typingString;
-                    typingString = "";
-                    if (currentState != null) {
-                        currentState.stringDeletedActions(currentState.game, s);
-                    }
-                } else if (key == Input.KEY_ENTER) {
-                    finishTypingString = true;
-                } else if (c != '\u0000' && typingString.length() < maxTypingStringLength) {
-                    typingString += c;
-                    if (currentState != null) {
-                        currentState.charTypedActions(currentState.game, c);
-                    }
-                }
-            }
-        }
-        
-        @Override
-        public final void mouseClicked(int button, int x, int y, int clickCount) {
-            if (bindingCommandNum >= 0) {
-                finishBindToCommand(new MouseButtonControl(button));
-            }
-        }
-        
-        @Override
-        public final void controllerUpPressed(int controller) {
-            if (bindingCommandNum >= 0) {
-                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.UP));
-            }
-        }
-        
-        @Override
-        public final void controllerDownPressed(int controller) {
-            if (bindingCommandNum >= 0) {
-                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.DOWN));
-            }
-        }
-        
-        @Override
-        public final void controllerLeftPressed(int controller) {
-            if (bindingCommandNum >= 0) {
-                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.LEFT));
-            }
-        }
-        
-        @Override
-        public final void controllerRightPressed(int controller) {
-            if (bindingCommandNum >= 0) {
-                finishBindToCommand(new ControllerDirectionControl(controller, ControllerDirectionControl.RIGHT));
-            }
-        }
-        
-        @Override
-        public final void controllerButtonPressed(int controller, int button) {
-            if (bindingCommandNum >= 0) {
-                finishBindToCommand(new ControllerButtonControl(controller, button));
-            }
-        }
-        
-        @Override
-        public final void controlPressed(Command command) {
-            if (bindingCommandNum == -1 && boundCommandNum == -1 && typingString == null) {
-                int i = Arrays.asList(commands).indexOf(command);
-                if (i >= 0) {
-                    if (commandChanges[i] == CommandState.NOTHELD
-                            || commandChanges[i] == CommandState.TAPPED) {
-                        commandChanges[i] = CommandState.PRESSED;
-                    } else if (commandChanges[i] == CommandState.RELEASED) {
-                        commandChanges[i] = CommandState.UNTAPPED;
-                    }
-                }
-            }
-        }
-        
-        @Override
-        public final void controlReleased(Command command) {
-            if (bindingCommandNum == -1 && boundCommandNum == -1 && typingString == null) {
-                int i = Arrays.asList(commands).indexOf(command);
-                if (i >= 0) {
-                    if (commandChanges[i] == CommandState.HELD
-                            || commandChanges[i] == CommandState.UNTAPPED) {
-                        commandChanges[i] = CommandState.RELEASED;
-                    } else if (commandChanges[i] == CommandState.PRESSED) {
-                        commandChanges[i] = CommandState.TAPPED;
-                    }
-                }
-            }
-        }
-        
-        @Override
-        public final void inputEnded() {
-            if (boundCommandNum >= 0) {
-                int commandNum = boundCommandNum;
-                boundCommandNum = -1;
-                if (currentState != null) {
-                    currentState.bindFinishedActions(currentState.game, commandNum);
-                }
-            } else if (finishTypingString) {
-                String s = typingString;
-                typingString = null;
-                maxTypingStringLength = 0;
-                finishTypingString = false;
-                if (currentState != null) {
-                    currentState.stringFinishedActions(currentState.game, s);
-                }
-            }
-        }
-        
     }
     
     private class LoadingState extends BasicGameState {
@@ -541,7 +578,9 @@ public abstract class CellGame {
         }
         
         @Override
-        public final void init(GameContainer container, StateBasedGame game) throws SlickException {}
+        public final void init(GameContainer container, StateBasedGame game) throws SlickException {
+            create();
+        }
         
         @Override
         public final void update(
@@ -706,20 +745,22 @@ public abstract class CellGame {
      * @return How many commands this CellGame has
      */
     public final int getNumCommands() {
-        return commands.length;
+        return commandStates.length;
     }
     
     /**
-     * Returns all of the Controls that are bound to the specified command.
+     * Returns an unmodifiable Set view of all of the Controls that are bound to
+     * the specified command.
      * @param commandNum The number of the command whose controls are to be
      * returned
      * @return The Controls that are bound to the specified command
      */
-    public final List<Control> getControlsFor(int commandNum) {
-        if (commandNum < 0 || commandNum >= commands.length) {
-            throw new RuntimeException("Attempted to get the controls for nonexistent command number " + commandNum);
+    public final Set<Control> getControlsFor(int commandNum) {
+        if (commandNum < 0 || commandNum >= commandStates.length) {
+            throw new RuntimeException("Attempted to get the controls for nonexistent command number "
+                    + commandNum);
         }
-        return (provider == null ? new ArrayList<>() : provider.getControlsFor(commands[commandNum]));
+        return Collections.unmodifiableSet(commandControls.get(commandNum));
     }
     
     /**
@@ -728,12 +769,15 @@ public abstract class CellGame {
      * @param control The control to bind to the specified command
      */
     public final void bindControl(int commandNum, Control control) {
-        if (commandNum < 0 || commandNum >= commands.length) {
+        if (commandNum < 0 || commandNum >= commandStates.length) {
             throw new RuntimeException("Attempted to bind nonexistent command number " + commandNum);
         }
-        if (provider != null) {
-            provider.bindCommand(control, commands[commandNum]);
+        int oldCommandNum = controlCommands.getOrDefault(control, -1);
+        if (oldCommandNum >= 0) {
+            commandControls.get(oldCommandNum).remove(control);
         }
+        commandControls.get(commandNum).add(control);
+        controlCommands.put(control, commandNum);
     }
     
     /**
@@ -741,8 +785,10 @@ public abstract class CellGame {
      * @param control The control to be unbound
      */
     public final void unbindControl(Control control) {
-        if (provider != null) {
-            provider.unbindCommand(control);
+        int oldCommandNum = controlCommands.getOrDefault(control, -1);
+        if (oldCommandNum >= 0) {
+            commandControls.get(oldCommandNum).remove(control);
+            controlCommands.remove(control);
         }
     }
     
@@ -752,12 +798,13 @@ public abstract class CellGame {
      * unbound
      */
     public final void clearControls(int commandNum) {
-        if (commandNum < 0 || commandNum >= commands.length) {
+        if (commandNum < 0 || commandNum >= commandStates.length) {
             throw new RuntimeException("Attempted to clear nonexistent command number " + commandNum);
         }
-        if (provider != null) {
-            provider.clearCommand(commands[commandNum]);
+        for (Control control : commandControls.get(commandNum)) {
+            controlCommands.remove(control);
         }
+        commandControls.get(commandNum).clear();
     }
     
     /**
@@ -781,20 +828,23 @@ public abstract class CellGame {
      * control pressed should be bound
      */
     public final void waitToBindToCommand(int commandNum) {
-        if (commandNum < 0 || commandNum >= commands.length) {
+        if (commandNum < 0 || commandNum >= commandStates.length) {
             throw new RuntimeException("Attempted to begin waiting to bind to nonexistent command number " + commandNum);
         }
         if (typingString != null) {
             throw new RuntimeException("Attempted to begin waiting to bind to command number " + commandNum + " while already typing to a String");
         }
         bindingCommandNum = commandNum;
-        resetCommandChanges();
+        resetCommands();
     }
     
     private void finishBindToCommand(Control control) {
         bindControl(bindingCommandNum, control);
-        boundCommandNum = bindingCommandNum;
+        int boundCommandNum = bindingCommandNum;
         bindingCommandNum = -1;
+        if (currentState != null) {
+            currentState.bindFinishedActions(currentState.game, boundCommandNum);
+        }
     }
     
     /**
@@ -805,277 +855,6 @@ public abstract class CellGame {
         bindingCommandNum = -1;
     }
     
-    private static void putKeycodeName(int keycode, String name) {
-        KEYCODE_NAMES.put(keycode, name);
-        NAME_KEYCODES.put(name, keycode);
-    }
-    
-    private static void initKeycodeData() {
-        KEYCODE_NAMES = new HashMap<>();
-        NAME_KEYCODES = new HashMap<>();
-        putKeycodeName(Input.KEY_ESCAPE, "Escape");
-	putKeycodeName(Input.KEY_1, "1");
-	putKeycodeName(Input.KEY_2, "2");
-        putKeycodeName(Input.KEY_3, "3");
-	putKeycodeName(Input.KEY_4, "4");
-        putKeycodeName(Input.KEY_5, "5");
-	putKeycodeName(Input.KEY_6, "6");
-        putKeycodeName(Input.KEY_7, "7");
-	putKeycodeName(Input.KEY_8, "8");
-        putKeycodeName(Input.KEY_9, "9");
-	putKeycodeName(Input.KEY_0, "0");
-	putKeycodeName(Input.KEY_MINUS, "-");
-	putKeycodeName(Input.KEY_EQUALS, "=");
-	putKeycodeName(Input.KEY_BACK, "Back");
-	putKeycodeName(Input.KEY_TAB, "Tab");
-	putKeycodeName(Input.KEY_Q, "Q");
-	putKeycodeName(Input.KEY_W, "W");
-	putKeycodeName(Input.KEY_E, "E");
-	putKeycodeName(Input.KEY_R, "R");
-	putKeycodeName(Input.KEY_T, "T");
-	putKeycodeName(Input.KEY_Y, "Y");
-	putKeycodeName(Input.KEY_U, "U");
-	putKeycodeName(Input.KEY_I, "I");
-	putKeycodeName(Input.KEY_O, "O");
-	putKeycodeName(Input.KEY_P, "P");
-	putKeycodeName(Input.KEY_LBRACKET, "[");
-	putKeycodeName(Input.KEY_RBRACKET, "]");
-	putKeycodeName(Input.KEY_ENTER, "Enter");
-	putKeycodeName(Input.KEY_LCONTROL, "LCtrl");
-	putKeycodeName(Input.KEY_A, "A");
-	putKeycodeName(Input.KEY_S, "S");
-	putKeycodeName(Input.KEY_D, "D");
-	putKeycodeName(Input.KEY_F, "F");
-	putKeycodeName(Input.KEY_G, "G");
-	putKeycodeName(Input.KEY_H, "H");
-	putKeycodeName(Input.KEY_J, "J");
-	putKeycodeName(Input.KEY_K, "K");
-	putKeycodeName(Input.KEY_L, "L");
-	putKeycodeName(Input.KEY_SEMICOLON, ";");
-	putKeycodeName(Input.KEY_APOSTROPHE, "'");
-	putKeycodeName(Input.KEY_GRAVE, "`");
-	putKeycodeName(Input.KEY_LSHIFT, "LShift");
-	putKeycodeName(Input.KEY_BACKSLASH, "\\");
-	putKeycodeName(Input.KEY_Z, "Z");
-	putKeycodeName(Input.KEY_X, "X");
-	putKeycodeName(Input.KEY_C, "C");
-	putKeycodeName(Input.KEY_V, "V");
-	putKeycodeName(Input.KEY_B, "B");
-	putKeycodeName(Input.KEY_N, "N");
-	putKeycodeName(Input.KEY_M, "M");
-	putKeycodeName(Input.KEY_COMMA, ",");
-	putKeycodeName(Input.KEY_PERIOD, ".");
-	putKeycodeName(Input.KEY_SLASH, "/");
-	putKeycodeName(Input.KEY_RSHIFT, "RShift");
-	putKeycodeName(Input.KEY_MULTIPLY, "Numpd*");
-	putKeycodeName(Input.KEY_LMENU, "LAlt");
-	putKeycodeName(Input.KEY_SPACE, "Space");
-	putKeycodeName(Input.KEY_CAPITAL, "CapsLk");
-	putKeycodeName(Input.KEY_F1, "F1");
-        putKeycodeName(Input.KEY_F2, "F2");
-        putKeycodeName(Input.KEY_F3, "F3");
-        putKeycodeName(Input.KEY_F4, "F4");
-        putKeycodeName(Input.KEY_F5, "F5");
-        putKeycodeName(Input.KEY_F6, "F6");
-        putKeycodeName(Input.KEY_F7, "F7");
-        putKeycodeName(Input.KEY_F8, "F8");
-        putKeycodeName(Input.KEY_F9, "F9");
-        putKeycodeName(Input.KEY_F10, "F10");
-	putKeycodeName(Input.KEY_NUMLOCK, "NumLk");
-	putKeycodeName(Input.KEY_SCROLL, "ScrlLk");
-	putKeycodeName(Input.KEY_NUMPAD7, "Numpd7");
-	putKeycodeName(Input.KEY_NUMPAD8, "Numpd8");
-	putKeycodeName(Input.KEY_NUMPAD9, "Numpd9");
-	putKeycodeName(Input.KEY_SUBTRACT, "Numpd-");
-	putKeycodeName(Input.KEY_NUMPAD4, "Numpd4");
-	putKeycodeName(Input.KEY_NUMPAD5, "Numpd5");
-	putKeycodeName(Input.KEY_NUMPAD6, "Numpd6");
-	putKeycodeName(Input.KEY_ADD, "Numpd+");
-	putKeycodeName(Input.KEY_NUMPAD1, "Numpd1");
-	putKeycodeName(Input.KEY_NUMPAD2, "Numpd2");
-	putKeycodeName(Input.KEY_NUMPAD3, "Numpd3");
-	putKeycodeName(Input.KEY_NUMPAD0, "Numpd0");
-	putKeycodeName(Input.KEY_DECIMAL, "Numpd.");
-	putKeycodeName(Input.KEY_F11, "F11");
-	putKeycodeName(Input.KEY_F12, "F12");
-	putKeycodeName(Input.KEY_F13, "F13");
-	putKeycodeName(Input.KEY_F14, "F14");
-	putKeycodeName(Input.KEY_F15, "F15");
-	putKeycodeName(Input.KEY_KANA, "Kana");
-	putKeycodeName(Input.KEY_CONVERT, "Conv");
-	putKeycodeName(Input.KEY_NOCONVERT, "NoConv");
-	putKeycodeName(Input.KEY_YEN, "Yen");
-	putKeycodeName(Input.KEY_NUMPADEQUALS, "Numpd=");
-	putKeycodeName(Input.KEY_CIRCUMFLEX, "^");
-	putKeycodeName(Input.KEY_AT, "@");
-	putKeycodeName(Input.KEY_COLON, ":");
-	putKeycodeName(Input.KEY_UNDERLINE, "_");
-	putKeycodeName(Input.KEY_KANJI, "Kanji");
-	putKeycodeName(Input.KEY_STOP, "Stop");
-	putKeycodeName(Input.KEY_AX, "AX");
-	putKeycodeName(Input.KEY_UNLABELED, "Unlabl");
-	putKeycodeName(Input.KEY_NUMPADENTER, "NumpdE");
-	putKeycodeName(Input.KEY_RCONTROL, "RCtrl");
-	putKeycodeName(Input.KEY_NUMPADCOMMA, "Numpd,");
-	putKeycodeName(Input.KEY_DIVIDE, "Numpd%");
-	putKeycodeName(Input.KEY_SYSRQ, "SysRq");
-	putKeycodeName(Input.KEY_RMENU, "RAlt");
-	putKeycodeName(Input.KEY_PAUSE, "Pause");
-	putKeycodeName(Input.KEY_HOME, "Home");
-	putKeycodeName(Input.KEY_UP, "Up");
-	putKeycodeName(Input.KEY_PRIOR, "PageUp");
-	putKeycodeName(Input.KEY_LEFT, "Left");
-	putKeycodeName(Input.KEY_RIGHT, "Right");
-	putKeycodeName(Input.KEY_END, "End");
-	putKeycodeName(Input.KEY_DOWN, "Down");
-	putKeycodeName(Input.KEY_NEXT, "PageDn");
-	putKeycodeName(Input.KEY_INSERT, "Insert");
-	putKeycodeName(Input.KEY_DELETE, "Delete");
-	putKeycodeName(Input.KEY_LWIN, "LWndws");
-	putKeycodeName(Input.KEY_RWIN, "RWndws");
-	putKeycodeName(Input.KEY_APPS, "Apps");
-	putKeycodeName(Input.KEY_POWER, "Power");
-	putKeycodeName(Input.KEY_SLEEP, "Sleep");
-    }
-    
-    /**
-     * Returns a short, descriptive, and unique String name for the specified
-     * Control. The name will be no more than 6 characters long and contain only
-     * ASCII characters and no whitespace. Two distinct Control objects will
-     * have the same name if and only if they are equal. This method will return
-     * a null name for certain malformed or highly unusual Control objects, but
-     * any Control associated with an actual physical control device is almost
-     * guaranteed to have a non-null name.
-     * @param control The Control to name
-     * @return The name of the specified Control
-     */
-    public final String getControlName(Control control) {
-        if (control instanceof KeyControl) {
-            if (KEYCODE_NAMES == null) {
-                initKeycodeData();
-            }
-            return KEYCODE_NAMES.get(control.hashCode());
-        } else if (control instanceof MouseButtonControl) {
-            int hashCode = control.hashCode();
-            switch (hashCode) {
-                case Input.MOUSE_LEFT_BUTTON:
-                    return "LMB";
-                case Input.MOUSE_RIGHT_BUTTON:
-                    return "RMB";
-                case Input.MOUSE_MIDDLE_BUTTON:
-                    return "MMB";
-            }
-        } else if (control instanceof ControllerDirectionControl) {
-            for (int i = 0; i < MAX_CONTROLLERS; i++) {
-                if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.UP))) {
-                    return "C" + i + "Up";
-                } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.DOWN))) {
-                    return "C" + i + "Dwn";
-                } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.LEFT))) {
-                    return "C" + i + "Lft";
-                } else if (control.equals(new ControllerDirectionControl(i, ControllerDirectionControl.RIGHT))) {
-                    return "C" + i + "Rgt";
-                }
-            }
-        } else if (control instanceof ControllerButtonControl) {
-            for (int i = 0; i < MAX_CONTROLLERS; i++) {
-                for (int j = 0; j < NORMAL_CTLR_BUTTONS; j++) {
-                    if (control.equals(new ControllerButtonControl(i, j))) {
-                        return "C" + i + "B" + j;
-                    }
-                }
-            }
-            for (int i = 0; i < MAX_CONTROLLERS; i++) {
-                for (int j = NORMAL_CTLR_BUTTONS; j < MAX_CTLR_BUTTONS; j++) {
-                    if (control.equals(new ControllerButtonControl(i, j))) {
-                        return "C" + i + "B" + j;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Returns the Control whose name according to getControlName() is the
-     * specified String, or null if no Control has that String as a name.
-     * @param controlName The name of the Control to be returned
-     * @return The Control whose name is the specified String
-     */
-    public final Control getControl(String controlName) {
-        if (NAME_KEYCODES == null) {
-            initKeycodeData();
-        }
-        Integer keycode = NAME_KEYCODES.get(controlName);
-        if (keycode != null) {
-            return new KeyControl(keycode);
-        } else if (controlName.equals("LMB")) {
-            return new MouseButtonControl(Input.MOUSE_LEFT_BUTTON);
-        } else if (controlName.equals("RMB")) {
-            return new MouseButtonControl(Input.MOUSE_RIGHT_BUTTON);
-        } else if (controlName.equals("MMB")) {
-            return new MouseButtonControl(Input.MOUSE_MIDDLE_BUTTON);
-        } else if (controlName.length() > 0 && controlName.charAt(0) == 'C') {
-            int i = 1;
-            char c;
-            while (true) {
-                c = controlName.charAt(i);
-                if (!Character.isDigit(c)) {
-                    break;
-                }
-                i++;
-                if (i == controlName.length()) {
-                    return null;
-                }
-            }
-            String controllerNumStr = controlName.substring(1, i);
-            int controllerNum;
-            try {
-                controllerNum = Integer.parseInt(controllerNumStr);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-            if (controllerNum < 0 || controllerNum >= MAX_CONTROLLERS
-                    || (controllerNumStr.charAt(0) == '0' && controllerNumStr.length() > 1)) {
-                return null;
-            }
-            if (c == 'B') {
-                i++;
-                int j = i;
-                while (j < controlName.length()) {
-                    c = controlName.charAt(j);
-                    if (!Character.isDigit(c)) {
-                        return null;
-                    }
-                    j++;
-                }
-                String buttonNumStr = controlName.substring(i, j);
-                int buttonNum;
-                try {
-                    buttonNum = Integer.parseInt(buttonNumStr);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-                if (buttonNum < 0 || buttonNum >= MAX_CTLR_BUTTONS
-                        || (buttonNumStr.charAt(0) == '0' && buttonNumStr.length() > 1)) {
-                    return null;
-                }
-                return new ControllerButtonControl(controllerNum, buttonNum);
-            }
-            switch (controlName.substring(i)) {
-                case "Up":
-                    return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.UP);
-                case "Dwn":
-                    return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.DOWN);
-                case "Lft":
-                    return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.LEFT);
-                case "Rgt":
-                    return new ControllerDirectionControl(controllerNum, ControllerDirectionControl.RIGHT);
-            }
-        }
-        return null;
-    }
-    
     /**
      * Returns whether the specified command was pressed this frame; that is,
      * whether it transitioned from not being held to being held.
@@ -1083,9 +862,7 @@ public abstract class CellGame {
      * @return Whether the specified command was pressed this frame
      */
     public final boolean commandPressed(int commandNum) {
-        return commandStates[commandNum] == CommandState.PRESSED
-                || commandStates[commandNum] == CommandState.TAPPED
-                || commandStates[commandNum] == CommandState.UNTAPPED;
+        return commandStates[commandNum].pressed;
     }
     
     /**
@@ -1094,9 +871,7 @@ public abstract class CellGame {
      * @return Whether the specified command is being held this frame
      */
     public final boolean commandHeld(int commandNum) {
-        return commandStates[commandNum] == CommandState.PRESSED
-                || commandStates[commandNum] == CommandState.HELD
-                || commandStates[commandNum] == CommandState.TAPPED;
+        return commandStates[commandNum].numControlsHeld > 0;
     }
     
     /**
@@ -1106,9 +881,7 @@ public abstract class CellGame {
      * @return Whether the specified command was released this frame
      */
     public final boolean commandReleased(int commandNum) {
-        return commandStates[commandNum] == CommandState.RELEASED
-                || commandStates[commandNum] == CommandState.TAPPED
-                || commandStates[commandNum] == CommandState.UNTAPPED;
+        return commandStates[commandNum].released;
     }
     
     /**
@@ -1118,7 +891,7 @@ public abstract class CellGame {
      * screen
      */
     public final int getMouseX() {
-        return adjustedMouseX;
+        return mouseX;
     }
     
     /**
@@ -1128,7 +901,7 @@ public abstract class CellGame {
      * screen
      */
     public final int getMouseY() {
-        return adjustedMouseY;
+        return mouseY;
     }
     
     /**
@@ -1206,7 +979,7 @@ public abstract class CellGame {
         }
         typingString = initialString;
         maxTypingStringLength = maxLength;
-        resetCommandChanges();
+        resetCommands();
         if (currentState != null) {
             currentState.stringBeganActions(currentState.game, initialString);
         }
