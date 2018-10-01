@@ -65,12 +65,12 @@ import org.lwjgl.opengl.DisplayMode;
  * <p>A CellGame processes input in the form of a fixed number of binary
  * <i>commands</i>, numbered from 0 to getNumCommands() - 1 inclusive, as well
  * as the position of the mouse cursor on the screen and the movement of the
- * mouse wheel. Slick2D objects called Controls, which represent keys, mouse
- * buttons, controller buttons, etc. may be bound to at most one command at a
- * time so that when they are pressed, held, and released, so too are the
- * commands to which they are bound. A CellGame also allows for the temporary
- * processing of input as assignments of Controls to specific commands, or as
- * the typing of text to a specific String.</p>
+ * mouse wheel. Controls, which represent keys, mouse buttons, controller
+ * buttons, etc. may be bound to at most one command at a time so that when they
+ * are pressed, held, and released, so too are the commands to which they are
+ * bound. A CellGame also allows for the temporary processing of input as
+ * assignments of Controls to specific commands, or as the typing of text to a
+ * specific String.</p>
  * 
  * <p>A CellGame also controls the playing and stopping of Music tracks. It
  * contains a data structure called a <i>music stack</i> in which different
@@ -79,6 +79,7 @@ import org.lwjgl.opengl.DisplayMode;
  * any given time. If a currently playing Music track finishes, it will
  * automatically be removed from the top of the music stack.</p>
  * @see GameState
+ * @see Control
  * @see Music
  * @author Andrew Heyman
  */
