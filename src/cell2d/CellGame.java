@@ -270,6 +270,7 @@ public abstract class CellGame {
             commandState.reset();
         }
         controlsHeld.clear();
+        controllerDirections.clear();
     }
     
     private void updateScreen(GameContainer container) throws SlickException {
