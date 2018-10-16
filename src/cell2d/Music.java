@@ -104,8 +104,8 @@ public class Music {
         if (loopStart < 0) {
             throw new RuntimeException("Attempted to give a Music track a negative loop start position");
         } else if (loopEnd >= 0 && loopStart >= loopEnd) {
-            throw new RuntimeException("Attempted to give a Music track a loop start position after or "
-                    + "equal to its loop end position");
+            throw new RuntimeException("Attempted to give a Music track a loop start position after or equal"
+                    + " to its loop end position");
         }
         blank = false;
         this.path = path;

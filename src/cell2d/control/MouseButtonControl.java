@@ -3,9 +3,11 @@ package cell2d.control;
 import java.util.Objects;
 
 /**
+ * <p>A MouseButtonControl is a Control that represents a button on the mouse.
+ * The button is specified by an integer <i>button code</i> that is equal to one
+ * of the MOUSE_ constants of the MouseButtonControl class. All other integers
+ * are invalid as button codes.</p>
  * @author Andrew Heyman
- * @author joverton
- * @author kevin
  */
 public class MouseButtonControl extends Control {
     
@@ -15,10 +17,16 @@ public class MouseButtonControl extends Control {
     
     private final int buttonCode;
     
+    /**
+     * Constructs a MouseButtonControl that represents the mouse button with the
+     * specified button code.
+     * @param buttonCode This MouseButtonControl's button code
+     * @throws InvalidControlException If the button code is invalid
+     */
     public MouseButtonControl(int buttonCode) throws InvalidControlException {
         if (buttonCode < 0 || buttonCode > 2) {
-            throw new InvalidControlException("Attempted to construct a MouseButtonControl with invalid "
-                    + "button code " + buttonCode);
+            throw new InvalidControlException("Attempted to construct a MouseButtonControl with invalid"
+                    + " button code " + buttonCode);
         }
         this.buttonCode = buttonCode;
     }
@@ -49,6 +57,10 @@ public class MouseButtonControl extends Control {
         return null;
     }
     
+    /**
+     * Returns this MouseButtonControl's button code.
+     * @return This MouseButtonControl's button code
+     */
     public final int getButtonCode() {
         return buttonCode;
     }

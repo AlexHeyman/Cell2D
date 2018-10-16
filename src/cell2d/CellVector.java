@@ -60,8 +60,9 @@ public class CellVector {
     }
     
     /**
-     * Returns whether two CellVectors are equal. Two CellVectors are equal if
-     * and only if they represent the same point.
+     * Returns whether the specified object is a CellVector that is equal to
+     * this CellVector. Two CellVectors are equal if and only if they represent
+     * the same point.
      * @param obj The object to be compared with this CellVector
      * @return Whether the specified object is a CellVector that is equal to
      * this CellVector

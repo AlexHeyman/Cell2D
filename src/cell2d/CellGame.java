@@ -65,12 +65,14 @@ import org.lwjgl.opengl.DisplayMode;
  * <p>A CellGame processes input in the form of a fixed number of binary
  * <i>commands</i>, numbered from 0 to getNumCommands() - 1 inclusive, as well
  * as the position of the mouse cursor on the screen and the movement of the
- * mouse wheel. Controls, which represent keys, mouse buttons, controller
- * buttons, etc. may be bound to at most one command at a time so that when they
- * are pressed, held, and released, so too are the commands to which they are
- * bound. A CellGame also allows for the temporary processing of input as
- * assignments of Controls to specific commands, or as the typing of text to a
- * specific String.</p>
+ * mouse wheel. Controls, which represent keys, controller buttons, etc. may be
+ * bound to at most one command at a time so that when they are pressed, held,
+ * and released, so too are the commands to which they are bound. If an attempt
+ * is made to bind a Control that is already bound, it will be unbound from its
+ * current command first. A CellGame considers Controls to be the same Control
+ * if they are equal - that is, if they represent the same input. A CellGame
+ * also allows for the temporary processing of input as assignments of Controls
+ * to specific commands, or as the typing of text to a specific String.</p>
  * 
  * <p>A CellGame also controls the playing and stopping of Music tracks. It
  * contains a data structure called a <i>music stack</i> in which different
@@ -545,8 +547,8 @@ public abstract class CellGame {
             } else if (loadingVisualsRendered) {
                 initActions();
                 if (currentState == null) {
-                    throw new RuntimeException("A CellGame did not enter any of its GameStates during "
-                            + "initialization");
+                    throw new RuntimeException("A CellGame did not enter any of its GameStates during"
+                            + " initialization");
                 }
                 loaded = true;
             }
@@ -720,9 +722,9 @@ public abstract class CellGame {
     /**
      * Actions for this CellGame to take when initializing itself before
      * entering its first GameState. This should include creating at least one
-     * GameState for it, binding default controls to its commands, loading
-     * assets, etc. enterState() must be called during this method to tell the
-     * CellGame which GameState to start out in, or an Exception will be thrown.
+     * GameState for it, binding Controls to its commands, loading assets, etc.
+     * enterState() must be called during this method to tell the CellGame which
+     * GameState to start out in, or an Exception will be thrown.
      */
     public abstract void initActions();
     
@@ -759,20 +761,21 @@ public abstract class CellGame {
      */
     public final Set<Control> getControlsFor(int commandNum) {
         if (commandNum < 0 || commandNum >= commandStates.length) {
-            throw new RuntimeException("Attempted to get the controls for nonexistent command number "
+            throw new RuntimeException("Attempted to get the Controls for nonexistent command number "
                     + commandNum);
         }
         return Collections.unmodifiableSet(commandControls.get(commandNum));
     }
     
     /**
-     * Binds the specified control to the specified command.
-     * @param commandNum The command to bind the specified control to
-     * @param control The control to bind to the specified command
+     * Binds the specified Control to the specified command. If the Control is
+     * already bound to a command, it will be unbound first.
+     * @param commandNum The command to bind the specified Control to
+     * @param control The Control to bind to the specified command
      */
     public final void bindControl(int commandNum, Control control) {
         if (commandNum < 0 || commandNum >= commandStates.length) {
-            throw new RuntimeException("Attempted to bind nonexistent command number " + commandNum);
+            throw new RuntimeException("Attempted to bind to nonexistent command number " + commandNum);
         }
         int oldCommandNum = controlCommands.getOrDefault(control, -1);
         if (oldCommandNum >= 0) {
@@ -783,8 +786,8 @@ public abstract class CellGame {
     }
     
     /**
-     * Unbinds the specified control from its command, if it is bound to one.
-     * @param control The control to be unbound
+     * Unbinds the specified Control from its command, if it is bound to one.
+     * @param control The Control to be unbound
      */
     public final void unbindControl(Control control) {
         int oldCommandNum = controlCommands.getOrDefault(control, -1);
@@ -795,8 +798,8 @@ public abstract class CellGame {
     }
     
     /**
-     * Unbinds all of the specified command's controls from it.
-     * @param commandNum The number of the command whose controls are to be
+     * Unbinds all of the specified command's Controls from it.
+     * @param commandNum The number of the command whose Controls are to be
      * unbound
      */
     public final void clearControls(int commandNum) {
@@ -811,23 +814,23 @@ public abstract class CellGame {
     
     /**
      * Returns the number of the command to which this CellGame has been
-     * instructed to bind the next valid control pressed, or -1 if there is
+     * instructed to bind the next valid Control pressed, or -1 if there is
      * none.
      * @return The number of the command to which this CellGame has been
-     * instructed to bind the next valid control pressed
+     * instructed to bind the next valid Control pressed
      */
     public final int getBindingCommandNum() {
         return bindingCommandNum;
     }
     
     /**
-     * Instructs this CellGame to bind the next valid control pressed to the
-     * specified command. After that control is bound, the bindFinishedActions()
+     * Instructs this CellGame to bind the next valid Control pressed to the
+     * specified command. After that Control is bound, the bindFinishedActions()
      * method of this CellGame's current GameState will be called. This method
      * will throw an Exception if this CellGame is already being used to type a
      * String.
      * @param commandNum The number of the command to which the next valid
-     * control pressed should be bound
+     * Control pressed should be bound
      */
     public final void waitToBindToCommand(int commandNum) {
         if (commandNum < 0 || commandNum >= commandStates.length) {
@@ -850,7 +853,7 @@ public abstract class CellGame {
     }
     
     /**
-     * Cancels this CellGame's instruction to bind the next valid control
+     * Cancels this CellGame's instruction to bind the next valid Control
      * pressed to a specified command, if it has been instructed to do so.
      */
     public final void cancelBindToCommand() {
@@ -858,8 +861,9 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns whether the specified command was pressed this frame; that is,
-     * whether it transitioned from not being held to being held.
+     * Returns whether the specified command was pressed this frame. This is the
+     * case if one of the command's bound Controls was pressed while none of its
+     * other Controls were held.
      * @param commandNum The number of the command to examine
      * @return Whether the specified command was pressed this frame
      */
@@ -868,7 +872,8 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns whether the specified command is being held this frame.
+     * Returns whether the specified command is being held this frame. This is
+     * the case if any of the command's bound Controls are being held.
      * @param commandNum The number of the command to examine
      * @return Whether the specified command is being held this frame
      */
@@ -877,8 +882,9 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns whether the specified command was released this frame; that is,
-     * whether it transitioned from being held to not being held.
+     * Returns whether the specified command was released this frame. This is
+     * the case if one of the command's bound Controls was released while none
+     * of its other Controls were held.
      * @param commandNum The number of the command to examine
      * @return Whether the specified command was released this frame
      */
@@ -945,7 +951,7 @@ public abstract class CellGame {
      * and the Enter key finishes the typing and calls the
      * stringFinishedActions() method of this CellGame's current GameState. This
      * method will throw an Exception if this CellGame has already been
-     * instructed to bind the next control pressed to a specified command.
+     * instructed to bind the next Control pressed to a specified command.
      * @param maxLength The maximum length in characters of the String to be
      * typed
      */
@@ -961,7 +967,7 @@ public abstract class CellGame {
      * cancelTypingString(), and the Enter key finishes the typing and calls the
      * stringFinishedActions() method of this CellGame's current GameState. This
      * method will throw an Exception if this CellGame has already been
-     * instructed to bind the next control pressed to a specified command.
+     * instructed to bind the next Control pressed to a specified command.
      * @param initialString The initial value of the String to be typed
      * @param maxLength The maximum length in characters of the String to be
      * typed

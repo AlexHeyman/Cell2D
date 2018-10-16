@@ -47,12 +47,15 @@ class Audio {
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load an OGG-format audio file: " + path);
             }
-            AL10.alBufferData(buffer, ogg.channels > 1 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16, ogg.data, ogg.rate);
+            AL10.alBufferData(buffer, ogg.channels > 1 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
+                    ogg.data, ogg.rate);
         } else if (lowerPath.endsWith(".aif") || lowerPath.endsWith(".aiff")) {
-            AiffData data = AiffData.create(new BufferedInputStream(ResourceLoader.getResourceAsStream(path)));
+            AiffData data = AiffData.create(
+                    new BufferedInputStream(ResourceLoader.getResourceAsStream(path)));
             AL10.alBufferData(buffer, data.format, data.data, data.samplerate);
         } else {
-            throw new RuntimeException("Attempted to load an audio file with an unsupported format: " + path);
+            throw new RuntimeException("Attempted to load an audio file with an unsupported format: "
+                    + path);
         }
         int bytes = AL10.alGetBufferi(buffer, AL10.AL_SIZE);
         int bits = AL10.alGetBufferi(buffer, AL10.AL_BITS);

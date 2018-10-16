@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * <p>A KeyControl is a Control that represents a key on the keyboard. The key
+ * is specified by an integer <i>key code</i> that is equal to one of the KEY_
+ * constants of the KeyControl class. All other integers are invalid as key
+ * codes.</p>
  * @author Andrew Heyman
- * @author joverton
- * @author kevin
  */
 public class KeyControl extends Control {
     
@@ -38,7 +40,6 @@ public class KeyControl extends Control {
     public static final int KEY_P               = 0x19;
     public static final int KEY_LBRACKET        = 0x1A;
     public static final int KEY_RBRACKET        = 0x1B;
-    public static final int KEY_RETURN          = 0x1C; /* Enter on main keyboard */
     public static final int KEY_ENTER           = 0x1C; /* Enter on main keyboard */
     public static final int KEY_LCONTROL        = 0x1D;
     public static final int KEY_A               = 0x1E;
@@ -67,7 +68,7 @@ public class KeyControl extends Control {
     public static final int KEY_SLASH           = 0x35; /* / on main keyboard */
     public static final int KEY_RSHIFT          = 0x36;
     public static final int KEY_MULTIPLY        = 0x37; /* * on numeric keypad */
-    public static final int KEY_LMENU           = 0x38; /* left Alt */
+    public static final int KEY_LALT            = 0x38; /* left Alt */
     public static final int KEY_SPACE           = 0x39;
     public static final int KEY_CAPITAL         = 0x3A;
     public static final int KEY_F1              = 0x3B;
@@ -100,7 +101,11 @@ public class KeyControl extends Control {
     public static final int KEY_F13             = 0x64; /*                     (NEC PC98) */
     public static final int KEY_F14             = 0x65; /*                     (NEC PC98) */
     public static final int KEY_F15             = 0x66; /*                     (NEC PC98) */
+    public static final int KEY_F16             = 0x67; /* Extended Function keys - (Mac) */
+    public static final int KEY_F17             = 0x68;
+    public static final int KEY_F18             = 0x69;
     public static final int KEY_KANA            = 0x70; /* (Japanese keyboard)            */
+    public static final int KEY_F19             = 0x71; /* Extended Function keys - (Mac) */
     public static final int KEY_CONVERT         = 0x79; /* (Japanese keyboard)            */
     public static final int KEY_NOCONVERT       = 0x7B; /* (Japanese keyboard)            */
     public static final int KEY_YEN             = 0x7D; /* (Japanese keyboard)            */
@@ -115,10 +120,12 @@ public class KeyControl extends Control {
     public static final int KEY_UNLABELED       = 0x97; /*                        (J3100) */
     public static final int KEY_NUMPADENTER     = 0x9C; /* Enter on numeric keypad */
     public static final int KEY_RCONTROL        = 0x9D;
+    public static final int KEY_SECTION         = 0xA7; /* Section symbol (Mac) */
     public static final int KEY_NUMPADCOMMA     = 0xB3; /* , on numeric keypad (NEC PC98) */
     public static final int KEY_DIVIDE          = 0xB5; /* / on numeric keypad */
     public static final int KEY_SYSRQ           = 0xB7;
-    public static final int KEY_RMENU           = 0xB8; /* right Alt */
+    public static final int KEY_RALT            = 0xB8; /* right Alt */
+    public static final int KEY_FUNCTION        = 0xC4; /* Function (Mac) */
     public static final int KEY_PAUSE           = 0xC5; /* Pause */
     public static final int KEY_HOME            = 0xC7; /* Home on arrow keypad */
     public static final int KEY_UP              = 0xC8; /* UpArrow on arrow keypad */
@@ -130,166 +137,193 @@ public class KeyControl extends Control {
     public static final int KEY_NEXT            = 0xD1; /* PgDn on arrow keypad */
     public static final int KEY_INSERT          = 0xD2; /* Insert on arrow keypad */
     public static final int KEY_DELETE          = 0xD3; /* Delete on arrow keypad */
-    public static final int KEY_LWIN            = 0xDB; /* Left Windows key */
-    public static final int KEY_RWIN            = 0xDC; /* Right Windows key */
+    public static final int KEY_CLEAR           = 0xDA; /* Clear key (Mac) */
+    public static final int KEY_LMETA           = 0xDB; /* Left Windows/Option key */
+    public static final int KEY_RMETA           = 0xDC; /* Right Windows/Option key */
     public static final int KEY_APPS            = 0xDD; /* AppMenu key */
     public static final int KEY_POWER           = 0xDE;
     public static final int KEY_SLEEP           = 0xDF;
-    public static final int KEY_LALT = KEY_LMENU;
-    public static final int KEY_RALT = KEY_RMENU;
     
     private static Map<Integer,String> KEYCODE_NAMES = null;
     private static Map<String,Integer> NAME_KEYCODES = null;
     
-    private static void putKeycodeName(int keycode, String name) {
-        KEYCODE_NAMES.put(keycode, name);
-        NAME_KEYCODES.put(name, keycode);
+    private static void putKeyCodeName(int keyCode, String name) {
+        KEYCODE_NAMES.put(keyCode, name);
+        NAME_KEYCODES.put(name, keyCode);
     }
     
-    private static void initKeycodeData() {
+    private static void initKeyCodeData() {
         KEYCODE_NAMES = new HashMap<>();
         NAME_KEYCODES = new HashMap<>();
-        putKeycodeName(KEY_ESCAPE, "Escape");
-	putKeycodeName(KEY_1, "1");
-	putKeycodeName(KEY_2, "2");
-        putKeycodeName(KEY_3, "3");
-	putKeycodeName(KEY_4, "4");
-        putKeycodeName(KEY_5, "5");
-	putKeycodeName(KEY_6, "6");
-        putKeycodeName(KEY_7, "7");
-	putKeycodeName(KEY_8, "8");
-        putKeycodeName(KEY_9, "9");
-	putKeycodeName(KEY_0, "0");
-	putKeycodeName(KEY_MINUS, "-");
-	putKeycodeName(KEY_EQUALS, "=");
-	putKeycodeName(KEY_BACK, "Back");
-	putKeycodeName(KEY_TAB, "Tab");
-	putKeycodeName(KEY_Q, "Q");
-	putKeycodeName(KEY_W, "W");
-	putKeycodeName(KEY_E, "E");
-	putKeycodeName(KEY_R, "R");
-	putKeycodeName(KEY_T, "T");
-	putKeycodeName(KEY_Y, "Y");
-	putKeycodeName(KEY_U, "U");
-	putKeycodeName(KEY_I, "I");
-	putKeycodeName(KEY_O, "O");
-	putKeycodeName(KEY_P, "P");
-	putKeycodeName(KEY_LBRACKET, "[");
-	putKeycodeName(KEY_RBRACKET, "]");
-	putKeycodeName(KEY_ENTER, "Enter");
-	putKeycodeName(KEY_LCONTROL, "LCtrl");
-	putKeycodeName(KEY_A, "A");
-	putKeycodeName(KEY_S, "S");
-	putKeycodeName(KEY_D, "D");
-	putKeycodeName(KEY_F, "F");
-	putKeycodeName(KEY_G, "G");
-	putKeycodeName(KEY_H, "H");
-	putKeycodeName(KEY_J, "J");
-	putKeycodeName(KEY_K, "K");
-	putKeycodeName(KEY_L, "L");
-	putKeycodeName(KEY_SEMICOLON, ";");
-	putKeycodeName(KEY_APOSTROPHE, "'");
-	putKeycodeName(KEY_GRAVE, "`");
-	putKeycodeName(KEY_LSHIFT, "LShift");
-	putKeycodeName(KEY_BACKSLASH, "\\");
-	putKeycodeName(KEY_Z, "Z");
-	putKeycodeName(KEY_X, "X");
-	putKeycodeName(KEY_C, "C");
-	putKeycodeName(KEY_V, "V");
-	putKeycodeName(KEY_B, "B");
-	putKeycodeName(KEY_N, "N");
-	putKeycodeName(KEY_M, "M");
-	putKeycodeName(KEY_COMMA, ",");
-	putKeycodeName(KEY_PERIOD, ".");
-	putKeycodeName(KEY_SLASH, "/");
-	putKeycodeName(KEY_RSHIFT, "RShift");
-	putKeycodeName(KEY_MULTIPLY, "Numpd*");
-	putKeycodeName(KEY_LMENU, "LAlt");
-	putKeycodeName(KEY_SPACE, "Space");
-	putKeycodeName(KEY_CAPITAL, "CapsLk");
-	putKeycodeName(KEY_F1, "F1");
-        putKeycodeName(KEY_F2, "F2");
-        putKeycodeName(KEY_F3, "F3");
-        putKeycodeName(KEY_F4, "F4");
-        putKeycodeName(KEY_F5, "F5");
-        putKeycodeName(KEY_F6, "F6");
-        putKeycodeName(KEY_F7, "F7");
-        putKeycodeName(KEY_F8, "F8");
-        putKeycodeName(KEY_F9, "F9");
-        putKeycodeName(KEY_F10, "F10");
-	putKeycodeName(KEY_NUMLOCK, "NumLk");
-	putKeycodeName(KEY_SCROLL, "ScrlLk");
-	putKeycodeName(KEY_NUMPAD7, "Numpd7");
-	putKeycodeName(KEY_NUMPAD8, "Numpd8");
-	putKeycodeName(KEY_NUMPAD9, "Numpd9");
-	putKeycodeName(KEY_SUBTRACT, "Numpd-");
-	putKeycodeName(KEY_NUMPAD4, "Numpd4");
-	putKeycodeName(KEY_NUMPAD5, "Numpd5");
-	putKeycodeName(KEY_NUMPAD6, "Numpd6");
-	putKeycodeName(KEY_ADD, "Numpd+");
-	putKeycodeName(KEY_NUMPAD1, "Numpd1");
-	putKeycodeName(KEY_NUMPAD2, "Numpd2");
-	putKeycodeName(KEY_NUMPAD3, "Numpd3");
-	putKeycodeName(KEY_NUMPAD0, "Numpd0");
-	putKeycodeName(KEY_DECIMAL, "Numpd.");
-	putKeycodeName(KEY_F11, "F11");
-	putKeycodeName(KEY_F12, "F12");
-	putKeycodeName(KEY_F13, "F13");
-	putKeycodeName(KEY_F14, "F14");
-	putKeycodeName(KEY_F15, "F15");
-	putKeycodeName(KEY_KANA, "Kana");
-	putKeycodeName(KEY_CONVERT, "Conv");
-	putKeycodeName(KEY_NOCONVERT, "NoConv");
-	putKeycodeName(KEY_YEN, "Yen");
-	putKeycodeName(KEY_NUMPADEQUALS, "Numpd=");
-	putKeycodeName(KEY_CIRCUMFLEX, "^");
-	putKeycodeName(KEY_AT, "@");
-	putKeycodeName(KEY_COLON, ":");
-	putKeycodeName(KEY_UNDERLINE, "_");
-	putKeycodeName(KEY_KANJI, "Kanji");
-	putKeycodeName(KEY_STOP, "Stop");
-	putKeycodeName(KEY_AX, "AX");
-	putKeycodeName(KEY_UNLABELED, "Unlabl");
-	putKeycodeName(KEY_NUMPADENTER, "NumpdE");
-	putKeycodeName(KEY_RCONTROL, "RCtrl");
-	putKeycodeName(KEY_NUMPADCOMMA, "Numpd,");
-	putKeycodeName(KEY_DIVIDE, "Numpd%");
-	putKeycodeName(KEY_SYSRQ, "SysRq");
-	putKeycodeName(KEY_RMENU, "RAlt");
-	putKeycodeName(KEY_PAUSE, "Pause");
-	putKeycodeName(KEY_HOME, "Home");
-	putKeycodeName(KEY_UP, "Up");
-	putKeycodeName(KEY_PRIOR, "PageUp");
-	putKeycodeName(KEY_LEFT, "Left");
-	putKeycodeName(KEY_RIGHT, "Right");
-	putKeycodeName(KEY_END, "End");
-	putKeycodeName(KEY_DOWN, "Down");
-	putKeycodeName(KEY_NEXT, "PageDn");
-	putKeycodeName(KEY_INSERT, "Insert");
-	putKeycodeName(KEY_DELETE, "Delete");
-	putKeycodeName(KEY_LWIN, "LWndws");
-	putKeycodeName(KEY_RWIN, "RWndws");
-	putKeycodeName(KEY_APPS, "Apps");
-	putKeycodeName(KEY_POWER, "Power");
-	putKeycodeName(KEY_SLEEP, "Sleep");
+        putKeyCodeName(KEY_ESCAPE, "Escape");
+	putKeyCodeName(KEY_1, "1");
+	putKeyCodeName(KEY_2, "2");
+        putKeyCodeName(KEY_3, "3");
+	putKeyCodeName(KEY_4, "4");
+        putKeyCodeName(KEY_5, "5");
+	putKeyCodeName(KEY_6, "6");
+        putKeyCodeName(KEY_7, "7");
+	putKeyCodeName(KEY_8, "8");
+        putKeyCodeName(KEY_9, "9");
+	putKeyCodeName(KEY_0, "0");
+	putKeyCodeName(KEY_MINUS, "-");
+	putKeyCodeName(KEY_EQUALS, "=");
+	putKeyCodeName(KEY_BACK, "Back");
+	putKeyCodeName(KEY_TAB, "Tab");
+	putKeyCodeName(KEY_Q, "Q");
+	putKeyCodeName(KEY_W, "W");
+	putKeyCodeName(KEY_E, "E");
+	putKeyCodeName(KEY_R, "R");
+	putKeyCodeName(KEY_T, "T");
+	putKeyCodeName(KEY_Y, "Y");
+	putKeyCodeName(KEY_U, "U");
+	putKeyCodeName(KEY_I, "I");
+	putKeyCodeName(KEY_O, "O");
+	putKeyCodeName(KEY_P, "P");
+	putKeyCodeName(KEY_LBRACKET, "[");
+	putKeyCodeName(KEY_RBRACKET, "]");
+	putKeyCodeName(KEY_ENTER, "Enter");
+	putKeyCodeName(KEY_LCONTROL, "LCtrl");
+	putKeyCodeName(KEY_A, "A");
+	putKeyCodeName(KEY_S, "S");
+	putKeyCodeName(KEY_D, "D");
+	putKeyCodeName(KEY_F, "F");
+	putKeyCodeName(KEY_G, "G");
+	putKeyCodeName(KEY_H, "H");
+	putKeyCodeName(KEY_J, "J");
+	putKeyCodeName(KEY_K, "K");
+	putKeyCodeName(KEY_L, "L");
+	putKeyCodeName(KEY_SEMICOLON, ";");
+	putKeyCodeName(KEY_APOSTROPHE, "'");
+	putKeyCodeName(KEY_GRAVE, "`");
+	putKeyCodeName(KEY_LSHIFT, "LShift");
+	putKeyCodeName(KEY_BACKSLASH, "\\");
+	putKeyCodeName(KEY_Z, "Z");
+	putKeyCodeName(KEY_X, "X");
+	putKeyCodeName(KEY_C, "C");
+	putKeyCodeName(KEY_V, "V");
+	putKeyCodeName(KEY_B, "B");
+	putKeyCodeName(KEY_N, "N");
+	putKeyCodeName(KEY_M, "M");
+	putKeyCodeName(KEY_COMMA, ",");
+	putKeyCodeName(KEY_PERIOD, ".");
+	putKeyCodeName(KEY_SLASH, "/");
+	putKeyCodeName(KEY_RSHIFT, "RShift");
+	putKeyCodeName(KEY_MULTIPLY, "Numpd*");
+	putKeyCodeName(KEY_LALT, "LAlt");
+	putKeyCodeName(KEY_SPACE, "Space");
+	putKeyCodeName(KEY_CAPITAL, "CapsLk");
+	putKeyCodeName(KEY_F1, "F1");
+        putKeyCodeName(KEY_F2, "F2");
+        putKeyCodeName(KEY_F3, "F3");
+        putKeyCodeName(KEY_F4, "F4");
+        putKeyCodeName(KEY_F5, "F5");
+        putKeyCodeName(KEY_F6, "F6");
+        putKeyCodeName(KEY_F7, "F7");
+        putKeyCodeName(KEY_F8, "F8");
+        putKeyCodeName(KEY_F9, "F9");
+        putKeyCodeName(KEY_F10, "F10");
+	putKeyCodeName(KEY_NUMLOCK, "NumLk");
+	putKeyCodeName(KEY_SCROLL, "ScrlLk");
+	putKeyCodeName(KEY_NUMPAD7, "Numpd7");
+	putKeyCodeName(KEY_NUMPAD8, "Numpd8");
+	putKeyCodeName(KEY_NUMPAD9, "Numpd9");
+	putKeyCodeName(KEY_SUBTRACT, "Numpd-");
+	putKeyCodeName(KEY_NUMPAD4, "Numpd4");
+	putKeyCodeName(KEY_NUMPAD5, "Numpd5");
+	putKeyCodeName(KEY_NUMPAD6, "Numpd6");
+	putKeyCodeName(KEY_ADD, "Numpd+");
+	putKeyCodeName(KEY_NUMPAD1, "Numpd1");
+	putKeyCodeName(KEY_NUMPAD2, "Numpd2");
+	putKeyCodeName(KEY_NUMPAD3, "Numpd3");
+	putKeyCodeName(KEY_NUMPAD0, "Numpd0");
+	putKeyCodeName(KEY_DECIMAL, "Numpd.");
+	putKeyCodeName(KEY_F11, "F11");
+	putKeyCodeName(KEY_F12, "F12");
+	putKeyCodeName(KEY_F13, "F13");
+	putKeyCodeName(KEY_F14, "F14");
+	putKeyCodeName(KEY_F15, "F15");
+        putKeyCodeName(KEY_F16, "F16");
+	putKeyCodeName(KEY_F17, "F17");
+	putKeyCodeName(KEY_F18, "F18");
+	putKeyCodeName(KEY_KANA, "Kana");
+        putKeyCodeName(KEY_F19, "F19");
+	putKeyCodeName(KEY_CONVERT, "Conv");
+	putKeyCodeName(KEY_NOCONVERT, "NoConv");
+	putKeyCodeName(KEY_YEN, "Yen");
+	putKeyCodeName(KEY_NUMPADEQUALS, "Numpd=");
+	putKeyCodeName(KEY_CIRCUMFLEX, "^");
+	putKeyCodeName(KEY_AT, "@");
+	putKeyCodeName(KEY_COLON, ":");
+	putKeyCodeName(KEY_UNDERLINE, "_");
+	putKeyCodeName(KEY_KANJI, "Kanji");
+	putKeyCodeName(KEY_STOP, "Stop");
+	putKeyCodeName(KEY_AX, "AX");
+	putKeyCodeName(KEY_UNLABELED, "Unlabl");
+	putKeyCodeName(KEY_NUMPADENTER, "NumpdE");
+	putKeyCodeName(KEY_RCONTROL, "RCtrl");
+        putKeyCodeName(KEY_SECTION, "Sectn");
+	putKeyCodeName(KEY_NUMPADCOMMA, "Numpd,");
+	putKeyCodeName(KEY_DIVIDE, "Numpd%");
+	putKeyCodeName(KEY_SYSRQ, "SysRq");
+	putKeyCodeName(KEY_RALT, "RAlt");
+        putKeyCodeName(KEY_FUNCTION, "Functn");
+	putKeyCodeName(KEY_PAUSE, "Pause");
+	putKeyCodeName(KEY_HOME, "Home");
+	putKeyCodeName(KEY_UP, "Up");
+	putKeyCodeName(KEY_PRIOR, "PageUp");
+	putKeyCodeName(KEY_LEFT, "Left");
+	putKeyCodeName(KEY_RIGHT, "Right");
+	putKeyCodeName(KEY_END, "End");
+	putKeyCodeName(KEY_DOWN, "Down");
+	putKeyCodeName(KEY_NEXT, "PageDn");
+	putKeyCodeName(KEY_INSERT, "Insert");
+	putKeyCodeName(KEY_DELETE, "Delete");
+        putKeyCodeName(KEY_CLEAR, "Clear");
+	putKeyCodeName(KEY_LMETA, "LMeta");
+	putKeyCodeName(KEY_RMETA, "RMeta");
+	putKeyCodeName(KEY_APPS, "Apps");
+	putKeyCodeName(KEY_POWER, "Power");
+	putKeyCodeName(KEY_SLEEP, "Sleep");
     }
     
+    /**
+     * Returns a short, descriptive, and unique String name for the specified
+     * key code, identical to the return value of the getName() method of a
+     * KeyControl with the key code. If the key code is invalid, this method
+     * will return null.
+     * @param keyCode The key code to return the name of
+     * @return The name of the specified key code
+     */
     public static String getKeyCodeName(int keyCode) {
         if (KEYCODE_NAMES == null) {
-            initKeycodeData();
+            initKeyCodeData();
         }
         return KEYCODE_NAMES.get(keyCode);
     }
     
+    /**
+     * Returns the key code whose name according to getKeyCodeName() is the
+     * specified String. If no key code has the String as a name, this method
+     * will return null.
+     * @param name The name of the key code to be returned
+     * @return The key code whose name is the specified String
+     */
     public static Integer getKeyCode(String name) {
         if (NAME_KEYCODES == null) {
-            initKeycodeData();
+            initKeyCodeData();
         }
         return NAME_KEYCODES.get(name);
     }
     
     private final int keyCode;
     
+    /**
+     * Constructs a KeyControl that represents the key with the specified key
+     * code.
+     * @param keyCode This KeyControl's key code
+     * @throws InvalidControlException If the key code is invalid
+     */
     public KeyControl(int keyCode) throws InvalidControlException {
         if (getKeyCodeName(keyCode) == null) {
             throw new InvalidControlException("Attempted to construct a KeyControl with invalid key code "
@@ -316,6 +350,10 @@ public class KeyControl extends Control {
         return KEYCODE_NAMES.get(keyCode);
     }
     
+    /**
+     * Returns this KeyControl's key code.
+     * @return This KeyControl's key code
+     */
     public final int getKeyCode() {
         return keyCode;
     }

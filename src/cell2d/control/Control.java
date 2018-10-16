@@ -3,6 +3,12 @@ package cell2d.control;
 import cell2d.Direction;
 
 /**
+ * <p>A Control represents a form of input that can be pressed, held, and
+ * released, such as a key, mouse button, or controller button. A Control may be
+ * bound to a CellGame's command, allowing it to respond to the input that the
+ * Control represents. All instantiable subclasses of Control are equal if and
+ * only if they represent the same input.</p>
+ * @see cell2d.CellGame#bindControl(int, cell2d.control.Control)
  * @author Andrew Heyman
  */
 public abstract class Control {
@@ -10,24 +16,24 @@ public abstract class Control {
     /**
      * Returns a short, descriptive, and unique String name for this Control.
      * The name will be no more than 6 characters long and contain only ASCII
-     * characters and no whitespace. Two distinct Control objects will have the
-     * same name if and only if they are equal.
+     * characters and no whitespace. Two distinct Control objects have the same
+     * name if and only if they are equal.
      * @return This Control's name
      */
     public abstract String getName();
     
     /**
-     * Returns the Control whose name according to getName() is the specified
+     * Returns a Control whose name according to getName() is the specified
      * String, or null if no Control has that String as a name.
      * @param name The name of the Control to be returned
-     * @return The Control whose name is the specified String
+     * @return A Control whose name is the specified String
      */
     public static Control getControl(String name) {
         try {
-            Integer keycode = KeyControl.getKeyCode(name);
-            if (keycode != null) {
-                return new KeyControl(keycode);
-            } else if (name.equals("LMB")) {
+            return new KeyControl(KeyControl.getKeyCode(name));
+        } catch (InvalidControlException e) {}
+        try {
+            if (name.equals("LMB")) {
                 return new MouseButtonControl(MouseButtonControl.MOUSE_LEFT_BUTTON);
             } else if (name.equals("RMB")) {
                 return new MouseButtonControl(MouseButtonControl.MOUSE_RIGHT_BUTTON);
@@ -89,9 +95,7 @@ public abstract class Control {
                         return new ControllerDirectionControl(controllerNum, Direction.RIGHT);
                 }
             }
-        } catch (InvalidControlException e) {
-            return null;
-        }
+        } catch (InvalidControlException e) {}
         return null;
     }
     

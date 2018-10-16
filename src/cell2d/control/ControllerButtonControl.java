@@ -3,19 +3,34 @@ package cell2d.control;
 import java.util.Objects;
 
 /**
+ * <p>A ControllerButtonControl is a ControllerControl that represents a button
+ * on a game controller. The button is specified by a number that ranges from 0
+ * to MAX_BUTTONS - 1 inclusive.</p>
  * @author Andrew Heyman
  */
 public class ControllerButtonControl extends ControllerControl {
     
-    public static final int MAX_CTLR_BUTTONS = 100;
+    /**
+     * The maximum number of buttons on each controller that Cell2D recognizes.
+     */
+    public static final int MAX_BUTTONS = 100;
     
     private final int buttonNum;
     
+    /**
+     * Constructs a ControllerButtonControl that represents the button with the
+     * specified number on the controller with the specified number.
+     * @param controllerNum The number of this ControllerButtonControl's
+     * controller
+     * @param buttonNum The number of this ControllerButtonControl's button
+     * @throws InvalidControlException If the specified controller or button
+     * number is invalid
+     */
     public ControllerButtonControl(int controllerNum, int buttonNum) throws InvalidControlException {
         super(controllerNum);
-        if (buttonNum < 0 || buttonNum >= MAX_CTLR_BUTTONS) {
-            throw new InvalidControlException("Attempted to construct a ControllerButtonControl with "
-                    + "out-of-bounds button number " + buttonNum);
+        if (buttonNum < 0 || buttonNum >= MAX_BUTTONS) {
+            throw new InvalidControlException("Attempted to construct a ControllerButtonControl with invalid"
+                    + " button number " + buttonNum);
         }
         this.buttonNum = buttonNum;
     }
@@ -40,6 +55,10 @@ public class ControllerButtonControl extends ControllerControl {
         return "C" + getControllerNum() + "B" + buttonNum;
     }
     
+    /**
+     * Returns the number of this ControllerButtonControl's button.
+     * @return The number of this ControllerButtonControl's button
+     */
     public final int getButtonNum() {
         return buttonNum;
     }
