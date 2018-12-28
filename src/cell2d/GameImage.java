@@ -116,39 +116,14 @@ class GameImage {
             throw new RuntimeException(e);
         }
         image.setFilter(Image.FILTER_NEAREST);
-        int size = colorMap.size();
-        int[] oldR = new int[size];
-        int[] oldG = new int[size];
-        int[] oldB = new int[size];
-        int[] newR = new int[size];
-        int[] newG = new int[size];
-        int[] newB = new int[size];
-        int i = 0;
-        Color key, value;
-        for (Map.Entry<Color,Color> entry : colorMap.entrySet()) {
-            key = entry.getKey();
-            value = entry.getValue();
-            oldR[i] = key.getRedByte();
-            oldG[i] = key.getGreenByte();
-            oldB[i] = key.getBlueByte();
-            newR[i] = value.getRedByte();
-            newG[i] = value.getGreenByte();
-            newB[i] = value.getBlueByte();
-            i++;
-        }
-        int colorR, colorG, colorB;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Color color = intToColor(newImage.getRGB(x, y));
-                colorR = color.getRedByte();
-                colorG = color.getGreenByte();
-                colorB = color.getBlueByte();
-                for (int j = 0; j < size; j++) {
-                    if (oldR[j] == colorR && oldG[j] == colorG && oldB[j] == colorB) {
-                        color = new Color(newR[j], newG[j], newB[j], color.getAlphaByte());
-                        newImage.setRGB(x, y, colorToInt(color));
-                        break;
-                    }
+                Color mappedColor = colorMap.get(color);
+                if (mappedColor != null) {
+                    color = new Color(mappedColor.getRedByte(), mappedColor.getGreenByte(),
+                            mappedColor.getBlueByte(), color.getAlphaByte());
+                    newImage.setRGB(x, y, colorToInt(color));
                 }
                 graphics.setColor(color);
                 graphics.fillRect(x, y, 1, 1);
