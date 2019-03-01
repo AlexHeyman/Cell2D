@@ -6,7 +6,7 @@ import cell2d.Direction;
  * <p>A Control represents a form of input that can be pressed, held, and
  * released, such as a key, mouse button, or controller button. A Control may be
  * bound to a CellGame's command, allowing it to respond to the input that the
- * Control represents. All instantiable subclasses of Control are equal if and
+ * Control represents. All instances of subclasses of Control are equal if and
  * only if they represent the same input.</p>
  * @see cell2d.CellGame#bindControl(int, cell2d.control.Control)
  * @author Andrew Heyman

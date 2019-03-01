@@ -11,11 +11,11 @@ package cell2d;
  * while a Music track is not loaded, it cannot play.</p>
  * 
  * <p>Music tracks can be played at different speeds from 0 up, with a speed of
- * 0 making the Music track inaudible and a speed of 1 causing no speed change.
- * They can also be played at different volumes between 0 and 1, with a volume
- * of 0 making the Music track inaudible and a volume of 1 causing no volume
- * change. Finally, the Music class has a global volume between 0 and 1 by which
- * the effective volumes of all currently playing Music tracks are scaled.</p>
+ * 0 pausing the Music track and a speed of 1 causing no speed change. They can
+ * also be played at different volumes between 0 and 1, with a volume of 0
+ * making the Music track inaudible and a volume of 1 causing no volume change.
+ * Finally, the Music class has a global volume between 0 and 1 by which the
+ * effective volumes of all currently playing Music tracks are scaled.</p>
  * @see CellGame
  * @author Andrew Heyman
  */
