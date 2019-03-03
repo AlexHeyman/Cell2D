@@ -1,6 +1,5 @@
 package cell2d;
 
-import celick.AppGameContainer;
 import celick.GameContainer;
 import celick.Graphics;
 import celick.SlickException;
@@ -171,7 +170,7 @@ public abstract class CellGame {
     public static void startGame(CellGame game) {
         Log.info("Cell2D Version: " + VERSION);
         try {
-            AppGameContainer container = new AppGameContainer(game.game);
+            GameContainer container = new GameContainer(game.game);
             game.updateScreen(container);
             container.setTargetFrameRate(game.fps);
             container.setShowFPS(game.showFPS);
@@ -277,70 +276,54 @@ public abstract class CellGame {
     
     private void updateScreen(GameContainer container) throws SlickException {
         updateScreen = false;
-        if (container instanceof AppGameContainer) {
-            AppGameContainer appContainer = (AppGameContainer)container;
-            if (fullscreen) {
-                int wastedArea = -1;
-                int newWidth = -1;
-                int newHeight = -1;
-                double newScale = -1;
-                int newXOffset = -1;
-                int newYOffset = -1;
-                double screenRatio = ((double)screenHeight)/screenWidth;
-                for (int i = 0; i < displayModes.length; i++) {
-                    int modeWidth = displayModes[i].getWidth();
-                    int modeHeight = displayModes[i].getHeight();
-                    if (modeWidth < screenWidth || modeHeight < screenHeight) {
-                        continue;
-                    }
-                    double modeScale;
-                    int modeXOffset = 0;
-                    int modeYOffset = 0;
-                    if (((double)modeHeight)/modeWidth > screenRatio) {
-                        modeScale = ((double)modeWidth)/screenWidth;
-                        modeYOffset = (int)((modeHeight/modeScale - screenHeight)/2);
-                    } else {
-                        modeScale = ((double)modeHeight)/screenHeight;
-                        modeXOffset = (int)((modeWidth/modeScale - screenWidth)/2);
-                    }
-                    int modeArea = modeWidth*modeHeight - (int)(screenWidth*screenHeight*modeScale*modeScale);
-                    if (modeArea < wastedArea || wastedArea < 0) {
-                        wastedArea = modeArea;
-                        newWidth = modeWidth;
-                        newHeight = modeHeight;
-                        newScale = modeScale;
-                        newXOffset = modeXOffset;
-                        newYOffset = modeYOffset;
-                    }
+        if (fullscreen) {
+            int wastedArea = -1;
+            int newWidth = -1;
+            int newHeight = -1;
+            double newScale = -1;
+            int newXOffset = -1;
+            int newYOffset = -1;
+            double screenRatio = ((double)screenHeight)/screenWidth;
+            for (int i = 0; i < displayModes.length; i++) {
+                int modeWidth = displayModes[i].getWidth();
+                int modeHeight = displayModes[i].getHeight();
+                if (modeWidth < screenWidth || modeHeight < screenHeight) {
+                    continue;
                 }
-                if (wastedArea >= 0) {
-                    effectiveScaleFactor = newScale;
-                    screenXOffset = newXOffset;
-                    screenYOffset = newYOffset;
-                    appContainer.setDisplayMode(newWidth, newHeight, true);
-                    resetCommands();
-                    return;
+                double modeScale;
+                int modeXOffset = 0;
+                int modeYOffset = 0;
+                if (((double)modeHeight)/modeWidth > screenRatio) {
+                    modeScale = ((double)modeWidth)/screenWidth;
+                    modeYOffset = (int)((modeHeight/modeScale - screenHeight)/2);
+                } else {
+                    modeScale = ((double)modeHeight)/screenHeight;
+                    modeXOffset = (int)((modeWidth/modeScale - screenWidth)/2);
+                }
+                int modeArea = modeWidth*modeHeight - (int)(screenWidth*screenHeight*modeScale*modeScale);
+                if (modeArea < wastedArea || wastedArea < 0) {
+                    wastedArea = modeArea;
+                    newWidth = modeWidth;
+                    newHeight = modeHeight;
+                    newScale = modeScale;
+                    newXOffset = modeXOffset;
+                    newYOffset = modeYOffset;
                 }
             }
-            effectiveScaleFactor = scaleFactor;
-            screenXOffset = 0;
-            screenYOffset = 0;
-            appContainer.setDisplayMode((int)(screenWidth*scaleFactor), (int)(screenHeight*scaleFactor), false);
-            resetCommands();
-            return;
+            if (wastedArea >= 0) {
+                effectiveScaleFactor = newScale;
+                screenXOffset = newXOffset;
+                screenYOffset = newYOffset;
+                container.setDisplayMode(newWidth, newHeight, true);
+                resetCommands();
+                return;
+            }
         }
-        double screenRatio = ((double)screenHeight)/screenWidth;
-        int containerWidth = container.getWidth();
-        int containerHeight = container.getHeight();
-        if (((double)containerHeight)/containerWidth > screenRatio) {
-            effectiveScaleFactor = ((double)containerWidth)/screenWidth;
-            screenXOffset = 0;
-            screenYOffset = (int)((containerHeight/effectiveScaleFactor - screenHeight)/2);
-            return;
-        }
-        effectiveScaleFactor = ((double)containerHeight)/screenHeight;
-        screenXOffset = (int)((containerWidth/effectiveScaleFactor - screenWidth)/2);
+        effectiveScaleFactor = scaleFactor;
+        screenXOffset = 0;
         screenYOffset = 0;
+        container.setDisplayMode((int)(screenWidth*scaleFactor), (int)(screenHeight*scaleFactor), false);
+        resetCommands();
     }
     
     private void updateControl(Control control, boolean pressed) {
