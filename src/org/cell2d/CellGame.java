@@ -1,12 +1,12 @@
 package org.cell2d;
 
-import org.celick.GameContainer;
-import org.celick.Graphics;
-import org.celick.SlickException;
-import org.celick.state.BasicGameState;
-import org.celick.state.StateBasedGame;
-import org.celick.state.transition.Transition;
-import org.celick.util.Log;
+import org.cell2d.celick.GameContainer;
+import org.cell2d.celick.Graphics;
+import org.cell2d.celick.SlickException;
+import org.cell2d.celick.state.BasicGameState;
+import org.cell2d.celick.state.StateBasedGame;
+import org.cell2d.celick.state.transition.Transition;
+import org.cell2d.celick.util.Log;
 import org.cell2d.control.Control;
 import org.cell2d.control.ControllerButtonControl;
 import org.cell2d.control.ControllerDirectionControl;

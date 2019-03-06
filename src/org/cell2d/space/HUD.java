@@ -1,6 +1,6 @@
 package org.cell2d.space;
 
-import org.celick.Graphics;
+import org.cell2d.celick.Graphics;
 
 /**
  * <p>An HUD (heads-up display) renders visuals in front of those of the

@@ -1,10 +1,10 @@
 package org.cell2d;
 
-import org.celick.Color;
-import org.celick.Graphics;
-import org.celick.Image;
-import org.celick.SlickException;
-import org.celick.opengl.pbuffer.GraphicsFactory;
+import org.cell2d.celick.Color;
+import org.cell2d.celick.Graphics;
+import org.cell2d.celick.Image;
+import org.cell2d.celick.SlickException;
+import org.cell2d.celick.opengl.pbuffer.GraphicsFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;

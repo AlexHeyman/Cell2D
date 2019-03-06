@@ -1,6 +1,6 @@
 package org.cell2d;
 
-import org.celick.Graphics;
+import org.cell2d.celick.Graphics;
 
 /**
  * <p>A Drawable object is one that visually represents itself with an image

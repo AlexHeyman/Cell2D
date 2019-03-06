@@ -1,6 +1,6 @@
 package org.cell2d.space;
 
-import org.celick.Graphics;
+import org.cell2d.celick.Graphics;
 import org.cell2d.Animation;
 import org.cell2d.AnimationInstance;
 import org.cell2d.CellGame;

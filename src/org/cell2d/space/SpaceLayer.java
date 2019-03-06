@@ -1,6 +1,6 @@
 package org.cell2d.space;
 
-import org.celick.Graphics;
+import org.cell2d.celick.Graphics;
 
 /**
  * <p>A SpaceLayer renders visuals either in front of or behind those of the

@@ -1,10 +1,10 @@
 package org.cell2d;
 
-import org.celick.openal.AiffData;
-import org.celick.openal.OggData;
-import org.celick.openal.OggDecoder;
-import org.celick.openal.WaveData;
-import org.celick.util.ResourceLoader;
+import org.cell2d.celick.openal.AiffData;
+import org.cell2d.celick.openal.OggData;
+import org.cell2d.celick.openal.OggDecoder;
+import org.cell2d.celick.openal.WaveData;
+import org.cell2d.celick.util.ResourceLoader;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.IntBuffer;

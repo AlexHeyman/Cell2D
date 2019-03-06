@@ -1,6 +1,6 @@
 package org.cell2d;
 
-import org.celick.Graphics;
+import org.cell2d.celick.Graphics;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

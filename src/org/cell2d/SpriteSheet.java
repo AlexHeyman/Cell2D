@@ -1,8 +1,8 @@
 package org.cell2d;
 
-import org.celick.Color;
-import org.celick.Image;
-import org.celick.SlickException;
+import org.cell2d.celick.Color;
+import org.cell2d.celick.Image;
+import org.cell2d.celick.SlickException;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
@@ -198,7 +198,7 @@ public class SpriteSheet {
     }
     
     private void loadFilter(Filter filter, Image image) {
-        org.celick.SpriteSheet spriteSheet = new org.celick.SpriteSheet(
+        org.cell2d.celick.SpriteSheet spriteSheet = new org.cell2d.celick.SpriteSheet(
                 image, spriteWidth, spriteHeight, spriteSpacing);
         for (int x = 0; x < sprites.length; x++) {
             Sprite[] column = sprites[x];

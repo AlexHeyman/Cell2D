@@ -1,6 +1,6 @@
 package org.cell2d.space;
 
-import org.celick.Graphics;
+import org.cell2d.celick.Graphics;
 import org.cell2d.CellGame;
 import org.cell2d.CellVector;
 import org.cell2d.Direction;

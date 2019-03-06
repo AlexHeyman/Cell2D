@@ -1,6 +1,6 @@
 package org.cell2d;
 
-import org.celick.Graphics;
+import org.cell2d.celick.Graphics;
 
 /**
  * <p>An AnimationInstance is an instance of an Animation that represents a
