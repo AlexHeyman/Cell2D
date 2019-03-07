@@ -63,8 +63,8 @@ import java.util.Map;
  * SpaceStates as appropriate to match its own time factor and assigned
  * SpaceState.</p>
  * @see Hitbox
- * @see SpaceState#addObject(cell2d.space.SpaceObject)
- * @see #setAppearance(cell2d.Drawable)
+ * @see SpaceState#addObject(org.cell2d.space.SpaceObject)
+ * @see #setAppearance(org.cell2d.Drawable)
  * @see Area
  * @author Andrew Heyman
  */
@@ -90,7 +90,7 @@ public abstract class SpaceObject {
      * Constructs a SpaceObject with no locator Hitbox. This SpaceObject must be
      * assigned a locator Hitbox with its setLocatorHitbox() method before any
      * of its other methods are called.
-     * @see #setLocatorHitbox(cell2d.space.Hitbox)
+     * @see #setLocatorHitbox(org.cell2d.space.Hitbox)
      */
     public SpaceObject() {
         centerHitbox = new PointHitbox(0, 0);

@@ -45,16 +45,12 @@ public class FadeOutTransition implements Transition {
 		this.fadeTime = fadeTime;
 	}
 	
-	/**
-	 * @see celick.state.transition.Transition#isComplete()
-	 */
+        @Override
 	public boolean isComplete() {
 		return (color.a >= 1);
 	}
 
-	/**
-	 * @see celick.state.transition.Transition#postRender(celick.state.StateBasedGame, celick.GameContainer, celick.Graphics)
-	 */
+        @Override
 	public void postRender(StateBasedGame game, GameContainer container, Graphics g) {
 		Color old = g.getColor();
 		g.setColor(color);
@@ -62,9 +58,7 @@ public class FadeOutTransition implements Transition {
 		g.setColor(old);
 	}
 	
-	/**
-	 * @see celick.state.transition.Transition#update(celick.state.StateBasedGame, celick.GameContainer, int)
-	 */
+        @Override
 	public void update(StateBasedGame game, GameContainer container, int delta) {
 		color.a += delta * (1.0f / fadeTime);
 		if (color.a > 1) {
@@ -72,15 +66,11 @@ public class FadeOutTransition implements Transition {
 		}
 	}
 
-	/**
-	 * @see celick.state.transition.Transition#preRender(celick.state.StateBasedGame, celick.GameContainer, celick.Graphics)
-	 */
+        @Override
 	public void preRender(StateBasedGame game, GameContainer container, Graphics g) {
 	}
 
-	public void init(GameState firstState, GameState secondState) {
-		// TODO Auto-generated method stub
-		
-	}
+        @Override
+	public void init(GameState firstState, GameState secondState) {}
 
 }

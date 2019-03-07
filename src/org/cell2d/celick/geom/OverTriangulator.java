@@ -75,37 +75,27 @@ public class OverTriangulator implements Triangulator {
 		}
 	}
 	
-	/**
-	 * @see celick.geom.Triangulator#addPolyPoint(float, float)
-	 */
+	@Override
 	public void addPolyPoint(float x, float y) {
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#getTriangleCount()
-	 */
+	@Override
 	public int getTriangleCount() {
 		return triangles.length / 3;
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#getTrianglePoint(int, int)
-	 */
+	@Override
 	public float[] getTrianglePoint(int tri, int i) {
 		float[] pt = triangles[(tri * 3)+i];
 	
 		return new float[] {pt[0],pt[1]};
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#startHole()
-	 */
+	@Override
 	public void startHole() {
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#triangulate()
-	 */
+	@Override
 	public boolean triangulate() {
 		return true;
 	}

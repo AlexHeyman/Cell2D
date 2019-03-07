@@ -39,8 +39,8 @@ public class CursorLoader {
 	 * Get a cursor based on a image reference on the classpath
 	 * 
 	 * @param ref The reference to the image to be loaded
-	 * @param x The x-coordinate of the cursor hotspot (left -> right)
-	 * @param y The y-coordinate of the cursor hotspot (bottom -> top)
+	 * @param x The x-coordinate of the cursor hotspot (left to right)
+	 * @param y The y-coordinate of the cursor hotspot (bottom to top)
 	 * @return The create cursor
 	 * @throws IOException Indicates a failure to load the image
 	 * @throws LWJGLException Indicates a failure to create the hardware cursor
@@ -82,8 +82,8 @@ public class CursorLoader {
 	 * Get a cursor based on a set of image data
 	 * 
 	 * @param buf The image data (stored in RGBA) to load the cursor from
-	 * @param x The x-coordinate of the cursor hotspot (left -> right)
-	 * @param y The y-coordinate of the cursor hotspot (bottom -> top)
+	 * @param x The x-coordinate of the cursor hotspot (left to right)
+	 * @param y The y-coordinate of the cursor hotspot (bottom to top)
 	 * @param width The width of the image data provided
 	 * @param height The height of the image data provided
 	 * @return The create cursor
@@ -119,8 +119,8 @@ public class CursorLoader {
 	 * Get a cursor based on a set of image data
 	 * 
 	 * @param imageData The data from which the cursor can read it's contents
-	 * @param x The x-coordinate of the cursor hotspot (left -> right)
-	 * @param y The y-coordinate of the cursor hotspot (bottom -> top)
+	 * @param x The x-coordinate of the cursor hotspot (left to right)
+	 * @param y The y-coordinate of the cursor hotspot (bottom to top)
 	 * @return The create cursor
 	 * @throws IOException Indicates a failure to load the image
 	 * @throws LWJGLException Indicates a failure to create the hardware cursor
@@ -157,8 +157,8 @@ public class CursorLoader {
 	 * bottom.
 	 * 
 	 * @param ref The reference to the image to be loaded
-	 * @param x The x-coordinate of the cursor hotspot (left -> right)
-	 * @param y The y-coordinate of the cursor hotspot (bottom -> top)
+	 * @param x The x-coordinate of the cursor hotspot (left to right)
+	 * @param y The y-coordinate of the cursor hotspot (bottom to top)
 	 * @param width The x width of the cursor
 	 * @param height The y height of the cursor
 	 * @param cursorDelays image delays between changing frames in animation

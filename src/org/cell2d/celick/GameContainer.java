@@ -417,8 +417,8 @@ public class GameContainer {
      * bottom.
      *
      * @param ref The reference to the image to be loaded
-     * @param x The x-coordinate of the cursor hotspot (left -> right)
-     * @param y The y-coordinate of the cursor hotspot (bottom -> top)
+     * @param x The x-coordinate of the cursor hotspot (left to right)
+     * @param y The y-coordinate of the cursor hotspot (bottom to top)
      * @param width The x width of the cursor
      * @param height The y height of the cursor
      * @param cursorDelays image delays between changing frames in animation

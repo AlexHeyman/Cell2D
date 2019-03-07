@@ -24,7 +24,7 @@ import java.awt.Point;
  * Viewport's own. Only one HUD may be assigned to a given Viewport in this
  * capacity at once. A Viewport's HUD uses the region of the screen that the
  * Viewport occupies as its rendering region.</p>
- * @see SpaceState#setViewport(int, cell2d.space.Viewport)
+ * @see SpaceState#setViewport(int, org.cell2d.space.Viewport)
  * @see HUD
  * @param <T> The type of CellGame that uses this Viewport's SpaceStates
  * @param <U> The type of SpaceState that uses this Viewport

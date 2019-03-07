@@ -144,34 +144,26 @@ public class Polygon extends Shape {
         return resultPolygon;
     }
     
-    /**
-     * @see celick.geom.Shape#setX(float)
-     */
+    @Override
     public void setX(float x) {
         super.setX(x);
         
         pointsDirty = false;
     }
     
-    /**
-     * @see celick.geom.Shape#setY(float)
-     */
+    @Override
     public void setY(float y) {
         super.setY(y);
         
         pointsDirty = false;
     }
     
-    /**
-     * @see celick.geom.Shape#createPoints()
-     */
+    @Override
     protected void createPoints() {
 //    	This is empty since a polygon must have it's points all the time.
     }
     
-    /**
-     * @see celick.geom.Shape#closed()
-     */
+        @Override
 	public boolean closed() {
 		return closed;
 	}

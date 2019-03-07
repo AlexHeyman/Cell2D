@@ -7,8 +7,8 @@ import org.cell2d.celick.Graphics;
  * Viewports or SpaceStates to which it is assigned. HUDs are intended to be
  * used to display information about a SpaceState's space, as opposed to
  * displaying physical objects in it.</p>
- * @see Viewport#setHUD(cell2d.space.HUD)
- * @see SpaceState#setHUD(cell2d.space.HUD)
+ * @see Viewport#setHUD(org.cell2d.space.HUD)
+ * @see SpaceState#setHUD(org.cell2d.space.HUD)
  * @author Andrew Heyman
  */
 public interface HUD {

@@ -45,9 +45,7 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 	/** The stack for entering list creation mode - when we're creating a list we can't use our VAs */
 	private int listMode = 0;
 	
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#initDisplay(int, int)
-	 */
+	@Override
 	public void initDisplay(int width, int height) {
 		super.initDisplay(width, height);
 		
@@ -122,18 +120,14 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 		super.glColor4f(color[0], color[1], color[2], color[3]);
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#flush()
-	 */
+	@Override
 	public void flush() {
 		super.flush();
 		
 		applyBuffer();
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glBegin(int)
-	 */
+	@Override
 	public void glBegin(int geomType) {
 		if (listMode > 0) {
 			super.glBegin(geomType);
@@ -146,9 +140,7 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 		}
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glColor4f(float, float, float, float)
-	 */
+	@Override
 	public void glColor4f(float r, float g, float b, float a) {
 		a *= alphaScale;
 		
@@ -163,9 +155,7 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 		}
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glEnd()
-	 */
+	@Override
 	public void glEnd() {
 		if (listMode > 0) {
 			super.glEnd();
@@ -173,9 +163,7 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 		}
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glTexCoord2f(float, float)
-	 */
+	@Override
 	public void glTexCoord2f(float u, float v) {
 		if (listMode > 0) {
 			super.glTexCoord2f(u,v);
@@ -186,9 +174,7 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 		tex[1] = v;
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glVertex2f(float, float)
-	 */
+	@Override
 	public void glVertex2f(float x, float y) {
 		if (listMode > 0) {
 			super.glVertex2f(x,y);
@@ -198,9 +184,7 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 		glVertex3f(x,y,0);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glVertex3f(float, float, float)
-	 */
+	@Override
 	public void glVertex3f(float x, float y, float z) {
 		if (listMode > 0) {
 			super.glVertex3f(x,y,z);
@@ -247,170 +231,129 @@ public class VAOGLRenderer extends ImmediateModeOGLRenderer {
 		return false;
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glBindTexture(int, int)
-	 */
+	@Override
 	public void glBindTexture(int target, int id) {
 		applyBuffer();
 		super.glBindTexture(target, id);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glBlendFunc(int, int)
-	 */
+	@Override
 	public void glBlendFunc(int src, int dest) {
 		applyBuffer();
 		super.glBlendFunc(src, dest);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glCallList(int)
-	 */
+	@Override
 	public void glCallList(int id) {
 		applyBuffer();
 		super.glCallList(id);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glClear(int)
-	 */
+	@Override
 	public void glClear(int value) {
 		applyBuffer();
 		super.glClear(value);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glClipPlane(int, java.nio.DoubleBuffer)
-	 */
+	@Override
 	public void glClipPlane(int plane, DoubleBuffer buffer) {
 		applyBuffer();
 		super.glClipPlane(plane, buffer);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glColorMask(boolean, boolean, boolean, boolean)
-	 */
+	@Override
 	public void glColorMask(boolean red, boolean green, boolean blue, boolean alpha) {
 		applyBuffer();
 		super.glColorMask(red, green, blue, alpha);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glDisable(int)
-	 */
+	@Override
 	public void glDisable(int item) {
 		applyBuffer();
 		super.glDisable(item);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glEnable(int)
-	 */
+	@Override
 	public void glEnable(int item) {
 		applyBuffer();
 		super.glEnable(item);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glLineWidth(float)
-	 */
+	@Override
 	public void glLineWidth(float width) {
 		applyBuffer();
 		super.glLineWidth(width);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glPointSize(float)
-	 */
+	@Override
 	public void glPointSize(float size) {
 		applyBuffer();
 		super.glPointSize(size);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glPopMatrix()
-	 */
+	@Override
 	public void glPopMatrix() {
 		applyBuffer();
 		super.glPopMatrix();
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glPushMatrix()
-	 */
+	@Override
 	public void glPushMatrix() {
 		applyBuffer();
 		super.glPushMatrix();
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glRotatef(float, float, float, float)
-	 */
+	@Override
 	public void glRotatef(float angle, float x, float y, float z) {
 		applyBuffer();
 		super.glRotatef(angle, x, y, z);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glScalef(float, float, float)
-	 */
+	@Override
 	public void glScalef(float x, float y, float z) {
 		applyBuffer();
 		super.glScalef(x, y, z);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glScissor(int, int, int, int)
-	 */
+	@Override
 	public void glScissor(int x, int y, int width, int height) {
 		applyBuffer();
 		super.glScissor(x, y, width, height);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glTexEnvi(int, int, int)
-	 */
+	@Override
 	public void glTexEnvi(int target, int mode, int value) {
 		applyBuffer();
 		super.glTexEnvi(target, mode, value);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glTranslatef(float, float, float)
-	 */
+	@Override
 	public void glTranslatef(float x, float y, float z) {
 		applyBuffer();
 		super.glTranslatef(x, y, z);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glEndList()
-	 */
+	@Override
 	public void glEndList() {
 		listMode--;
 		super.glEndList();
 	}
 
-	/**
-	 * @see celick.opengl.renderer.ImmediateModeOGLRenderer#glNewList(int, int)
-	 */
+	@Override
 	public void glNewList(int id, int option) {
 		listMode++;
 		super.glNewList(id, option);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.SGL#getCurrentColor()
-	 */
+	@Override
 	public float[] getCurrentColor() {
 		return color;
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.SGL#glLoadMatrix(java.nio.FloatBuffer)
-	 */
+	@Override
 	public void glLoadMatrix(FloatBuffer buffer) {
 		flushBuffer();
 		super.glLoadMatrix(buffer);
 	}
+        
 }

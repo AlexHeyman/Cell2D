@@ -20,9 +20,7 @@ public class Point extends Shape
         checkPoints(); 
     } 
 
-    /**
-     * @see celick.geom.Shape#transform(celick.geom.Transform)
-     */
+    @Override
     public Shape transform(Transform transform) 
     { 
         float result[] = new float[points.length]; 
@@ -31,9 +29,7 @@ public class Point extends Shape
         return new Point(points[0], points[1]); 
     } 
 
-    /**
-     * @see celick.geom.Shape#createPoints()
-     */
+    @Override
     protected void createPoints() 
     { 
         points = new float[2]; 
@@ -49,9 +45,7 @@ public class Point extends Shape
         calculateRadius(); 
     } 
 
-    /**
-     * @see celick.geom.Shape#findCenter()
-     */
+    @Override
     protected void findCenter() 
     { 
     	center = new float[2];
@@ -59,11 +53,10 @@ public class Point extends Shape
         center[1] = points[1]; 
     } 
 
-    /**
-     * @see celick.geom.Shape#calculateRadius()
-     */
+    @Override
     protected void calculateRadius() 
     { 
         boundingCircleRadius = 0; 
-    } 
+    }
+    
 }

@@ -28,23 +28,17 @@ public class CompositeImageData implements LoadableImageData  {
 		sources.add(data);
 	}
 	
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream)
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis) throws IOException {
 		return loadImage(fis, false, null);
 	}
 
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream, boolean, int[])
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis, boolean flipped, int[] transparent) throws IOException {
 		return loadImage(fis, flipped, false, transparent);
 	}
 
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream, boolean, boolean, int[])
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream is, boolean flipped, boolean forceAlpha, int[] transparent) throws IOException {
 		CompositeIOException exception = new CompositeIOException();
 		ByteBuffer buffer = null;
@@ -84,63 +78,49 @@ public class CompositeImageData implements LoadableImageData  {
 		}
 	}
 	
-	/**
-	 * @see celick.opengl.ImageData#getDepth()
-	 */
+	@Override
 	public int getDepth() {
 		checkPicked();
 		
 		return picked.getDepth();
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getHeight()
-	 */
+	@Override
 	public int getHeight() {
 		checkPicked();
 		
 		return picked.getHeight();
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getImageBufferData()
-	 */
+	@Override
 	public ByteBuffer getImageBufferData() {
 		checkPicked();
 		
 		return picked.getImageBufferData();
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexHeight()
-	 */
+	@Override
 	public int getTexHeight() {
 		checkPicked();
 		
 		return picked.getTexHeight();
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexWidth()
-	 */
+	@Override
 	public int getTexWidth() {
 		checkPicked();
 		
 		return picked.getTexWidth();
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getWidth()
-	 */
+	@Override
 	public int getWidth() {
 		checkPicked();
 		
 		return picked.getWidth();
 	}
 
-	/**
-	 * @see celick.opengl.LoadableImageData#configureEdging(boolean)
-	 */
+	@Override
 	public void configureEdging(boolean edging) {
 		for (int i=0;i<sources.size();i++) {
 			((LoadableImageData) sources.get(i)).configureEdging(edging);

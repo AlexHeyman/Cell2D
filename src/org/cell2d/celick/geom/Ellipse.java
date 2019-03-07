@@ -160,9 +160,7 @@ public class Ellipse extends Shape {
         }
     }
 
-    /**
-     * @see celick.geom.Shape#transform(celick.geom.Transform)
-     */
+    @Override
     public Shape transform(Transform transform) {
         checkPoints();
         
@@ -176,18 +174,14 @@ public class Ellipse extends Shape {
         return resultPolygon;
     }
 
-    /**
-     * @see celick.geom.Shape#findCenter()
-     */
+    @Override
     protected void findCenter() {
         center = new float[2];
         center[0] = x + radius1;
         center[1] = y + radius2;
     }
 
-    /**
-     * @see celick.geom.Shape#calculateRadius()
-     */
+    @Override
     protected void calculateRadius() {
         boundingCircleRadius = (radius1 > radius2) ? radius1 : radius2;
     }

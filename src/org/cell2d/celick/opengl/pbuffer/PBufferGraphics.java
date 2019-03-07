@@ -76,9 +76,7 @@ public class PBufferGraphics extends Graphics {
 		}
 	}
 
-	/**
-	 * @see celick.Graphics#disable()
-	 */
+	@Override
 	protected void disable() {
 		GL.flush();
 		
@@ -95,9 +93,7 @@ public class PBufferGraphics extends Graphics {
 		SlickCallable.leaveSafeBlock();
 	}
 
-	/**
-	 * @see celick.Graphics#enable()
-	 */
+	@Override
 	protected void enable() {
 		SlickCallable.enterSafeBlock();
 		
@@ -152,18 +148,14 @@ public class PBufferGraphics extends Graphics {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 	}
 	
-	/**
-	 * @see celick.Graphics#destroy()
-	 */
+	@Override
 	public void destroy() {
 		super.destroy();
 		
 		pbuffer.destroy();
 	}
 	
-	/**
-	 * @see celick.Graphics#flush()
-	 */
+	@Override
 	public void flush() {
 		super.flush();
 		

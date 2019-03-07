@@ -427,9 +427,7 @@ public class BasicTriangulator implements Triangulator {
 		}
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#startHole()
-	 */
+        @Override
 	public void startHole() {
 		// TODO Auto-generated method stub
 		

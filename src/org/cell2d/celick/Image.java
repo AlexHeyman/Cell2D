@@ -893,7 +893,7 @@ public class Image implements Renderable {
 	
     /**
      * Set the angle to rotate this image to.  The angle will be normalized to 
-     * be 0 <= angle < 360.  The image will be rotated around its center.
+     * be between 0 and 360.  The image will be rotated around its center.
      * 
      * @param angle The angle to be set
      */
@@ -931,7 +931,7 @@ public class Image implements Renderable {
     
     /**
      * Add the angle provided to the current rotation.  The angle will be normalized to 
-     * be 0 <= angle < 360.  The image will be rotated around its center.
+     * be between 0 and 360.  The image will be rotated around its center.
      *  
      * @param angle The angle to add.
      */

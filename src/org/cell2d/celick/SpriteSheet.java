@@ -165,9 +165,7 @@ public class SpriteSheet extends Image {
 		this.th = th;
 	}
 	
-	/**
-	 * @see celick.Image#initImpl()
-	 */
+        @Override
 	protected void initImpl() {
 		if (subImages != null) {
 			return;
@@ -267,9 +265,7 @@ public class SpriteSheet extends Image {
 		subImages[sx][sy].drawEmbedded(x, y, tw, th);
 	}
 
-	/**
-	 * @see celick.Image#endUse()
-	 */
+        @Override
 	public void endUse() {
 		if (target == this) {
 			super.endUse();
@@ -278,9 +274,7 @@ public class SpriteSheet extends Image {
 		target.endUse();
 	}
 
-	/**
-	 * @see celick.Image#startUse()
-	 */
+        @Override
 	public void startUse() {
 		if (target == this) {
 			super.startUse();
@@ -289,9 +283,7 @@ public class SpriteSheet extends Image {
 		target.startUse();
 	}
 	
-	/**
-	 * @see celick.Image#setTexture(celick.opengl.Texture)
-	 */
+        @Override
 	public void setTexture(Texture texture) {
 		if (target == this) {
 			super.setTexture(texture);

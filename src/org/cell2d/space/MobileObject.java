@@ -78,7 +78,7 @@ public abstract class MobileObject extends SpaceObject {
      * Constructs a MobileObject with no locator Hitbox. This MobileObject must
      * be assigned a locator Hitbox with its setLocatorHitbox() method before
      * any of its other methods are called.
-     * @see #setLocatorHitbox(cell2d.space.Hitbox)
+     * @see #setLocatorHitbox(org.cell2d.space.Hitbox)
      */
     public MobileObject() {}
     

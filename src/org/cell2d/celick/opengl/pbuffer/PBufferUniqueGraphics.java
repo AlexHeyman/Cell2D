@@ -72,9 +72,7 @@ public class PBufferUniqueGraphics extends Graphics {
 		}
 	}
 
-	/**
-	 * @see celick.Graphics#disable()
-	 */
+	@Override
 	protected void disable() {
 		// Bind the texture after rendering.
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, image.getTexture().getTextureID());
@@ -91,9 +89,7 @@ public class PBufferUniqueGraphics extends Graphics {
 		SlickCallable.leaveSafeBlock();
 	}
 
-	/**
-	 * @see celick.Graphics#enable()
-	 */
+	@Override
 	protected void enable() {
 		SlickCallable.enterSafeBlock();
 		
@@ -147,18 +143,14 @@ public class PBufferUniqueGraphics extends Graphics {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 	}
 	
-	/**
-	 * @see celick.Graphics#destroy()
-	 */
+	@Override
 	public void destroy() {
 		super.destroy();
 		
 		pbuffer.destroy();
 	}
 	
-	/**
-	 * @see celick.Graphics#flush()
-	 */
+	@Override
 	public void flush() {
 		super.flush();
 		

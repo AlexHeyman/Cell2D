@@ -92,16 +92,12 @@ public class TextureImpl implements Texture {
     	this.cacheName = cacheName;
     }
     
-    /**
-	 * @see celick.opengl.Texture#hasAlpha()
-	 */
+    @Override
     public boolean hasAlpha() {
     	return alpha;
     }
     
-    /**
-	 * @see celick.opengl.Texture#getTextureRef()
-	 */
+    @Override
     public String getTextureRef() {
     	return ref;
     }
@@ -132,9 +128,7 @@ public class TextureImpl implements Texture {
     	lastBind = null;
     }
     
-    /**
-	 * @see celick.opengl.Texture#bind()
-	 */
+    @Override
     public void bind() {
     	if (lastBind != this) {
     		lastBind = this;
@@ -163,44 +157,32 @@ public class TextureImpl implements Texture {
         setWidth();
     }
     
-    /**
-	 * @see celick.opengl.Texture#getImageHeight()
-	 */
+    @Override
     public int getImageHeight() {
         return height;
     }
     
-    /**
-	 * @see celick.opengl.Texture#getImageWidth()
-	 */
+    @Override
     public int getImageWidth() {
         return width;
     }
     
-    /**
-	 * @see celick.opengl.Texture#getHeight()
-	 */
+    @Override
     public float getHeight() {
         return heightRatio;
     }
     
-    /**
-	 * @see celick.opengl.Texture#getWidth()
-	 */
+    @Override
     public float getWidth() {
         return widthRatio;
     }
     
-    /**
-	 * @see celick.opengl.Texture#getTextureHeight()
-	 */
+    @Override
     public int getTextureHeight() {
     	return texHeight;
     }
 
-    /**
-	 * @see celick.opengl.Texture#getTextureWidth()
-	 */
+    @Override
     public int getTextureWidth() {
     	return texWidth;
     }
@@ -245,9 +227,7 @@ public class TextureImpl implements Texture {
         }
     }
     
-    /**
-	 * @see celick.opengl.Texture#release()
-	 */
+    @Override
     public void release() {
         IntBuffer texBuf = createIntBuffer(1); 
         texBuf.put(textureID);
@@ -266,9 +246,7 @@ public class TextureImpl implements Texture {
         }
     }
     
-    /**
-	 * @see celick.opengl.Texture#getTextureID()
-	 */
+    @Override
     public int getTextureID() {
     	return textureID;
     }
@@ -296,9 +274,7 @@ public class TextureImpl implements Texture {
       return temp.asIntBuffer();
     }    
     
-    /**
-	 * @see celick.opengl.Texture#getTextureData()
-	 */
+    @Override
     public byte[] getTextureData() {
     	ByteBuffer buffer = BufferUtils.createByteBuffer((hasAlpha() ? 4 : 3) * texWidth * texHeight);
     	bind();
@@ -311,9 +287,7 @@ public class TextureImpl implements Texture {
     	return data;
     }
 
-    /**
-     * @see celick.opengl.Texture#setTextureFilter(int)
-     */
+        @Override
 	public void setTextureFilter(int textureFilter) {
 		bind();
         GL.glTexParameteri(target, SGL.GL_TEXTURE_MIN_FILTER, textureFilter); 
@@ -373,4 +347,5 @@ public class TextureImpl implements Texture {
 			return InternalTextureLoader.get().reload(TextureImpl.this, srcPixelFormat, componentCount, minFilter, magFilter, textureBuffer);
 		}
 	}
+        
 }

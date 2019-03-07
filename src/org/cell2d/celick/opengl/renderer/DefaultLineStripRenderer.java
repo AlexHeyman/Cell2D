@@ -10,16 +10,12 @@ public class DefaultLineStripRenderer implements LineStripRenderer {
 	/** The access to OpenGL */
 	private SGL GL = Renderer.get();
 	
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#end()
-	 */
+        @Override
 	public void end() {
 		GL.glEnd();
 	}
 
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#setAntiAlias(boolean)
-	 */
+        @Override
 	public void setAntiAlias(boolean antialias) {
 		if (antialias) {
 			GL.glEnable(SGL.GL_LINE_SMOOTH);
@@ -28,43 +24,31 @@ public class DefaultLineStripRenderer implements LineStripRenderer {
 		}
 	}
 
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#setWidth(float)
-	 */
+        @Override
 	public void setWidth(float width) {
 		GL.glLineWidth(width);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#start()
-	 */
+        @Override
 	public void start() {
 		GL.glBegin(SGL.GL_LINE_STRIP);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#vertex(float, float)
-	 */
+        @Override
 	public void vertex(float x, float y) {
 		GL.glVertex2f(x,y);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#color(float, float, float, float)
-	 */
+        @Override
 	public void color(float r, float g, float b, float a) {
 		GL.glColor4f(r, g, b, a);
 	}
 
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#setLineCaps(boolean)
-	 */
+        @Override
 	public void setLineCaps(boolean caps) {
 	}
 
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#applyGLLineFixes()
-	 */
+        @Override
 	public boolean applyGLLineFixes() {
 		return true;
 	}

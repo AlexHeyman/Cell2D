@@ -4,8 +4,6 @@ package org.cell2d.celick;
  * The main game interface that should be implemented by any game being developed
  * using the container system. There will be some utility type sub-classes as development
  * continues.
- * 
- * @see celick.BasicGame
  *
  * @author kevin
  */

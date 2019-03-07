@@ -54,44 +54,32 @@ public class ImageBuffer implements ImageData {
 		return rawData;
 	}
 	
-	/**
-	 * @see celick.opengl.ImageData#getDepth()
-	 */
+        @Override
 	public int getDepth() {
 		return 32;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getHeight()
-	 */
+        @Override
 	public int getHeight() {
 		return height;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexHeight()
-	 */
+        @Override
 	public int getTexHeight() {
 		return texHeight;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexWidth()
-	 */
+        @Override
 	public int getTexWidth() {
 		return texWidth;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getWidth()
-	 */
+        @Override
 	public int getWidth() {
 		return width;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getImageBufferData()
-	 */
+        @Override
 	public ByteBuffer getImageBufferData() {
 		ByteBuffer scratch = BufferUtils.createByteBuffer(rawData.length);
 		scratch.put(rawData);
@@ -105,10 +93,10 @@ public class ImageBuffer implements ImageData {
 	 * 
 	 * @param x The x position of the pixel to set
 	 * @param y The y position of the pixel to set
-	 * @param r The red component to set (0->255)
-	 * @param g The green component to set (0->255)
-	 * @param b The blue component to set (0->255)
-	 * @param a The alpha component to set (0->255)
+	 * @param r The red component to set (0 to 255)
+	 * @param g The green component to set (0 to 255)
+	 * @param b The blue component to set (0 to 255)
+	 * @param a The alpha component to set (0 to 255)
 	 */
 	public void setRGBA(int x, int y, int r, int g, int b, int a) {
 		if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) {

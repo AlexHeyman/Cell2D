@@ -40,18 +40,12 @@ public class QuadBasedLineStripRenderer implements LineStripRenderer {
 		colours = new float[MAX_POINTS * 4];
 	}
 	
-	/**
-	 * Indicate if we should render end caps
-	 * 
-	 * @param caps True if we should render end caps
-	 */
+	@Override
 	public void setLineCaps(boolean caps) {
 		this.lineCaps = caps;
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#start()
-	 */
+	@Override
 	public void start() {
 		if (width == 1) {
 			def.start();
@@ -66,9 +60,7 @@ public class QuadBasedLineStripRenderer implements LineStripRenderer {
 		color(col[0],col[1],col[2],col[3]);
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#end()
-	 */
+	@Override
 	public void end() {
 		if (width == 1) {
 			def.end();
@@ -78,9 +70,7 @@ public class QuadBasedLineStripRenderer implements LineStripRenderer {
 		renderLines(points, pts);
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#vertex(float, float)
-	 */
+	@Override
 	public void vertex(float x, float y) {
 		if (width == 1) {
 			def.vertex(x,y);
@@ -95,16 +85,12 @@ public class QuadBasedLineStripRenderer implements LineStripRenderer {
 		color(colours[(index*4)], colours[(index*4)+1], colours[(index*4)+2], colours[(index*4)+3]);
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#setWidth(float)
-	 */
+	@Override
 	public void setWidth(float width) {
 		this.width = width;
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#setAntiAlias(boolean)
-	 */
+	@Override
 	public void setAntiAlias(boolean antialias) {
 		def.setAntiAlias(antialias);
 		this.antialias = antialias;
@@ -267,9 +253,7 @@ public class QuadBasedLineStripRenderer implements LineStripRenderer {
 		}
 	}
 	
-	/**
-	 * @see celick.opengl.renderer.LineStripRenderer#color(float, float, float, float)
-	 */
+	@Override
 	public void color(float r, float g, float b, float a) {
 		if (width == 1) {
 			def.color(r,g,b,a);
@@ -283,6 +267,7 @@ public class QuadBasedLineStripRenderer implements LineStripRenderer {
 		cpt++;
 	}
 
+        @Override
 	public boolean applyGLLineFixes() {
 		if (width == 1) {
 			return def.applyGLLineFixes();
@@ -290,4 +275,5 @@ public class QuadBasedLineStripRenderer implements LineStripRenderer {
 		
 		return def.applyGLLineFixes();
 	}
+        
 }

@@ -25,7 +25,7 @@ import java.util.Iterator;
  * <p>It is useful to implicitly extend subclasses of SubThinker to override
  * their methods for single instances without creating completely new class
  * files.</p>
- * @see Thinker#addSubThinker(cell2d.SubThinker)
+ * @see Thinker#addSubThinker(org.cell2d.SubThinker)
  * @see Event
  * @param <T> The type of CellGame that uses this SubThinker's GameStates
  * @param <U> The type of GameState that uses this SubThinker

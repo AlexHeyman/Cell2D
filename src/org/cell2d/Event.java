@@ -5,7 +5,7 @@ package org.cell2d;
  * mechanics of a GameState. It is useful to create an Event as a lambda
  * expression to simplify code.</p>
  * @see EventGroup
- * @see Thinker#setTimerValue(cell2d.Event, int)
+ * @see Thinker#setTimerValue(org.cell2d.Event, int)
  * @param <T> The type of CellGame that uses the GameStates that can involve
  * this Event
  * @param <U> The type of GameState that can involve this Event

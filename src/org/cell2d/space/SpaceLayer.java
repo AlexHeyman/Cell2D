@@ -7,7 +7,7 @@ import org.cell2d.celick.Graphics;
  * SpaceObjects in the SpaceStates to which it is assigned. SpaceLayers are
  * intended to be used to display objects in the foreground or background of a
  * SpaceState's space.</p>
- * @see SpaceState#setLayer(int, cell2d.space.SpaceLayer)
+ * @see SpaceState#setLayer(int, org.cell2d.space.SpaceLayer)
  * @author Andrew Heyman
  */
 public interface SpaceLayer {

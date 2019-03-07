@@ -25,44 +25,32 @@ public class EmptyImageData implements ImageData {
 		this.height = height;
 	}
 	
-	/**
-	 * @see celick.opengl.ImageData#getDepth()
-	 */
+	@Override
 	public int getDepth() {
 		return 32;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getHeight()
-	 */
+	@Override
 	public int getHeight() {
 		return height;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getImageBufferData()
-	 */
+	@Override
 	public ByteBuffer getImageBufferData() {
 		return BufferUtils.createByteBuffer(getTexWidth() * getTexHeight() * 4);
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexHeight()
-	 */
+	@Override
 	public int getTexHeight() {
 		return InternalTextureLoader.get2Fold(height);
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexWidth()
-	 */
+	@Override
 	public int getTexWidth() {
 		return InternalTextureLoader.get2Fold(width);
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getWidth()
-	 */
+	@Override
 	public int getWidth() {
 		return width;
 	}

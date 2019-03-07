@@ -32,8 +32,8 @@ public abstract class ThinkerObject<T extends CellGame,
      * SpaceThinker. This ThinkerObject must be assigned a locator Hitbox with
      * its setLocatorHitbox() method and a SpaceThinker with its setThinker()
      * method before any of its other methods are called.
-     * @see #setLocatorHitbox(cell2d.space.Hitbox)
-     * @see #setThinker(cell2d.space.SpaceThinker)
+     * @see #setLocatorHitbox(org.cell2d.space.Hitbox)
+     * @see #setThinker(org.cell2d.space.SpaceThinker)
      */
     public ThinkerObject() {}
     

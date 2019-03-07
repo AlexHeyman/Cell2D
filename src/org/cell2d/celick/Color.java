@@ -82,9 +82,9 @@ public class Color implements Serializable {
 	/**
 	 * Create a 3 component colour
 	 * 
-	 * @param r The red component of the colour (0.0 -> 1.0)
-	 * @param g The green component of the colour (0.0 -> 1.0)
-	 * @param b The blue component of the colour (0.0 -> 1.0)
+	 * @param r The red component of the colour (0.0 to 1.0)
+	 * @param g The green component of the colour (0.0 to 1.0)
+	 * @param b The blue component of the colour (0.0 to 1.0)
 	 */
 	public Color(float r,float g,float b) {
 		this.r = r;
@@ -96,10 +96,10 @@ public class Color implements Serializable {
 	/**
 	 * Create a 4 component colour
 	 * 
-	 * @param r The red component of the colour (0.0 -> 1.0)
-	 * @param g The green component of the colour (0.0 -> 1.0)
-	 * @param b The blue component of the colour (0.0 -> 1.0)
-	 * @param a The alpha component of the colour (0.0 -> 1.0)
+	 * @param r The red component of the colour (0.0 to 1.0)
+	 * @param g The green component of the colour (0.0 to 1.0)
+	 * @param b The blue component of the colour (0.0 to 1.0)
+	 * @param a The alpha component of the colour (0.0 to 1.0)
 	 */
 	public Color(float r,float g,float b,float a) {
 		this.r = Math.min(r, 1);
@@ -111,9 +111,9 @@ public class Color implements Serializable {
 	/**
 	 * Create a 3 component colour
 	 * 
-	 * @param r The red component of the colour (0 -> 255)
-	 * @param g The green component of the colour (0 -> 255)
-	 * @param b The blue component of the colour (0 -> 255)
+	 * @param r The red component of the colour (0 to 255)
+	 * @param g The green component of the colour (0 to 255)
+	 * @param b The blue component of the colour (0 to 255)
 	 */
 	public Color(int r,int g,int b) {
 		this.r = r / 255.0f;
@@ -125,10 +125,10 @@ public class Color implements Serializable {
 	/**
 	 * Create a 4 component colour
 	 * 
-	 * @param r The red component of the colour (0 -> 255)
-	 * @param g The green component of the colour (0 -> 255)
-	 * @param b The blue component of the colour (0 -> 255)
-	 * @param a The alpha component of the colour (0 -> 255)
+	 * @param r The red component of the colour (0 to 255)
+	 * @param g The green component of the colour (0 to 255)
+	 * @param b The blue component of the colour (0 to 255)
+	 * @param a The alpha component of the colour (0 to 255)
 	 */
 	public Color(int r,int g,int b,int a) {
 		this.r = r / 255.0f;
@@ -171,7 +171,7 @@ public class Color implements Serializable {
 	 * @return The color generated from the number read
 	 */
 	public static Color decode(String nm) {
-		return new Color(Integer.decode(nm).intValue());
+		return new Color(Integer.decode(nm));
 	}
 	
 	/**

@@ -241,16 +241,12 @@ public class Line extends Shape {
 		return end.getY() - start.getY();
 	}
 
-	/**
-	 * @see celick.geom.Shape#getX()
-	 */
+	@Override
 	public float getX() {
 		return getX1();
 	}
 
-	/**
-	 * @see celick.geom.Shape#getY()
-	 */
+	@Override
 	public float getY() {
 		return getY1();
 	}
@@ -360,9 +356,7 @@ public class Line extends Shape {
 		result.y = start.getY() + projDistance * vec.getY();
 	}
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
+	@Override
 	public String toString() {
 		return "[Line " + start + "," + end + "]";
 	}
@@ -439,9 +433,7 @@ public class Line extends Shape {
 		return true;
 	}
 
-	/**
-	 * @see celick.geom.Shape#createPoints()
-	 */
+	@Override
 	protected void createPoints() {
 		points = new float[4];
 		points[0] = getX1();
@@ -450,9 +442,7 @@ public class Line extends Shape {
 		points[3] = getY2();
 	}
 
-	/**
-	 * @see celick.geom.Shape#transform(celick.geom.Transform)
-	 */
+	@Override
 	public Shape transform(Transform transform) {
 		float[] temp = new float[4];
 		createPoints();
@@ -461,22 +451,16 @@ public class Line extends Shape {
 		return new Line(temp[0], temp[1], temp[2], temp[3]);
 	}
 
-	/**
-	 * @see celick.geom.Shape#closed()
-	 */
+	@Override
 	public boolean closed() {
 		return false;
 	}
 	
-	/**
-	 * @see celick.geom.Shape#intersects(celick.geom.Shape)
-	 */
-	public boolean intersects(Shape shape) 
-    { 
-        if (shape instanceof Circle) 
-        { 
-            return shape.intersects(this); 
-        } 
-        return super.intersects(shape); 
-    }
+	@Override
+	public boolean intersects(Shape shape) { 
+            if (shape instanceof Circle) { 
+                return shape.intersects(this); 
+            } 
+            return super.intersects(shape); 
+        }
 }

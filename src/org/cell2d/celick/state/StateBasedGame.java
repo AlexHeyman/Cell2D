@@ -17,7 +17,7 @@ import java.util.Iterator;
  */
 public abstract class StateBasedGame implements Game {
 	/** The list of states making up this game */
-	private HashMap states = new HashMap();
+	private HashMap<Integer,GameState> states = new HashMap<>();
 	/** The current state */
 	private GameState currentState;
 	/** The next state we're moving into */
@@ -87,7 +87,7 @@ public abstract class StateBasedGame implements Game {
 	 * @param state The state to be added
 	 */
 	public void addState(GameState state) {
-		states.put(new Integer(state.getID()), state);
+		states.put(state.getID(), state);
 		
 		if (currentState.getID() == -1) {
 			currentState = state;
@@ -101,7 +101,7 @@ public abstract class StateBasedGame implements Game {
 	 * @return The state requested or null if no state with the specified ID exists
 	 */
 	public GameState getState(int id) {
-		return (GameState) states.get(new Integer(id));
+		return states.get(id);
 	}
 
 	/**
@@ -138,19 +138,15 @@ public abstract class StateBasedGame implements Game {
 		leaveTransition.init(currentState, nextState);
 	}
 	
-	/**
-	 * @see celick.BasicGame#init(celick.GameContainer)
-	 */
+	@Override
 	public final void init(GameContainer container) throws SlickException {
 		this.container = container;
 		initStatesList(container);
 		
-		Iterator gameStates = states.values().iterator();
+		Iterator<GameState> gameStates = states.values().iterator();
 		
 		while (gameStates.hasNext()) {
-			GameState state = (GameState) gameStates.next();
-		
-			state.init(container, this);
+			gameStates.next().init(container, this);
 		}
 		
 		if (currentState != null) {
@@ -166,9 +162,7 @@ public abstract class StateBasedGame implements Game {
 	 */
 	public abstract void initStatesList(GameContainer container) throws SlickException;
 	
-	/**
-	 * @see celick.Game#render(celick.GameContainer, celick.Graphics)
-	 */
+	@Override
 	public final void render(GameContainer container, Graphics g) throws SlickException {
 		preRenderState(container, g);
 		
@@ -213,9 +207,7 @@ public abstract class StateBasedGame implements Game {
 		// NO-OP
 	}
 	
-	/**
-	 * @see celick.BasicGame#update(celick.GameContainer, int)
-	 */
+	@Override
 	public final void update(GameContainer container, int delta) throws SlickException {
 		preUpdateState(container, delta);
 		
@@ -283,16 +275,12 @@ public abstract class StateBasedGame implements Game {
 		return (leaveTransition != null) || (enterTransition != null);
 	}
 	
-	/**
-	 * @see celick.Game#closeRequested()
-	 */
+	@Override
 	public boolean closeRequested() {
 		return true;
 	}
 
-	/**
-	 * @see celick.Game#getTitle()
-	 */
+	@Override
 	public String getTitle() {
 		return title;
 	}

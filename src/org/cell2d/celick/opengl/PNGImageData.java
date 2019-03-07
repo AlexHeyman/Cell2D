@@ -26,51 +26,37 @@ public class PNGImageData implements LoadableImageData {
 	/** The scratch buffer storing the image data */
 	private ByteBuffer scratch;
 	
-    /**
-     * @see celick.opengl.ImageData#getDepth()
-     */
+        @Override
 	public int getDepth() {
 		return bitDepth;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getImageBufferData()
-	 */
+	@Override
 	public ByteBuffer getImageBufferData() {
 		return scratch;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexHeight()
-	 */
+	@Override
 	public int getTexHeight() {
 		return texHeight;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexWidth()
-	 */
+	@Override
 	public int getTexWidth() {
 		return texWidth;
 	}
 
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream)
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis) throws IOException {
 		return loadImage(fis, false, null);
 	}
 
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream, boolean, int[])
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis, boolean flipped, int[] transparent) throws IOException {
 		return loadImage(fis, flipped, false, transparent);
 	}
 
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream, boolean, boolean, int[])
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis, boolean flipped, boolean forceAlpha, int[] transparent) throws IOException {
 		if (transparent != null) {
 			forceAlpha = true;
@@ -184,18 +170,18 @@ public class PNGImageData implements LoadableImageData {
         return ret;
     }
     
-	/**
-	 * @see celick.opengl.LoadableImageData#configureEdging(boolean)
-	 */
+	@Override
 	public void configureEdging(boolean edging) {
 	}
 
+        @Override
 	public int getWidth() {
 		return width;
 	}
 
+        @Override
 	public int getHeight() {
 		return height;
 	}
+        
 }
-

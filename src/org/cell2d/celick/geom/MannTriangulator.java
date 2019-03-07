@@ -56,9 +56,7 @@ public class MannTriangulator implements Triangulator {
 		contour = getPointBag();
 	}
 	
-	/**
-	 * @see celick.geom.Triangulator#addPolyPoint(float, float)
-	 */
+	@Override
 	public void addPolyPoint(float x, float y) {
     	addPoint(new Vector2f(x,y));
     }
@@ -75,9 +73,7 @@ public class MannTriangulator implements Triangulator {
 		holes = null;
 	}
 
-	/**
-	 * Begin adding a hole to the polygon
-	 */
+	@Override
 	public void startHole() {
 		PointBag newHole = getPointBag();
 		newHole.next = holes;
@@ -598,16 +594,12 @@ public class MannTriangulator implements Triangulator {
 		return true;
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#getTriangleCount()
-	 */
+	@Override
 	public int getTriangleCount() {
 		return triangles.size() / 3;
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#getTrianglePoint(int, int)
-	 */
+	@Override
 	public float[] getTrianglePoint(int tri, int i) {
 		Vector2f pt = (Vector2f) triangles.get((tri * 3) + i);
 

@@ -29,7 +29,7 @@ import java.util.StringTokenizer;
  * supports the text BMFont format definition file.
  * 
  * @author kevin
- * @author Nathan Sweet <misc@n4te.com>
+ * @author Nathan Sweet (misc@n4te.com)
  */
 public class AngelCodeFont implements Font {
 	/** The renderer to use for all GL operations */
@@ -319,24 +319,17 @@ public class AngelCodeFont implements Font {
 		return def;
 	}
 
-	/**
-	 * @see celick.Font#drawString(float, float, java.lang.String)
-	 */
+        @Override
 	public void drawString(float x, float y, String text) {
 		drawString(x, y, text, Color.white);
 	}
 
-	/**
-	 * @see celick.Font#drawString(float, float, java.lang.String,
-	 *      celick.Color)
-	 */
+        @Override
 	public void drawString(float x, float y, String text, Color col) {
 		drawString(x, y, text, col, 0, text.length() - 1);
 	}
 
-	/**
-	 * @see Font#drawString(float, float, String, Color, int, int)
-	 */
+        @Override
 	public void drawString(float x, float y, String text, Color col,
 			int startIndex, int endIndex) {
 		fontImage.bind();
@@ -443,9 +436,7 @@ public class AngelCodeFont implements Font {
 		return minYOffset;
 	}
 
-	/**
-	 * @see celick.Font#getHeight(java.lang.String)
-	 */
+        @Override
 	public int getHeight(String text) {
 		DisplayList displayList = null;
 		if (displayListCaching) {
@@ -482,9 +473,7 @@ public class AngelCodeFont implements Font {
 		return maxHeight;
 	}
 
-	/**
-	 * @see celick.Font#getWidth(java.lang.String)
-	 */
+        @Override
 	public int getWidth(String text) {
 		DisplayList displayList = null;
 		if (displayListCaching) {
@@ -564,9 +553,7 @@ public class AngelCodeFont implements Font {
 			image = fontImage.getSubImage(x, y, width, height);
 		}
 
-		/**
-		 * @see java.lang.Object#toString()
-		 */
+                @Override
 		public String toString() {
 			return "[CharDef id=" + id + " x=" + x + " y=" + y + "]";
 		}
@@ -607,9 +594,7 @@ public class AngelCodeFont implements Font {
 		}
 	}
 
-	/**
-	 * @see celick.Font#getLineHeight()
-	 */
+	@Override
 	public int getLineHeight() {
 		return lineHeight;
 	}

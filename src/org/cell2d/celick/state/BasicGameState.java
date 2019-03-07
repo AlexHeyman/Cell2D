@@ -11,20 +11,14 @@ import org.cell2d.celick.SlickException;
  */
 public abstract class BasicGameState implements GameState {
 	
-	/**
-	 * @see celick.state.GameState#getID()
-	 */
+	@Override
 	public abstract int getID();
 
-	/**
-	 * @see celick.state.GameState#enter(celick.GameContainer, celick.state.StateBasedGame)
-	 */
+	@Override
 	public void enter(GameContainer container, StateBasedGame game) throws SlickException {
 	}
 
-	/**
-	 * @see celick.state.GameState#leave(celick.GameContainer, celick.state.StateBasedGame)
-	 */
+	@Override
 	public void leave(GameContainer container, StateBasedGame game) throws SlickException {
 	}
 

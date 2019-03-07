@@ -90,16 +90,12 @@ public class OggInputStream extends InputStream implements AudioInputStream {
 		return total;
 	}
 	
-	/**
-	 * @see celick.openal.AudioInputStream#getChannels()
-	 */
+	@Override
 	public int getChannels() {
 		return oggInfo.channels;
 	}
 	
-	/**
-	 * @see celick.openal.AudioInputStream#getRate()
-	 */
+	@Override
 	public int getRate() {
 		return oggInfo.rate;
 	}
@@ -114,9 +110,7 @@ public class OggInputStream extends InputStream implements AudioInputStream {
 		readPCM();
 	}
 		
-	/**
-	 * @see java.io.InputStream#available()
-	 */
+	@Override
 	public int available() {
 		return endOfStream ? 0 : 1;
 	}
@@ -435,9 +429,7 @@ public class OggInputStream extends InputStream implements AudioInputStream {
 		endOfStream = true;
 	}
 	
-	/**
-	 * @see java.io.InputStream#read()
-	 */
+	@Override
 	public int read() throws IOException {
 		if (readIndex >= pcmBuffer.position()) {
 			pcmBuffer.clear();
@@ -457,16 +449,12 @@ public class OggInputStream extends InputStream implements AudioInputStream {
 		return value;
 	}
 
-	/**
-	 * @see celick.openal.AudioInputStream#atEnd()
-	 */
+	@Override
 	public boolean atEnd() {
 		return endOfStream && (readIndex >= pcmBuffer.position());
 	}
 
-	/**
-	 * @see java.io.InputStream#read(byte[], int, int)
-	 */
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		for (int i=0;i<len;i++) {
 			try {
@@ -489,16 +477,13 @@ public class OggInputStream extends InputStream implements AudioInputStream {
 		return len;
 	}
 
-	/**
-	 * @see java.io.InputStream#read(byte[])
-	 */
+	@Override
 	public int read(byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 	
-	/**
-	 * @see java.io.InputStream#close()
-	 */
+	@Override
 	public void close() throws IOException {
 	}
+        
 }

@@ -47,58 +47,42 @@ public class TGAImageData implements LoadableImageData {
 		return (short) (input << 8 | (input & 0xFF00) >>> 8);
 	}
 	
-	/**
-	 * @see celick.opengl.ImageData#getDepth()
-	 */
+	@Override
 	public int getDepth() {
 		return pixelDepth;
 	}
 	
-	/**
-	 * @see celick.opengl.ImageData#getWidth()
-	 */
+	@Override
 	public int getWidth() {
 		return width;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getHeight()
-	 */
+	@Override
 	public int getHeight() {
 		return height;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexWidth()
-	 */
+	@Override
 	public int getTexWidth() {
 		return texWidth;
 	}
 
-	/**
-	 * @see celick.opengl.ImageData#getTexHeight()
-	 */
+	@Override
 	public int getTexHeight() {
 		return texHeight;
 	}
 	
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream)
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis) throws IOException {
 		return loadImage(fis,true, null);
 	}
 	
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream, boolean, int[])
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis, boolean flipped, int[] transparent) throws IOException {
 		return loadImage(fis, flipped, false, transparent);
 	}
 	
-	/**
-	 * @see celick.opengl.LoadableImageData#loadImage(java.io.InputStream, boolean, boolean, int[])
-	 */
+	@Override
 	public ByteBuffer loadImage(InputStream fis, boolean flipped, boolean forceAlpha, int[] transparent) throws IOException {
 		if (transparent != null) { 
 			forceAlpha = true;
@@ -303,16 +287,13 @@ public class TGAImageData implements LoadableImageData {
         return ret;
     }
 
-	/**
-	 * @see celick.opengl.ImageData#getImageBufferData()
-	 */
+	@Override
 	public ByteBuffer getImageBufferData() {
 		throw new RuntimeException("TGAImageData doesn't store it's image.");
 	}
 	
-	/**
-	 * @see celick.opengl.LoadableImageData#configureEdging(boolean)
-	 */
+	@Override
 	public void configureEdging(boolean edging) {
 	}
+        
 }

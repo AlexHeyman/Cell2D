@@ -141,18 +141,14 @@ public strictfp class Circle extends Ellipse {
          return contains(line.getX1(), line.getY1()) && contains(line.getX2(), line.getY2()); 
     }
     
-	/**
-	 * @see celick.geom.Ellipse#findCenter()
-	 */
+    @Override
     protected void findCenter() {
         center = new float[2];
         center[0] = x + radius;
         center[1] = y + radius;
     }
 
-    /**
-     * @see celick.geom.Ellipse#calculateRadius()
-     */
+    @Override
     protected void calculateRadius() {
         boundingCircleRadius = radius;
     }

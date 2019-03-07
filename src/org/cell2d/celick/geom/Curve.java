@@ -71,9 +71,7 @@ public class Curve extends Shape {
 		return new Vector2f(nx,ny);
 	}
 
-	/**
-	 * @see celick.geom.Shape#createPoints()
-	 */
+        @Override
 	protected void createPoints() {
 		float step = 1.0f / segments;
 		points = new float[(segments+1) * 2];
@@ -86,9 +84,7 @@ public class Curve extends Shape {
 		}
 	}
 	
-	/**
-	 * @see celick.geom.Shape#transform(celick.geom.Transform)
-	 */
+	@Override
 	public Shape transform(Transform transform) {
 		float[] pts = new float[8];
 		float[] dest = new float[8];
@@ -102,11 +98,7 @@ public class Curve extends Shape {
 						 new Vector2f(dest[4],dest[5]), new Vector2f(dest[6],dest[7]));
 	}
 	
-    /**
-     * True if this is a closed shape
-     * 
-     * @return True if this is a closed shape
-     */
+    @Override
     public boolean closed() {
     	return false;
     }

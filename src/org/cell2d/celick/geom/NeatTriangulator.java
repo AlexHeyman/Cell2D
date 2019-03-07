@@ -592,16 +592,12 @@ public class NeatTriangulator implements Triangulator
     	}
     }
 
-	/**
-	 * @see celick.geom.Triangulator#getTriangleCount()
-	 */
+	@Override
 	public int getTriangleCount() {
 		return numTriangles;
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#getTrianglePoint(int, int)
-	 */
+	@Override
 	public float[] getTrianglePoint(int tri, int i) {
 		float xp = pointsX[triangles[tri].v[i]];
 		float yp = pointsY[triangles[tri].v[i]];
@@ -609,9 +605,7 @@ public class NeatTriangulator implements Triangulator
 		return new float[] {xp,yp};
 	}
 
-	/**
-	 * @see celick.geom.Triangulator#startHole()
-	 */
+	@Override
 	public void startHole() {
 	}
 }

@@ -17,7 +17,7 @@ import org.lwjgl.openal.AL10;
  *
  * Utitlity class for loading wavefiles.
  *
- * @author Brian Matzon <brian@matzon.dk>
+ * @author Brian Matzon (brian@matzon.dk)
  * @version $Revision: 2286 $
  * $Id: WaveData.java 2286 2006-03-23 19:32:21Z matzon $
  */
