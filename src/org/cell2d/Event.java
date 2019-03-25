@@ -1,7 +1,7 @@
 package org.cell2d;
 
 /**
- * <p>An Event represents a set of actions that can be taken as part of the
+ * <p>An Event represents a sequence of actions that can be taken as part of the
  * mechanics of a GameState. It is useful to create an Event as a lambda
  * expression to simplify code.</p>
  * @see EventGroup
