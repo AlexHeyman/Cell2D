@@ -1,6 +1,5 @@
 package org.cell2d;
 
-import org.cell2d.celick.Color;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;

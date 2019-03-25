@@ -1,8 +1,8 @@
 package org.cell2d.celick;
 
-import org.cell2d.celick.opengl.ImageData;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import org.cell2d.celick.opengl.ImageData;
 import org.lwjgl.BufferUtils;
 
 /**

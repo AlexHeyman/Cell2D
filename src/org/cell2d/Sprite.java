@@ -1,14 +1,13 @@
 package org.cell2d;
 
-import org.cell2d.celick.Color;
-import org.cell2d.celick.Graphics;
-import org.cell2d.celick.Image;
-import org.cell2d.celick.SlickException;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.cell2d.celick.Graphics;
+import org.cell2d.celick.Image;
+import org.cell2d.celick.SlickException;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
@@ -121,9 +120,9 @@ public class Sprite implements Animatable, Drawable {
      * @param path The relative path to the image file
      * @param originX The x-coordinate in pixels of the origin on the image
      * @param originY The y-coordinate in pixels of the origin on the image
-     * @param transR The R value (0-255) of this Sprite's transparent color
-     * @param transG The G value (0-255) of this Sprite's transparent color
-     * @param transB The B value (0-255) of this Sprite's transparent color
+     * @param transR The red value (0-255) of this Sprite's transparent color
+     * @param transG The green value (0-255) of this Sprite's transparent color
+     * @param transB The blue value (0-255) of this Sprite's transparent color
      * @param filters The Set of Filters that should have an effect on this
      * Sprite when applied to it with draw(), or null if no Filters should have
      * an effect

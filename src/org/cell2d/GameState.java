@@ -1,10 +1,10 @@
 package org.cell2d;
 
-import org.cell2d.celick.Graphics;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.cell2d.celick.Graphics;
 
 /**
  * <p>A GameState represents one state that a CellGame can be in, such as the
@@ -287,7 +287,7 @@ public abstract class GameState<T extends CellGame,
      */
     public void leftActions(T game) {}
     
-    final void doFrame() {
+    final void stateUpdate() {
         for (AnimationInstance instance : animInstances) {
             instance.update();
         }

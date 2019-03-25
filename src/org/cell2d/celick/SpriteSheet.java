@@ -1,9 +1,10 @@
 package org.cell2d.celick;
 
-import org.cell2d.celick.opengl.Texture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import org.cell2d.Color;
+import org.cell2d.celick.opengl.Texture;
 
 /**
  * A sheet of sprites that can be drawn individually

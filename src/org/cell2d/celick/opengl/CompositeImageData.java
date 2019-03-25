@@ -1,11 +1,11 @@
 package org.cell2d.celick.opengl;
 
-import org.cell2d.celick.util.Log;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import org.cell2d.celick.util.Log;
 
 /**
  * A composite data source that checks multiple loaders in order of

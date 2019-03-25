@@ -1,5 +1,8 @@
 package org.cell2d.celick;
 
+import java.io.IOException;
+import java.io.InputStream;
+import org.cell2d.Color;
 import org.cell2d.celick.opengl.ImageData;
 import org.cell2d.celick.opengl.InternalTextureLoader;
 import org.cell2d.celick.opengl.Texture;
@@ -8,8 +11,6 @@ import org.cell2d.celick.opengl.pbuffer.GraphicsFactory;
 import org.cell2d.celick.opengl.renderer.Renderer;
 import org.cell2d.celick.opengl.renderer.SGL;
 import org.cell2d.celick.util.Log;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * An image loaded from a file and renderable to the canvas
@@ -184,9 +185,9 @@ public class Image implements Renderable {
 			int[] trans = null;
 			if (transparent != null) {
 				trans = new int[3];
-				trans[0] = (int) (transparent.r * 255);
-				trans[1] = (int) (transparent.g * 255);
-				trans[2] = (int) (transparent.b * 255);
+				trans[0] = transparent.getRByte();
+				trans[1] = transparent.getGByte();
+				trans[2] = transparent.getBByte();
 			}
 			texture = InternalTextureLoader.get().getTexture(ref, flipped, filter, trans);
 		} catch (IOException e) {
@@ -375,11 +376,7 @@ public class Image implements Renderable {
 		if (corners == null) {
 			corners = new Color[] {new Color(1,1,1,1f),new Color(1,1,1,1f), new Color(1,1,1,1f), new Color(1,1,1,1f)};
 		}
-		
-		corners[corner].r = r;
-		corners[corner].g = g;
-		corners[corner].b = b;
-		corners[corner].a = a;
+		corners[corner] = new Color(r, g, b, a);
 	}
 
 	/** 
@@ -395,10 +392,7 @@ public class Image implements Renderable {
 		if (corners == null) {
 			corners = new Color[] {new Color(1,1,1,1f),new Color(1,1,1,1f), new Color(1,1,1,1f), new Color(1,1,1,1f)};
 		}
-		
-		corners[corner].r = r;
-		corners[corner].g = g;
-		corners[corner].b = b;
+		corners[corner] = new Color(r, g, b, corners[corner].getA());
 	}
 	
 	/**
@@ -461,9 +455,9 @@ public class Image implements Renderable {
 			int[] trans = null;
 			if (transparent != null) {
 				trans = new int[3];
-				trans[0] = (int) (transparent.r * 255);
-				trans[1] = (int) (transparent.g * 255);
-				trans[2] = (int) (transparent.b * 255);
+				trans[0] = transparent.getRByte();
+				trans[1] = transparent.getGByte();
+				trans[2] = transparent.getBByte();
 			}
 			texture = InternalTextureLoader.get().getTexture(in, ref, flipped, filter, trans);
 		} catch (IOException e) {
@@ -580,17 +574,17 @@ public class Image implements Renderable {
 			GL.glTexCoord2f(textureOffsetX + textureWidth, textureOffsetY);
 			GL.glVertex3f(x + width, y, 0);
 		} else {
-			corners[TOP_LEFT].bind();
+			Renderer.bindColor(corners[TOP_LEFT]);
 		    GL.glTexCoord2f(textureOffsetX, textureOffsetY);
 			GL.glVertex3f(x, y, 0);
-			corners[BOTTOM_LEFT].bind();
+			Renderer.bindColor(corners[BOTTOM_LEFT]);
 			GL.glTexCoord2f(textureOffsetX, textureOffsetY + textureHeight);
 			GL.glVertex3f(x, y + height, 0);
-			corners[BOTTOM_RIGHT].bind();
+			Renderer.bindColor(corners[BOTTOM_RIGHT]);
 			GL.glTexCoord2f(textureOffsetX + textureWidth, textureOffsetY
 					+ textureHeight);
 			GL.glVertex3f(x + width, y + height, 0);
-			corners[TOP_RIGHT].bind();
+			Renderer.bindColor(corners[TOP_RIGHT]);
 			GL.glTexCoord2f(textureOffsetX + textureWidth, textureOffsetY);
 			GL.glVertex3f(x + width, y, 0);
 		}
@@ -649,7 +643,7 @@ public class Image implements Renderable {
 	 */
 	public void draw(float x,float y,float scale) {
 		init();
-		draw(x,y,width*scale,height*scale,Color.white);
+		draw(x,y,width*scale,height*scale,Color.WHITE);
 	}
 	
 	/**
@@ -679,7 +673,7 @@ public class Image implements Renderable {
 	 */
 	public void draw(float x,float y,float width,float height) {
 		init();
-		draw(x,y,width,height,Color.white);
+		draw(x,y,width,height,Color.WHITE);
 	}
 
 	/**
@@ -691,7 +685,7 @@ public class Image implements Renderable {
 	 * @param vshear The amount to shear the right points by vertically
 	 */
     public void drawSheared(float x,float y, float hshear, float vshear) { 
-    	this.drawSheared(x, y, hshear, vshear, Color.white);
+    	this.drawSheared(x, y, hshear, vshear, Color.WHITE);
     }
 	/**
 	 * Draw this image at a specified location and size
@@ -705,14 +699,13 @@ public class Image implements Renderable {
     public void drawSheared(float x,float y, float hshear, float vshear, Color filter) { 
     	if (alpha != 1) {
     		if (filter == null) {
-    			filter = Color.white;
+    			filter = Color.WHITE;
     		}
     		
-    		filter = new Color(filter);
-    		filter.a *= alpha;
+    		filter = new Color(filter.getR(), filter.getG(), filter.getB(), filter.getA() * alpha);
     	}
         if (filter != null) { 
-            filter.bind(); 
+            Renderer.bindColor(filter); 
         } 
         
         texture.bind(); 
@@ -758,14 +751,13 @@ public class Image implements Renderable {
     public void draw(float x,float y,float width,float height,Color filter) { 
     	if (alpha != 1) {
     		if (filter == null) {
-    			filter = Color.white;
+    			filter = Color.WHITE;
     		}
     		
-    		filter = new Color(filter);
-    		filter.a *= alpha;
+    		filter = new Color(filter.getR(), filter.getG(), filter.getB(), filter.getA() * alpha);
     	}
         if (filter != null) { 
-            filter.bind(); 
+            Renderer.bindColor(filter); 
         } 
        
         texture.bind(); 
@@ -798,7 +790,7 @@ public class Image implements Renderable {
 	 * @param height The height to render the image at
 	 */
 	public void drawFlash(float x,float y,float width,float height) {
-		drawFlash(x,y,width,height,Color.white);
+		drawFlash(x,y,width,height,Color.WHITE);
 	}
 	
 	/**
@@ -846,14 +838,12 @@ public class Image implements Renderable {
 	public void drawFlash(float x,float y,float width,float height, Color col) {
 		init();
 		
-		col.bind();
+		Renderer.bindColor(col);
 		texture.bind();
 
 		if (GL.canSecondaryColor()) {
 			GL.glEnable(SGL.GL_COLOR_SUM_EXT);
-			GL.glSecondaryColor3ubEXT((byte)(col.r * 255), 
-													 (byte)(col.g * 255), 
-													 (byte)(col.b * 255));
+			GL.glSecondaryColor3ubEXT((byte)(col.getRByte()), (byte)(col.getGByte()), (byte)col.getBByte());
 		}
 		
 		GL.glTexEnvi(SGL.GL_TEXTURE_ENV, SGL.GL_TEXTURE_ENV_MODE, SGL.GL_MODULATE);
@@ -1002,7 +992,7 @@ public class Image implements Renderable {
 	 * @param srcy2 The t position of the bottom right cornder of rectangle to draw from this image (i.e. relative to this image)
 	 */
 	public void draw(float x, float y, float x2, float y2, float srcx, float srcy, float srcx2, float srcy2) {
-		draw(x,y,x2,y2,srcx,srcy,srcx2,srcy2,Color.white);
+		draw(x,y,x2,y2,srcx,srcy,srcx2,srcy2,Color.WHITE);
 	}
 	
 	/**
@@ -1023,13 +1013,12 @@ public class Image implements Renderable {
 
     	if (alpha != 1) {
     		if (filter == null) {
-    			filter = Color.white;
+    			filter = Color.WHITE;
     		}
     		
-    		filter = new Color(filter);
-    		filter.a *= alpha;
+    		filter = new Color(filter.getR(), filter.getG(), filter.getB(), filter.getA() * alpha);
     	}
-		filter.bind();
+		Renderer.bindColor(filter);
 		texture.bind();
 		
         GL.glTranslatef(x, y, 0);
@@ -1088,7 +1077,7 @@ public class Image implements Renderable {
 	 */
 	public void drawEmbedded(float x, float y, float x2, float y2, float srcx, float srcy, float srcx2, float srcy2, Color filter) {
 		if (filter != null) {
-			filter.bind();
+			Renderer.bindColor(filter);
 		}
 		
 		float mywidth = x2 - x;
@@ -1132,7 +1121,7 @@ public class Image implements Renderable {
 	 * @param y4 The bottom left corner y coordinate
 	 */
 	public void drawWarped(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
-        Color.white.bind();
+        Renderer.bindColor(Color.WHITE);
         texture.bind();
 
         GL.glTranslatef(x1, y1, 0);
@@ -1282,7 +1271,7 @@ public class Image implements Renderable {
 		inUse = this;
 		init();
 
-		Color.white.bind();
+		Renderer.bindColor(Color.WHITE);
 		texture.bind();
 		GL.glBegin(SGL.GL_QUADS);
 	}

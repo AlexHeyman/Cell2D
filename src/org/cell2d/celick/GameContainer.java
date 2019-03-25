@@ -1,5 +1,11 @@
 package org.cell2d.celick;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Properties;
 import org.cell2d.celick.opengl.CursorLoader;
 import org.cell2d.celick.opengl.ImageData;
 import org.cell2d.celick.opengl.ImageIOImageData;
@@ -10,12 +16,6 @@ import org.cell2d.celick.opengl.renderer.Renderer;
 import org.cell2d.celick.opengl.renderer.SGL;
 import org.cell2d.celick.util.Log;
 import org.cell2d.celick.util.ResourceLoader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Properties;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
@@ -45,10 +45,6 @@ public class GameContainer {
      */
     protected DisplayMode targetDisplayMode;
     /**
-     * True if we should update the game only when the display is visible
-     */
-    protected boolean updateOnlyOnVisible = true;
-    /**
      * Alpha background supported
      */
     protected boolean alphaSupport = false;
@@ -66,14 +62,6 @@ public class GameContainer {
      * The time the last frame was rendered
      */
     protected long lastFrame;
-    /**
-     * The last time the FPS recorded
-     */
-    protected long lastFPS;
-    /**
-     * The last recorded FPS
-     */
-    protected int recordedFPS;
     /**
      * The current count of FPS
      */
@@ -106,38 +94,10 @@ public class GameContainer {
     private Graphics graphics;
 
     /**
-     * The FPS we want to lock to
-     */
-    protected int targetFPS = -1;
-    /**
-     * True if we should show the fps
-     */
-    private boolean showFPS = true;
-    /**
-     * The minimum logic update interval
-     */
-    protected long minimumLogicInterval = 1;
-    /**
-     * The stored delta
-     */
-    protected long storedDelta;
-    /**
-     * The maximum logic update interval
-     */
-    protected long maximumLogicInterval = 0;
-    /**
      * The last game started
      */
     protected Game lastGame;
-    /**
-     * True if we should clear the screen each frame
-     */
-    protected boolean clearEachFrame = true;
 
-    /**
-     * True if the game is paused
-     */
-    protected boolean paused;
     /**
      * True if we should force exit
      */
@@ -147,10 +107,6 @@ public class GameContainer {
      */
     protected boolean vsync;
     /**
-     * Smoothed deltas requested
-     */
-    protected boolean smoothDeltas;
-    /**
      * The number of samples we'll attempt through hardware
      */
     protected int samples;
@@ -159,11 +115,6 @@ public class GameContainer {
      * True if this context supports multisample
      */
     protected boolean supportsMultiSample;
-
-    /**
-     * True if we should render when not focused
-     */
-    protected boolean alwaysRender;
     
     /**
      * Create a new container wrapping a game
@@ -174,10 +125,9 @@ public class GameContainer {
     public GameContainer(Game game) throws SlickException {
         this.game = game;
         lastFrame = getTime();
-
-        getBuildVersion();
+        
         Log.checkVerboseLogSetting();
-
+        
         originalDisplayMode = Display.getDisplayMode();
     }
 
@@ -235,16 +185,6 @@ public class GameContainer {
     }
 
     /**
-     * Indicate if we want to smooth deltas. This feature will report a delta
-     * based on the FPS not the time passed. This works well with vsync.
-     *
-     * @param smoothDeltas True if we should report smooth deltas
-     */
-    public void setSmoothDeltas(boolean smoothDeltas) {
-        this.smoothDeltas = smoothDeltas;
-    }
-
-    /**
      * Get the aspect ratio of the screen
      *
      * @return The aspect ratio of the display
@@ -275,89 +215,6 @@ public class GameContainer {
      */
     public static Drawable getSharedContext() {
         return SHARED_DRAWABLE;
-    }
-
-    /**
-     * Indicate if we should clear the screen at the beginning of each frame. If
-     * you're rendering to the whole screen each frame then setting this to
-     * false can give some performance improvements
-     *
-     * @param clear True if the the screen should be cleared each frame
-     */
-    public void setClearEachFrame(boolean clear) {
-        this.clearEachFrame = clear;
-    }
-
-    /**
-     * Pause the game - i.e. suspend updates
-     */
-    public void pause() {
-        setPaused(true);
-    }
-
-    /**
-     * Resumt the game - i.e. continue updates
-     */
-    public void resume() {
-        setPaused(false);
-    }
-
-    /**
-     * Check if the container is currently paused.
-     *
-     * @return True if the container is paused
-     */
-    public boolean isPaused() {
-        return paused;
-    }
-
-    /**
-     * Indicates if the game should be paused, i.e. if updates should be
-     * propogated through to the game.
-     *
-     * @param paused True if the game should be paused
-     */
-    public void setPaused(boolean paused) {
-        this.paused = paused;
-    }
-
-    /**
-     * True if this container should render when it has focus
-     *
-     * @return True if this container should render when it has focus
-     */
-    public boolean getAlwaysRender() {
-        return alwaysRender;
-    }
-
-    /**
-     * Indicate whether we want this container to render when it has focus
-     *
-     * @param alwaysRender True if this container should render when it has
-     * focus
-     */
-    public void setAlwaysRender(boolean alwaysRender) {
-        this.alwaysRender = alwaysRender;
-    }
-
-    /**
-     * Get the build number of slick
-     *
-     * @return The build number of slick
-     */
-    public static int getBuildVersion() {
-        try {
-            Properties props = new Properties();
-            props.load(ResourceLoader.getResourceAsStream("version"));
-
-            int build = Integer.parseInt(props.getProperty("build"));
-            Log.info("Slick Build #" + build);
-
-            return build;
-        } catch (Exception e) {
-            Log.error("Unable to determine Slick build number");
-            return -1;
-        }
     }
 
     /**
@@ -397,21 +254,6 @@ public class GameContainer {
     }
 
     /**
-     * Sleep for a given period
-     *
-     * @param milliseconds The period to sleep for in milliseconds
-     */
-    public void sleep(int milliseconds) {
-        long target = getTime() + milliseconds;
-        while (getTime() < target) {
-            try {
-                Thread.sleep(1);
-            } catch (Exception e) {
-            }
-        }
-    }
-
-    /**
      * Get a cursor based on a image reference on the classpath. The image is
      * assumed to be a set/strip of cursor animation frames running from top to
      * bottom.
@@ -437,15 +279,6 @@ public class GameContainer {
     }
 
     /**
-     * Get the current recorded FPS (frames per second)
-     *
-     * @return The current FPS
-     */
-    public int getFPS() {
-        return recordedFPS;
-    }
-
-    /**
      * Retrieve the time taken to render the last frame, i.e. the change in time
      * - delta.
      *
@@ -453,119 +286,9 @@ public class GameContainer {
      */
     protected int getDelta() {
         long time = getTime();
-        int delta = (int) (time - lastFrame);
+        int delta = (int)(time - lastFrame);
         lastFrame = time;
-
         return delta;
-    }
-
-    /**
-     * Updated the FPS counter
-     */
-    protected void updateFPS() {
-        if (getTime() - lastFPS > 1000) {
-            lastFPS = getTime();
-            recordedFPS = fps;
-            fps = 0;
-        }
-        fps++;
-    }
-
-    /**
-     * Set the minimum amount of time in milliseonds that has to pass before
-     * update() is called on the container game. This gives a way to limit logic
-     * updates compared to renders.
-     *
-     * @param interval The minimum interval between logic updates
-     */
-    public void setMinimumLogicUpdateInterval(int interval) {
-        minimumLogicInterval = interval;
-    }
-
-    /**
-     * Set the maximum amount of time in milliseconds that can passed into the
-     * update method. Useful for collision detection without sweeping.
-     *
-     * @param interval The maximum interval between logic updates
-     */
-    public void setMaximumLogicUpdateInterval(int interval) {
-        maximumLogicInterval = interval;
-    }
-
-    /**
-     * Update and render the game
-     *
-     * @param delta The change in time since last update and render
-     * @throws SlickException Indicates an internal fault to the game.
-     */
-    protected void updateAndRender(int delta) throws SlickException {
-        if (smoothDeltas) {
-            if (getFPS() != 0) {
-                delta = 1000 / getFPS();
-            }
-        }
-
-        if (!paused) {
-            storedDelta += delta;
-
-            if (storedDelta >= minimumLogicInterval) {
-                try {
-                    if (maximumLogicInterval != 0) {
-                        long cycles = storedDelta / maximumLogicInterval;
-                        for (int i = 0; i < cycles; i++) {
-                            game.update(this, (int) maximumLogicInterval);
-                        }
-
-                        int remainder = (int) (storedDelta % maximumLogicInterval);
-                        if (remainder > minimumLogicInterval) {
-                            game.update(this, (int) (remainder % maximumLogicInterval));
-                            storedDelta = 0;
-                        } else {
-                            storedDelta = remainder;
-                        }
-                    } else {
-                        game.update(this, (int) storedDelta);
-                        storedDelta = 0;
-                    }
-
-                } catch (Throwable e) {
-                    Log.error(e);
-                    throw new SlickException("Game.update() failure - check the game code.");
-                }
-            }
-        } else {
-            game.update(this, 0);
-        }
-
-        if (hasFocus() || getAlwaysRender()) {
-            if (clearEachFrame) {
-                GL.glClear(SGL.GL_COLOR_BUFFER_BIT | SGL.GL_DEPTH_BUFFER_BIT);
-            }
-
-            GL.glLoadIdentity();
-
-            graphics.resetTransform();
-            graphics.resetFont();
-            graphics.resetLineWidth();
-            graphics.setAntiAlias(false);
-            try {
-                game.render(this, graphics);
-            } catch (Throwable e) {
-                Log.error(e);
-                throw new SlickException("Game.render() failure - check the game code.");
-            }
-            graphics.resetTransform();
-
-            if (showFPS) {
-                defaultFont.drawString(10, 10, "FPS: " + recordedFPS);
-            }
-
-            GL.flush();
-        }
-
-        if (targetFPS != -1) {
-            Display.sync(targetFPS);
-        }
     }
 
     /**
@@ -597,33 +320,6 @@ public class GameContainer {
      */
     protected void enterOrtho() {
         enterOrtho(width, height);
-    }
-
-    /**
-     * Indicate whether the container should show the FPS
-     *
-     * @param show True if the container should show the FPS
-     */
-    public void setShowFPS(boolean show) {
-        showFPS = show;
-    }
-
-    /**
-     * Check if the FPS is currently showing
-     *
-     * @return True if the FPS is showing
-     */
-    public boolean isShowingFPS() {
-        return showFPS;
-    }
-
-    /**
-     * Set the target fps we're hoping to get
-     *
-     * @param fps The target fps we're hoping to get
-     */
-    public void setTargetFrameRate(int fps) {
-        targetFPS = fps;
     }
 
     /**
@@ -928,17 +624,11 @@ public class GameContainer {
      * @throws SlickException Indicates a failure to initialise the system
      */
     public void start() throws SlickException {
-        try {
-            setup();
-
-            getDelta();
-            while (running()) {
-                gameLoop();
-            }
-        } finally {
-            destroy();
+        setup();
+        while (running()) {
+            gameLoop();
         }
-
+        destroy();
         if (forceExit) {
             System.exit(0);
         }
@@ -1006,49 +696,33 @@ public class GameContainer {
             Log.error(e);
             running = false;
         }
+        
+        getDelta();
     }
-
+    
     /**
      * Strategy for overloading game loop context handling
-     *
-     * @throws SlickException Indicates a game failure
      */
-    protected void gameLoop() throws SlickException {
+    protected void gameLoop() {
         int delta = getDelta();
-        if (!Display.isVisible() && updateOnlyOnVisible) {
+        if (delta == 0) {
             try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-            }
-        } else {
-            try {
-                updateAndRender(delta);
-            } catch (SlickException e) {
-                Log.error(e);
-                running = false;
-                return;
-            }
+                Thread.sleep(1);
+            } catch (InterruptedException e) {}
+            return;
         }
-
-        updateFPS();
-
-        Display.update();
-
-        if (Display.isCloseRequested()) {
-            if (game.closeRequested()) {
-                running = false;
-            }
+        try {
+            game.gameLoop(this, delta, graphics);
+        } catch (SlickException e) {
+            Log.error(e);
+            running = false;
+            return;
+        }
+        if (game.closeRequested() || Display.isCloseRequested()) {
+            running = false;
         }
     }
-
-    public void setUpdateOnlyWhenVisible(boolean updateOnlyWhenVisible) {
-        updateOnlyOnVisible = updateOnlyWhenVisible;
-    }
-
-    public boolean isUpdatingOnlyWhenVisible() {
-        return updateOnlyOnVisible;
-    }
-
+    
     public void setIcon(String ref) throws SlickException {
         setIcons(new String[]{ref});
     }
@@ -1065,7 +739,7 @@ public class GameContainer {
         // hmm, not really the right thing, talk to the LWJGL guys
         return Display.isActive();
     }
-
+    
     /**
      * Get the height of the standard screen resolution
      * 

@@ -1,8 +1,5 @@
 package org.cell2d.celick.opengl;
 
-import org.cell2d.celick.opengl.renderer.Renderer;
-import org.cell2d.celick.opengl.renderer.SGL;
-import org.cell2d.celick.util.ResourceLoader;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +11,9 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
+import org.cell2d.celick.opengl.renderer.Renderer;
+import org.cell2d.celick.opengl.renderer.SGL;
+import org.cell2d.celick.util.ResourceLoader;
 import org.lwjgl.BufferUtils;
 
 /**

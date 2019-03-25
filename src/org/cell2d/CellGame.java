@@ -1,18 +1,5 @@
 package org.cell2d;
 
-import org.cell2d.celick.GameContainer;
-import org.cell2d.celick.Graphics;
-import org.cell2d.celick.SlickException;
-import org.cell2d.celick.state.BasicGameState;
-import org.cell2d.celick.state.StateBasedGame;
-import org.cell2d.celick.state.transition.Transition;
-import org.cell2d.celick.util.Log;
-import org.cell2d.control.Control;
-import org.cell2d.control.ControllerButtonControl;
-import org.cell2d.control.ControllerDirectionControl;
-import org.cell2d.control.InvalidControlException;
-import org.cell2d.control.KeyControl;
-import org.cell2d.control.MouseButtonControl;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -26,6 +13,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.cell2d.celick.Game;
+import org.cell2d.celick.GameContainer;
+import org.cell2d.celick.Graphics;
+import org.cell2d.celick.SlickException;
+import org.cell2d.celick.opengl.renderer.Renderer;
+import org.cell2d.celick.opengl.renderer.SGL;
+import org.cell2d.celick.util.Log;
+import org.cell2d.control.Control;
+import org.cell2d.control.ControllerButtonControl;
+import org.cell2d.control.ControllerDirectionControl;
+import org.cell2d.control.InvalidControlException;
+import org.cell2d.control.KeyControl;
+import org.cell2d.control.MouseButtonControl;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Controller;
 import org.lwjgl.input.Controllers;
@@ -90,6 +90,8 @@ public abstract class CellGame {
      * The version number of Cell2D, currently 2.0.0.
      */
     public static final String VERSION = "2.0.0";
+    
+    private static final SGL GL = Renderer.get();
     
     private static class CommandState {
         
@@ -172,23 +174,26 @@ public abstract class CellGame {
         try {
             GameContainer container = new GameContainer(game.game);
             game.updateScreen(container);
-            container.setTargetFrameRate(game.fps);
-            container.setShowFPS(game.showFPS);
             if (game.iconPath != null) {
                 container.setIcon(game.iconPath);
             }
-            container.setAlwaysRender(true);
             container.start();
         } catch (SlickException e) {
             throw new RuntimeException("Failed to start a CellGame");
         }
     }
     
+    private final Game game;
+    private final String title;
     private boolean closeRequested = false;
-    private final StateBasedGame game;
+    private boolean loadingVisualsRendered = false;
+    private boolean loaded = false;
     private final Map<Integer,GameState> states = new HashMap<>();
     private GameState currentState = null;
-    private boolean loaded = false;
+    private Transition currentTransition = null;
+    private Transition nextTransition = null;
+    private int transitionStage = 0;
+    private int transitionTimer = 0;
     private final CommandState[] commandStates;
     private final Set<Control> controlsHeld = new HashSet<>();
     private final Map<Integer,Set<Direction>> controllerDirections = new HashMap<>();
@@ -201,7 +206,6 @@ public abstract class CellGame {
     private String typingString = null;
     private int maxTypingStringLength = 0;
     private int fps;
-    private boolean showFPS = false;
     private double msPerFrame;
     private double msToRun = 0;
     private final DisplayMode[] displayModes;
@@ -213,12 +217,11 @@ public abstract class CellGame {
     private boolean fullscreen;
     private boolean updateScreen = true;
     private final String iconPath;
-    private boolean loadingVisualsRendered = false;
     private final SortedMap<Integer,Map<Music,MusicInstance>> musicStack = new TreeMap<>();
     
     /**
      * Constructs a CellGame.
-     * @param name The name of this CellGame as seen on its program window
+     * @param title The title of this CellGame as seen on its program window
      * @param numCommands The total number of input commands that this CellGame
      * needs to keep track of
      * @param fps The number of frames that this CellGame will execute every
@@ -233,9 +236,10 @@ public abstract class CellGame {
      * program window should use as its icon, or null if the window should use
      * the default LWJGL 2 icon
      */
-    public CellGame(String name, int numCommands, int fps,
+    public CellGame(String title, int numCommands, int fps,
             int screenWidth, int screenHeight, double scaleFactor, boolean fullscreen, String iconPath) {
-        game = new Game(name);
+        game = new CelickGame();
+        this.title = title;
         if (numCommands < 0) {
             throw new RuntimeException("Attempted to create a CellGame with a negative number of commands");
         }
@@ -479,149 +483,186 @@ public abstract class CellGame {
         }
     }
     
-    private class Game extends StateBasedGame {
-        
-        private Game(String name) {
-            super(name);
-        }
-        
-        @Override
-        public final void initStatesList(GameContainer container) throws SlickException {
-            game.addState(new LoadingState());
-        }
-        
-        @Override
-        public final void postUpdateState(GameContainer container, int delta) throws SlickException {
-            if (loaded) {
-                //Update music stack
+    private void updateMusicStack(int delta) {
+        if (!musicStack.isEmpty()) {
+            int top = musicStack.lastKey();
+            Map<Music,MusicInstance> musics = musicStack.get(top);
+            Iterator<Music> iterator = musics.keySet().iterator();
+            while (iterator.hasNext()) {
+                Music music = iterator.next();
+                if (music.update(delta)) {
+                    iterator.remove();
+                }
+            }
+            if (musics.isEmpty()) {
+                musicStack.remove(top);
                 if (!musicStack.isEmpty()) {
-                    int top = musicStack.lastKey();
-                    Map<Music,MusicInstance> musics = musicStack.get(top);
-                    Iterator<Music> iterator = musics.keySet().iterator();
-                    while (iterator.hasNext()) {
-                        Music music = iterator.next();
-                        if (music.update(delta)) {
-                            iterator.remove();
-                        }
-                    }
-                    if (musics.isEmpty()) {
-                        musicStack.remove(top);
-                        if (!musicStack.isEmpty()) {
-                            for (Map.Entry<Music,MusicInstance> entry
-                                    : musicStack.get(musicStack.lastKey()).entrySet()) {
-                                entry.getKey().play(entry.getValue());
-                            }
-                        }
+                    for (Map.Entry<Music,MusicInstance> entry
+                            : musicStack.get(musicStack.lastKey()).entrySet()) {
+                        entry.getKey().play(entry.getValue());
                     }
                 }
-                //Execute a frame if it's been long enough since the last one
-                msToRun += Math.min(delta, msPerFrame);
-                if (msToRun >= msPerFrame) {
-                    updateInput();
-                    currentState.doFrame();
-                    msToRun -= msPerFrame;
-                    if (closeRequested) {
-                        destroy();
-                        container.exit();
-                    } else if (updateScreen) {
-                        updateScreen(container);
-                    }
-                }
-            } else if (loadingVisualsRendered) {
-                initActions();
-                if (currentState == null) {
-                    throw new RuntimeException("A CellGame did not enter any of its GameStates during"
-                            + " initialization");
-                }
-                loaded = true;
             }
         }
+    }
+    
+    private class Transition {
         
-        @Override
-        public final void preRenderState(GameContainer container, Graphics g) {
-            float scale = (float)effectiveScaleFactor;
-            g.scale(scale, scale);
-            g.setWorldClip(screenXOffset, screenYOffset, screenWidth, screenHeight);
-        }
+        private final GameState destState;
+        private final Color fadeColor;
+        private final int fadeOutTime, fadeInTime;
         
-        @Override
-        public final void postRenderState(GameContainer container, Graphics g) throws SlickException {
-            if (loaded) {
-                renderActions(g, screenXOffset, screenYOffset,
-                        screenXOffset + screenWidth, screenYOffset + screenHeight);
+        private Transition(GameState destState, Color fadeColor, int fadeOutTime, int fadeInTime) {
+            this.destState = destState;
+            this.fadeColor = fadeColor;
+            if (fadeOutTime < 0) {
+                throw new RuntimeException("Attempted to make a CellGame transition to a new GameState"
+                        + " with a negative fade-out time");
             }
-            g.clearWorldClip();
+            this.fadeOutTime = fadeOutTime;
+            if (fadeInTime < 0) {
+                throw new RuntimeException("Attempted to make a CellGame transition to a new GameState"
+                        + " with a negative fade-in time");
+            }
+            this.fadeInTime = fadeInTime;
         }
         
     }
     
-    private class LoadingState extends BasicGameState {
-        
-        private LoadingState() {}
-        
-        @Override
-        public int getID() {
-            return -1;
+    private void startNextTransition() {
+        currentTransition = nextTransition;
+        nextTransition = null;
+        if (currentState != null) {
+            currentState.leftActions(currentState.getGame());
+            currentState.active = false;
         }
+        transitionStage = 1;
+        transitionTimer = 0;
+        updateCurrentTransition();
+    }
+    
+    private void updateCurrentTransition() {
+        if (transitionStage == 1) {
+            if (transitionTimer == currentTransition.fadeOutTime) {
+                currentState = currentTransition.destState;
+                currentState.active = true;
+                currentState.enteredActions(currentState.getGame());
+                transitionStage = 2;
+                transitionTimer = currentTransition.fadeInTime;
+            }
+            transitionTimer++;
+        }
+        if (transitionStage == 2) {
+            transitionTimer--;
+            if (transitionTimer == 0) {
+                transitionStage = 0;
+                currentTransition = null;
+            }
+        }
+    }
+    
+    private class CelickGame implements Game {
+        
+        private CelickGame() {}
         
         @Override
-        public final void init(GameContainer container, StateBasedGame game) throws SlickException {
+        public void init(GameContainer container) throws SlickException {
             create();
         }
         
         @Override
-        public final void update(
-                GameContainer container, StateBasedGame game, int delta) throws SlickException {}
-        
-        @Override
-        public final void render(
-                GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-            if (!loadingVisualsRendered) {
-                renderLoadingVisuals(g, screenXOffset, screenYOffset,
-                        screenXOffset + screenWidth, screenYOffset + screenHeight);
-                loadingVisualsRendered = true;
+        public void gameLoop(GameContainer container, int delta, Graphics g) throws SlickException {
+            updateMusicStack(delta);
+            if (!Display.isActive()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {}
+                Display.update();
+                return;
+            }
+            boolean render = true;
+            if (loaded) {
+                //Do a game logic update if it's been long enough since the last one
+                msToRun += Math.min(delta, msPerFrame);
+                if (msToRun >= msPerFrame) {
+                    msToRun -= msPerFrame;
+                    updateInput();
+                    if (transitionStage == 0) {
+                        currentState.stateUpdate();
+                        if (nextTransition != null) {
+                            startNextTransition();
+                        }
+                    } else {
+                        updateCurrentTransition();
+                    }
+                } else {
+                    render = false;
+                }
+            } else if (loadingVisualsRendered) {
+                initActions();
+                if (nextTransition == null) {
+                    throw new RuntimeException("A CellGame did not enter any of its GameStates during"
+                            + " initialization");
+                } else {
+                    startNextTransition();
+                }
+                loaded = true;
+            } else {
+                loadLoadingAssets();
+            }
+            if (closeRequested) {
+                destroy();
+                return;
+            }
+            if (updateScreen) {
+                updateScreen(container);
+            }
+            if (render) {
+                GL.glClear(SGL.GL_COLOR_BUFFER_BIT | SGL.GL_DEPTH_BUFFER_BIT);
+                g.resetTransform();
+                float scale = (float)effectiveScaleFactor;
+                g.scale(scale, scale);
+                int x1 = screenXOffset;
+                int y1 = screenYOffset;
+                int x2 = x1 + screenWidth;
+                int y2 = y1 + screenHeight;
+                g.setWorldClip(x1, y1, x2 - x1, y2 - y1);
+                if (currentState == null) {
+                    renderLoadingVisuals(g, x1, y1, x2, y2);
+                    loadingVisualsRendered = true;
+                } else {
+                    currentState.renderActions(currentState.getGame(), g, x1, y1, x2, y2);
+                    renderActions(g, x1, y1, x2, y2);
+                }
+                if (currentTransition != null) {
+                    Color fadeColor = currentTransition.fadeColor;
+                    if (fadeColor != null) {
+                        float filterAlpha;
+                        if (transitionStage == 1) {
+                            filterAlpha = ((float)transitionTimer)/currentTransition.fadeOutTime;
+                        } else {
+                            filterAlpha = ((float)transitionTimer)/currentTransition.fadeInTime;
+                        }
+                        Color filterColor = new Color(fadeColor.getR(), fadeColor.getG(),
+                                fadeColor.getB(), filterAlpha);
+                        g.setColor(filterColor);
+                        g.fillRect(x1, y1, x2 - x1, y2 - y1);
+                    }
+                }
+                g.clearWorldClip();
+                GL.flush();
+                Display.update();
             }
         }
         
-    }
-    
-    private class State extends BasicGameState {
-        
-        private final GameState state;
-        
-        private State(GameState state) {
-            this.state = state;
+        @Override
+        public boolean closeRequested() {
+            return closeRequested;
         }
         
         @Override
-        public int getID() {
-            return state.getID();
-        }
-        
-        @Override
-        public final void init(GameContainer container, StateBasedGame game) throws SlickException {}
-        
-        @Override
-        public final void update(
-                GameContainer container, StateBasedGame game, int delta) throws SlickException {}
-        
-        @Override
-        public final void render(
-                GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-            state.renderActions(state.getGame(), g, screenXOffset, screenYOffset,
-                    screenXOffset + screenWidth, screenYOffset + screenHeight);
-        }
-        
-        @Override
-        public final void enter(GameContainer container, StateBasedGame game) {
-            state.active = true;
-            state.enteredActions(state.getGame());
-        }
-        
-        @Override
-        public final void leave(GameContainer container, StateBasedGame game) {
-            state.leftActions(state.getGame());
-            state.active = false;
+        public String getTitle() {
+            return title;
         }
         
     }
@@ -650,45 +691,53 @@ public abstract class CellGame {
             throw new RuntimeException("Attempted to add a GameState with negative ID " + id);
         }
         states.put(id, state);
-        game.addState(new State(state));
     }
     
     /**
-     * Instructs this CellGame to enter its GameState with the specified ID at
-     * the end of the current frame. If this CellGame has no GameState with the
-     * specified ID, this method will do nothing.
+     * Instructs this CellGame to enter its GameState with the specified ID the
+     * next time it finishes a game logic update. If this CellGame has no
+     * GameState with the specified ID, this method will do nothing.
      * @param id The ID of the GameState to enter
      */
     public final void enterState(int id) {
-        enterState(id, null, null);
+        GameState state = states.get(id);
+        if (state != null) {
+            nextTransition = new Transition(state, null, 0, 0);
+        }
     }
     
     /**
-     * Instructs this CellGame to enter its GameState with the specified ID,
-     * using the specified Slick2D Transitions when leaving the current
-     * GameState and entering the new one, at the end of the current frame.
+     * Instructs this CellGame to enter its GameState with the specified ID the
+     * next time it finishes a game logic update, using a visual
+     * fade-out/fade-in effect to transition to it from the current GameState.
      * If this CellGame has no GameState with the specified ID, this method will
      * do nothing.
      * @param id The ID of the GameState to enter
-     * @param leave The Transition to use when leaving the current GameState
-     * @param enter The Transition to use when entering the new GameState
+     * @param fadeColor The color of the fade effect
+     * @param fadeOutTime The number of frames to be spent fading out from the
+     * current GameState
+     * @param fadeInTime The number of frames to be spent fading in to the new
+     * GameState
      */
-    public final void enterState(int id, Transition leave, Transition enter) {
-        if (id < 0) {
-            return;
-        }
+    public final void enterState(int id, Color fadeColor, int fadeOutTime, int fadeInTime) {
         GameState state = states.get(id);
         if (state != null) {
-            currentState = state;
-            game.enterState(id, leave, enter);
+            nextTransition = new Transition(state, fadeColor, fadeOutTime, fadeInTime);
         }
     }
+    
+    /**
+     * Loads any assets that are used in renderLoadingVisuals(). This method is
+     * called automatically exactly once before renderLoadingVisuals() is.
+     */
+    public void loadLoadingAssets() {}
     
     /**
      * Renders the visuals that this CellGame will display while its
      * initActions() are in progress. This method is called automatically before
-     * initActions() is, so it cannot employ assets that are first loaded in
-     * initActions().
+     * initActions() is, so it cannot use assets that are first loaded in
+     * initActions(). Any assets used should be loaded in loadLoadingAssets()
+     * instead.
      * @param g The Graphics context to which this CellGame is rendering the
      * loading visuals
      * @param x1 The x-coordinate in pixels of the screen's left edge on the
@@ -957,10 +1006,10 @@ public abstract class CellGame {
      */
     public final void beginTypingString(String initialString, int maxLength) {
         if (maxLength <= 0) {
-            throw new RuntimeException("Attempted to begin typing to a String with non-positive maximum length " + maxLength);
+            throw new RuntimeException("Attempted to begin typing to a String with a non-positive maximum length");
         }
         if (bindingCommandNum >= 0) {
-            throw new RuntimeException("Attempted to begin typing to a String while already binding to command number " + bindingCommandNum);
+            throw new RuntimeException("Attempted to begin typing to a String while already binding to a command");
         }
         if (initialString == null) {
             initialString = "";
@@ -1011,32 +1060,6 @@ public abstract class CellGame {
         }
         this.fps = fps;
         msPerFrame = 1000/((double)fps);
-        if (game.getContainer() != null) {
-            game.getContainer().setTargetFrameRate(fps);
-        }
-    }
-    
-    /**
-     * Returns whether this CellGame displays on its screen the number of frames
-     * that it executes per second.
-     * @return Whether this CellGame displays the number of frames that it
-     * executes per second
-     */
-    public final boolean isShowingFPS() {
-        return showFPS;
-    }
-    
-    /**
-     * Sets whether this CellGame displays on its screen the number of frames
-     * that it executes per second.
-     * @param showFPS Whether this CellGame should display the number of frames
-     * that it executes per second
-     */
-    public final void setShowFPS(boolean showFPS) {
-        this.showFPS = showFPS;
-        if (game.getContainer() != null) {
-            game.getContainer().setShowFPS(showFPS);
-        }
     }
     
     /**

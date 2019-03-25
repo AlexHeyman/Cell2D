@@ -1,13 +1,12 @@
 package org.cell2d;
 
-import org.cell2d.celick.Color;
-import org.cell2d.celick.Image;
-import org.cell2d.celick.SlickException;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.cell2d.celick.Image;
+import org.cell2d.celick.SlickException;
 
 /**
  * <p>A SpriteSheet is a rectangular grid of Sprites. Each Sprite has an
@@ -96,11 +95,11 @@ public class SpriteSheet {
      * between Sprites
      * @param originX The x-coordinate in pixels on each Sprite of its origin
      * @param originY The y-coordinate in pixels on each Sprite of its origin
-     * @param transR The R value (0-255) of this SpriteSheet's Sprites'
+     * @param transR The red value (0-255) of this SpriteSheet's Sprites'
      * transparent color
-     * @param transG The G value (0-255) of this SpriteSheet's Sprites'
+     * @param transG The green value (0-255) of this SpriteSheet's Sprites'
      * transparent color
-     * @param transB The B value (0-255) of this SpriteSheet's Sprites'
+     * @param transB The blue value (0-255) of this SpriteSheet's Sprites'
      * transparent color
      * @param filters The Set of Filters that will have an effect on this
      * SpriteSheet's Sprites when applied to them with draw(), or null if no

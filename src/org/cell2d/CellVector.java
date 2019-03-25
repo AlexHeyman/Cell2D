@@ -1,8 +1,8 @@
 package org.cell2d;
 
+import java.util.Objects;
 import org.cell2d.space.Hitbox;
 import org.cell2d.space.SpaceObject;
-import java.util.Objects;
 
 /**
  * <p>A CellVector represents a point in continuous space as a two-dimensional

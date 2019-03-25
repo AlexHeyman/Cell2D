@@ -1,11 +1,11 @@
 package org.cell2d.celick.opengl;
 
-import org.cell2d.celick.opengl.renderer.Renderer;
-import org.cell2d.celick.opengl.renderer.SGL;
-import org.cell2d.celick.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import org.cell2d.celick.opengl.renderer.Renderer;
+import org.cell2d.celick.opengl.renderer.SGL;
+import org.cell2d.celick.util.Log;
 import org.lwjgl.BufferUtils;
 
 /**

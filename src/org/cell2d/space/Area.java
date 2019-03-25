@@ -1,7 +1,7 @@
 package org.cell2d.space;
 
-import org.cell2d.CellGame;
 import java.util.Collection;
+import org.cell2d.CellGame;
 
 /**
  * <p>An Area is a pattern of SpaceObjects that can be generated and loaded by a

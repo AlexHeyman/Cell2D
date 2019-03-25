@@ -18,24 +18,14 @@ public interface Game {
 	public void init(GameContainer container) throws SlickException;
 	
 	/**
-	 * Update the game logic here. No rendering should take place in this method
-	 * though it won't do any harm. 
-	 * 
-	 * @param container The container holing this game
+	 * Update the game logic and render the game's screen here.
+	 * @param container The container holding this game
 	 * @param delta The amount of time thats passed since last update in milliseconds
+         * @param g The graphics context that can be used to render. However, normal rendering
+	 * routines can also be used.
 	 * @throws SlickException Throw to indicate an internal error
 	 */
-	public void update(GameContainer container, int delta) throws SlickException;
-	
-	/**
-	 * Render the game's screen here. 
-	 * 
-	 * @param container The container holing this game
-	 * @param g The graphics context that can be used to render. However, normal rendering
-	 * routines can also be used.
- 	 * @throws SlickException Throw to indicate a internal error
-	 */
-	public void render(GameContainer container, Graphics g) throws SlickException;
+	public void gameLoop(GameContainer container, int delta, Graphics g) throws SlickException;
 	
 	/**
 	 * Notification that a game close has been requested

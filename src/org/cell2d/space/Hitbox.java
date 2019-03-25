@@ -1,11 +1,11 @@
 package org.cell2d.space;
 
-import org.cell2d.CellVector;
-import org.cell2d.Direction;
-import org.cell2d.Frac;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
+import org.cell2d.CellVector;
+import org.cell2d.Direction;
+import org.cell2d.Frac;
 
 /**
  * <p>A Hitbox is a region of space that can be checked for intersection with

@@ -1,9 +1,9 @@
 package org.cell2d.space;
 
-import org.cell2d.CellVector;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.cell2d.CellVector;
 
 /**
  * <p>A CompositeHitbox is a Hitbox that is composed of other Hitboxes whose

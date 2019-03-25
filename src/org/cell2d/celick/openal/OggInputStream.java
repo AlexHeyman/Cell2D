@@ -1,6 +1,5 @@
 package org.cell2d.celick.openal;
 
-import org.cell2d.celick.util.Log;
 import com.jcraft.jogg.Packet;
 import com.jcraft.jogg.Page;
 import com.jcraft.jogg.StreamState;
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import org.cell2d.celick.util.Log;
 import org.lwjgl.BufferUtils;
 
 /**

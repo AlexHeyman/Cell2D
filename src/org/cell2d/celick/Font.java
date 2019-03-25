@@ -1,5 +1,7 @@
 package org.cell2d.celick;
 
+import org.cell2d.Color;
+
 
 /**
  * The proprites of any font implementation

@@ -1,5 +1,12 @@
 package org.cell2d.celick;
 
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import org.cell2d.Color;
 import org.cell2d.celick.geom.Rectangle;
 import org.cell2d.celick.geom.Shape;
 import org.cell2d.celick.geom.ShapeRenderer;
@@ -8,12 +15,6 @@ import org.cell2d.celick.opengl.renderer.LineStripRenderer;
 import org.cell2d.celick.opengl.renderer.Renderer;
 import org.cell2d.celick.opengl.renderer.SGL;
 import org.cell2d.celick.util.Log;
-import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.ArrayList;
 import org.lwjgl.BufferUtils;
 
 /**
@@ -79,7 +80,7 @@ public class Graphics {
 	private Font font;
 
 	/** The current color */
-	private Color currentColor = Color.white;
+	private Color currentColor = Color.WHITE;
 
 	/** The width of the screen */
 	protected int screenWidth;
@@ -137,8 +138,8 @@ public class Graphics {
 				public Object run() {
 					try {
 						DEFAULT_FONT = new AngelCodeFont(
-								"org/newdawn/slick/data/defaultfont.fnt",
-								"org/newdawn/slick/data/defaultfont.png");
+								"org/cell2d/celick/data/defaultfont.fnt",
+								"org/cell2d/celick/data/defaultfont.png");
 					} catch (SlickException e) {
 						Log.error(e);
 					}
@@ -283,7 +284,7 @@ public class Graphics {
 	 */
 	public void setBackground(Color color) {
 		predraw();
-		GL.glClearColor(color.r, color.g, color.b, color.a);
+		GL.glClearColor(color.getR(), color.getG(), color.getB(), color.getA());
 		postdraw();
 	}
 
@@ -298,7 +299,7 @@ public class Graphics {
 		GL.glGetFloat(SGL.GL_COLOR_CLEAR_VALUE, buffer);
 		postdraw();
 
-		return new Color(buffer);
+		return new Color(buffer.get(), buffer.get(), buffer.get(), buffer.get());
 	}
 
 	/**
@@ -419,10 +420,9 @@ public class Graphics {
 		if (color == null) {
 			return;
 		}
-		
-		currentColor = new Color(color);
+		currentColor = color;
 		predraw();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 		postdraw();
 	}
 
@@ -432,7 +432,7 @@ public class Graphics {
 	 * @return The color in use by this graphics context
 	 */
 	public Color getColor() {
-		return new Color(currentColor);
+		return currentColor;
 	}
 
 	/**
@@ -475,7 +475,7 @@ public class Graphics {
 		}
 		
 		predraw();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 		TextureImpl.bindNone();
 
 		LSR.start();
@@ -500,7 +500,7 @@ public class Graphics {
 
 		ShapeRenderer.draw(shape, fill);
 
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 		postdraw();
 	}
 
@@ -518,7 +518,7 @@ public class Graphics {
 
 		ShapeRenderer.fill(shape, fill);
 
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 		postdraw();
 	}
 
@@ -531,7 +531,7 @@ public class Graphics {
 	public void draw(Shape shape) {
 		predraw();
 		TextureImpl.bindNone();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 
 		ShapeRenderer.draw(shape);
 
@@ -547,7 +547,7 @@ public class Graphics {
 	public void fill(Shape shape) {
 		predraw();
 		TextureImpl.bindNone();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 
 		ShapeRenderer.fill(shape);
 
@@ -632,7 +632,7 @@ public class Graphics {
 			boolean fit) {
 		predraw();
 		TextureImpl.bindNone();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 
 		if (fit) {
 			ShapeRenderer.textureFit(shape, image, scaleX, scaleY);
@@ -661,7 +661,7 @@ public class Graphics {
 			ShapeFill fill) {
 		predraw();
 		TextureImpl.bindNone();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 
 		ShapeRenderer.texture(shape, image, scaleX, scaleY, fill);
 
@@ -885,7 +885,7 @@ public class Graphics {
 	public void fillRect(float x1, float y1, float width, float height) {
 		predraw();
 		TextureImpl.bindNone();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 
 		GL.glBegin(SGL.GL_QUADS);
 		GL.glVertex2f(x1, y1);
@@ -982,7 +982,7 @@ public class Graphics {
 			int segments, float start, float end) {
 		predraw();
 		TextureImpl.bindNone();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 
 		while (end < start) {
 			end += 360;
@@ -1094,7 +1094,7 @@ public class Graphics {
 			int segments, float start, float end) {
 		predraw();
 		TextureImpl.bindNone();
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 
 		while (end < start) {
 			end += 360;
@@ -1380,7 +1380,7 @@ public class Graphics {
 	public void drawImage(Image image, float x, float y, Color col) {
 		predraw();
 		image.draw(x, y, col);
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 		postdraw();
 	}
 
@@ -1395,7 +1395,7 @@ public class Graphics {
 	 *            The y location at which to draw the image
 	 */
 	public void drawImage(Image image, float x, float y) {
-		drawImage(image, x, y, Color.white);
+		drawImage(image, x, y, Color.WHITE);
 	}
 
 	/**
@@ -1429,7 +1429,7 @@ public class Graphics {
 			float srcx, float srcy, float srcx2, float srcy2) {
 		predraw();
 		image.draw(x, y, x2, y2, srcx, srcy, srcx2, srcy2);
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 		postdraw();
 	}
 
@@ -1572,7 +1572,7 @@ public class Graphics {
 			float srcx, float srcy, float srcx2, float srcy2, Color col) {
 		predraw();
 		image.draw(x, y, x2, y2, srcx, srcy, srcx2, srcy2, col);
-		currentColor.bind();
+		Renderer.bindColor(currentColor);
 		postdraw();
 	}
 
@@ -1679,10 +1679,10 @@ public class Graphics {
 
 		GL.glBegin(SGL.GL_LINES);
 
-		Color1.bind();
+                Renderer.bindColor(Color1);
 		GL.glVertex2f(x1, y1);
 
-		Color2.bind();
+                Renderer.bindColor(Color2);
 		GL.glVertex2f(x2, y2);
 
 		GL.glEnd();

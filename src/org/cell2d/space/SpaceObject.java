@@ -1,6 +1,9 @@
 package org.cell2d.space;
 
-import org.cell2d.celick.Graphics;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.cell2d.Animation;
 import org.cell2d.AnimationInstance;
 import org.cell2d.CellGame;
@@ -9,10 +12,7 @@ import org.cell2d.Direction;
 import org.cell2d.Drawable;
 import org.cell2d.Filter;
 import org.cell2d.Sprite;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.cell2d.celick.Graphics;
 
 /**
  * <p>A SpaceObject is a physical object in a SpaceState's space. SpaceObjects

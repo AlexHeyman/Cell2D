@@ -1,5 +1,6 @@
 package org.cell2d.celick;
 
+import org.cell2d.Color;
 import org.cell2d.celick.geom.Shape;
 import org.cell2d.celick.geom.Vector2f;
 

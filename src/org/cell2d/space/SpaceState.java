@@ -1,13 +1,5 @@
 package org.cell2d.space;
 
-import org.cell2d.celick.Graphics;
-import org.cell2d.CellGame;
-import org.cell2d.CellVector;
-import org.cell2d.Direction;
-import org.cell2d.EventGroup;
-import org.cell2d.Frac;
-import org.cell2d.GameState;
-import org.cell2d.SafeIterator;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,6 +20,14 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import javafx.util.Pair;
+import org.cell2d.CellGame;
+import org.cell2d.CellVector;
+import org.cell2d.Direction;
+import org.cell2d.EventGroup;
+import org.cell2d.Frac;
+import org.cell2d.GameState;
+import org.cell2d.SafeIterator;
+import org.cell2d.celick.Graphics;
 
 /**
  * <p>A SpaceState is a type of GameState that handles gameplay in a continuous

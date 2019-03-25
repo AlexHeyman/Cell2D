@@ -1,7 +1,5 @@
 package org.cell2d.space;
 
-import org.cell2d.CellVector;
-import org.cell2d.Direction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -10,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.cell2d.CellVector;
+import org.cell2d.Direction;
 
 /**
  * <p>A MobileObject is a SpaceObject that can simulate continuous movement

@@ -1,5 +1,7 @@
 package org.cell2d.celick.opengl.renderer;
 
+import org.cell2d.Color;
+
 
 /**
  * The static holder for the current GL implementation. Note that this 
@@ -96,4 +98,12 @@ public class Renderer {
 		return lineStripRenderer;
 	}
 	
+        /**
+         * Bind the specified Color to the GL context.
+         * @param color The Color to be bound to the GL context
+         */
+        public static void bindColor(Color color) {
+            renderer.glColor4f(color.getR(), color.getG(), color.getB(), color.getA());
+        }
+        
 }

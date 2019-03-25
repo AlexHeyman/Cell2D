@@ -1,9 +1,5 @@
 package org.cell2d.celick;
 
-import org.cell2d.celick.opengl.renderer.Renderer;
-import org.cell2d.celick.opengl.renderer.SGL;
-import org.cell2d.celick.util.Log;
-import org.cell2d.celick.util.ResourceLoader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import org.cell2d.Color;
+import org.cell2d.celick.opengl.renderer.Renderer;
+import org.cell2d.celick.opengl.renderer.SGL;
+import org.cell2d.celick.util.Log;
+import org.cell2d.celick.util.ResourceLoader;
 
 /**
  * A font implementation that will parse BMFont format font files. The font files can be output
@@ -321,7 +322,7 @@ public class AngelCodeFont implements Font {
 
         @Override
 	public void drawString(float x, float y, String text) {
-		drawString(x, y, text, Color.white);
+		drawString(x, y, text, Color.WHITE);
 	}
 
         @Override
@@ -333,7 +334,7 @@ public class AngelCodeFont implements Font {
 	public void drawString(float x, float y, String text, Color col,
 			int startIndex, int endIndex) {
 		fontImage.bind();
-		col.bind();
+		Renderer.bindColor(col);
 
 		GL.glTranslatef(x, y, 0);
 		if (displayListCaching && startIndex == 0 && endIndex == text.length() - 1) {

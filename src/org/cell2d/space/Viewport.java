@@ -1,9 +1,9 @@
 package org.cell2d.space;
 
+import java.awt.Point;
 import org.cell2d.CellGame;
 import org.cell2d.CellVector;
 import org.cell2d.Frac;
-import java.awt.Point;
 
 /**
  * <p>A Viewport represents a rectangular region of the screen through which the

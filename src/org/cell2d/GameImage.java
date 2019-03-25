@@ -1,23 +1,21 @@
 package org.cell2d;
 
-import org.cell2d.celick.Color;
-import org.cell2d.celick.Graphics;
-import org.cell2d.celick.Image;
-import org.cell2d.celick.SlickException;
-import org.cell2d.celick.opengl.pbuffer.GraphicsFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import javax.imageio.ImageIO;
+import org.cell2d.celick.Graphics;
+import org.cell2d.celick.Image;
+import org.cell2d.celick.SlickException;
+import org.cell2d.celick.opengl.pbuffer.GraphicsFactory;
 
 /**
  * @author Andrew Heyman
  */
 class GameImage {
     
-    private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
-    private static final int TRANS_INT = colorToInt(TRANSPARENT);
+    private static final int TRANS_INT = colorToInt(Color.TRANSPARENT);
     
     private final Image image;
     private final BufferedImage bufferedImage;
@@ -36,7 +34,7 @@ class GameImage {
     }
     
     private static int colorToInt(Color color) {
-        return (color.getAlphaByte() << 24) | (color.getRedByte() << 16) | (color.getGreenByte() << 8) | color.getBlueByte();
+        return (color.getAByte() << 24) | (color.getRByte() << 16) | (color.getGByte() << 8) | color.getBByte();
     }
     
     private static Color intToColor(int color) {
@@ -66,24 +64,23 @@ class GameImage {
             } catch (SlickException e) {
                 throw new RuntimeException("Failed to load an image file: " + path);
             }
+            image.setFilter(Image.FILTER_NEAREST);
         } else {
             Graphics graphics;
             try {
-                image = new Image(width, height);
+                image = new Image(width, height, Image.FILTER_NEAREST);
                 graphics = image.getGraphics();
             } catch (SlickException e) {
                 throw new RuntimeException(e);
             }
-            int transR = transColor.getRedByte();
-            int transG = transColor.getGreenByte();
-            int transB = transColor.getBlueByte();
+            float transR = transColor.getR();
+            float transG = transColor.getG();
+            float transB = transColor.getB();
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     Color color = intToColor(bufferedImage.getRGB(x, y));
-                    if (color.getRedByte() == transR
-                            && color.getGreenByte() == transG
-                            && color.getBlueByte() == transB) {
-                        color = TRANSPARENT;
+                    if (color.getR() == transR && color.getG() == transG && color.getB() == transB) {
+                        color = Color.TRANSPARENT;
                         bufferedImage.setRGB(x, y, TRANS_INT);
                     }
                     graphics.setColor(color);
@@ -96,7 +93,6 @@ class GameImage {
                 throw new RuntimeException(e);
             }
         }
-        image.setFilter(Image.FILTER_NEAREST);
         return new GameImage(image, bufferedImage);
     }
     
@@ -110,19 +106,18 @@ class GameImage {
         Image image;
         Graphics graphics;
         try {
-            image = new Image(width, height);
+            image = new Image(width, height, Image.FILTER_NEAREST);
             graphics = image.getGraphics();
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
-        image.setFilter(Image.FILTER_NEAREST);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Color color = intToColor(newImage.getRGB(x, y));
                 Color mappedColor = colorMap.get(color);
                 if (mappedColor != null) {
-                    color = new Color(mappedColor.getRedByte(), mappedColor.getGreenByte(),
-                            mappedColor.getBlueByte(), color.getAlphaByte());
+                    color = new Color(mappedColor.getR(), mappedColor.getG(),
+                            mappedColor.getB(), color.getA());
                     newImage.setRGB(x, y, colorToInt(color));
                 }
                 graphics.setColor(color);
@@ -147,36 +142,35 @@ class GameImage {
         Image image;
         Graphics graphics;
         try {
-            image = new Image(width, height);
+            image = new Image(width, height, Image.FILTER_NEAREST);
             graphics = image.getGraphics();
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
-        image.setFilter(Image.FILTER_NEAREST);
-        int blendAlpha = blendColor.getAlphaByte();
-        if (blendAlpha == 255) {
-            int newR = blendColor.getRedByte();
-            int newG = blendColor.getGreenByte();
-            int newB = blendColor.getBlueByte();
+        float blendAlpha = blendColor.getA();
+        if (blendAlpha == 1) {
+            float newR = blendColor.getR();
+            float newG = blendColor.getG();
+            float newB = blendColor.getB();
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    Color color = new Color(newR, newG, newB, (newImage.getRGB(x, y) >> 24) & 255);
+                    Color color = intToColor(newImage.getRGB(x, y));
+                    color = new Color(newR, newG, newB, color.getA());
                     newImage.setRGB(x, y, colorToInt(color));
                     graphics.setColor(color);
                     graphics.fillRect(x, y, 1, 1);
                 }
             }
         } else {
-            int blendR = blendColor.getRedByte()*blendAlpha;
-            int blendG = blendColor.getGreenByte()*blendAlpha;
-            int blendB = blendColor.getBlueByte()*blendAlpha;
-            int remainder = 255 - blendAlpha;
+            float blendR = blendColor.getR()*blendAlpha;
+            float blendG = blendColor.getG()*blendAlpha;
+            float blendB = blendColor.getB()*blendAlpha;
+            float remainder = 1 - blendAlpha;
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     Color color = intToColor(newImage.getRGB(x, y));
-                    color = new Color((blendR + color.getRedByte()*remainder)/255,
-                            (blendG + color.getGreenByte()*remainder)/255,
-                            (blendB + color.getBlueByte()*remainder)/255, color.getAlphaByte());
+                    color = new Color(blendR + color.getR()*remainder, blendG + color.getG()*remainder,
+                            blendB + color.getB()*remainder, color.getA());
                     newImage.setRGB(x, y, colorToInt(color));
                     graphics.setColor(color);
                     graphics.fillRect(x, y, 1, 1);

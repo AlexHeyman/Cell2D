@@ -1,11 +1,11 @@
 package org.cell2d.celick.opengl;
 
-import org.cell2d.celick.util.Log;
-import org.cell2d.celick.util.ResourceLoader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import org.cell2d.celick.util.Log;
+import org.cell2d.celick.util.ResourceLoader;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Cursor;
 

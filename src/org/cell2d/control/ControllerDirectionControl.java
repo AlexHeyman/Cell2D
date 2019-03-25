@@ -1,7 +1,7 @@
 package org.cell2d.control;
 
-import org.cell2d.Direction;
 import java.util.Objects;
+import org.cell2d.Direction;
 
 /**
  * <p>A ControllerDirectionControl is a ControllerControl that represents a

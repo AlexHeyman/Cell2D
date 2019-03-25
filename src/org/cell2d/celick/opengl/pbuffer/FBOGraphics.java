@@ -1,5 +1,6 @@
 package org.cell2d.celick.opengl.pbuffer;
 
+import java.nio.IntBuffer;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
@@ -7,7 +8,6 @@ import org.cell2d.celick.opengl.InternalTextureLoader;
 import org.cell2d.celick.opengl.SlickCallable;
 import org.cell2d.celick.opengl.Texture;
 import org.cell2d.celick.util.Log;
-import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;

@@ -1,8 +1,8 @@
 package org.cell2d.space;
 
-import org.cell2d.CellVector;
 import java.util.ArrayList;
 import java.util.List;
+import org.cell2d.CellVector;
 
 /**
  * <p>A PolygonHitbox is a polygonal Hitbox defined by a List of vertices. A
