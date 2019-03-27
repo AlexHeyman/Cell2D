@@ -112,8 +112,8 @@ public abstract class CellGame {
     
     /**
      * Loads the native libraries that are necessary for LWJGL 2, and thus
-     * Slick2D, and thus Cell2D, to run. This method should be called exactly
-     * once before any CellGames are created.
+     * Cell2D, to run. This method should be called exactly once before any
+     * CellGames are created.
      * @param path The relative path to the folder containing the native
      * libraries
      */
