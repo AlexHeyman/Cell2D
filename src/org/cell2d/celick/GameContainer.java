@@ -29,8 +29,7 @@ import org.lwjgl.opengl.Pbuffer;
 import org.lwjgl.opengl.PixelFormat;
 
 /**
- * A generic game container that handles the game loop, fps recording and
- * managing the input system
+ * A generic game container that handles the game loop
  *
  * @author kevin
  */
