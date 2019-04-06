@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Properties;
 import org.cell2d.celick.opengl.CursorLoader;
 import org.cell2d.celick.opengl.ImageData;
 import org.cell2d.celick.opengl.ImageIOImageData;
@@ -62,10 +61,6 @@ public class GameContainer {
      */
     protected long lastFrame;
     /**
-     * The current count of FPS
-     */
-    protected int fps;
-    /**
      * True if we're currently running the game loop
      */
     protected boolean running = true;
@@ -91,11 +86,6 @@ public class GameContainer {
      * The graphics context to be passed to the game
      */
     private Graphics graphics;
-
-    /**
-     * The last game started
-     */
-    protected Game lastGame;
 
     /**
      * True if we should force exit
@@ -299,7 +289,6 @@ public class GameContainer {
         if (graphics != null) {
             graphics.setDimensions(getWidth(), getHeight());
         }
-        lastGame = game;
     }
 
     /**
@@ -763,23 +752,6 @@ public class GameContainer {
     public void destroy() {
         Display.destroy();
         AL.destroy();
-    }
-
-    /**
-     * A null stream to clear out those horrid errors
-     *
-     * @author kevin
-     */
-    private class NullOutputStream extends OutputStream {
-
-        /**
-         * @see java.io.OutputStream#write(int)
-         */
-        @Override
-        public void write(int b) throws IOException {
-            // null implemetnation
-        }
-
     }
 
     public void setIcons(String[] refs) throws SlickException {
