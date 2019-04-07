@@ -610,7 +610,10 @@ public abstract class SpaceState<T extends CellGame,
         
         @Override
         public final void remove() {
-            if (!stopped && lastObject != null) {
+            if (!stopped) {
+                if (lastObject == null) {
+                    throw new IllegalStateException();
+                }
                 removeObject(lastObject);
                 lastObject = null;
             }
@@ -963,7 +966,10 @@ public abstract class SpaceState<T extends CellGame,
         
         @Override
         public final void remove() {
-            if (!stopped && lastObject != null) {
+            if (!stopped) {
+                if (lastObject == null) {
+                    throw new IllegalStateException();
+                }
                 removeObject(lastObject);
                 lastObject = null;
             }
