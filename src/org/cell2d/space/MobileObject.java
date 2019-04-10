@@ -597,7 +597,7 @@ public abstract class MobileObject extends SpaceObject {
     public final void doMovement(long changeX, long changeY) {
         if (state == null) {
             if (changeX != 0 || changeY != 0) {
-                setPosition(getX() + changeX, getY() + changeY);
+                changePosition(changeX, changeY, true);
             }
         } else {
             collisions.clear();
