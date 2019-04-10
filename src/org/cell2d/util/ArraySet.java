@@ -36,7 +36,8 @@ public class ArraySet<E> implements Set<E> {
     
     /**
      * Constructs an ArraySet containing the elements of the specified
-     * Collection, in the order they are returned by the Collection's Iterator.
+     * Collection. The ArraySet is created with enough initial capacity to hold
+     * these elements.
      * @param c The Collection whose elements are to be placed into this
      * ArraySet
      */
