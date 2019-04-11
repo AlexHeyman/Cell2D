@@ -23,10 +23,10 @@ import java.util.Set;
  * it to take its own time-dependent actions, while the GameState is active. A
  * Thinker's <i>time factor</i> represents the average number of discrete time
  * units the Thinker will experience each frame while assigned to an active
- * GameState. If its time factor is negative, a Thinker will use a default time
- * factor that depends on whether it is a GameState or a SubThinker. If a
- * Thinker is assigned to an inactive GameState or none at all, time will not
- * pass for it.</p>
+ * GameState. If its time factor is negative, as it is by default, a Thinker
+ * will use a default time factor that depends on whether it is a GameState or a
+ * SubThinker. If a Thinker is assigned to an inactive GameState or none at all,
+ * time will not pass for it.</p>
  * 
  * <p>A Thinker has <i>timers</i> that can perform Events after a certain number
  * of time units. Timers have integer values, with a positive value x indicating

@@ -39,15 +39,16 @@ import org.cell2d.Direction;
  * 
  * <p>A MobileObject has a <i>velocity</i>, as well as a vector called a <i>step
  * </i> that acts as a short-term adjustment to its velocity, both in fracunits
- * per time unit. Every frame, between the periods in which its SpaceState's
- * SpaceThinkers perform their beforeMovementActions() and their frameActions(),
- * a MobileObject assigned to an active SpaceState moves by the sum of its
- * velocity and step multiplied by its time factor, then resets its step to (0,
- * 0). A MobileObject's <i>movement priority</i> determines when it will move
- * relative to other MobileObjects. MobileObjects with higher movement
- * priorities move before those with lower ones. Also, if two solid
- * MobileObjects would otherwise collide with each other, the one with the
- * higher movement priority will push the other one along with it.</p>
+ * per time unit, and both of which are initially (0, 0). Every frame, between
+ * the periods in which its SpaceState's SpaceThinkers perform their
+ * beforeMovementActions() and their frameActions(), a MobileObject assigned to
+ * an active SpaceState moves by the sum of its velocity and step multiplied by
+ * its time factor, then resets its step to (0, 0). A MobileObject's <i>movement
+ * priority</i> (0 by default) determines when it will move relative to other
+ * MobileObjects. MobileObjects with higher movement priorities move before
+ * those with lower ones. Also, if two solid MobileObjects would otherwise
+ * collide with each other, the one with the higher movement priority will push
+ * the other one along with it.</p>
  * 
  * <p>Every time a MobileObject moves, it records the SpaceObjects whose solid
  * surfaces it collided with and the Directions of the surfaces relative to it

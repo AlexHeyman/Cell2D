@@ -14,10 +14,11 @@ import org.cell2d.celick.Graphics;
  * <p>At each of its levels, an AnimationInstance has an <i>index</i> of its
  * current position in that level of the Animation, as well as a <i>speed</i>
  * that represents how fast, in fracunits per time unit, it advances through
- * that level. If a level's speed is negative, the AnimationInstance will cycle
- * through the Animation at that level backward. If an AnimationInstance moves
- * forward past a level's end or backward past its beginning, it will loop back
- * to the beginning or end, respectively.</p>
+ * that level. Each level's index and speed are both initially 0. If a level's
+ * speed is negative, the AnimationInstance will cycle through the Animation at
+ * that level backward. If an AnimationInstance moves forward past a level's end
+ * or backward past its beginning, it will loop back to the beginning or end,
+ * respectively.</p>
  * 
  * <p>When an AnimationInstance is drawn, it will appear as the Sprite in its
  * Animation that its current indices specify. The Filters that can be
@@ -28,11 +29,11 @@ import org.cell2d.celick.Graphics;
  * <p>AnimationInstances keep track of time by being assigned to one GameState
  * each. An AnimationInstance's <i>time factor</i> represents the average number
  * of discrete time units the AnimationInstance will experience every frame
- * while assigned to an active GameState. If its own time factor is negative, an
- * AnimationInstance will use its assigned GameState's time factor instead. If
- * an AnimationInstance is assigned to an inactive GameState or none at all,
- * time will not pass for it. AnimationInstances assigned to the active
- * GameState update their indices at the beginning of each frame, before
+ * while assigned to an active GameState. If its own time factor is negative, as
+ * it is by default, an AnimationInstance will use its assigned GameState's time
+ * factor instead. If an AnimationInstance is assigned to an inactive GameState
+ * or none at all, time will not pass for it. AnimationInstances assigned to the
+ * active GameState update their indices at the beginning of each frame, before
  * Thinkers' timer values are updated.</p>
  * 
  * <p>All operations on an AnimationInstance return the AnimationInstance itself

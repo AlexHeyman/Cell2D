@@ -10,7 +10,8 @@ package org.cell2d;
  * also be played at different volumes between 0 and 1, with a volume of 0
  * making the Sound inaudible and a volume of 1 causing no volume change.
  * Finally, the Sound class has a global volume between 0 and 1 by which the
- * effective volumes of all newly played Sounds are scaled.</p>
+ * effective volumes of all newly played Sounds are scaled. The global volume is
+ * 1 by default.</p>
  * @author Andrew Heyman
  */
 public class Sound {

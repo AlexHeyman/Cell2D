@@ -20,10 +20,10 @@ import org.cell2d.celick.Graphics;
  * are assigned to Thinkers. A SpaceObject's assigned SpaceState will keep track
  * of time for it and its AnimationInstances. A SpaceObject's <i>time factor</i>
  * represents the average number of discrete time units the SpaceObject will
- * experience every frame while assigned to an active SpaceState. If its own
- * time factor is negative, a SpaceObject will use its assigned SpaceState's
- * time factor instead. If a SpaceObject is assigned to an inactive SpaceState
- * or none at all, time will not pass for it.</p>
+ * experience every frame while assigned to an active SpaceState. If its time
+ * factor is negative, as it is by default, a SpaceObject will use its assigned
+ * SpaceState's time factor instead. If a SpaceObject is assigned to an inactive
+ * SpaceState or none at all, time will not pass for it.</p>
  * 
  * <p>A SpaceObject inherits the position, flipped status, angle of rotation,
  * and rectangular bounding box of a <i>locator Hitbox</i> that is relative to
@@ -47,13 +47,14 @@ import org.cell2d.celick.Graphics;
  * <p>A SpaceObject has a Drawable <i>appearance</i> that represents it as seen
  * through a Viewport's camera, as well as an alpha (opacity) value that is
  * normalized to be between 0 to 1 and a Filter that apply to its appearance.
- * The use of a SpaceObject's appearance, alpha value, and Filter to represent
- * it is a result of its default draw() method, which can be overridden. A
- * SpaceObject will only be drawn if its locator Hitbox's rectangular bounding
- * box intersects the Viewport's field of view. A SpaceObject's <i>draw priority
- * </i> determines whether it will be drawn in front of or behind other
- * SpaceObjects that intersect it. SpaceObjects with higher draw priorities are
- * drawn in front of those with lower ones.</p>
+ * By default, these are Sprite.BLANK, 1, and "no Filter", respectively. The use
+ * of a SpaceObject's appearance, alpha value, and Filter to represent it is a
+ * result of its default draw() method, which can be overridden. A SpaceObject
+ * will only be drawn if its locator Hitbox's rectangular bounding box
+ * intersects the Viewport's field of view. A SpaceObject's <i>draw priority</i>
+ * (0 by default) determines whether it will be drawn in front of or behind
+ * other SpaceObjects that intersect it. SpaceObjects with higher draw
+ * priorities are drawn in front of those with lower ones.</p>
  * 
  * <p>If an AnimationInstance is not already assigned to a GameState, it may be
  * assigned to a SpaceObject with an integer ID in the context of that
@@ -1201,8 +1202,8 @@ public abstract class SpaceObject {
     }
     
     /**
-     * Sets this SpaceObject's Filter to the specified Filter, or to none if the
-     * specified Filter is null.
+     * Sets this SpaceObject's Filter to the specified Filter, or to "no Filter"
+     * if the specified Filter is null.
      * @param filter The new Filter
      */
     public final void setFilter(Filter filter) {

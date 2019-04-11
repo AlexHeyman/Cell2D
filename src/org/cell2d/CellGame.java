@@ -483,14 +483,14 @@ public abstract class CellGame {
         }
     }
     
-    private void updateMusicStack(int delta) {
+    private void updateMusicStack(int msElapsed) {
         if (!musicStack.isEmpty()) {
             int top = musicStack.lastKey();
             Map<Music,MusicInstance> musics = musicStack.get(top);
             Iterator<Music> iterator = musics.keySet().iterator();
             while (iterator.hasNext()) {
                 Music music = iterator.next();
-                if (music.update(delta)) {
+                if (music.update(msElapsed)) {
                     iterator.remove();
                 }
             }
@@ -571,8 +571,8 @@ public abstract class CellGame {
         }
         
         @Override
-        public void gameLoop(GameContainer container, int delta, Graphics g) throws SlickException {
-            updateMusicStack(delta);
+        public void gameLoop(GameContainer container, int msElapsed, Graphics g) throws SlickException {
+            updateMusicStack(msElapsed);
             if (!Display.isActive()) {
                 try {
                     Thread.sleep(10);
@@ -583,7 +583,7 @@ public abstract class CellGame {
             boolean render = true;
             if (loaded) {
                 //Do a game logic update if it's been long enough since the last one
-                msToRun += Math.min(delta, msPerFrame);
+                msToRun += Math.min(msElapsed, msPerFrame);
                 if (msToRun >= msPerFrame) {
                     msToRun -= msPerFrame;
                     updateInput();

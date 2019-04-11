@@ -5,17 +5,19 @@ import java.util.Iterator;
 /**
  * <p>A SubThinker is a type of Thinker that contributes to the mechanics of
  * another Thinker to which it is assigned. This Thinker is called its <i>
- * super-Thinker</i>.</p>
+ * super-Thinker</i>. If its time factor is negative, a SubThinker will use the
+ * time factor of its super-Thinker.</p>
  * 
  * <p>The process in which a SubThinker takes its frameActions() and then
  * performs its frame Events is itself an Event, and the SubThinker
  * automatically ensures that this Event is in the frame Events of its current
- * super-Thinker. The SubThinker's <i>frame priority</i> is the Event's priority
- * in its super-Thinker's frame Events. This means that the SubThinkers assigned
- * to a given Thinker will take their frameActions() in order from highest to
- * lowest frame priority, and that a SubThinker will take its frameActions()
- * after its super-Thinker, but, if its super-Thinker is itself a SubThinker,
- * before the next Thinker assigned to its super-Thinker's super-Thinker.</p>
+ * super-Thinker. The SubThinker's <i>frame priority</i> (0 by default) is the
+ * Event's priority in its super-Thinker's frame Events. This means that the
+ * SubThinkers assigned to a given Thinker will take their frameActions() in
+ * order from highest to lowest frame priority, and that a SubThinker will take
+ * its frameActions() after its super-Thinker, but, if its super-Thinker is
+ * itself a SubThinker, before the next Thinker assigned to its super-Thinker's
+ * super-Thinker.</p>
  * 
  * <p>The SubThinker class is intended to be extended by classes V that extend
  * SubThinker&lt;T,U,V&gt; and interact with GameStates of class U. BasicThinker

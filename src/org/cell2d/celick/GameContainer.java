@@ -691,15 +691,15 @@ public class GameContainer {
      * Strategy for overloading game loop context handling
      */
     protected void gameLoop() {
-        int delta = getDelta();
-        if (delta == 0) {
+        int msElapsed = getDelta();
+        if (msElapsed == 0) {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {}
             return;
         }
         try {
-            game.gameLoop(this, delta, graphics);
+            game.gameLoop(this, msElapsed, graphics);
         } catch (SlickException e) {
             Log.error(e);
             running = false;

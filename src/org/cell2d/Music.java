@@ -15,7 +15,8 @@ package org.cell2d;
  * also be played at different volumes between 0 and 1, with a volume of 0
  * making the Music track inaudible and a volume of 1 causing no volume change.
  * Finally, the Music class has a global volume between 0 and 1 by which the
- * effective volumes of all currently playing Music tracks are scaled.</p>
+ * effective volumes of all currently playing Music tracks are scaled. The
+ * global volume is 1 by default.</p>
  * @see CellGame
  * @author Andrew Heyman
  */

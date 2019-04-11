@@ -15,10 +15,11 @@ import org.cell2d.celick.Graphics;
  * <i>active</i>.</p>
  * 
  * <p>A GameState is also a Thinker that is considered assigned to itself. This
- * means that it has timers, frameActions(), frame events, etc. A GameState will
- * take its frameActions() immediately after all Thinkers have experienced all
- * of their time units for that frame, first among the Thinkers assigned to it.
- * </p>
+ * means that it has timers, frameActions(), frame events, etc. If its time
+ * factor is negative, a GameState will use a time factor of one fracunit. A
+ * GameState will take its frameActions() immediately after all Thinkers have
+ * experienced all of their time units for that frame, first among the Thinkers
+ * assigned to it.</p>
  * 
  * <p>AnimationInstances may be assigned to one GameState each. An
  * AnimationInstance may be assigned to a GameState with or without an integer
