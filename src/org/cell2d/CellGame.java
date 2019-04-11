@@ -53,8 +53,8 @@ import org.lwjgl.opengl.DisplayMode;
  * left to right, as well as y-coordinates that increase from top to bottom. The
  * dimensions of the screen are not necessarily the same as the dimensions of
  * the CellGame's program window, as the screen may be scaled to different
- * apparent sizes using the CellGame's scale factor. A CellGame may be displayed
- * in windowed or fullscreen mode.</p>
+ * apparent sizes using the CellGame's <i>scale factor</i>. A CellGame may be
+ * displayed in windowed or fullscreen mode.</p>
  * 
  * <p>While a CellGame is rendering visuals, the region of the Graphics context
  * to which it is rendering that is outside its screen cannot be drawn to. When
@@ -179,7 +179,7 @@ public abstract class CellGame {
             }
             container.start();
         } catch (SlickException e) {
-            throw new RuntimeException("Failed to start a CellGame");
+            throw new RuntimeException("Failed to start a CellGame: " + e.getMessage());
         }
     }
     
@@ -281,52 +281,28 @@ public abstract class CellGame {
     private void updateScreen(GameContainer container) throws SlickException {
         updateScreen = false;
         if (fullscreen) {
-            int wastedArea = -1;
-            int newWidth = -1;
-            int newHeight = -1;
-            double newScale = -1;
-            int newXOffset = -1;
-            int newYOffset = -1;
-            double screenRatio = ((double)screenHeight)/screenWidth;
-            for (int i = 0; i < displayModes.length; i++) {
-                int modeWidth = displayModes[i].getWidth();
-                int modeHeight = displayModes[i].getHeight();
-                if (modeWidth < screenWidth || modeHeight < screenHeight) {
-                    continue;
-                }
-                double modeScale;
-                int modeXOffset = 0;
-                int modeYOffset = 0;
-                if (((double)modeHeight)/modeWidth > screenRatio) {
-                    modeScale = ((double)modeWidth)/screenWidth;
-                    modeYOffset = (int)((modeHeight/modeScale - screenHeight)/2);
-                } else {
-                    modeScale = ((double)modeHeight)/screenHeight;
-                    modeXOffset = (int)((modeWidth/modeScale - screenWidth)/2);
-                }
-                int modeArea = modeWidth*modeHeight - (int)(screenWidth*screenHeight*modeScale*modeScale);
-                if (modeArea < wastedArea || wastedArea < 0) {
-                    wastedArea = modeArea;
-                    newWidth = modeWidth;
-                    newHeight = modeHeight;
-                    newScale = modeScale;
-                    newXOffset = modeXOffset;
-                    newYOffset = modeYOffset;
-                }
+            DisplayMode mode = Display.getDesktopDisplayMode();
+            int modeWidth = mode.getWidth();
+            int modeHeight = mode.getHeight();
+            if (((double)modeHeight)/modeWidth > ((double)screenHeight)/screenWidth) {
+                //Display mode is vertically wider than screen; put black bars at the top and bottom
+                effectiveScaleFactor = ((double)modeWidth)/screenWidth;
+                screenXOffset = 0;
+                screenYOffset = (int)((modeHeight/ effectiveScaleFactor - screenHeight)/2);
+            } else {
+                //Display mode is vertically narrower than screen; put black bars at the left and right
+                effectiveScaleFactor = ((double)modeHeight)/screenHeight;
+                screenXOffset = (int)((modeWidth/ effectiveScaleFactor - screenWidth)/2);
+                screenYOffset = 0;
             }
-            if (wastedArea >= 0) {
-                effectiveScaleFactor = newScale;
-                screenXOffset = newXOffset;
-                screenYOffset = newYOffset;
-                container.setDisplayMode(newWidth, newHeight, true);
-                resetCommands();
-                return;
-            }
+            container.setDisplayMode(mode, true);
+        } else {
+            effectiveScaleFactor = scaleFactor;
+            screenXOffset = 0;
+            screenYOffset = 0;
+            container.setDisplayMode(
+                    new DisplayMode((int)(screenWidth*scaleFactor), (int)(screenHeight*scaleFactor)), false);
         }
-        effectiveScaleFactor = scaleFactor;
-        screenXOffset = 0;
-        screenYOffset = 0;
-        container.setDisplayMode((int)(screenWidth*scaleFactor), (int)(screenHeight*scaleFactor), false);
         resetCommands();
     }
     

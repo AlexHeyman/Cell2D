@@ -91,10 +91,6 @@ public class GameContainer {
      */
     protected boolean forceExit = true;
     /**
-     * True if vsync has been requested
-     */
-    protected boolean vsync;
-    /**
      * The number of samples we'll attempt through hardware
      */
     protected int samples;
@@ -310,26 +306,6 @@ public class GameContainer {
     }
 
     /**
-     * Indicate whether the display should be synced to the vertical refresh
-     * (stops tearing)
-     *
-     * @param vsync True if we want to sync to vertical refresh
-     */
-    public void setVSync(boolean vsync) {
-        this.vsync = vsync;
-        Display.setVSyncEnabled(vsync);
-    }
-
-    /**
-     * True if vsync is requested
-     *
-     * @return True if vsync is requested
-     */
-    public boolean isVSyncRequested() {
-        return vsync;
-    }
-
-    /**
      * True if the game is running
      *
      * @return True if the game is running
@@ -394,102 +370,26 @@ public class GameContainer {
 
     /**
      * Set the display mode to be used
-     *
-     * @param width The width of the display required
-     * @param height The height of the display required
+     * @param mode The DisplayMode to be used
      * @param fullscreen True if we want fullscreen mode
      * @throws SlickException Indicates a failure to initialise the display
      */
-    public void setDisplayMode(int width, int height, boolean fullscreen) throws SlickException {
-        if ((this.width == width) && (this.height == height) && (isFullscreen() == fullscreen)) {
-            return;
-        }
-
+    public void setDisplayMode(DisplayMode mode, boolean fullscreen) throws SlickException {
+        targetDisplayMode = mode;
+        this.width = mode.getWidth();
+        this.height = mode.getHeight();
         try {
-            targetDisplayMode = null;
-            if (fullscreen) {
-                DisplayMode[] modes = Display.getAvailableDisplayModes();
-                int freq = 0;
-
-                for (int i = 0; i < modes.length; i++) {
-                    DisplayMode current = modes[i];
-
-                    if ((current.getWidth() == width) && (current.getHeight() == height)) {
-                        if ((targetDisplayMode == null) || (current.getFrequency() >= freq)) {
-                            if ((targetDisplayMode == null) || (current.getBitsPerPixel() > targetDisplayMode.getBitsPerPixel())) {
-                                targetDisplayMode = current;
-                                freq = targetDisplayMode.getFrequency();
-                            }
-                        }
-
-                        // if we've found a match for bpp and frequence against the 
-                        // original display mode then it's probably best to go for this one
-                        // since it's most likely compatible with the monitor
-                        if ((current.getBitsPerPixel() == originalDisplayMode.getBitsPerPixel())
-                                && (current.getFrequency() == originalDisplayMode.getFrequency())) {
-                            targetDisplayMode = current;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                targetDisplayMode = new DisplayMode(width, height);
-            }
-
-            if (targetDisplayMode == null) {
-                throw new SlickException("Failed to find value mode: " + width + "x" + height + " fs=" + fullscreen);
-            }
-
-            this.width = width;
-            this.height = height;
-
-            Display.setDisplayMode(targetDisplayMode);
+            Display.setDisplayMode(mode);
             Display.setFullscreen(fullscreen);
-
             if (Display.isCreated()) {
                 initGL();
                 enterOrtho();
             }
-
-            if (targetDisplayMode.getBitsPerPixel() == 16) {
+            if (mode.getBitsPerPixel() == 16) {
                 InternalTextureLoader.get().set16BitMode();
             }
         } catch (LWJGLException e) {
             throw new SlickException("Unable to setup mode " + width + "x" + height + " fullscreen=" + fullscreen, e);
-        }
-
-        getDelta();
-    }
-
-    /**
-     * Check if the display is in fullscreen mode
-     *
-     * @return True if the display is in fullscreen mode
-     */
-    public boolean isFullscreen() {
-        return Display.isFullscreen();
-    }
-
-    /**
-     * Indicate whether we want to be in fullscreen mode. Note that the current
-     * display mode must be valid as a fullscreen mode for this to work
-     *
-     * @param fullscreen True if we want to be in fullscreen mode
-     * @throws SlickException Indicates we failed to change the display mode
-     */
-    public void setFullscreen(boolean fullscreen) throws SlickException {
-        if (isFullscreen() == fullscreen) {
-            return;
-        }
-
-        if (!fullscreen) {
-            try {
-                Display.setFullscreen(fullscreen);
-            } catch (LWJGLException e) {
-                throw new SlickException("Unable to set fullscreen=" + fullscreen, e);
-            }
-        } else {
-            setDisplayMode(width, height, fullscreen);
         }
         getDelta();
     }
@@ -628,7 +528,7 @@ public class GameContainer {
      */
     protected void setup() throws SlickException {
         if (targetDisplayMode == null) {
-            setDisplayMode(640, 480, false);
+            setDisplayMode(new DisplayMode(640, 480), false);
         }
 
         Display.setTitle(game.getTitle());
@@ -673,7 +573,8 @@ public class GameContainer {
         if (!Display.isCreated()) {
             throw new SlickException("Failed to initialise the LWJGL display");
         }
-
+        Display.setVSyncEnabled(true);
+        
         initSystem();
         enterOrtho();
 
