@@ -18,13 +18,13 @@ import org.cell2d.SubThinker;
  * its beforeMovementActions() and then performs its before-movement Events is
  * itself an Event, and the SpaceThinker automatically ensures that this Event
  * is in the before-movement Events of its current super-Thinker. The
- * SpaceThinker's <i>before-movement priority</i> is the Event's priority in its
- * super-Thinker's before-movement Events. This means that the SpaceThinkers
- * assigned to a given Thinker will take their beforeMovementActions() in order
- * from highest to lowest before-movement priority, and that a SpaceThinker will
- * take its beforeMovementActions() after its super-Thinker, but, if its
- * super-Thinker is itself a SpaceThinker, before the next Thinker assigned to
- * its super-Thinker's super-Thinker.</p>
+ * SpaceThinker's <i>before-movement priority</i> (0 by default) is the Event's
+ * priority in its super-Thinker's before-movement Events. This means that the
+ * SpaceThinkers assigned to a given Thinker will take their
+ * beforeMovementActions() in order from highest to lowest before-movement
+ * priority, and that a SpaceThinker will take its beforeMovementActions() after
+ * its super-Thinker, but, if its super-Thinker is itself a SpaceThinker, before
+ * the next Thinker assigned to its super-Thinker's super-Thinker.</p>
  * @see SpaceState
  * @see ThinkerObject
  * @param <T> The type of CellGame that uses this SpaceThinker's SpaceStates
