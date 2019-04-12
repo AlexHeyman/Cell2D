@@ -172,12 +172,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         private int lastIndex = -1;
         
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             return index < list.size();
         }
         
         @Override
-        public K next() {
+        public final K next() {
             if (index < list.size()) {
                 K next = list.get(index).key;
                 lastIndex = index;
@@ -189,7 +189,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public void remove() {
+        public final void remove() {
             if (lastIndex == -1) {
                 throw new IllegalStateException();
             }
@@ -203,17 +203,17 @@ public class ArrayMap<K,V> implements Map<K,V> {
     private class KeySet implements Set<K> {
         
         @Override
-        public int size() {
+        public final int size() {
             return list.size();
         }
         
         @Override
-        public boolean isEmpty() {
+        public final boolean isEmpty() {
             return list.isEmpty();
         }
         
         @Override
-        public boolean contains(Object o) {
+        public final boolean contains(Object o) {
             for (Entry<K,V> entry : list) {
                 if (entry.key == o) {
                     return true;
@@ -223,12 +223,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public Iterator<K> iterator() {
+        public final Iterator<K> iterator() {
             return new KeySetIterator();
         }
         
         @Override
-        public Object[] toArray() {
+        public final Object[] toArray() {
             int size = list.size();
             Object[] array = new Object[size];
             for (int i = 0; i < size; i++) {
@@ -238,7 +238,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public <T> T[] toArray(T[] a) {
+        public final <T> T[] toArray(T[] a) {
             int size = list.size();
             if (size <= a.length) {
                 for (int i = 0; i < size; i++) {
@@ -257,12 +257,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean add(K e) {
+        public final boolean add(K e) {
             throw new UnsupportedOperationException();
         }
         
         @Override
-        public boolean remove(Object o) {
+        public final boolean remove(Object o) {
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
                 Entry<K,V> entry = iterator.next();
@@ -275,7 +275,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean containsAll(Collection<?> c) {
+        public final boolean containsAll(Collection<?> c) {
             for (Object element : c) {
                 if (!containsKey(element)) {
                     return false;
@@ -285,12 +285,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean addAll(Collection<? extends K> c) {
+        public final boolean addAll(Collection<? extends K> c) {
             throw new UnsupportedOperationException();
         }
         
         @Override
-        public boolean retainAll(Collection<?> c) {
+        public final boolean retainAll(Collection<?> c) {
             boolean removedAny = false;
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
@@ -304,7 +304,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean removeAll(Collection<?> c) {
+        public final boolean removeAll(Collection<?> c) {
             boolean removedAny = false;
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
@@ -318,7 +318,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public void clear() {
+        public final void clear() {
             list.clear();
         }
         
@@ -335,12 +335,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         private int lastIndex = -1;
         
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             return index < list.size();
         }
         
         @Override
-        public V next() {
+        public final V next() {
             if (index < list.size()) {
                 V next = list.get(index).value;
                 lastIndex = index;
@@ -352,7 +352,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public void remove() {
+        public final void remove() {
             if (lastIndex == -1) {
                 throw new IllegalStateException();
             }
@@ -366,17 +366,17 @@ public class ArrayMap<K,V> implements Map<K,V> {
     private class Values implements Collection<V> {
         
         @Override
-        public int size() {
+        public final int size() {
             return list.size();
         }
         
         @Override
-        public boolean isEmpty() {
+        public final boolean isEmpty() {
             return list.isEmpty();
         }
         
         @Override
-        public boolean contains(Object o) {
+        public final boolean contains(Object o) {
             for (Entry<K,V> entry : list) {
                 if (entry.value == o) {
                     return true;
@@ -386,12 +386,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public Iterator<V> iterator() {
+        public final Iterator<V> iterator() {
             return new ValuesIterator();
         }
         
         @Override
-        public Object[] toArray() {
+        public final Object[] toArray() {
             int size = list.size();
             Object[] array = new Object[size];
             for (int i = 0; i < size; i++) {
@@ -401,7 +401,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public <T> T[] toArray(T[] a) {
+        public final <T> T[] toArray(T[] a) {
             int size = list.size();
             if (size <= a.length) {
                 for (int i = 0; i < size; i++) {
@@ -420,12 +420,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean add(V e) {
+        public final boolean add(V e) {
             throw new UnsupportedOperationException();
         }
         
         @Override
-        public boolean remove(Object o) {
+        public final boolean remove(Object o) {
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
                 Entry<K,V> entry = iterator.next();
@@ -438,7 +438,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean containsAll(Collection<?> c) {
+        public final boolean containsAll(Collection<?> c) {
             for (Object element : c) {
                 if (!containsValue(element)) {
                     return false;
@@ -448,12 +448,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean addAll(Collection<? extends V> c) {
+        public final boolean addAll(Collection<? extends V> c) {
             throw new UnsupportedOperationException();
         }
         
         @Override
-        public boolean removeAll(Collection<?> c) {
+        public final boolean removeAll(Collection<?> c) {
             boolean removedAny = false;
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
@@ -467,7 +467,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean retainAll(Collection<?> c) {
+        public final boolean retainAll(Collection<?> c) {
             boolean removedAny = false;
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
@@ -481,7 +481,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public void clear() {
+        public final void clear() {
             list.clear();
         }
         
@@ -498,12 +498,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         private int lastIndex = -1;
         
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             return index < list.size();
         }
         
         @Override
-        public Map.Entry<K,V> next() {
+        public final Map.Entry<K,V> next() {
             if (index < list.size()) {
                 Map.Entry<K,V> next = list.get(index);
                 lastIndex = index;
@@ -515,7 +515,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public void remove() {
+        public final void remove() {
             if (lastIndex == -1) {
                 throw new IllegalStateException();
             }
@@ -529,17 +529,17 @@ public class ArrayMap<K,V> implements Map<K,V> {
     private class EntrySet implements Set<Map.Entry<K,V>> {
         
         @Override
-        public int size() {
+        public final int size() {
             return list.size();
         }
         
         @Override
-        public boolean isEmpty() {
+        public final boolean isEmpty() {
             return list.isEmpty();
         }
         
         @Override
-        public boolean contains(Object o) {
+        public final boolean contains(Object o) {
             for (Entry<K,V> entry : list) {
                 if (entry == o) {
                     return true;
@@ -549,12 +549,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public Iterator<Map.Entry<K,V>> iterator() {
+        public final Iterator<Map.Entry<K,V>> iterator() {
             return new EntrySetIterator();
         }
         
         @Override
-        public Object[] toArray() {
+        public final Object[] toArray() {
             int size = list.size();
             Object[] array = new Object[size];
             for (int i = 0; i < size; i++) {
@@ -564,7 +564,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public <T> T[] toArray(T[] a) {
+        public final <T> T[] toArray(T[] a) {
             int size = list.size();
             if (size <= a.length) {
                 for (int i = 0; i < size; i++) {
@@ -583,12 +583,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean add(Map.Entry<K,V> e) {
+        public final boolean add(Map.Entry<K,V> e) {
             throw new UnsupportedOperationException();
         }
         
         @Override
-        public boolean remove(Object o) {
+        public final boolean remove(Object o) {
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
                 Entry<K,V> entry = iterator.next();
@@ -601,7 +601,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean containsAll(Collection<?> c) {
+        public final boolean containsAll(Collection<?> c) {
             for (Object element : c) {
                 if (!contains(element)) {
                     return false;
@@ -611,12 +611,12 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean addAll(Collection<? extends Map.Entry<K,V>> c) {
+        public final boolean addAll(Collection<? extends Map.Entry<K,V>> c) {
             throw new UnsupportedOperationException();
         }
         
         @Override
-        public boolean retainAll(Collection<?> c) {
+        public final boolean retainAll(Collection<?> c) {
             boolean removedAny = false;
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
@@ -630,7 +630,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public boolean removeAll(Collection<?> c) {
+        public final boolean removeAll(Collection<?> c) {
             boolean removedAny = false;
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
@@ -644,7 +644,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         }
         
         @Override
-        public void clear() {
+        public final void clear() {
             list.clear();
         }
         
