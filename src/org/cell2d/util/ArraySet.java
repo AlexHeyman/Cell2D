@@ -46,22 +46,6 @@ public class ArraySet<E> implements Set<E> {
     }
     
     @Override
-    public boolean equals(Object o) {
-        return (o instanceof ArraySet && list.equals(((ArraySet)o).list));
-    }
-    
-    @Override
-    public int hashCode() {
-        int hashCode = 0;
-        for (E element : list) {
-            if (element != null) {
-                hashCode += element.hashCode();
-            }
-        }
-        return hashCode;
-    }
-    
-    @Override
     public int size() {
         return list.size();
     }

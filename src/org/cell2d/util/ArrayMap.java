@@ -103,7 +103,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
     @Override
     public boolean containsKey(Object key) {
         for (Entry<K,V> entry : list) {
-            if (entry.key == key) {
+            if (key == null ? entry.key == null : key.equals(entry.key)) {
                 return true;
             }
         }
@@ -113,7 +113,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
     @Override
     public boolean containsValue(Object value) {
         for (Entry<K,V> entry : list) {
-            if (entry.value == value) {
+            if (value == null ? entry.value == null : value.equals(entry.value)) {
                 return true;
             }
         }
@@ -123,7 +123,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
     @Override
     public V get(Object key) {
         for (Entry<K,V> entry : list) {
-            if (entry.key == key) {
+            if (key == null ? entry.key == null : key.equals(entry.key)) {
                 return entry.value;
             }
         }
@@ -133,7 +133,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
     @Override
     public V put(K key, V value) {
         for (Entry<K,V> entry : list) {
-            if (entry.key == key) {
+            if (key == null ? entry.key == null : key.equals(entry.key)) {
                 return entry.setValue(value);
             }
         }
@@ -146,7 +146,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         Iterator<Entry<K,V>> iterator = list.iterator();
         while (iterator.hasNext()) {
             Entry<K,V> entry = iterator.next();
-            if (entry.key == key) {
+            if (key == null ? entry.key == null : key.equals(entry.key)) {
                 iterator.remove();
                 return entry.value;
             }
@@ -215,7 +215,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         @Override
         public final boolean contains(Object o) {
             for (Entry<K,V> entry : list) {
-                if (entry.key == o) {
+                if (o == null ? entry.key == null : o.equals(entry.key)) {
                     return true;
                 }
             }
@@ -378,7 +378,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         @Override
         public final boolean contains(Object o) {
             for (Entry<K,V> entry : list) {
-                if (entry.value == o) {
+                if (o == null ? entry.value == null : o.equals(entry.value)) {
                     return true;
                 }
             }
@@ -429,7 +429,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
                 Entry<K,V> entry = iterator.next();
-                if (entry.value == o) {
+                if (o == null ? entry.value == null : o.equals(entry.value)) {
                     iterator.remove();
                     return true;
                 }
@@ -541,7 +541,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
         @Override
         public final boolean contains(Object o) {
             for (Entry<K,V> entry : list) {
-                if (entry == o) {
+                if (o == null ? entry == null : o.equals(entry)) {
                     return true;
                 }
             }
@@ -592,7 +592,7 @@ public class ArrayMap<K,V> implements Map<K,V> {
             Iterator<Entry<K,V>> iterator = list.iterator();
             while (iterator.hasNext()) {
                 Entry<K,V> entry = iterator.next();
-                if (entry == o) {
+                if (o == null ? entry == null : o.equals(entry)) {
                     iterator.remove();
                     return true;
                 }
