@@ -123,7 +123,7 @@ public abstract class ThinkerObject<T extends CellGame,
      * @param event The Event whose timer value should be returned
      * @return The current value of the timer for the specified Event
      */
-    public final int getTimerValue(Event event) {
+    public final int getTimerValue(Event<T,U> event) {
         return thinker.getTimerValue(event);
     }
     
@@ -133,7 +133,7 @@ public abstract class ThinkerObject<T extends CellGame,
      * @param event The Event whose timer value should be set
      * @param value The new value of the specified Event's timer
      */
-    public final void setTimerValue(Event event, int value) {
+    public final void setTimerValue(Event<T,U> event, int value) {
         thinker.setTimerValue(event, value);
     }
     
