@@ -508,10 +508,6 @@ public abstract class CellGame {
     private void startNextTransition() {
         currentTransition = nextTransition;
         nextTransition = null;
-        if (currentState != null) {
-            currentState.leftActions(currentState.getGame());
-            currentState.active = false;
-        }
         transitionStage = 1;
         transitionTimer = 0;
         updateCurrentTransition();
@@ -520,6 +516,10 @@ public abstract class CellGame {
     private void updateCurrentTransition() {
         if (transitionStage == 1) {
             if (transitionTimer == currentTransition.fadeOutTime) {
+                if (currentState != null) {
+                    currentState.leftActions(currentState.getGame());
+                    currentState.active = false;
+                }
                 currentState = currentTransition.destState;
                 currentState.active = true;
                 currentState.enteredActions(currentState.getGame());
