@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * An ArraySet is a Set implemented as a resizable array, just like that of an
  * ArrayList. An ArraySet takes up less memory than other Set types, and offers
- * comparable or better performance to HashSet when the Set size is very small.
+ * at-least-comparable performance to a HashSet when the Set size is very small.
  * For best results, the initial capacity of an ArraySet should be set to the
  * smallest number that the ArraySet's size will almost certainly never exceed.
  * @see java.util.ArrayList

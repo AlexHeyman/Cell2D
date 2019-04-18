@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * An ArrayMap is a Map implemented as a resizable array, just like that of an
  * ArrayList. An ArrayMap takes up less memory than other Map types, and offers
- * comparable or better performance to HashMap when the Map size is very small.
+ * at-least-comparable performance to a HashMap when the Map size is very small.
  * For best results, the initial capacity of an ArrayMap should be set to the
  * smallest number that the ArrayMap's size will almost certainly never exceed.
  * @param <K> The type of keys maintained by this ArrayMap
