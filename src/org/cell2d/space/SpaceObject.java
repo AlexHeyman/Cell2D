@@ -45,16 +45,17 @@ import org.cell2d.celick.Graphics;
  * measured.</p>
  * 
  * <p>A SpaceObject has a Drawable <i>appearance</i> that represents it as seen
- * through a Viewport's camera, as well as an alpha (opacity) value that is
- * normalized to be between 0 to 1 and a Filter that apply to its appearance.
- * By default, these are Sprite.BLANK, 1, and "no Filter", respectively. The use
- * of a SpaceObject's appearance, alpha value, and Filter to represent it is a
- * result of its default draw() method, which can be overridden. A SpaceObject
- * will only be drawn if its locator Hitbox's rectangular bounding box
- * intersects the Viewport's field of view. A SpaceObject's <i>draw priority</i>
- * (0 by default) determines whether it will be drawn in front of or behind
- * other SpaceObjects that intersect it. SpaceObjects with higher draw
- * priorities are drawn in front of those with lower ones.</p>
+ * through a Viewport's camera, as well as two properties that only affect how
+ * its appearance is drawn: an alpha (opacity) value that is normalized to be
+ * between 0 and 1, and a Filter. By default, these are Sprite.BLANK, 1, and "no
+ * Filter", respectively. A SpaceObject's use of its appearance, alpha value,
+ * and Filter to represent itself is a result of its default draw() method,
+ * which can be overridden. A SpaceObject will only be drawn if its locator
+ * Hitbox's rectangular bounding box intersects the Viewport's field of view. A
+ * SpaceObject's <i>draw priority</i> (0 by default) determines whether it will
+ * be drawn in front of or behind other SpaceObjects that intersect it.
+ * SpaceObjects with higher draw priorities are drawn in front of those with
+ * lower ones.</p>
  * 
  * <p>If an AnimationInstance is not already assigned to a GameState, it may be
  * assigned to a SpaceObject with an integer ID in the context of that
