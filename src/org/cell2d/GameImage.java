@@ -97,6 +97,7 @@ class GameImage {
     }
     
     static GameImage getRecoloredImage(BufferedImage bufferedImage, Map<Color,Color> colorMap) {
+        //Only keys of colorMap with alpha values of 1 are used. Alpha values of pixels are unchanged.
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
         BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -113,8 +114,8 @@ class GameImage {
         }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                Color color = intToColor((255 << 24) | newImage.getRGB(x, y));
-                Color mappedColor = colorMap.get(color);
+                Color color = intToColor(newImage.getRGB(x, y));
+                Color mappedColor = colorMap.get(new Color(color.getR(), color.getG(), color.getB(), 1));
                 if (mappedColor != null) {
                     color = new Color(mappedColor.getR(), mappedColor.getG(),
                             mappedColor.getB(), color.getA());
