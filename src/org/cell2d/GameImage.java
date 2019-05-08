@@ -113,7 +113,7 @@ class GameImage {
         }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                Color color = intToColor(newImage.getRGB(x, y));
+                Color color = intToColor((255 << 24) | newImage.getRGB(x, y));
                 Color mappedColor = colorMap.get(color);
                 if (mappedColor != null) {
                     color = new Color(mappedColor.getR(), mappedColor.getG(),
