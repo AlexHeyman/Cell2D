@@ -1,7 +1,7 @@
 package org.cell2d.space;
 
 /**
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 enum HitboxRole {
     LOCATOR, CENTER, OVERLAP, SOLID, COLLISION

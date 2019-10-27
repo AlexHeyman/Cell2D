@@ -9,7 +9,7 @@ import org.cell2d.CellVector;
  * are absolutely horizontal and vertical, respectively, but its angle of
  * rotation affects only any other Hitboxes that are relative to it. A
  * RectangleHitbox cannot have a negative width or height.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class RectangleHitbox extends Hitbox {
     

@@ -39,7 +39,7 @@ import org.cell2d.celick.Graphics;
  * <p>All operations on an AnimationInstance return the AnimationInstance itself
  * to allow operations to be easily strung together.</p>
  * @see GameState
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class AnimationInstance implements Drawable {
     

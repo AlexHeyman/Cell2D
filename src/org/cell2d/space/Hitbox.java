@@ -31,7 +31,7 @@ import org.cell2d.Frac;
  * solid Hitbox.</p>
  * @see SpaceObject
  * @see CompositeHitbox
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class Hitbox {
     

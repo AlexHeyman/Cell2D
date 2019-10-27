@@ -4,7 +4,7 @@ package org.cell2d.space;
  * <p>A CollisionResponse is a possible response that a MobileObject can have
  * to colliding with a solid surface.</p>
  * @see MobileObject
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public enum CollisionResponse {
     /**

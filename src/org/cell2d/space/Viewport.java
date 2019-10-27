@@ -28,7 +28,7 @@ import org.cell2d.Frac;
  * @see HUD
  * @param <T> The type of CellGame that uses this Viewport's SpaceStates
  * @param <U> The type of SpaceState that uses this Viewport
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     

@@ -8,7 +8,7 @@ import java.util.Objects;
  * values, all between 0 and 1: the intensities of red, green, and blue, plus an
  * alpha (opacity) value. An alpha of 0 is completely transparent, and an alpha
  * of 1 is completely opaque. Once created, Colors are immutable.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  * @author Kevin Glass
  */
 public class Color implements Serializable {

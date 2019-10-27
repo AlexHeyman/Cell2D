@@ -4,7 +4,7 @@ package org.cell2d.control;
  * <p>A ControllerControl is a Control that represents an input on a game
  * controller. The controller is specified by a number that ranges from 0 to
  * MAX_CONTROLLERS - 1 inclusive.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class ControllerControl extends Control {
     

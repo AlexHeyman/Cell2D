@@ -1,7 +1,7 @@
 package org.cell2d;
 
 /**
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 class MusicInstance {
     

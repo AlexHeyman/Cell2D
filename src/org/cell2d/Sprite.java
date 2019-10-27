@@ -19,7 +19,7 @@ import org.cell2d.celick.SlickException;
  * @see Filter
  * @see SpriteSheet
  * @see Animation
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class Sprite implements Animatable, Drawable {
     

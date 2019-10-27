@@ -12,7 +12,7 @@ package org.cell2d;
  * Finally, the Sound class has a global volume between 0 and 1 by which the
  * effective volumes of all newly played Sounds are scaled. The global volume is
  * 1 by default.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class Sound {
     

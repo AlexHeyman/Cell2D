@@ -82,7 +82,7 @@ import org.lwjgl.opengl.DisplayMode;
  * @see GameState
  * @see Control
  * @see Music
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class CellGame {
     

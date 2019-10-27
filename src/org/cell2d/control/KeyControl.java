@@ -9,7 +9,7 @@ import java.util.Objects;
  * is specified by an integer <i>key code</i> that is equal to one of the KEY_
  * constants of the KeyControl class. All other integers are invalid as key
  * codes.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class KeyControl extends Control {
     

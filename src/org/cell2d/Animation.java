@@ -26,7 +26,7 @@ import java.util.Arrays;
  * Sprite.BLANK, and thus no frame of an Animation may be null.</p>
  * @see Animatable
  * @see Sprite
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class Animation implements Animatable {
     

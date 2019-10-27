@@ -19,7 +19,7 @@ import org.cell2d.SafeIterator;
  * SpaceStates
  * @param <U> The type of SpaceState that uses this ThinkerObject's SpaceThinker
  * @param <V> The type of SpaceThinker that this ThinkerObject mimics
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class ThinkerObject<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends MobileObject {

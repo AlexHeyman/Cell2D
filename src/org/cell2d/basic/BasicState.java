@@ -9,7 +9,7 @@ import org.cell2d.GameState;
  * designed to be easily extended by types of GameStates that do not require
  * custom fields or methods to be automatically shared between themselves and
  * their SubThinkers or CellGames.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class BasicState extends GameState<CellGame,BasicState,BasicThinker> {
     

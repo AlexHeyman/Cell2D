@@ -9,7 +9,7 @@ package org.cell2d;
  * infinite. An Animatable object that is not an Animation has exactly one
  * frame, namely itself, with a duration of 0.</p>
  * @see Animation
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public interface Animatable {
     

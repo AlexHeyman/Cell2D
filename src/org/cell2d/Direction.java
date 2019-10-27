@@ -2,7 +2,7 @@ package org.cell2d;
 
 /**
  * <p>A Direction is one of the four orthogonal directions.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public enum Direction {
     /**

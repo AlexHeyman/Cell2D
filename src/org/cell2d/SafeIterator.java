@@ -8,7 +8,7 @@ import java.util.Iterator;
  * is active. Changes to the Collection will be delayed until after all of its
  * SafeIterators stop iterating over it.</p>
  * @param <E> The type of element that this SafeIterator returns
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public interface SafeIterator<E> extends Iterator<E> {
     

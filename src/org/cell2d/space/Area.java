@@ -14,7 +14,7 @@ import org.cell2d.CellGame;
  * @param <T> The type of CellGame that uses the SpaceStates that can load this
  * Area
  * @param <U> The type of SpaceState that can load this Area
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public interface Area<T extends CellGame, U extends SpaceState<T,U,?>> {
     

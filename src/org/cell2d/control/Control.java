@@ -9,7 +9,7 @@ import org.cell2d.Direction;
  * Control represents. All instances of subclasses of Control are equal if and
  * only if they represent the same input.</p>
  * @see org.cell2d.CellGame#bindControl(int, org.cell2d.control.Control)
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class Control {
     

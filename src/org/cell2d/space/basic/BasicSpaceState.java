@@ -10,7 +10,7 @@ import org.cell2d.space.SpaceState;
  * CellGame. It is designed to be easily extended by types of SpaceStates that
  * do not require custom fields or methods to be automatically shared between
  * themselves and their SpaceThinkers or CellGames.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class BasicSpaceState extends SpaceState<CellGame,BasicSpaceState,BasicSpaceThinker> {
     

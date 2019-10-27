@@ -54,7 +54,7 @@ import java.util.Set;
  * @param <T> The type of CellGame that uses this Thinker's GameStates
  * @param <U> The type of GameState that uses this Thinker
  * @param <V> The type of SubThinker that can be assigned to this Thinker
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class Thinker<T extends CellGame, U extends GameState<T,U,V>, V extends SubThinker<T,U,V>> {
     

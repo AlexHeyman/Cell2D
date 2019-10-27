@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
  * alpha value of 1 completely replaces the original image's RGB values, thus
  * turning the filtered image into a colored silhouette. The alpha values of the
  * original image's pixels are left unchanged in the filtered image.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class ColorFilter extends Filter {
     

@@ -36,7 +36,7 @@ import org.cell2d.celick.Graphics;
  * @param <U> The type of GameState that this GameState is for SubThinker
  * interaction purposes
  * @param <V> The type of SubThinker that can be assigned to this GameState
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class GameState<T extends CellGame,
         U extends GameState<T,U,V>, V extends SubThinker<T,U,V>> extends Thinker<T,U,V> {

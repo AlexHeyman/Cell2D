@@ -6,7 +6,7 @@ import java.util.Objects;
  * <p>A ControllerButtonControl is a ControllerControl that represents a button
  * on a game controller. The button is specified by a number that ranges from 0
  * to MAX_BUTTONS - 1 inclusive.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class ControllerButtonControl extends ControllerControl {
     

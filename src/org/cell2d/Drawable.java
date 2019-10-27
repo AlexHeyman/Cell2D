@@ -8,7 +8,7 @@ import org.cell2d.celick.Graphics;
  * on the image have x-coordinates that increase from left to right, as well as
  * y-coordinates that increase from top to bottom. The image has an origin point
  * somewhere on (or off) it around which it is flipped, rotated, and scaled.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public interface Drawable {
     

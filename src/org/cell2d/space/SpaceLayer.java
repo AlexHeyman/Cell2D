@@ -8,7 +8,7 @@ import org.cell2d.celick.Graphics;
  * intended to be used to display objects in the foreground or background of a
  * SpaceState's space.</p>
  * @see SpaceState#setLayer(int, org.cell2d.space.SpaceLayer)
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public interface SpaceLayer {
     

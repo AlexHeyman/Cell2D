@@ -13,7 +13,7 @@ import java.util.Map;
  * replaced with that of the key's value in the Map. The Map's values' alpha
  * values are irrelevant to the ColorMapFilter's behavior, and the alpha values
  * of the original image's pixels are left unchanged in the filtered image.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class ColorMapFilter extends Filter {
     

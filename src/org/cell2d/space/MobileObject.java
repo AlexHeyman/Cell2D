@@ -57,7 +57,7 @@ import org.cell2d.Direction;
  * manipulation of its position. These records are reset when the MobileObject
  * moves again, or when it is removed from the SpaceState whose space the
  * records reflect.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class MobileObject extends SpaceObject {
     

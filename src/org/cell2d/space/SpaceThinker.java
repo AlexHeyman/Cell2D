@@ -31,7 +31,7 @@ import org.cell2d.SubThinker;
  * @param <U> The type of SpaceState that uses this SpaceThinker
  * @param <V> The type of SpaceThinker that this SpaceThinker is for SpaceState
  * interaction purposes
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class SpaceThinker<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends SubThinker<T,U,V> {

@@ -11,7 +11,7 @@ import org.cell2d.celick.SlickException;
 import org.cell2d.celick.opengl.pbuffer.GraphicsFactory;
 
 /**
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 class GameImage {
     

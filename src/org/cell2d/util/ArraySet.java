@@ -13,7 +13,7 @@ import java.util.Set;
  * smallest number that the ArraySet's size will almost certainly never exceed.
  * @see java.util.ArrayList
  * @param <E> The type of elements in this ArraySet
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class ArraySet<E> implements Set<E> {
     

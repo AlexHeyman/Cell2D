@@ -5,7 +5,7 @@ import org.cell2d.CellVector;
 /**
  * <p>A CircleHitbox is a circular Hitbox with its origin at its center. A
  * CircleHitbox's radius cannot be negative.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class CircleHitbox extends Hitbox {
     

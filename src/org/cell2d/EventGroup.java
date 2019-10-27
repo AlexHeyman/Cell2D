@@ -21,7 +21,7 @@ import java.util.TreeSet;
  * @param <T> The type of CellGame that uses the GameStates that can involve
  * this EventGroup's Events
  * @param <U> The type of GameState that can involve this EventGroup's Events
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class EventGroup<T extends CellGame, U extends GameState<T,U,?>> {
     

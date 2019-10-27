@@ -68,7 +68,7 @@ import org.cell2d.celick.Graphics;
  * @see SpaceState#addObject(org.cell2d.space.SpaceObject)
  * @see #setAppearance(org.cell2d.Drawable)
  * @see Area
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class SpaceObject {
     

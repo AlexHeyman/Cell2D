@@ -7,7 +7,7 @@ import java.util.Objects;
  * The button is specified by an integer <i>button code</i> that is equal to one
  * of the MOUSE_ constants of the MouseButtonControl class. All other integers
  * are invalid as button codes.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class MouseButtonControl extends Control {
     

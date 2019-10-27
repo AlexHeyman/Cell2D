@@ -33,7 +33,7 @@ import java.util.Iterator;
  * @param <U> The type of GameState that uses this SubThinker
  * @param <V> The type of SubThinker that this SubThinker is for GameState
  * interaction purposes
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class SubThinker<T extends CellGame,
         U extends GameState<T,U,V>, V extends SubThinker<T,U,V>> extends Thinker<T,U,V> {

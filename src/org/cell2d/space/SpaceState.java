@@ -87,7 +87,7 @@ import org.cell2d.celick.Graphics;
  * @param <U> The type of SpaceState that this SpaceState is for SpaceThinker
  * interaction purposes
  * @param <V> The type of SpaceThinker that this SpaceState uses
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class SpaceState<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends GameState<T,U,V> {

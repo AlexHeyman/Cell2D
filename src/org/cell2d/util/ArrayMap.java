@@ -16,7 +16,7 @@ import java.util.Set;
  * @param <K> The type of keys maintained by this ArrayMap
  * @param <V> The type of mapped values
  * @see java.util.ArrayList
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class ArrayMap<K,V> implements Map<K,V> {
     

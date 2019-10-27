@@ -8,7 +8,7 @@ import org.cell2d.space.ThinkerObject;
  * BasicSpaceThinker, which has no special capabilities. It does not
  * automatically share any custom fields or methods between itself and its
  * SpaceStates or their CellGames.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class BasicThinkerObject extends ThinkerObject<CellGame,BasicSpaceState,BasicSpaceThinker> {
     

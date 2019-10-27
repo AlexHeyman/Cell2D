@@ -13,7 +13,7 @@ import org.cell2d.CellVector;
  * crosses itself. Both relative and absolute vertices are relative to their
  * PolygonHitbox's position. A PolygonHitbox with no vertices is a point at its
  * absolute position that cannot overlap other Hitboxes.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class PolygonHitbox extends Hitbox {
     

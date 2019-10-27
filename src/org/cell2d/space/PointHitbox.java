@@ -5,7 +5,7 @@ import org.cell2d.CellVector;
 /**
  * A PointHitbox is a Hitbox that consists only of the point that is its
  * absolute position.
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class PointHitbox extends Hitbox {
     

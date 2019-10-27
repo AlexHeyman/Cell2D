@@ -18,7 +18,7 @@ package org.cell2d;
  * effective volumes of all currently playing Music tracks are scaled. The
  * global volume is 1 by default.</p>
  * @see CellGame
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class Music {
     

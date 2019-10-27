@@ -5,7 +5,7 @@ package org.cell2d.space;
  * which to draw SpaceObjects with the same draw priority over one another.</p>
  * @see SpaceState
  * @see SpaceObject
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public enum DrawMode {
     /**

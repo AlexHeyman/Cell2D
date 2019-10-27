@@ -9,7 +9,7 @@ import org.cell2d.celick.Graphics;
  * displaying physical objects in it.</p>
  * @see Viewport#setHUD(org.cell2d.space.HUD)
  * @see SpaceState#setHUD(org.cell2d.space.HUD)
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public interface HUD {
     

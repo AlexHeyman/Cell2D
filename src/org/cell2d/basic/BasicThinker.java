@@ -8,7 +8,7 @@ import org.cell2d.SubThinker;
  * have no special capabilities, and treats their CellGames as basic CellGames.
  * It does not automatically share any custom fields or methods between itself
  * and its GameStates or their CellGames.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class BasicThinker extends SubThinker<CellGame,BasicState,BasicThinker> {
     

@@ -14,7 +14,7 @@ import org.cell2d.space.SpaceObject;
  * right and normalize them to be between 0 and 360. All operations on a
  * CellVector return the CellVector itself to allow operations to be easily
  * strung together.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class CellVector {
     

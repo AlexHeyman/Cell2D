@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
  * a Graphics context using that Filter.</p>
  * @see Sprite
  * @see SpriteSheet
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public abstract class Filter {
     

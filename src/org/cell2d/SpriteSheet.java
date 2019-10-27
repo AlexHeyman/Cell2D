@@ -19,7 +19,7 @@ import org.cell2d.celick.SlickException;
  * part of a SpriteSheet will also load its SpriteSheet.</p>
  * @see Sprite
  * @see Filter
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class SpriteSheet {
     

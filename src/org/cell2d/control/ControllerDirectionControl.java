@@ -13,7 +13,7 @@ import org.cell2d.Direction;
  * Direction. The axes can be in a pair of adjacent Directions, such as up and
  * right, at the same time.</p>
  * @see org.cell2d.Direction
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class ControllerDirectionControl extends ControllerControl {
     

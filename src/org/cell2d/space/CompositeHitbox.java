@@ -13,7 +13,7 @@ import org.cell2d.CellVector;
  * CompositeHitbox. Only one Hitbox may be assigned to a given CompositeHitbox
  * with a given ID at once. A CompositeHitbox with no component Hitboxes is a
  * point at its absolute position that cannot overlap other Hitboxes.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public class CompositeHitbox extends Hitbox {
     

@@ -13,7 +13,7 @@ import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 
 /**
- * @author Andrew Heyman
+ * @author Alex Heyman
  * @author Kevin Glass
  * @author Nathan Sweet <misc@n4te.com>
  */

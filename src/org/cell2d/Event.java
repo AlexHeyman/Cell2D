@@ -9,7 +9,7 @@ package org.cell2d;
  * @param <T> The type of CellGame that uses the GameStates that can involve
  * this Event
  * @param <U> The type of GameState that can involve this Event
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public interface Event<T extends CellGame, U extends GameState<T,U,?>> {
     

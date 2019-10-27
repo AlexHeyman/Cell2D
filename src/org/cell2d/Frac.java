@@ -13,7 +13,7 @@ import java.math.BigInteger;
  * Fracunit-scale numbers may be correctly added and subtracted with the + and -
  * operators, but other operations require the use of their respective methods
  * in the Frac class.</p>
- * @author Andrew Heyman
+ * @author Alex Heyman
  */
 public final class Frac {
     
