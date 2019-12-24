@@ -24,6 +24,22 @@ import org.lwjgl.BufferUtils;
  * @author kevin
  */
 public class Graphics {
+        
+        /**
+	 * Translate an unsigned int into a signed integer
+	 * 
+	 * @param b
+	 *            The byte to convert
+	 * @return The integer value represented by the byte
+	 */
+	public static int translate(byte b) {
+		if (b < 0) {
+			return 256 + b;
+		}
+
+		return b;
+	}
+        
 	/** The renderer to use for all GL operations */
 	protected static SGL GL = Renderer.get();
 	/** The renderer to use line strips */
@@ -1483,21 +1499,6 @@ public class Graphics {
 	}
 
 	/**
-	 * Translate an unsigned int into a signed integer
-	 * 
-	 * @param b
-	 *            The byte to convert
-	 * @return The integer value represented by the byte
-	 */
-	private int translate(byte b) {
-		if (b < 0) {
-			return 256 + b;
-		}
-
-		return b;
-	}
-
-	/**
 	 * Get the colour of a single pixel in this graphics context
 	 * 
 	 * @param x
@@ -1508,7 +1509,7 @@ public class Graphics {
 	 */
 	public Color getPixel(int x, int y) {
 		predraw();
-		GL.glReadPixels(x, screenHeight - y, 1, 1, SGL.GL_RGBA,
+		GL.glReadPixels(x, y, 1, 1, SGL.GL_RGBA,
 				SGL.GL_UNSIGNED_BYTE, readBuffer);
 		postdraw();
 
@@ -1534,7 +1535,7 @@ public class Graphics {
 		}
 		
 		predraw();	
-		GL.glReadPixels(x, screenHeight - y - height, width, height, SGL.GL_RGBA,
+		GL.glReadPixels(x, y, width, height, SGL.GL_RGBA,
 				SGL.GL_UNSIGNED_BYTE, target);
 		postdraw();
 	}

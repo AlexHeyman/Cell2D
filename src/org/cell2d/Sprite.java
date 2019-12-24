@@ -1,6 +1,5 @@
 package org.cell2d;
 
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +38,6 @@ public class Sprite implements Animatable, Drawable {
     private final Set<Filter> filters;
     private final HashMap<Filter,Image[]> images = new HashMap<>();
     private Image[] defaultImages = null;
-    private BufferedImage bufferedImage = null;
     private final int originX, originY;
     private int width = 0;
     private int height = 0;
@@ -136,13 +134,15 @@ public class Sprite implements Animatable, Drawable {
     /**
      * Constructs a Sprite from a Celick Image. This Sprite's origin will be the
      * Image's center of rotation with its coordinates rounded to the nearest
-     * integer. This Sprite will be considered to always be loaded and cannot be
-     * unloaded. It will also be considered non-copyable, which means that no
-     * new Sprites can be created from it. No Filters will have an effect on
-     * this Sprite when applied to it with draw().
+     * integer. Once created, this Sprite will be independent of the Image from
+     * which it is created. This Sprite will be considered to be loaded from the
+     * start, and once unloaded, it cannot be reloaded.
      * @param image The Image to create this Sprite from
+     * @param filters The Set of Filters that should have an effect on this
+     * Sprite when applied to it with draw(), or null if no Filters should have
+     * an effect
      */
-    public Sprite(Image image) {
+    public Sprite(Image image, Set<Filter> filters) {
         blank = false;
         loaded = true;
         basedOn = null;
@@ -150,17 +150,24 @@ public class Sprite implements Animatable, Drawable {
         spriteSheet = null;
         path = null;
         transColor = null;
-        filters = null;
+        this.filters = (filters == null ? null : new HashSet<>(filters));
         originX = (int)Math.round(image.getCenterOfRotationX());
         originY = (int)Math.round(image.getCenterOfRotationY());
-        loadFilter(null, image.copy(), null);
+        Image spriteImage;
+        try {
+            spriteImage = new Image(image.getWidth(), image.getHeight());
+            spriteImage.getGraphics().drawImage(image, 0, 0);
+        } catch (SlickException e) {
+            throw new RuntimeException(e);
+        }
+        loadFilter(null, spriteImage);
     }
     
     /**
      * Constructs a Sprite from an existing Sprite with a Filter applied to it.
-     * The existing Sprite must have been created as an individual Sprite from
-     * an image file. The new Sprite will have the same Set of Filters that are
-     * usable with draw() as the existing Sprite.
+     * The existing Sprite must have been created as an individual Sprite. The
+     * new Sprite will have the same Set of Filters that are usable with draw()
+     * as the existing Sprite.
      * @param sprite The Sprite to create this Sprite from
      * @param filter The Filter to apply to the existing Sprite
      * @param load Whether this Sprite should load upon creation
@@ -168,8 +175,6 @@ public class Sprite implements Animatable, Drawable {
     public Sprite(Sprite sprite, Filter filter, boolean load) {
         if (sprite.spriteSheet != null) {
             throw new RuntimeException("Attempted to create a Sprite from part of a SpriteSheet");
-        } else if (sprite.bufferedImage == null) {
-            throw new RuntimeException("Attempted to create a Sprite from a non-copyable Sprite");
         }
         blank = false;
         loaded = false;
@@ -206,19 +211,23 @@ public class Sprite implements Animatable, Drawable {
         }
         loaded = true;
         if (spriteSheet == null) {
-            GameImage gameImage;
-            if (basedOn == null) {
-                gameImage = GameImage.getTransparentImage(path, transColor);
-            } else {
+            Image image;
+            if (path != null) {
+                try {
+                    image = new Image(path, false, Image.FILTER_NEAREST, transColor);
+                } catch (SlickException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (basedOn != null) {
                 basedOn.load();
-                gameImage = basedFilter.getFilteredImage(basedOn.bufferedImage);
+                image = basedFilter.getFilteredImage(basedOn.defaultImages[0]);
+            } else {
+                throw new RuntimeException("Attempted to reload a Sprite that cannot be reloaded");
             }
-            bufferedImage = gameImage.getBufferedImage();
-            loadFilter(null, gameImage.getImage(), bufferedImage);
+            loadFilter(null, image);
             if (filters != null) {
                 for (Filter filter : filters) {
-                    GameImage filteredImage = filter.getFilteredImage(bufferedImage);
-                    loadFilter(filter, filteredImage.getImage(), filteredImage.getBufferedImage());   
+                    loadFilter(filter, filter.getFilteredImage(image));   
                 }
             }
         } else {
@@ -227,7 +236,7 @@ public class Sprite implements Animatable, Drawable {
         return true;
     }
     
-    final void loadFilter(Filter filter, Image image, BufferedImage bufferedImage) {
+    final void loadFilter(Filter filter, Image image) {
         image.getWidth(); //Prompt the image to initialize itself if it hasn't already
         Image[] imageArray = new Image[4];
         imageArray[0] = image;
@@ -259,15 +268,15 @@ public class Sprite implements Animatable, Drawable {
             return false;
         } else if (spriteSheet != null) {
             spriteSheet.unloadSprite();
-        } else if (bufferedImage != null) {
-            for (Image[] imageArray : images.values()) {
-                try {
+        } else {
+            try {
+                for (Image[] imageArray : images.values()) {
                     imageArray[0].destroy();
-                } catch (SlickException e) {}
+                }
+            } catch (SlickException e) {
+                throw new RuntimeException(e);
             }
             clear();
-        } else {
-            return false;
         }
         loaded = false;
         return true;
@@ -276,7 +285,6 @@ public class Sprite implements Animatable, Drawable {
     final void clear() {
         images.clear();
         defaultImages = null;
-        bufferedImage = null;
         width = 0;
         height = 0;
         right = 0;

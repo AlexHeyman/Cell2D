@@ -1,6 +1,5 @@
 package org.cell2d;
 
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,7 +29,6 @@ public class SpriteSheet {
     private final Color transColor;
     private final Set<Filter> filters;
     private final HashMap<Filter,Image> images = new HashMap<>();
-    private BufferedImage bufferedImage = null;
     private final int spriteWidth, spriteHeight, spriteSpacing, originX, originY;
     private int width = 0;
     private int height = 0;
@@ -170,25 +168,27 @@ public class SpriteSheet {
     public final boolean load() {
         if (!loaded) {
             loaded = true;
-            GameImage gameImage;
-            if (basedOn == null) {
-                gameImage = GameImage.getTransparentImage(path, transColor);
+            Image image;
+            if (path != null) {
+                try {
+                    image = new Image(path, false, Image.FILTER_NEAREST, transColor);
+                } catch (SlickException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 basedOn.load();
-                gameImage = basedFilter.getFilteredImage(basedOn.bufferedImage);
+                image = basedFilter.getFilteredImage(basedOn.images.get(null));
             }
-            bufferedImage = gameImage.getBufferedImage();
             for (Sprite[] column : sprites) {
                 for (Sprite sprite : column) {
                     sprite.loaded = true;
                 }
             }
             numSpritesLoaded = width*height;
-            loadFilter(null, gameImage.getImage());
+            loadFilter(null, image);
             if (filters != null) {
                 for (Filter filter : filters) {
-                    GameImage filteredImage = filter.getFilteredImage(bufferedImage);
-                    loadFilter(filter, filteredImage.getImage());
+                    loadFilter(filter, filter.getFilteredImage(image));
                 }
             }
             return true;
@@ -202,7 +202,7 @@ public class SpriteSheet {
         for (int x = 0; x < sprites.length; x++) {
             Sprite[] column = sprites[x];
             for (int y = 0; y < column.length; y++) {
-                column[y].loadFilter(filter, spriteSheet.getSubImage(x, y), null);
+                column[y].loadFilter(filter, spriteSheet.getSubImage(x, y));
             }
         }
         images.put(filter, image);
@@ -243,13 +243,14 @@ public class SpriteSheet {
     }
     
     private void destroyAndClear() {
-        for (Image image : images.values()) {
-            try {
+        try {
+            for (Image image : images.values()) {
                 image.destroy();
-            } catch (SlickException e) {}
+            }
+        } catch (SlickException e) {
+            throw new RuntimeException(e);
         }
         images.clear();
-        bufferedImage = null;
         width = 0;
         height = 0;
     }

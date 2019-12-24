@@ -1,9 +1,11 @@
 package org.cell2d;
 
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.cell2d.celick.Graphics;
+import org.cell2d.celick.Image;
+import org.cell2d.celick.SlickException;
 
 /**
  * <p>A ColorMapFilter is a Filter that uses a Map&lt;Color,Color&gt; to replace
@@ -36,8 +38,33 @@ public class ColorMapFilter extends Filter {
     }
     
     @Override
-    final GameImage getFilteredImage(BufferedImage bufferedImage) {
-        return GameImage.getRecoloredImage(bufferedImage, colorMap);
+    final Image getFilteredImage(Image image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        Image newImage;
+        Graphics newGraphics;
+        try {
+            newImage = new Image(width, height, image.getFilter());
+            newGraphics = newImage.getGraphics();
+        } catch (SlickException e) {
+            throw new RuntimeException(e);
+        }
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                Color pixelColor = image.getColor(x, y);
+                Color mappedColor = colorMap.get(new Color(
+                        pixelColor.getR(), pixelColor.getG(), pixelColor.getB(), 1));
+                if (mappedColor != null) {
+                    pixelColor = new Color(mappedColor.getR(), mappedColor.getG(),
+                            mappedColor.getB(), pixelColor.getA());
+                }
+                newGraphics.setColor(pixelColor);
+                newGraphics.fillRect(x, y, 1, 1);
+            }
+        }
+        image.flushPixelData();
+        newGraphics.flush();
+        return newImage;
     }
     
 }

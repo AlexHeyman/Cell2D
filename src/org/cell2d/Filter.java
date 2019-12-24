@@ -1,6 +1,6 @@
 package org.cell2d;
 
-import java.awt.image.BufferedImage;
+import org.cell2d.celick.Image;
 
 /**
  * <p>A Filter represents an operation that transforms an image, such as
@@ -15,6 +15,6 @@ import java.awt.image.BufferedImage;
  */
 public abstract class Filter {
     
-    abstract GameImage getFilteredImage(BufferedImage bufferedImage);
+    abstract Image getFilteredImage(Image image);
     
 }

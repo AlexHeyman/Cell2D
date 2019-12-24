@@ -3,6 +3,7 @@ package org.cell2d.celick;
 import java.io.IOException;
 import java.io.InputStream;
 import org.cell2d.Color;
+import org.cell2d.celick.Graphics;
 import org.cell2d.celick.opengl.ImageData;
 import org.cell2d.celick.opengl.InternalTextureLoader;
 import org.cell2d.celick.opengl.Texture;
@@ -36,7 +37,7 @@ public class Image implements Renderable {
 	public static final int FILTER_LINEAR = 1;
 	/** Use Nearest Filtering */
 	public static final int FILTER_NEAREST = 2;
-	
+        
 	/** The OpenGL texture for this image */
 	protected Texture texture;
 	/** The width of the image */
@@ -1302,21 +1303,7 @@ public class Image implements Renderable {
 	public void setTexture(Texture texture) {
 		this.texture = texture;
 		reinit();
-	}
-
-	/**
-	 * Translate an unsigned int into a signed integer
-	 * 
-	 * @param b The byte to convert
-	 * @return The integer value represented by the byte
-	 */
-	private int translate(byte b) {
-		if (b < 0) {
-			return 256 + b;
-		}
-		
-		return b;
-	}
+        }
 	
 	/**
 	 * Get the colour of a pixel at a specified location in this image
@@ -1349,11 +1336,14 @@ public class Image implements Renderable {
 		offset *= texture.hasAlpha() ? 4 : 3;
 		
 		if (texture.hasAlpha()) {
-			return new Color(translate(pixelData[offset]),translate(pixelData[offset+1]),
-							 translate(pixelData[offset+2]),translate(pixelData[offset+3]));
+			return new Color(Graphics.translate(pixelData[offset]),
+                                Graphics.translate(pixelData[offset+1]),
+                                Graphics.translate(pixelData[offset+2]),
+                                Graphics.translate(pixelData[offset+3]));
 		} else {
-			return new Color(translate(pixelData[offset]),translate(pixelData[offset+1]),
-					 	     translate(pixelData[offset+2]));
+			return new Color(Graphics.translate(pixelData[offset]),
+                                Graphics.translate(pixelData[offset+1]),
+                                Graphics.translate(pixelData[offset+2]));
 		}
 	}
 	
@@ -1383,7 +1373,7 @@ public class Image implements Renderable {
 	}
 	
 	/**
-	 * Flush the current pixel data to force a re-read next update
+	 * Flush the current pixel data
 	 */
 	public void flushPixelData() {
 		pixelData = null;
