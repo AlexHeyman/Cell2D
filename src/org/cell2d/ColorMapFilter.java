@@ -30,6 +30,17 @@ public class ColorMapFilter extends Filter {
     }
     
     /**
+     * Constructs a ColorMapFilter with a Map that maps the specified key Color
+     * to the specified value Color.
+     * @param key The key Color
+     * @param value The value Color
+     */
+    public ColorMapFilter(Color key, Color value) {
+        colorMap = new HashMap<>();
+        colorMap.put(key, value);
+    }
+    
+    /**
      * Returns an unmodifiable view of the Map that this ColorMapFilter uses.
      * @return The Map that this ColorMapFilter uses
      */
