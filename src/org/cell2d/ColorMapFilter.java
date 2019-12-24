@@ -30,6 +30,17 @@ public class ColorMapFilter extends Filter {
     }
     
     /**
+     * Constructs a ColorMapFilter with a Map that maps the specified key Color
+     * to the specified value Color.
+     * @param key The key Color
+     * @param value The value Color
+     */
+    public ColorMapFilter(Color key, Color value) {
+        colorMap = new HashMap<>();
+        colorMap.put(key, value);
+    }
+    
+    /**
      * Returns an unmodifiable view of the Map that this ColorMapFilter uses.
      * @return The Map that this ColorMapFilter uses
      */
@@ -53,7 +64,7 @@ public class ColorMapFilter extends Filter {
             for (int y = 0; y < height; y++) {
                 Color pixelColor = image.getColor(x, y);
                 Color mappedColor = colorMap.get(new Color(
-                        pixelColor.getR(), pixelColor.getG(), pixelColor.getB(), 1));
+                        pixelColor.getR(), pixelColor.getG(), pixelColor.getB(), 1f));
                 if (mappedColor != null) {
                     pixelColor = new Color(mappedColor.getR(), mappedColor.getG(),
                             mappedColor.getB(), pixelColor.getA());

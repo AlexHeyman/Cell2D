@@ -3,7 +3,6 @@ package org.cell2d.celick;
 import java.io.IOException;
 import java.io.InputStream;
 import org.cell2d.Color;
-import org.cell2d.celick.Graphics;
 import org.cell2d.celick.opengl.ImageData;
 import org.cell2d.celick.opengl.InternalTextureLoader;
 import org.cell2d.celick.opengl.Texture;
