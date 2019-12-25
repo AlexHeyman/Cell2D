@@ -165,9 +165,9 @@ public class Sprite implements Animatable, Drawable {
     
     /**
      * Constructs a Sprite from an existing Sprite with a Filter applied to it.
-     * The existing Sprite must have been created as an individual Sprite. The
-     * new Sprite will have the same Set of Filters that are usable with draw()
-     * as the existing Sprite.
+     * The existing Sprite must not have been created as part of a SpriteSheet.
+     * The new Sprite will have the same Set of Filters that are usable with
+     * draw() as the existing Sprite.
      * @param sprite The Sprite to create this Sprite from
      * @param filter The Filter to apply to the existing Sprite
      * @param load Whether this Sprite should load upon creation
