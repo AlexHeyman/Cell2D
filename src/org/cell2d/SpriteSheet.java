@@ -14,8 +14,9 @@ import org.cell2d.celick.SlickException;
  * topmost row and increases below. Like Sprites, Sounds, and Music tracks,
  * SpriteSheets can be manually loaded and unloaded into and out of memory.
  * Loading may take a moment, but a SpriteSheet's Sprites cannot be loaded and
- * drawn if the SpriteSheet itself is not loaded. Thus, loading a Sprite that is
- * part of a SpriteSheet will also load its SpriteSheet.</p>
+ * drawn if the SpriteSheet itself is not loaded. Loading a SpriteSheet will
+ * also load all of its Sprites, and loading a Sprite that is part of a
+ * SpriteSheet will also load that SpriteSheet.</p>
  * @see Sprite
  * @see Filter
  * @author Alex Heyman
@@ -44,8 +45,10 @@ public class SpriteSheet {
      * @param spriteHeight The height in pixels of each Sprite
      * @param spriteSpacing The horizontal and vertical spacing in pixels
      * between Sprites
-     * @param originX The x-coordinate in pixels on each Sprite of its origin
-     * @param originY The y-coordinate in pixels on each Sprite of its origin
+     * @param originX The x-coordinate in pixels on each Sprite of that Sprite's
+     * origin
+     * @param originY The y-coordinate in pixels on each Sprite of that Sprite's
+     * origin
      * @param filters The Set of Filters that will have an effect on this
      * SpriteSheet's Sprites when applied to them with draw(), or null if no
      * Filters should have an effect
@@ -66,8 +69,10 @@ public class SpriteSheet {
      * @param spriteHeight The height in pixels of each Sprite
      * @param spriteSpacing The horizontal and vertical spacing in pixels
      * between Sprites
-     * @param originX The x-coordinate in pixels on each Sprite of its origin
-     * @param originY The y-coordinate in pixels on each Sprite of its origin
+     * @param originX The x-coordinate in pixels on each Sprite of that Sprite's
+     * origin
+     * @param originY The y-coordinate in pixels on each Sprite of that Sprite's
+     * origin
      * @param transColor The transparent color of this SpriteSheet's Sprites, or
      * null if there should be none
      * @param filters The Set of Filters that will have an effect on this
@@ -91,8 +96,10 @@ public class SpriteSheet {
      * @param spriteHeight The height in pixels of each Sprite
      * @param spriteSpacing The horizontal and vertical spacing in pixels
      * between Sprites
-     * @param originX The x-coordinate in pixels on each Sprite of its origin
-     * @param originY The y-coordinate in pixels on each Sprite of its origin
+     * @param originX The x-coordinate in pixels on each Sprite of that Sprite's
+     * origin
+     * @param originY The y-coordinate in pixels on each Sprite of that Sprite's
+     * origin
      * @param transR The red value (0-255) of this SpriteSheet's Sprites'
      * transparent color
      * @param transG The green value (0-255) of this SpriteSheet's Sprites'
@@ -267,9 +274,9 @@ public class SpriteSheet {
     
     /**
      * Returns the x-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of its origin.
+     * of that Sprite's origin.
      * @return The x-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of its origin
+     * of that Sprite's origin
      */
     public final int getOriginX() {
         return originX;
@@ -277,9 +284,9 @@ public class SpriteSheet {
     
     /**
      * Returns the y-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of its origin.
+     * of that Sprite's origin.
      * @return The y-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of its origin
+     * of that Sprite's origin
      */
     public final int getOriginY() {
         return originY;
@@ -302,7 +309,7 @@ public class SpriteSheet {
     }
     
     /**
-     * Returns the Sprite at the specified coordinates.
+     * Returns this SpriteSheet's Sprite at the specified coordinates.
      * @param x The x-coordinate in Sprites of the Sprite
      * @param y The y-coordinate in Sprites of the Sprite
      * @return The Sprite at the specified coordinates
