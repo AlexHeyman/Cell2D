@@ -1504,7 +1504,7 @@ public abstract class SpaceState<T extends CellGame,
      * @param hitbox The Hitbox to check for overlapping
      * @param cls The Class object that represents the SpaceObject subclass
      * @return Whether there are any SpaceObjects of the specified class that
-     * overlap the specified Hitbox.
+     * overlap the specified Hitbox
      */
     public final <O extends SpaceObject> boolean isOverlappingObject(Hitbox hitbox, Class<O> cls) {
         return overlappingObject(hitbox, cls) != null;
