@@ -62,10 +62,10 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
-        roundX1 = Frac.toInt(x1);
-        roundY1 = Frac.toInt(y1);
-        roundX2 = Frac.toInt(x2);
-        roundY2 = Frac.toInt(y2);
+        roundX1 = Frac.intRound(x1);
+        roundY1 = Frac.intRound(y1);
+        roundX2 = Frac.intRound(x2);
+        roundY2 = Frac.intRound(y2);
         updateXData();
         updateYData();
     }
@@ -159,7 +159,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     public final boolean setX1(long x1) {
         if (x1 <= x2) {
             this.x1 = x1;
-            roundX1 = Frac.toInt(x1);
+            roundX1 = Frac.intRound(x1);
             updateXData();
             return true;
         }
@@ -185,7 +185,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     public final boolean setY1(long y1) {
         if (y1 <= y2) {
             this.y1 = y1;
-            roundY1 = Frac.toInt(y1);
+            roundY1 = Frac.intRound(y1);
             updateYData();
             return true;
         }
@@ -211,7 +211,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     public final boolean setX2(long x2) {
         if (x1 <= x2) {
             this.x2 = x2;
-            roundX2 = Frac.toInt(x2);
+            roundX2 = Frac.intRound(x2);
             updateXData();
             return true;
         }
@@ -238,7 +238,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
     public final boolean setY2(long y2) {
         if (y1 <= y2) {
             this.y2 = y2;
-            roundY2 = Frac.toInt(y2);
+            roundY2 = Frac.intRound(y2);
             updateYData();
             return true;
         }

@@ -42,18 +42,6 @@ public final class Frac {
     }
     
     /**
-     * Returns the equivalent of the specified fracunit-scale number, rounded to
-     * the nearest fracunit, as an <code>int</code>.
-     * @param a The fracunit-scale number to be rounded and converted to an
-     * <code>int</code>
-     * @return The equivalent of the specified fracunit-scale number, rounded to
-     * the nearest fracunit, as an <code>int</code>
-     */
-    public static int toInt(long a) {
-        return (int)(round(a) >> BITS);
-    }
-    
-    /**
      * Returns the equivalent of the specified fracunit-scale number as a <code>
      * double</code>.
      * @param a The fracunit-scale number to be converted to a <code>double
@@ -102,6 +90,18 @@ public final class Frac {
     public static long round(long a) {
         long diff = a & (UNIT - 1);
         return (diff < UNIT/2 ? a - diff : a + UNIT - diff);
+    }
+    
+    /**
+     * Returns the equivalent of the specified fracunit-scale number, rounded to
+     * the nearest fracunit, as an <code>int</code>.
+     * @param a The fracunit-scale number to be rounded and converted to an
+     * <code>int</code>
+     * @return The equivalent of the specified fracunit-scale number, rounded to
+     * the nearest fracunit, as an <code>int</code>
+     */
+    public static int intRound(long a) {
+        return (int)(round(a) >> BITS);
     }
     
     /**
