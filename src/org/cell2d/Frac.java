@@ -11,8 +11,10 @@ import java.math.BigInteger;
  * 4294967296. In other words, fracunit arithmetic is fixed-point number
  * arithmetic in which numbers have 32 bits after the decimal point.
  * Fracunit-scale numbers may be correctly added and subtracted with the + and -
- * operators, but other operations require the use of their respective methods
- * in the Frac class.</p>
+ * operators, and they may be correctly multiplied and divided by
+ * non-fracunit-scale numbers with the * and / operators. However, other
+ * operations, such as multiplying two fracunit-scale numbers, require the use
+ * of dedicated methods in the Frac class.</p>
  * @author Alex Heyman
  */
 public final class Frac {
