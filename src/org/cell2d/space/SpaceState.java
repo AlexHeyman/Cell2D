@@ -92,13 +92,13 @@ import org.cell2d.celick.Graphics;
 public abstract class SpaceState<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends GameState<T,U,V> {
     
-    private Comparator<MobileObject> movementPriorityComparator = (object1, object2) -> {
+    private static final Comparator<MobileObject> movementPriorityComparator = (object1, object2) -> {
         int priorityDiff = object2.movementPriority - object1.movementPriority;
         return (priorityDiff == 0 ?
                 System.identityHashCode(object1) - System.identityHashCode(object2) : priorityDiff);
     };
     
-    private Comparator<MoveEvent> moveComparator = (event1, event2) -> {
+    private static final Comparator<MoveEvent> moveComparator = (event1, event2) -> {
         long metricDiff = event1.metric - event2.metric;
         if (metricDiff == 0) {
             int typeDiff = event1.type - event2.type;
@@ -108,36 +108,40 @@ public abstract class SpaceState<T extends CellGame,
         return (int)Math.signum(metricDiff);        
     };
     
-    private Comparator<Hitbox> drawPriorityComparator = (hitbox1, hitbox2) -> {
+    private static final Comparator<Hitbox> drawPriorityComparator = (hitbox1, hitbox2) -> {
         int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
         return (priorityDiff == 0 ?
                 System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2) : priorityDiff);
     };
     
-    private Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawPriorityIteratorComparator = (pair1, pair2) -> {
+    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> flatModeComparator = (pair1, pair2) -> {
         return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
     };
     
-    private Comparator<Hitbox> overModeComparator = (hitbox1, hitbox2) -> {
+    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> overModeComparator = (pair1, pair2) -> {
+        Hitbox hitbox1 = pair1.getKey();
+        Hitbox hitbox2 = pair2.getKey();
         int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
         if (priorityDiff == 0) {
-            long yDiff = hitbox1.getRelY() - hitbox2.getRelY();
+            long yDiff = hitbox1.getAbsY() - hitbox2.getAbsY();
             return (yDiff == 0 ?
                     System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
                     : (int)Math.signum(yDiff));
         }
-        return priorityDiff;        
+        return priorityDiff;
     };
     
-    private Comparator<Hitbox> underModeComparator = (hitbox1, hitbox2) -> {
+    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> underModeComparator = (pair1, pair2) -> {
+        Hitbox hitbox1 = pair1.getKey();
+        Hitbox hitbox2 = pair2.getKey();
         int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
         if (priorityDiff == 0) {
-            long yDiff = hitbox2.getRelY() - hitbox1.getRelY();
+            long yDiff = hitbox2.getAbsY() - hitbox1.getAbsY();
             return (yDiff == 0 ?
                     System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2)
                     : (int)Math.signum(yDiff));
         }
-        return priorityDiff;        
+        return priorityDiff;
     };
     
     private final EventGroup<T,U> beforeMovementEvents = new EventGroup<>();
@@ -155,6 +159,7 @@ public abstract class SpaceState<T extends CellGame,
     private int cellTop = 0;
     private int cellBottom = 0;
     private DrawMode drawMode;
+    private Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawComparator;
     private final Map<Integer,Viewport<T,U>> viewports = new HashMap<>();
     private HUD hud = null;
     private final SortedMap<Integer,SpaceLayer> spaceLayers = new TreeMap<>();
@@ -213,15 +218,10 @@ public abstract class SpaceState<T extends CellGame,
             right = left + cellWidth;
             top = y*cellHeight;
             bottom = top + cellHeight;
-            initializeLocatorHitboxes();
+            hitboxes.put(HitboxRole.LOCATOR, new TreeSet<>(drawPriorityComparator));
             for (HitboxRole role : EnumSet.complementOf(EnumSet.of(HitboxRole.LOCATOR))) {
                 hitboxes.put(role, new HashSet<>());
             }
-        }
-        
-        private void initializeLocatorHitboxes() {
-            hitboxes.put(HitboxRole.LOCATOR, (drawMode == DrawMode.FLAT ?
-                    new TreeSet<>(drawPriorityComparator) : new HashSet<>()));
         }
         
     }
@@ -255,8 +255,9 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     private int[] getCellRangeInclusive(long x1, long y1, long x2, long y2) {
-        int[] cellRange = {(int)Math.ceil(x1/cellWidth) - 1, (int)Math.ceil(y1/cellHeight) - 1,
-            (int)Math.floor(x2/cellWidth), (int)Math.floor(y2/cellHeight)};
+        int[] cellRange = {
+            Frac.intCeil(Frac.div(x1, cellWidth)) - 1, Frac.intCeil(Frac.div(y1, cellHeight)) - 1,
+            Frac.intFloor(Frac.div(x2, cellWidth)), Frac.intFloor(Frac.div(y2, cellHeight))};
         return cellRange;
     }
     
@@ -266,8 +267,9 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     private int[] getCellRangeExclusive(long x1, long y1, long x2, long y2) {
-        int[] cellRange = {(int)Math.floor(x1/cellWidth), (int)Math.floor(y1/cellHeight),
-            (int)Math.ceil(x2/cellWidth) - 1, (int)Math.ceil(y2/cellHeight) - 1};
+        int[] cellRange = {
+            Frac.intFloor(Frac.div(x1, cellWidth)), Frac.intFloor(Frac.div(y1, cellHeight)),
+            Frac.intCeil(Frac.div(x2, cellWidth)) - 1, Frac.intCeil(Frac.div(y2, cellHeight)) - 1};
         if (cellRange[0] == cellRange[2] + 1) {
             cellRange[0]--;
         }
@@ -462,22 +464,21 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Sets this SpaceState's DrawMode. The more cells this SpaceState has, the
-     * longer this operation may take, as cells' records of SpaceObjects may
-     * need to be reorganized.
+     * Sets this SpaceState's DrawMode.
      * @param drawMode The new DrawMode
      */
     public final void setDrawMode(DrawMode drawMode) {
         this.drawMode = drawMode;
-        if (!cells.isEmpty()) {
-            for (Cell cell : cells.values()) {
-                Set<Hitbox> oldLocatorHitboxes = cell.hitboxes.get(HitboxRole.LOCATOR);
-                cell.initializeLocatorHitboxes();
-                Set<Hitbox> newLocatorHitboxes = cell.hitboxes.get(HitboxRole.LOCATOR);
-                for (Hitbox hitbox : oldLocatorHitboxes) {
-                    newLocatorHitboxes.add(hitbox);
-                }
-            }
+        switch (drawMode) {
+            case FLAT:
+                drawComparator = flatModeComparator;
+                break;
+            case OVER:
+                drawComparator = overModeComparator;
+                break;
+            case UNDER:
+                drawComparator = underModeComparator;
+                break;
         }
     }
     
@@ -704,8 +705,9 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Removes from this SpaceState all of its SpaceObjects that exist entirely
-     * inside the specified rectangular region.
+     * Removes from this SpaceState all of its SpaceObjects that lie entirely
+     * inside the specified rectangular region. Removed SpaceObjects may touch
+     * the region's boundary, as long as no part of them lies outside it.
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
@@ -737,8 +739,9 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Removes from this SpaceState all of its SpaceObjects that exist entirely
-     * outside the specified rectangular region.
+     * Removes from this SpaceState all of its SpaceObjects that lie entirely
+     * outside the specified rectangular region. Removed SpaceObjects may touch
+     * the region's boundary, as long as no part of them lies inside it.
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
      * @param x2 The x-coordinate of the region's right edge
@@ -771,14 +774,15 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Removes from this SpaceState all of its SpaceObjects that exist entirely
-     * to the left of the specified vertical line.
+     * Removes from this SpaceState all of its SpaceObjects that lie entirely
+     * to the left of the specified vertical line. Removed SpaceObjects may
+     * touch the line, as long as no part of them lies to the right of it.
      * @param x The line's x-coordinate
      */
     public final void removeLeftOfLine(long x) {
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
-                cellLeft, cellTop, (int)Math.ceil(x/cellWidth), cellBottom);
+                cellLeft, cellTop, Frac.intCeil(Frac.div(x, cellWidth)) - 1, cellBottom);
         while (iterator.hasNext()) {
             for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -798,14 +802,15 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Removes from this SpaceState all of its SpaceObjects that exist entirely
-     * to the right of the specified vertical line.
+     * Removes from this SpaceState all of its SpaceObjects that lie entirely
+     * to the right of the specified vertical line. Removed SpaceObjects may
+     * touch the line, as long as no part of them lies to the left of it.
      * @param x The line's x-coordinate
      */
     public final void removeRightOfLine(long x) {
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
-                (int)Math.floor(x/cellWidth), cellTop, cellRight, cellBottom);
+                Frac.intFloor(Frac.div(x, cellWidth)), cellTop, cellRight, cellBottom);
         while (iterator.hasNext()) {
             for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -825,14 +830,15 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Removes from this SpaceState all of its SpaceObjects that exist entirely
-     * above the specified horizontal line.
+     * Removes from this SpaceState all of its SpaceObjects that lie entirely
+     * above the specified horizontal line. Removed SpaceObjects may touch the
+     * line, as long as no part of them lies below it.
      * @param y The line's y-coordinate
      */
     public final void removeAboveLine(long y) {
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
-                cellLeft, cellTop, cellRight, (int)Math.ceil(y/cellHeight));
+                cellLeft, cellTop, cellRight, Frac.intCeil(Frac.div(y, cellHeight)) - 1);
         while (iterator.hasNext()) {
             for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -852,14 +858,15 @@ public abstract class SpaceState<T extends CellGame,
     }
     
     /**
-     * Removes from this SpaceState all of its SpaceObjects that exist entirely
-     * below the specified horizontal line.
+     * Removes from this SpaceState all of its SpaceObjects that lie entirely
+     * below the specified horizontal line. Removed SpaceObjects may touch the
+     * line, as long as no part of them lies above it.
      * @param y The line's y-coordinate
      */
     public final void removeBelowLine(long y) {
         List<Hitbox> scanned = new ArrayList<>();
         Iterator<Cell> iterator = new ReadCellRangeIterator(
-                cellLeft, (int)Math.floor(y/cellHeight), cellRight, cellBottom);
+                cellLeft, Frac.intFloor(Frac.div(y, cellHeight)), cellRight, cellBottom);
         while (iterator.hasNext()) {
             for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
                 if (!locatorHitbox.scanned) {
@@ -3045,9 +3052,37 @@ public abstract class SpaceState<T extends CellGame,
                         layer.renderActions(g, cx, cy, scx, scy, vx1, vy1, vx2, vy2);
                     }
                     int[] cellRange = getCellRangeExclusive(leftEdge, topEdge, rightEdge, bottomEdge);
-                    if (drawMode == DrawMode.FLAT) {
-                        if (cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
-                            for (Hitbox locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).hitboxes.get(HitboxRole.LOCATOR)) {
+                    if (drawMode == DrawMode.FLAT
+                            && cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
+                        for (Hitbox locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).hitboxes.get(HitboxRole.LOCATOR)) {
+                            if (locatorHitbox.getLeftEdge() < rightEdge
+                                    && locatorHitbox.getRightEdge() > leftEdge
+                                    && locatorHitbox.getTopEdge() < bottomEdge
+                                    && locatorHitbox.getBottomEdge() > topEdge) {
+                                locatorHitbox.getObject().draw(g,
+                                        vx1 + Frac.intRound(locatorHitbox.getAbsX() - leftEdge),
+                                        vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge),
+                                        vx1, vy1, vx2, vy2);
+                            }
+                        }
+                    } else {
+                        List<Set<Hitbox>> hitboxesList = new ArrayList<>((cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
+                        Iterator<Cell> iterator = new ReadCellRangeIterator(cellRange);
+                        while (iterator.hasNext()) {
+                            hitboxesList.add(iterator.next().hitboxes.get(HitboxRole.LOCATOR));
+                        }
+                        PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawComparator);
+                        for (Set<Hitbox> locatorHitboxes : hitboxesList) {
+                            if (!locatorHitboxes.isEmpty()) {
+                                Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
+                                queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
+                            }
+                        }
+                        Hitbox lastHitbox = null;
+                        while (!queue.isEmpty()) {
+                            Pair<Hitbox,Iterator<Hitbox>> pair = queue.poll();
+                            Hitbox locatorHitbox = pair.getKey();
+                            if (locatorHitbox != lastHitbox) {
                                 if (locatorHitbox.getLeftEdge() < rightEdge
                                         && locatorHitbox.getRightEdge() > leftEdge
                                         && locatorHitbox.getTopEdge() < bottomEdge
@@ -3057,128 +3092,11 @@ public abstract class SpaceState<T extends CellGame,
                                             vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge),
                                             vx1, vy1, vx2, vy2);
                                 }
+                                lastHitbox = locatorHitbox;
                             }
-                        } else {
-                            List<Set<Hitbox>> hitboxesList = new ArrayList<>((cellRange[2] - cellRange[0] + 1)*(cellRange[3] - cellRange[1] + 1));
-                            Iterator<Cell> iterator = new ReadCellRangeIterator(cellRange);
-                            while (iterator.hasNext()) {
-                                hitboxesList.add(iterator.next().hitboxes.get(HitboxRole.LOCATOR));
-                            }
-                            if (hitboxesList.size() == 2) {
-                                Iterator<Hitbox> iterator1 = hitboxesList.get(0).iterator();
-                                Hitbox hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
-                                Iterator<Hitbox> iterator2 = hitboxesList.get(1).iterator();
-                                Hitbox hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
-                                Hitbox lastHitbox = null;
-                                while (hitbox1 != null || hitbox2 != null) {
-                                    if (hitbox1 == null) {
-                                        do {
-                                            if (hitbox2.getLeftEdge() < rightEdge
-                                                    && hitbox2.getRightEdge() > leftEdge
-                                                    && hitbox2.getTopEdge() < bottomEdge
-                                                    && hitbox2.getBottomEdge() > topEdge) {
-                                                hitbox2.getObject().draw(g,
-                                                        vx1 + Frac.intRound(hitbox2.getAbsX() - leftEdge),
-                                                        vy1 + Frac.intRound(hitbox2.getAbsY() - topEdge),
-                                                        vx1, vy1, vx2, vy2);
-                                            }
-                                            hitbox2 = (iterator2.hasNext() ? iterator2.next() : null); 
-                                        } while (hitbox2 != null);
-                                        break;
-                                    } else if (hitbox2 == null) {
-                                        do {
-                                            if (hitbox1.getLeftEdge() < rightEdge
-                                                    && hitbox1.getRightEdge() > leftEdge
-                                                    && hitbox1.getTopEdge() < bottomEdge
-                                                    && hitbox1.getBottomEdge() > topEdge) {
-                                                hitbox1.getObject().draw(g,
-                                                        vx1 + Frac.intRound(hitbox1.getAbsX() - leftEdge),
-                                                        vy1 + Frac.intRound(hitbox1.getAbsY() - topEdge),
-                                                        vx1, vy1, vx2, vy2);
-                                            }
-                                            hitbox1 = (iterator1.hasNext() ? iterator1.next() : null); 
-                                        } while (hitbox1 != null);
-                                        break;
-                                    } else {
-                                        if (drawPriorityComparator.compare(hitbox1, hitbox2) > 0) {
-                                            if (hitbox1 != lastHitbox) {
-                                                if (hitbox1.getLeftEdge() < rightEdge
-                                                        && hitbox1.getRightEdge() > leftEdge
-                                                        && hitbox1.getTopEdge() < bottomEdge
-                                                        && hitbox1.getBottomEdge() > topEdge) {
-                                                    hitbox1.getObject().draw(g,
-                                                            vx1 + Frac.intRound(hitbox1.getAbsX() - leftEdge),
-                                                            vy1 + Frac.intRound(hitbox1.getAbsY() - topEdge),
-                                                            vx1, vy1, vx2, vy2);
-                                                }
-                                                lastHitbox = hitbox1;
-                                            }
-                                            hitbox1 = (iterator1.hasNext() ? iterator1.next() : null);
-                                        } else {
-                                            if (hitbox2 != lastHitbox) {
-                                                if (hitbox2.getLeftEdge() < rightEdge
-                                                        && hitbox2.getRightEdge() > leftEdge
-                                                        && hitbox2.getTopEdge() < bottomEdge
-                                                        && hitbox2.getBottomEdge() > topEdge) {
-                                                    hitbox2.getObject().draw(g,
-                                                            vx1 + Frac.intRound(hitbox2.getAbsX() - leftEdge),
-                                                            vy1 + Frac.intRound(hitbox2.getAbsY() - topEdge),
-                                                            vx1, vy1, vx2, vy2);
-                                                }
-                                                lastHitbox = hitbox2;
-                                            }
-                                            hitbox2 = (iterator2.hasNext() ? iterator2.next() : null);
-                                        }
-                                    }
-                                }
-                            } else {
-                                PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawPriorityIteratorComparator);
-                                for (Set<Hitbox> locatorHitboxes : hitboxesList) {
-                                    if (!locatorHitboxes.isEmpty()) {
-                                        Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
-                                        queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
-                                    }
-                                }
-                                Hitbox lastHitbox = null;
-                                while (!queue.isEmpty()) {
-                                    Pair<Hitbox,Iterator<Hitbox>> pair = queue.poll();
-                                    Hitbox locatorHitbox = pair.getKey();
-                                    if (locatorHitbox != lastHitbox) {
-                                        if (locatorHitbox.getLeftEdge() < rightEdge
-                                                && locatorHitbox.getRightEdge() > leftEdge
-                                                && locatorHitbox.getTopEdge() < bottomEdge
-                                                && locatorHitbox.getBottomEdge() > topEdge) {
-                                            locatorHitbox.getObject().draw(g,
-                                                    vx1 + Frac.intRound(locatorHitbox.getAbsX() - leftEdge),
-                                                    vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge),
-                                                    vx1, vy1, vx2, vy2);
-                                        }
-                                        lastHitbox = locatorHitbox;
-                                    }
-                                    Iterator<Hitbox> hitboxIterator = pair.getValue();
-                                    if (hitboxIterator.hasNext()) {
-                                        queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        SortedSet<Hitbox> toDraw = new TreeSet<>(drawMode == DrawMode.OVER ? overModeComparator : underModeComparator);
-                        Iterator<Cell> iterator = new ReadCellRangeIterator(cellRange);
-                        while (iterator.hasNext()) {
-                            for (Hitbox locatorHitbox : iterator.next().hitboxes.get(HitboxRole.LOCATOR)) {
-                                toDraw.add(locatorHitbox);
-                            }
-                        }
-                        for (Hitbox locatorHitbox : toDraw) {
-                            if (locatorHitbox.getLeftEdge() < rightEdge
-                                    && locatorHitbox.getRightEdge() > leftEdge
-                                    && locatorHitbox.getTopEdge() < bottomEdge
-                                    && locatorHitbox.getBottomEdge() > topEdge) {
-                                locatorHitbox.getObject().draw(g,
-                                        vx1 + Frac.intRound(locatorHitbox.getAbsX() - leftEdge),
-                                        vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge),
-                                        vx1, vy1, vx2, vy2);
+                            Iterator<Hitbox> hitboxIterator = pair.getValue();
+                            if (hitboxIterator.hasNext()) {
+                                queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
                             }
                         }
                     }
