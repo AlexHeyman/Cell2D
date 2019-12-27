@@ -303,17 +303,28 @@ public class Sprite implements Animatable, Drawable {
     
     @Override
     public final Animatable getFrame(int index) {
-        return (index == 0 ? this : BLANK);
+        if (index != 0) {
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame at an invalid index");
+        }
+        return this;
     }
     
     @Override
     public final long getFrameDuration(int index) {
+        if (index != 0) {
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame duration at an"
+                    + " invalid index");
+        }
         return 0;
     }
     
     @Override
     public final boolean framesAreCompatible(int index1, int index2) {
-        return index1 == 0 && index2 == 0;
+        if (index1 != 0 || index2 != 0) {
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at an"
+                    + " invalid pair of indices");
+        }
+        return true;
     }
     
     /**

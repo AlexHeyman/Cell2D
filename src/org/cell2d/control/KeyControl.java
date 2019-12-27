@@ -322,7 +322,7 @@ public class KeyControl extends Control {
      * Constructs a KeyControl that represents the key with the specified key
      * code.
      * @param keyCode This KeyControl's key code
-     * @throws InvalidControlException If the key code is invalid
+     * @throws InvalidControlException if the key code is invalid
      */
     public KeyControl(int keyCode) throws InvalidControlException {
         if (getKeyCodeName(keyCode) == null) {

@@ -21,7 +21,7 @@ public class MouseButtonControl extends Control {
      * Constructs a MouseButtonControl that represents the mouse button with the
      * specified button code.
      * @param buttonCode This MouseButtonControl's button code
-     * @throws InvalidControlException If the button code is invalid
+     * @throws InvalidControlException if the button code is invalid
      */
     public MouseButtonControl(int buttonCode) throws InvalidControlException {
         if (buttonCode < 0 || buttonCode > 2) {

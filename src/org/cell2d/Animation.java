@@ -213,19 +213,27 @@ public class Animation implements Animatable {
     
     @Override
     public final Animatable getFrame(int index) {
-        return (index >= 0 && index < frames.length ? frames[index] : Sprite.BLANK);
+        if (index < 0 || index >= frames.length) {
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame at an invalid index");
+        }
+        return frames[index];
     }
     
     @Override
     public final long getFrameDuration(int index) {
-        return (index >= 0 && index < frameDurations.length ? frameDurations[index] : 0);
+        if (index < 0 || index >= frameDurations.length) {
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame duration at an"
+                    + " invalid index");
+        }
+        return frameDurations[index];
     }
     
     @Override
     public final boolean framesAreCompatible(int index1, int index2) {
         if (index1 < 0 || index1 >= frames.length
                 || index2 < 0 || index2 >= frames.length) {
-            return false;
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at an"
+                    + " invalid pair of indices");
         }
         if (index2 > index1) {
             return compatibilities[index2][index1];

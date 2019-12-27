@@ -170,13 +170,18 @@ public class AnimationInstance implements Drawable {
     }
     
     /**
-     * Returns this AnimationInstance's current index at the specified level. If
-     * the specified level is not valid, this method will return -1.
+     * Returns this AnimationInstance's current index at the specified level.
      * @param level The level of the index to be returned
      * @return The current index at the specified level
+     * @throws IndexOutOfBoundsException if the specified level is not valid for
+     * this AnimationInstance
      */
     public final int getIndex(int level) {
-        return (level >= 0 && level < indices.length ? indices[level] : -1);
+        if (level < 0 || level >= indices.length) {
+            throw new IndexOutOfBoundsException("Attempted to get an AnimationInstance's index at an invalid"
+                    + " level");
+        }
+        return indices[level];
     }
     
     /**
@@ -213,12 +218,24 @@ public class AnimationInstance implements Drawable {
      * is compatible with the frame at the current one, the indices at lower
      * levels will not be reset to 0. Otherwise, they will be.
      * @return This AnimationInstance
+     * @throws IndexOutOfBoundsException if this AnimationInstance does not have
+     * the specified level, or the specified index is out of range at the
+     * specified level
      */
     public final AnimationInstance setIndex(int level, int index, boolean resetLowerIndices) {
-        if (!blank && level >= 0 && level < indices.length) {
+        if (level < 0 || level >= indices.length) {
+            throw new IndexOutOfBoundsException("Attempted to set an AnimationInstance's index at an invalid"
+                    + " level");
+        }
+        if (!blank) {
             Animatable frame = animation;
             for (int i = indices.length - 1; i > level; i--) {
-                frame = frame.getFrame(indices[i]);
+                try {
+                    frame = frame.getFrame(indices[i]);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new IndexOutOfBoundsException("Attempted to set an AnimationInstance's index to a"
+                            + " value that is invalid at the relevant level");
+                }
             }
             setIndex(level, frame, index, resetLowerIndices);
             indexChanges[level] = 0;
@@ -233,6 +250,9 @@ public class AnimationInstance implements Drawable {
      * @param level The level of the index to be set
      * @param index The value to which the index will be set
      * @return This AnimationInstance
+     * @throws IndexOutOfBoundsException if this AnimationInstance does not have
+     * the specified level, or the specified index is out of range at the
+     * specified level
      */
     public final AnimationInstance setIndex(int level, int index) {
         return setIndex(level, index, true);
@@ -244,6 +264,7 @@ public class AnimationInstance implements Drawable {
      * only index. Otherwise, all indices at lower levels will be reset to 0.
      * @param index The value to which the index will be set
      * @return This AnimationInstance
+     * @throws IndexOutOfBoundsException if the specified index is out of range
      */
     public final AnimationInstance setIndex(int index) {
         return setIndex(indices.length - 1, index, true);
@@ -254,9 +275,15 @@ public class AnimationInstance implements Drawable {
      * specified level is not valid, this method will return 0.
      * @param level The level of the speed to be returned
      * @return The speed at the specified level
+     * @throws IndexOutOfBoundsException if the specified level is not valid for
+     * this AnimationInstance
      */
     public final long getSpeed(int level) {
-        return (level >= 0 && level < speeds.length ? speeds[level] : 0);
+        if (level < 0 || level >= speeds.length) {
+            throw new IndexOutOfBoundsException("Attempted to get an AnimationInstance's speed at an invalid"
+                    + " level");
+        }
+        return speeds[level];
     }
     
     /**
@@ -274,9 +301,15 @@ public class AnimationInstance implements Drawable {
      * @param level The level of the speed to be set
      * @param speed The value to which the speed will be set
      * @return This AnimationInstance
+     * @throws IndexOutOfBoundsException if the specified level is not valid for
+     * this AnimationInstance
      */
     public final AnimationInstance setSpeed(int level, long speed) {
-        if (!blank && level >= 0 && level < speeds.length) {
+        if (level < 0 || level >= speeds.length) {
+            throw new IndexOutOfBoundsException("Attempted to set an AnimationInstance's speed at an invalid"
+                    + " level");
+        }
+        if (!blank) {
             speeds[level] = speed;
         }
         return this;

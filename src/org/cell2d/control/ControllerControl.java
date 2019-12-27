@@ -19,7 +19,7 @@ public abstract class ControllerControl extends Control {
      * Constructs a ControllerControl that represents an input on the controller
      * with the specified number.
      * @param controllerNum The number of this ControllerControl's controller
-     * @throws InvalidControlException If the specified controller number is
+     * @throws InvalidControlException if the specified controller number is
      * invalid
      */
     public ControllerControl(int controllerNum) throws InvalidControlException {

@@ -842,10 +842,12 @@ public abstract class CellGame {
      */
     public final void waitToBindToCommand(int commandNum) {
         if (commandNum < 0 || commandNum >= commandStates.length) {
-            throw new RuntimeException("Attempted to begin waiting to bind to nonexistent command number " + commandNum);
+            throw new RuntimeException("Attempted to begin waiting to bind to nonexistent command number "
+                    + commandNum);
         }
         if (typingString != null) {
-            throw new RuntimeException("Attempted to begin waiting to bind to command number " + commandNum + " while already typing to a String");
+            throw new RuntimeException("Attempted to begin waiting to bind to command number " + commandNum
+                    + " while already typing to a String");
         }
         bindingCommandNum = commandNum;
         resetCommands();
@@ -982,10 +984,12 @@ public abstract class CellGame {
      */
     public final void beginTypingString(String initialString, int maxLength) {
         if (maxLength <= 0) {
-            throw new RuntimeException("Attempted to begin typing to a String with a non-positive maximum length");
+            throw new RuntimeException("Attempted to begin typing to a String with a non-positive maximum"
+                    + " length");
         }
         if (bindingCommandNum >= 0) {
-            throw new RuntimeException("Attempted to begin typing to a String while already binding to a command");
+            throw new RuntimeException("Attempted to begin typing to a String while already binding to a"
+                    + " command");
         }
         if (initialString == null) {
             initialString = "";

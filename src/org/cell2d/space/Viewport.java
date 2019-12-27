@@ -301,7 +301,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
      * Returns the x-coordinate of the left edge of this Viewport's field of
      * view in a SpaceState.
      * @return The x-coordinate of this Viewport's field of view's left edge
-     * @throws NullPointerException If this Viewport has no camera
+     * @throws NullPointerException if this Viewport has no camera
      */
     public final long getLeftEdge() throws NullPointerException {
         return camera.getCenterX() + ((long)left << Frac.BITS);
@@ -311,7 +311,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
      * Returns the x-coordinate of the right edge of this Viewport's field of
      * view in a SpaceState.
      * @return The x-coordinate of this Viewport's field of view's right edge
-     * @throws NullPointerException If this Viewport has no camera
+     * @throws NullPointerException if this Viewport has no camera
      */
     public final long getRightEdge() throws NullPointerException {
         return camera.getCenterX() + ((long)right << Frac.BITS);
@@ -321,7 +321,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
      * Returns the y-coordinate of the top edge of this Viewport's field of view
      * in a SpaceState.
      * @return The y-coordinate of this Viewport's field of view's top edge
-     * @throws NullPointerException If this Viewport has no camera
+     * @throws NullPointerException if this Viewport has no camera
      */
     public final long getTopEdge() throws NullPointerException {
         return camera.getCenterY() + ((long)top << Frac.BITS);
@@ -331,7 +331,7 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
      * Returns the y-coordinate of the bottom edge of this Viewport's field of
      * view in a SpaceState.
      * @return The y-coordinate of this Viewport's field of view's bottom edge
-     * @throws NullPointerException If this Viewport has no camera
+     * @throws NullPointerException if this Viewport has no camera
      */
     public final long getBottomEdge() throws NullPointerException {
         return camera.getCenterY() + ((long)bottom << Frac.BITS);

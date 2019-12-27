@@ -28,18 +28,18 @@ public interface Animatable {
     int getNumFrames();
     
     /**
-     * Returns this Animatable's frame at the specified index. If the specified
-     * index is not valid, this method will return Sprite.BLANK.
+     * Returns this Animatable's frame at the specified index.
      * @param index The index of the frame to be returned
      * @return This Animatable's frame at the specified index
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     Animatable getFrame(int index);
     
     /**
-     * Returns the duration of the frame at the specified index. If the
-     * specified index is not valid, this method will return 0.
+     * Returns the duration of the frame at the specified index.
      * @param index The index of the frame whose duration is to be returned
      * @return The duration of the frame at the specified index
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     long getFrameDuration(int index);
     
@@ -54,6 +54,8 @@ public interface Animatable {
      * @param index2 The index of the second frame
      * @return Whether or not an AnimationInstance may transition between the
      * two frames without resetting its lower indices to 0
+     * @throws IndexOutOfBoundsException if either of the two indices are out of
+     * range
      */
     boolean framesAreCompatible(int index1, int index2);
     

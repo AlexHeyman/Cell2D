@@ -26,7 +26,7 @@ public class ControllerDirectionControl extends ControllerControl {
      * @param controllerNum The number of this ControllerDirectionControl's
      * controller
      * @param direction This ControllerDirectionControl's Direction
-     * @throws InvalidControlException If the specified controller number is
+     * @throws InvalidControlException if the specified controller number is
      * invalid or the specified Direction is null
      */
     public ControllerDirectionControl(int controllerNum, Direction direction)

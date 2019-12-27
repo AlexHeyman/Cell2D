@@ -23,7 +23,7 @@ public class ControllerButtonControl extends ControllerControl {
      * @param controllerNum The number of this ControllerButtonControl's
      * controller
      * @param buttonNum The number of this ControllerButtonControl's button
-     * @throws InvalidControlException If the specified controller or button
+     * @throws InvalidControlException if the specified controller or button
      * number is invalid
      */
     public ControllerButtonControl(int controllerNum, int buttonNum) throws InvalidControlException {
