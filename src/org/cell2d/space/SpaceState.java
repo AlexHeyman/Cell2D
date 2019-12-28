@@ -105,7 +105,7 @@ public abstract class SpaceState<T extends CellGame,
             return (typeDiff == 0 ?
                     System.identityHashCode(event1) - System.identityHashCode(event2) : typeDiff);
         }
-        return (int)Math.signum(metricDiff);        
+        return (int)Math.signum(metricDiff);
     };
     
     private static final Comparator<Hitbox> drawPriorityComparator = (hitbox1, hitbox2) -> {
@@ -226,34 +226,6 @@ public abstract class SpaceState<T extends CellGame,
         
     }
     
-    private Cell getCell(Point point) {
-        Cell cell = cells.get(point);
-        if (cell == null) {
-            int x = (int)point.getX();
-            int y = (int)point.getY();
-            if (cells.isEmpty()) {
-                cellLeft = x;
-                cellRight = x;
-                cellTop = y;
-                cellBottom = y;
-            } else {
-                if (x < cellLeft) {
-                    cellLeft = x;
-                } else if (x > cellRight) {
-                    cellRight = x;
-                }
-                if (y < cellTop) {
-                    cellTop = y;
-                } else if (y > cellBottom) {
-                    cellBottom = y;
-                }
-            }
-            cell = new Cell(x, y);
-            cells.put(point, cell);
-        }
-        return cell;
-    }
-    
     private int[] getCellRangeInclusive(long x1, long y1, long x2, long y2) {
         int[] cellRange = {
             Frac.intCeil(Frac.div(x1, cellWidth)) - 1, Frac.intCeil(Frac.div(y1, cellHeight)) - 1,
@@ -353,7 +325,30 @@ public abstract class SpaceState<T extends CellGame,
         
         @Override
         public final Cell next() {
-            Cell next = getCell(new Point(xPos, yPos));
+            Point point = new Point(xPos, yPos);
+            Cell next = cells.get(point);
+            if (next == null) {
+                //There needs to be a cell here, but there isn't, so it's time to make one
+                if (cells.isEmpty()) {
+                    cellLeft = xPos;
+                    cellRight = xPos;
+                    cellTop = yPos;
+                    cellBottom = yPos;
+                } else {
+                    if (xPos < cellLeft) {
+                        cellLeft = xPos;
+                    } else if (xPos > cellRight) {
+                        cellRight = xPos;
+                    }
+                    if (yPos < cellTop) {
+                        cellTop = yPos;
+                    } else if (yPos > cellBottom) {
+                        cellBottom = yPos;
+                    }
+                }
+                next = new Cell(xPos, yPos);
+                cells.put(point, next);
+            }
             if (xPos == cellRange[2]) {
                 xPos = cellRange[0];
                 yPos++;
@@ -3054,15 +3049,18 @@ public abstract class SpaceState<T extends CellGame,
                     int[] cellRange = getCellRangeExclusive(leftEdge, topEdge, rightEdge, bottomEdge);
                     if (drawMode == DrawMode.FLAT
                             && cellRange[0] == cellRange[2] && cellRange[1] == cellRange[3]) {
-                        for (Hitbox locatorHitbox : getCell(new Point(cellRange[0], cellRange[1])).hitboxes.get(HitboxRole.LOCATOR)) {
-                            if (locatorHitbox.getLeftEdge() < rightEdge
-                                    && locatorHitbox.getRightEdge() > leftEdge
-                                    && locatorHitbox.getTopEdge() < bottomEdge
-                                    && locatorHitbox.getBottomEdge() > topEdge) {
-                                locatorHitbox.getObject().draw(g,
-                                        vx1 + Frac.intRound(locatorHitbox.getAbsX() - leftEdge),
-                                        vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge),
-                                        vx1, vy1, vx2, vy2);
+                        Cell cell = cells.get(new Point(cellRange[0], cellRange[1]));
+                        if (cell != null) {
+                            for (Hitbox locatorHitbox : cell.hitboxes.get(HitboxRole.LOCATOR)) {
+                                if (locatorHitbox.getLeftEdge() < rightEdge
+                                        && locatorHitbox.getRightEdge() > leftEdge
+                                        && locatorHitbox.getTopEdge() < bottomEdge
+                                        && locatorHitbox.getBottomEdge() > topEdge) {
+                                    locatorHitbox.getObject().draw(g,
+                                            vx1 + Frac.intRound(locatorHitbox.getAbsX() - leftEdge),
+                                            vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge),
+                                            vx1, vy1, vx2, vy2);
+                                }
                             }
                         }
                     } else {
