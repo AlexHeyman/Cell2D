@@ -129,7 +129,7 @@ public class Graphics {
 	private float lineWidth = 1;
 
 	/** The matrix stack */
-	private ArrayList stack = new ArrayList();
+	private ArrayList<FloatBuffer> stack = new ArrayList<>();
 	/** The index into the stack we're using */
 	private int stackIndex;
 
@@ -1705,7 +1705,7 @@ public class Graphics {
 			buffer = BufferUtils.createFloatBuffer(18);
 			stack.add(buffer);
 		} else {
-			buffer = (FloatBuffer) stack.get(stackIndex);
+			buffer = stack.get(stackIndex);
 		}
 		
 		GL.glGetFloat(SGL.GL_MODELVIEW_MATRIX, buffer);
@@ -1728,7 +1728,7 @@ public class Graphics {
 		predraw();
 		
 		stackIndex--;
-		FloatBuffer oldBuffer = (FloatBuffer) stack.get(stackIndex);
+		FloatBuffer oldBuffer = stack.get(stackIndex);
 		GL.glLoadMatrix(oldBuffer);
 		sx = oldBuffer.get(16);
 		sy = oldBuffer.get(17);

@@ -62,13 +62,17 @@ public class AngelCodeFont implements Font {
 	private DisplayList eldestDisplayList;
 	
 	/** The display list cache for rendered lines */
-	private final LinkedHashMap displayLists = new LinkedHashMap(DISPLAY_LIST_CACHE_SIZE, 1, true) {
-		protected boolean removeEldestEntry(Entry eldest) {
-			eldestDisplayList = (DisplayList)eldest.getValue();
-			eldestDisplayListID = eldestDisplayList.id;
+	private final LinkedHashMap<String,DisplayList> displayLists
+                = new LinkedHashMap<String,DisplayList>(DISPLAY_LIST_CACHE_SIZE, 1, true) {
+            
+            @Override
+            protected boolean removeEldestEntry(Entry<String,DisplayList> eldest) {
+                    eldestDisplayList = (DisplayList)eldest.getValue();
+                    eldestDisplayListID = eldestDisplayList.id;
 
-			return false;
-		}
+                    return false;
+            }
+            
 	};
 
 
@@ -338,7 +342,7 @@ public class AngelCodeFont implements Font {
 
 		GL.glTranslatef(x, y, 0);
 		if (displayListCaching && startIndex == 0 && endIndex == text.length() - 1) {
-			DisplayList displayList = (DisplayList)displayLists.get(text);
+			DisplayList displayList = displayLists.get(text);
 			if (displayList != null) {
 				GL.glCallList(displayList.id);
 			} else {
@@ -415,7 +419,7 @@ public class AngelCodeFont implements Font {
 	public int getYOffset(String text) {
 		DisplayList displayList = null;
 		if (displayListCaching) {
-			displayList = (DisplayList)displayLists.get(text);
+			displayList = displayLists.get(text);
 			if (displayList != null && displayList.yOffset != null) return displayList.yOffset.intValue();
 		}
 
@@ -441,7 +445,7 @@ public class AngelCodeFont implements Font {
 	public int getHeight(String text) {
 		DisplayList displayList = null;
 		if (displayListCaching) {
-			displayList = (DisplayList)displayLists.get(text);
+			displayList = displayLists.get(text);
 			if (displayList != null && displayList.height != null) return displayList.height.intValue();
 		}
 
@@ -478,7 +482,7 @@ public class AngelCodeFont implements Font {
 	public int getWidth(String text) {
 		DisplayList displayList = null;
 		if (displayListCaching) {
-			displayList = (DisplayList)displayLists.get(text);
+			displayList = displayLists.get(text);
 			if (displayList != null && displayList.width != null) return displayList.width.intValue();
 		}
 		
