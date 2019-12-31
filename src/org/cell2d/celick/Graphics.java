@@ -107,9 +107,6 @@ public class Graphics {
 	/** True if the matrix has been pushed to the stack */
 	private boolean pushed;
 
-	/** The graphics context clipping */
-	private Rectangle clip;
-
 	/** Buffer used for setting the world clip */
 	private DoubleBuffer worldClip = BufferUtils.createDoubleBuffer(4);
 
@@ -706,17 +703,6 @@ public class Graphics {
 	}
 
 	/**
-	 * Clear the clipping being applied. This will allow graphics to be drawn
-	 * anywhere on the screen
-	 */
-	public void clearClip() {
-		clip = null;
-		predraw();
-		GL.glDisable(SGL.GL_SCISSOR_TEST);
-		postdraw();
-	}
-
-	/**
 	 * Set clipping that controls which areas of the world will be drawn to.
 	 * Note that world clip is different from standard screen clip in that it's
 	 * defined in the space of the current world coordinate - i.e. it's affected
@@ -787,63 +773,6 @@ public class Graphics {
 	 */
 	public Rectangle getWorldClip() {
 		return worldClipRecord;
-	}
-
-	/**
-	 * Set the clipping to apply to the drawing. Note that this clipping takes
-	 * no note of the transforms that have been applied to the context and is
-	 * always in absolute screen space coordinates.
-	 * 
-	 * @param x
-	 *            The x coordinate of the top left corner of the allowed area
-	 * @param y
-	 *            The y coordinate of the top left corner of the allowed area
-	 * @param width
-	 *            The width of the allowed area
-	 * @param height
-	 *            The height of the allowed area
-	 */
-	public void setClip(int x, int y, int width, int height) {
-		predraw();
-		
-		if (clip == null) {
-			GL.glEnable(SGL.GL_SCISSOR_TEST);
-			clip = new Rectangle(x, y, width, height);
-		} else {
-			clip.setBounds(x,y,width,height);
-		}
-		
-		GL.glScissor(x, screenHeight - y - height, width, height);
-		postdraw();
-	}
-
-	/**
-	 * Set the clipping to apply to the drawing. Note that this clipping takes
-	 * no note of the transforms that have been applied to the context and is
-	 * always in absolute screen space coordinates.
-	 * 
-	 * @param rect
-	 *            The rectangle describing the clipped area in screen
-	 *            coordinates
-	 */
-	public void setClip(Rectangle rect) {
-		if (rect == null) {
-			clearClip();
-			return;
-		}
-
-		setClip((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(),
-				(int) rect.getHeight());
-	}
-
-	/**
-	 * Return the currently applied clipping rectangle
-	 * 
-	 * @return The current applied clipping rectangle or null if no clipping is
-	 *         applied
-	 */
-	public Rectangle getClip() {
-		return clip;
 	}
 
 	/**
