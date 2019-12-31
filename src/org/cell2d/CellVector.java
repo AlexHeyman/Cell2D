@@ -59,6 +59,11 @@ public class CellVector {
         y = Frac.units(-Math.sin(radians));
     }
     
+    @Override
+    public final int hashCode() {
+        return Objects.hash(x, y);
+    }
+    
     /**
      * Returns whether the specified object is a CellVector that is equal to
      * this CellVector. Two CellVectors are equal if and only if they represent
@@ -74,11 +79,6 @@ public class CellVector {
             return x == vector.x && y == vector.y;
         }
         return false;
-    }
-    
-    @Override
-    public final int hashCode() {
-        return Objects.hash(x, y);
     }
     
     /**

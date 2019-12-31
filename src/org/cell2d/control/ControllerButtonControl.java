@@ -36,6 +36,20 @@ public class ControllerButtonControl extends ControllerControl {
     }
     
     @Override
+    public int hashCode() {
+        return Objects.hash("ControllerButton", getControllerNum(), buttonNum);
+    }
+    
+    /**
+     * Returns whether the specified object is a ControllerButtonControl that is
+     * equal to this ControllerButtonControl. Two ControllerButtonControls are
+     * equal if and only if they represent the same button on the same
+     * controller.
+     * @param obj The object to be compared with this ControllerButtonControl
+     * @return Whether the specified object is a ControllerButtonControl that is
+     * equal to this ControllerButtonControl
+     */
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ControllerButtonControl) {
             ControllerButtonControl control = (ControllerButtonControl)obj;
@@ -43,11 +57,6 @@ public class ControllerButtonControl extends ControllerControl {
                     && control.buttonNum == buttonNum);
         }
         return false;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash("ControllerButton", getControllerNum(), buttonNum);
     }
     
     @Override

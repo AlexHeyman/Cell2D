@@ -32,16 +32,24 @@ public class MouseButtonControl extends Control {
     }
     
     @Override
+    public int hashCode() {
+        return Objects.hash("MouseButton", buttonCode);
+    }
+    
+    /**
+     * Returns whether the specified object is a MouseButtonControl that is
+     * equal to this MouseButtonControl. Two MouseButtonControls are equal if
+     * and only if they represent the same button.
+     * @param obj The object to be compared with this MouseButtonControl
+     * @return Whether the specified object is a MouseButtonControl that is
+     * equal to this MouseButtonControl
+     */
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof MouseButtonControl) {
             return ((MouseButtonControl)obj).buttonCode == buttonCode;
         }
         return false;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash("MouseButton", buttonCode);
     }
     
     @Override

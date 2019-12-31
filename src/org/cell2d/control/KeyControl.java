@@ -333,16 +333,24 @@ public class KeyControl extends Control {
     }
     
     @Override
+    public int hashCode() {
+        return Objects.hash("Key", keyCode);
+    }
+    
+    /**
+     * Returns whether the specified object is a KeyControl that is equal to
+     * this KeyControl. Two KeyControls are equal if and only if they represent
+     * the same key.
+     * @param obj The object to be compared with this KeyControl
+     * @return Whether the specified object is a KeyControl that is equal to
+     * this KeyControl
+     */
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof KeyControl) {
             return ((KeyControl)obj).keyCode == keyCode;
         }
         return false;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash("Key", keyCode);
     }
     
     @Override

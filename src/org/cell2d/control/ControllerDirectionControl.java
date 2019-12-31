@@ -40,6 +40,20 @@ public class ControllerDirectionControl extends ControllerControl {
     }
     
     @Override
+    public int hashCode() {
+        return Objects.hash("ControllerDirection", getControllerNum(), direction);
+    }
+    
+    /**
+     * Returns whether the specified object is a ControllerDirectionControl that
+     * is equal to this ControllerDirectionControl. Two
+     * ControllerDirectionControls are equal if and only if they represent the
+     * same Direction on the same controller.
+     * @param obj The object to be compared with this ControllerDirectionControl
+     * @return Whether the specified object is a ControllerDirectionControl that
+     * is equal to this ControllerDirectionControl
+     */
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ControllerDirectionControl) {
             ControllerDirectionControl control = (ControllerDirectionControl)obj;
@@ -47,11 +61,6 @@ public class ControllerDirectionControl extends ControllerControl {
                     && control.direction == direction);
         }
         return false;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash("ControllerDirection", getControllerNum(), direction);
     }
     
     @Override

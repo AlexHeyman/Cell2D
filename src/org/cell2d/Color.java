@@ -90,6 +90,14 @@ public class Color implements Serializable {
         return Objects.hash(r, g, b, a);
     }
     
+    /**
+     * Returns whether the specified object is a Color that is equal to this
+     * Color. Two CellVectors are equal if and only if their R, G, B, and A
+     * values are all equal.
+     * @param obj The object to be compared with this Color
+     * @return Whether the specified object is a Color that is equal to this
+     * Color
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Color) {
