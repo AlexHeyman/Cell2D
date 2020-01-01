@@ -159,7 +159,7 @@ public abstract class Hitbox {
     /**
      * Returns whether this Hitbox's surface in the specified Direction is
      * solid.
-     * @param direction The Direction of the surface to be examined
+     * @param direction The Direction of the surface to examine
      * @return Whether the surface in the specified Direction is solid
      */
     public final boolean surfaceIsSolid(Direction direction) {

@@ -380,6 +380,36 @@ public class Sprite implements Animatable, Drawable {
         return height;
     }
     
+    private void draw(Graphics g, float x, float y, int left, int right, int top, int bottom,
+            float scale, boolean xFlip, boolean yFlip, float angle, float alpha, Filter filter) {
+        int index = 0;
+        float xOffset, yOffset;
+        if (xFlip) {
+            index += 1;
+            xOffset = -this.right;
+        } else {
+            xOffset = -originX;
+        }
+        if (yFlip) {
+            index += 2;
+            yOffset = -this.bottom;
+        } else {
+            yOffset = -originY;
+        }
+        x += xOffset*scale;
+        y += yOffset*scale;
+        Image image;
+        if (filter == null) {
+            image = defaultImages[index];
+        } else {
+            Image[] imageArray = images.get(filter);
+            image = (imageArray == null ? defaultImages[index] : imageArray[index]);
+        }
+        image.setRotation(-angle);
+        image.setAlpha(alpha);
+        g.drawImage(image, x, y, x + (right - left)*scale, y + (bottom - top)*scale, left, top, right, bottom);
+    }
+    
     @Override
     public final void draw(Graphics g, int x, int y) {
         if (!blank && loaded) {
@@ -457,36 +487,6 @@ public class Sprite implements Animatable, Drawable {
             draw(g, x + (float)(left*scale), y + (float)(top*scale),
                     left, right, top, bottom, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
-    }
-    
-    private void draw(Graphics g, float x, float y, int left, int right, int top, int bottom,
-            float scale, boolean xFlip, boolean yFlip, float angle, float alpha, Filter filter) {
-        int index = 0;
-        float xOffset, yOffset;
-        if (xFlip) {
-            index += 1;
-            xOffset = -this.right;
-        } else {
-            xOffset = -originX;
-        }
-        if (yFlip) {
-            index += 2;
-            yOffset = -this.bottom;
-        } else {
-            yOffset = -originY;
-        }
-        x += xOffset*scale;
-        y += yOffset*scale;
-        Image image;
-        if (filter == null) {
-            image = defaultImages[index];
-        } else {
-            Image[] imageArray = images.get(filter);
-            image = (imageArray == null ? defaultImages[index] : imageArray[index]);
-        }
-        image.setRotation(-angle);
-        image.setAlpha(alpha);
-        g.drawImage(image, x, y, x + (right - left)*scale, y + (bottom - top)*scale, left, top, right, bottom);
     }
     
 }
