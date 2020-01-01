@@ -948,7 +948,7 @@ public abstract class SpaceObject {
     /**
      * Returns whether this SpaceObject's surface in the specified Direction is
      * solid.
-     * @param direction The Direction of the surface to be examined
+     * @param direction The Direction of the surface to examine
      * @return Whether the surface in the specified Direction is solid
      */
     public final boolean surfaceIsSolid(Direction direction) {
@@ -1240,16 +1240,8 @@ public abstract class SpaceObject {
      * corresponds to the x-coordinate of this SpaceObject's position
      * @param y The y-coordinate in pixels on the Graphics context that
      * corresponds to the y-coordinate of this SpaceObject's position
-     * @param x1 The x-coordinate in pixels of the Viewport's left edge on the
-     * Graphics context
-     * @param y1 The y-coordinate in pixels of the Viewport's top edge on the
-     * Graphics context
-     * @param x2 The x-coordinate in pixels of the Viewport's right edge on the
-     * Graphics context
-     * @param y2 The y-coordinate in pixels of the Viewport's bottom edge on the
-     * Graphics context
      */
-    public void draw(Graphics g, int x, int y, int x1, int y1, int x2, int y2) {
+    public void draw(Graphics g, int x, int y) {
         appearance.draw(g, x, y, getXFlip(), getYFlip(), getAngle(), alpha, filter);
     }
     
