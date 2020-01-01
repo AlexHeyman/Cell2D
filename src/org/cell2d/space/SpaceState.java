@@ -395,10 +395,12 @@ public abstract class SpaceState<T extends CellGame,
      */
     public final void setCellDimensions(long cellWidth, long cellHeight) {
         if (cellWidth <= 0) {
-            throw new RuntimeException("Attempted to give a SpaceState a non-positive cell width");
+            throw new RuntimeException("Attempted to give a SpaceState a non-positive cell width (about "
+                    + Frac.toDouble(cellWidth) + " fracunits)");
         }
         if (cellHeight <= 0) {
-            throw new RuntimeException("Attempted to give a SpaceState a non-positive cell height");
+            throw new RuntimeException("Attempted to give a SpaceState a non-positive cell height (about "
+                    + Frac.toDouble(cellHeight) + " fracunits)");
         }
         cells.clear();
         this.cellWidth = cellWidth;

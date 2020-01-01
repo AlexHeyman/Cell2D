@@ -92,8 +92,8 @@ public class Animation implements Animatable {
             throw new RuntimeException("Attempted to create an empty Animation");
         }
         if (frames.length != frameDurations.length) {
-            throw new RuntimeException("Attempted to create an Animation with different numbers of frames"
-                    + " and frame durations");
+            throw new RuntimeException("Attempted to create an Animation with " + frames.length
+                    + " frames, but " + frameDurations.length + " frame durations");
         }
         for (int i = 0; i < frames.length; i++) {
             if (frames[i] == null) {
@@ -120,10 +120,12 @@ public class Animation implements Animatable {
         level = maxLevel + 1;
     }
     
-    private static Animatable[] spriteSheetToFrames(SpriteSheet spriteSheet, int x1, int y1, int x2, int y2, boolean columns) {
-        if (x2 < x1 || y2 < y1) {
-            throw new RuntimeException("Attempted to create an Animation from a region of a sprite sheet"
-                    + " defined by invalid coordinates");
+    private static Animatable[] spriteSheetToFrames(
+            SpriteSheet spriteSheet, int x1, int y1, int x2, int y2, boolean columns) {
+        if (x1 < 0 || x2 >= spriteSheet.getWidth() || y1 < 0 || y2 >= spriteSheet.getHeight()
+                || x2 < x1 || y2 < y1) {
+            throw new RuntimeException("Attempted to create an Animation from a SpriteSheet region defined"
+                    + " by invalid coordinates (" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")");
         }
         Animatable[] frames = new Animatable[(x2 - x1 + 1)*(y2 - y1 + 1)];
         int i = 0;
@@ -214,7 +216,8 @@ public class Animation implements Animatable {
     @Override
     public final Animatable getFrame(int index) {
         if (index < 0 || index >= frames.length) {
-            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame at an invalid index");
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame at invalid index "
+                    + index);
         }
         return frames[index];
     }
@@ -222,8 +225,8 @@ public class Animation implements Animatable {
     @Override
     public final long getFrameDuration(int index) {
         if (index < 0 || index >= frameDurations.length) {
-            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame duration at an"
-                    + " invalid index");
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame duration at invalid"
+                    + " index " + index);
         }
         return frameDurations[index];
     }
@@ -232,8 +235,8 @@ public class Animation implements Animatable {
     public final boolean framesAreCompatible(int index1, int index2) {
         if (index1 < 0 || index1 >= frames.length
                 || index2 < 0 || index2 >= frames.length) {
-            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at an"
-                    + " invalid pair of indices");
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at"
+                    + " invalid pair of indices " + index1 + ", " + index2);
         }
         if (index2 > index1) {
             return compatibilities[index2][index1];

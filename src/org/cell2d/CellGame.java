@@ -241,7 +241,8 @@ public abstract class CellGame {
         game = new CelickGame();
         this.title = title;
         if (numCommands < 0) {
-            throw new RuntimeException("Attempted to create a CellGame with a negative number of commands");
+            throw new RuntimeException("Attempted to create a CellGame with negative number of commands "
+                    + numCommands);
         }
         commandStates = new CommandState[numCommands];
         commandControls = new ArrayList<>(numCommands);
@@ -493,12 +494,12 @@ public abstract class CellGame {
             this.fadeColor = fadeColor;
             if (fadeOutTime < 0) {
                 throw new RuntimeException("Attempted to make a CellGame transition to a new GameState"
-                        + " with a negative fade-out time");
+                        + " with negative fade-out time " + fadeOutTime);
             }
             this.fadeOutTime = fadeOutTime;
             if (fadeInTime < 0) {
                 throw new RuntimeException("Attempted to make a CellGame transition to a new GameState"
-                        + " with a negative fade-in time");
+                        + " with negative fade-in time " + fadeInTime);
             }
             this.fadeInTime = fadeInTime;
         }
@@ -975,21 +976,22 @@ public abstract class CellGame {
      * typing, the Backspace key deletes individual characters, the Delete key
      * resets the String to the empty String, the Escape key calls
      * cancelTypingString(), and the Enter key finishes the typing and calls the
-     * stringFinishedActions() method of this CellGame's current GameState. This
-     * method will throw an Exception if this CellGame has already been
-     * instructed to bind the next Control pressed to a specified command.
-     * @param initialString The initial value of the String to be typed
+     * stringFinishedActions() method of this CellGame's current GameState.
+     * @param initialString The initial value of the String to be typed, or null
+     * if the String should be empty initially
      * @param maxLength The maximum length in characters of the String to be
      * typed
+     * @throws RuntimeException if this CellGame has already been instructed to
+     * bind the next Control pressed to a command
      */
     public final void beginTypingString(String initialString, int maxLength) {
         if (maxLength <= 0) {
-            throw new RuntimeException("Attempted to begin typing to a String with a non-positive maximum"
-                    + " length");
+            throw new RuntimeException("Attempted to begin typing to a String with non-positive maximum"
+                    + " length " + maxLength);
         }
         if (bindingCommandNum >= 0) {
-            throw new RuntimeException("Attempted to begin typing to a String while already binding to a"
-                    + " command");
+            throw new RuntimeException("Attempted to begin typing to a String while already binding to"
+                    + " command number " + bindingCommandNum);
         }
         if (initialString == null) {
             initialString = "";
@@ -1036,10 +1038,10 @@ public abstract class CellGame {
      */
     public final void setFPS(int fps) {
         if (fps <= 0) {
-            throw new RuntimeException("Attempted to run a CellGame at a non-positive FPS");
+            throw new RuntimeException("Attempted to run a CellGame at non-positive FPS " + fps);
         }
         this.fps = fps;
-        msPerFrame = 1000/((double)fps);
+        msPerFrame = 1000.0/fps;
     }
     
     /**
@@ -1057,7 +1059,8 @@ public abstract class CellGame {
      */
     public final void setScreenWidth(int screenWidth) {
         if (screenWidth <= 0) {
-            throw new RuntimeException("Attempted to give a CellGame a non-positive screen width");
+            throw new RuntimeException("Attempted to give a CellGame non-positive screen width "
+                    + screenWidth);
         }
         this.screenWidth = screenWidth;
         updateScreen = true;
@@ -1078,7 +1081,8 @@ public abstract class CellGame {
      */
     public final void setScreenHeight(int screenHeight) {
         if (screenHeight <= 0) {
-            throw new RuntimeException("Attempted to give a CellGame a non-positive screen height");
+            throw new RuntimeException("Attempted to give a CellGame non-positive screen height "
+                    + screenHeight);
         }
         this.screenHeight = screenHeight;
         updateScreen = true;
@@ -1100,7 +1104,8 @@ public abstract class CellGame {
      */
     public final void setScaleFactor(double scaleFactor) {
         if (scaleFactor <= 0) {
-            throw new RuntimeException("Attempted to give a CellGame a non-positive scale factor");
+            throw new RuntimeException("Attempted to give a CellGame non-positive scale factor "
+                    + scaleFactor);
         }
         this.scaleFactor = scaleFactor;
         updateScreen = true;

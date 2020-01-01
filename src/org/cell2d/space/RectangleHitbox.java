@@ -1,6 +1,7 @@
 package org.cell2d.space;
 
 import org.cell2d.CellVector;
+import org.cell2d.Frac;
 
 /**
  * <p>A RectangleHitbox is a rectangular Hitbox with sides that remain
@@ -49,10 +50,12 @@ public class RectangleHitbox extends Hitbox {
     public RectangleHitbox(long relX, long relY, long relLeft, long relRight, long relTop, long relBottom) {
         super(relX, relY);
         if (relLeft > relRight) {
-            throw new RuntimeException("Attempted to give a RectangleHitbox a negative width");
+            throw new RuntimeException("Attempted to give a RectangleHitbox a negative width (about "
+                    + Frac.toDouble(relRight - relLeft) + " fracunits)");
         }
         if (relTop > relBottom) {
-            throw new RuntimeException("Attempted to give a RectangleHitbox a negative height");
+            throw new RuntimeException("Attempted to give a RectangleHitbox a negative height (about "
+                    + Frac.toDouble(relBottom - relTop) + " fracunits)");
         }
         this.relLeft = relLeft;
         this.relRight = relRight;

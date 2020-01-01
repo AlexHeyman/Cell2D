@@ -103,10 +103,11 @@ public class Music {
      */
     public Music(String path, double loopStart, double loopEnd, boolean load) {
         if (loopStart < 0) {
-            throw new RuntimeException("Attempted to give a Music track a negative loop start position");
+            throw new RuntimeException("Attempted to give a Music track negative loop start position "
+                    + loopStart);
         } else if (loopEnd >= 0 && loopStart >= loopEnd) {
-            throw new RuntimeException("Attempted to give a Music track a loop start position after or equal"
-                    + " to its loop end position");
+            throw new RuntimeException("Attempted to give a Music track a loop start position ("
+                    + loopStart + ") after or equal to its loop end position (" + loopEnd + ")");
         }
         blank = false;
         this.path = path;

@@ -3,6 +3,7 @@ package org.cell2d.space;
 import java.util.ArrayList;
 import java.util.List;
 import org.cell2d.CellVector;
+import org.cell2d.Frac;
 
 /**
  * <p>A PolygonHitbox is a polygonal Hitbox defined by a List of vertices. A
@@ -98,10 +99,12 @@ public class PolygonHitbox extends Hitbox {
     public static PolygonHitbox regularPolygon(
             long relX, long relY, int numVertices, long radius, double angle) {
         if (numVertices < 3) {
-            throw new RuntimeException("Attempted to make a regular polygon with fewer than 3 vertices");
+            throw new RuntimeException("Attempted to make a regular polygon with fewer than 3"
+                    + " (specifically, " + numVertices + ") vertices");
         }
         if (radius < 0) {
-            throw new RuntimeException("Attempted to make a regular polygon with a negative radius");
+            throw new RuntimeException("Attempted to make a regular polygon with a negative radius (about "
+                    + Frac.toDouble(radius) + " fracunits)");
         }
         CellVector[] relVertices = new CellVector[numVertices];
         double angleChange = 360.0/numVertices;

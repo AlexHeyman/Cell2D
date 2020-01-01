@@ -316,7 +316,8 @@ public class SpriteSheet {
      */
     public Sprite getSprite(int x, int y) {
         if (x < 0 || x >= sprites.length || y < 0 || y >= sprites[x].length) {
-            throw new RuntimeException("Attempted to retrieve a Sprite from a SpriteSheet at invalid coordinates");
+            throw new RuntimeException("Attempted to retrieve a Sprite from a SpriteSheet at invalid"
+                    + " coordinates (" + x + ", " + y + ")");
         }
         return sprites[x][y];
     }

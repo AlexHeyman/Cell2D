@@ -304,7 +304,8 @@ public class Sprite implements Animatable, Drawable {
     @Override
     public final Animatable getFrame(int index) {
         if (index != 0) {
-            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame at an invalid index");
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame at invalid index "
+                    + index);
         }
         return this;
     }
@@ -312,8 +313,8 @@ public class Sprite implements Animatable, Drawable {
     @Override
     public final long getFrameDuration(int index) {
         if (index != 0) {
-            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame duration at an"
-                    + " invalid index");
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame duration at invalid"
+                    + " index " + index);
         }
         return 0;
     }
@@ -321,8 +322,8 @@ public class Sprite implements Animatable, Drawable {
     @Override
     public final boolean framesAreCompatible(int index1, int index2) {
         if (index1 != 0 || index2 != 0) {
-            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at an"
-                    + " invalid pair of indices");
+            throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at"
+                    + " invalid pair of indices " + index1 + ", " + index2);
         }
         return true;
     }

@@ -52,10 +52,12 @@ public class Viewport<T extends CellGame, U extends SpaceState<T,U,?>> {
      */
     public Viewport(long x1, long y1, long x2, long y2) {
         if (x1 > x2) {
-            throw new RuntimeException("Attempted to give a Viewport a negative width");
+            throw new RuntimeException("Attempted to give a Viewport a negative width (about "
+                    + Frac.toDouble(x2 - x1) + " fracunits)");
         }
         if (y1 > y2) {
-            throw new RuntimeException("Attempted to give a Viewport a negative height");
+            throw new RuntimeException("Attempted to give a Viewport a negative height (about "
+                    + Frac.toDouble(y2 - y1) + " fracunits)");
         }
         this.x1 = x1;
         this.y1 = y1;

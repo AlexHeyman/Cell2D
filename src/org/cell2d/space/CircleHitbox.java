@@ -1,6 +1,7 @@
 package org.cell2d.space;
 
 import org.cell2d.CellVector;
+import org.cell2d.Frac;
 
 /**
  * <p>A CircleHitbox is a circular Hitbox with its origin at its center. A
@@ -32,7 +33,8 @@ public class CircleHitbox extends Hitbox {
     public CircleHitbox(long relX, long relY, long radius) {
         super(relX, relY);
         if (!setRadius(radius)) {
-            throw new RuntimeException("Attempted to give a CircleHitbox a negative radius");
+            throw new RuntimeException("Attempted to give a CircleHitbox a negative radius (about "
+                    + Frac.toDouble(radius) + " fracunits)");
         }
     }
     
