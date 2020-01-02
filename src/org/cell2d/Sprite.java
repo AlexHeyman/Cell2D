@@ -10,17 +10,16 @@ import org.cell2d.celick.SlickException;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
- * SpriteSheets, Sounds, and Music tracks, Sprites can be manually loaded and
- * unloaded into and out of memory. Loading may take a moment, but while a
- * Sprite is not loaded, it cannot be drawn. A Sprite may also be treated as an
- * Animatable with exactly one frame, namely itself, that has a duration of 0.
- * </p>
+ * other Loadables, Sprites can be manually loaded and unloaded into and out of
+ * memory. Loading may take a moment, but while a Sprite is not loaded, it
+ * cannot be drawn. A Sprite may also be treated as an Animatable with exactly
+ * one frame, namely itself, that has a duration of 0.</p>
  * @see Filter
  * @see SpriteSheet
  * @see Animation
  * @author Alex Heyman
  */
-public class Sprite implements Animatable, Drawable {
+public class Sprite implements Animatable, Drawable, Loadable {
     
     /**
      * A blank Sprite with no appearance. It is considered to always be loaded
@@ -191,10 +190,7 @@ public class Sprite implements Animatable, Drawable {
         }
     }
     
-    /**
-     * Returns whether this Sprite is loaded.
-     * @return Whether this Sprite is loaded
-     */
+    @Override
     public final boolean isLoaded() {
         return loaded;
     }
@@ -205,6 +201,7 @@ public class Sprite implements Animatable, Drawable {
      * SpriteSheet will be loaded as well.
      * @return Whether the loading occurred
      */
+    @Override
     public final boolean load() {
         if (loaded) {
             return false;
@@ -263,6 +260,7 @@ public class Sprite implements Animatable, Drawable {
      * unloaded as well.
      * @return Whether the unloading occurred
      */
+    @Override
     public final boolean unload() {
         if (blank || !loaded) {
             return false;

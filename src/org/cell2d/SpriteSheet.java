@@ -11,17 +11,17 @@ import org.cell2d.celick.SlickException;
  * <p>A SpriteSheet is a rectangular grid of Sprites. Each Sprite has an
  * x-coordinate in the grid that starts at 0 for the leftmost column and
  * increases to the right, as well as a y-coordinate that starts at 0 for the
- * topmost row and increases below. Like Sprites, Sounds, and Music tracks,
- * SpriteSheets can be manually loaded and unloaded into and out of memory.
- * Loading may take a moment, but a SpriteSheet's Sprites cannot be loaded and
- * drawn if the SpriteSheet itself is not loaded. Loading a SpriteSheet will
- * also load all of its Sprites, and loading a Sprite that is part of a
- * SpriteSheet will also load that SpriteSheet.</p>
+ * topmost row and increases below. Like other Loadables, SpriteSheets can be
+ * manually loaded and unloaded into and out of memory. Loading may take a
+ * moment, but a SpriteSheet's Sprites cannot be loaded and drawn if the
+ * SpriteSheet itself is not loaded. Loading a SpriteSheet will also load all of
+ * its Sprites, and loading a Sprite that is part of a SpriteSheet will also
+ * load that SpriteSheet.</p>
  * @see Sprite
  * @see Filter
  * @author Alex Heyman
  */
-public class SpriteSheet {
+public class SpriteSheet implements Loadable {
     
     private boolean loaded = false;
     private final SpriteSheet basedOn;
@@ -159,10 +159,7 @@ public class SpriteSheet {
         }
     }
     
-    /**
-     * Returns whether this SpriteSheet is loaded.
-     * @return Whether this SpriteSheet is loaded
-     */
+    @Override
     public final boolean isLoaded() {
         return loaded;
     }
@@ -172,6 +169,7 @@ public class SpriteSheet {
      * already loaded.
      * @return Whether the loading occurred
      */
+    @Override
     public final boolean load() {
         if (!loaded) {
             loaded = true;
@@ -220,6 +218,7 @@ public class SpriteSheet {
      * currently loaded.
      * @return Whether the unloading occurred
      */
+    @Override
     public final boolean unload() {
         if (loaded) {
             loaded = false;

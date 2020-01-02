@@ -1,20 +1,20 @@
 package org.cell2d;
 
 /**
- * <p>A Sound is a sound effect. Like Sprites, SpriteSheets, and Music tracks,
- * Sounds can be manually loaded and unloaded into and out of memory. Loading
- * may take a moment, but while a Sound is not loaded, it cannot play.</p>
+ * <p>A Sound is a sound effect. Like other Loadables, Sounds can be manually
+ * loaded and unloaded into and out of memory. Loading may take a moment, but
+ * while a Sound is not loaded, it cannot play.</p>
  * 
  * <p>Sounds can be played at different speeds from 0 up, with a speed of 0
  * making the Sound inaudible and a speed of 1 causing no speed change. They can
  * also be played at different volumes between 0 and 1, with a volume of 0
  * making the Sound inaudible and a volume of 1 causing no volume change.
- * Finally, the Sound class has a global volume between 0 and 1 by which the
+ * Finally, the Sound class has a global volume between 0 and 1, by which the
  * effective volumes of all newly played Sounds are scaled. The global volume is
  * 1 by default.</p>
  * @author Alex Heyman
  */
-public class Sound {
+public class Sound implements Loadable {
     
     private static double globalVolume = 1;
     
@@ -51,18 +51,12 @@ public class Sound {
         }
     }
     
-    /**
-     * Returns whether this Sound is loaded.
-     * @return Whether this Sound is loaded
-     */
+    @Override
     public final boolean isLoaded() {
         return loaded;
     }
     
-    /**
-     * Loads this Sound if it is not already loaded.
-     * @return Whether the loading occurred
-     */
+    @Override
     public final boolean load() {
         if (!loaded) {
             loaded = true;
@@ -72,10 +66,7 @@ public class Sound {
         return false;
     }
     
-    /**
-     * Unloads this Sound if it is currently loaded.
-     * @return Whether the unloading occurred
-     */
+    @Override
     public final boolean unload() {
         if (loaded) {
             loaded = false;

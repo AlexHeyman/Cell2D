@@ -3,24 +3,24 @@ package org.cell2d;
 /**
  * <p>A Music track is a piece of music that can be played in the background of
  * a CellGame. All playing and stopping of Music tracks is controlled by methods
- * of a CellGame so that the CellGame can keep track of them in its music stack.
- * </p>
+ * of a CellGame, so that the CellGame can keep track of the Music tracks in its
+ * music stack.</p>
  * 
- * <p>Like Sprites, SpriteSheets, and Sounds, Music tracks can be manually
- * loaded and unloaded into and out of memory. Loading may take a moment, but
- * while a Music track is not loaded, it cannot play.</p>
+ * <p>Like other Loadables, Music tracks can be manually loaded and unloaded
+ * into and out of memory. Loading may take a moment, but while a Music track is
+ * not loaded, it cannot play.</p>
  * 
  * <p>Music tracks can be played at different speeds from 0 up, with a speed of
  * 0 pausing the Music track and a speed of 1 causing no speed change. They can
  * also be played at different volumes between 0 and 1, with a volume of 0
  * making the Music track inaudible and a volume of 1 causing no volume change.
- * Finally, the Music class has a global volume between 0 and 1 by which the
+ * Finally, the Music class has a global volume between 0 and 1, by which the
  * effective volumes of all currently playing Music tracks are scaled. The
  * global volume is 1 by default.</p>
  * @see CellGame
  * @author Alex Heyman
  */
-public class Music {
+public class Music implements Loadable {
     
     /**
      * A blank Music track that produces no sound and plays indefinitely. It is
@@ -28,6 +28,7 @@ public class Music {
      * speed, and volume of 0.
      */
     public static final Music BLANK = new Music();
+    
     private static double globalVolume = 1;
     
     /**
@@ -127,18 +128,12 @@ public class Music {
         volumeFadeType = FadeType.NONE;
     }
     
-    /**
-     * Returns whether this Music track is loaded.
-     * @return Whether this Music track is loaded
-     */
+    @Override
     public final boolean isLoaded() {
         return loaded;
     }
     
-    /**
-     * Loads this Music track if it is not already loaded.
-     * @return Whether the loading occurred
-     */
+    @Override
     public final boolean load() {
         if (loaded) {
             return false;
@@ -148,10 +143,7 @@ public class Music {
         return true;
     }
     
-    /**
-     * Unloads this Music track if it is currently loaded.
-     * @return Whether the unloading occurred
-     */
+    @Override
     public final boolean unload() {
         if (blank || !loaded) {
             return false;
