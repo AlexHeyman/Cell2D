@@ -1,6 +1,7 @@
 package org.cell2d.celick;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.cell2d.Color;
 import org.cell2d.celick.opengl.renderer.Renderer;
 import org.cell2d.celick.opengl.renderer.SGL;
@@ -90,7 +93,7 @@ public class AngelCodeFont implements Font {
 	public AngelCodeFont(String fntFile, Image image) throws SlickException {
 		fontImage = image;
 
-		parseFnt(ResourceLoader.getResourceAsStream(fntFile));
+		parseFnt(fntFile);
 	}
 
 	/**
@@ -107,7 +110,7 @@ public class AngelCodeFont implements Font {
 	public AngelCodeFont(String fntFile, String imgFile) throws SlickException {
 		fontImage = new Image(imgFile);
 
-		parseFnt(ResourceLoader.getResourceAsStream(fntFile));
+		parseFnt(fntFile);
 	}
 
 	/**
@@ -127,7 +130,7 @@ public class AngelCodeFont implements Font {
 			throws SlickException {
 		fontImage = image;
 		displayListCaching = caching;
-		parseFnt(ResourceLoader.getResourceAsStream(fntFile));
+		parseFnt(fntFile);
 	}
 
 	/**
@@ -147,7 +150,7 @@ public class AngelCodeFont implements Font {
 			throws SlickException {
 		fontImage = new Image(imgFile);
 		displayListCaching = caching;
-		parseFnt(ResourceLoader.getResourceAsStream(fntFile));
+		parseFnt(fntFile);
 	}
 
 	/**
@@ -276,7 +279,15 @@ public class AngelCodeFont implements Font {
 			throw new SlickException("Failed to parse font file: " + fntFile);
 		}
 	}
-
+        
+        private void parseFnt(String fntFile) throws SlickException {
+            try {
+                parseFnt(ResourceLoader.getResourceAsStream(fntFile));
+            } catch (FileNotFoundException e) {
+                throw new SlickException(e.getMessage());
+            }
+        }
+        
 	/**
 	 * Parse a single character line from the definition
 	 * 

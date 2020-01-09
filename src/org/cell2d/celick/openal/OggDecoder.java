@@ -11,10 +11,12 @@ import java.nio.ByteBuffer;
  * @author Kevin Glass
  */
 public class OggDecoder {
+    
 	/** The conversion buffer size */
-	private int convsize = 4096 * 4;
+	private static final int CONV_BUF_SIZE = 4096 * 4;
 	/** The buffer used to read OGG file */
-	private byte[] convbuffer = new byte[convsize]; // take 8k out of the data segment, not the stack
+        // take 8k out of the data segment, not the stack
+	private final byte[] convbuffer = new byte[CONV_BUF_SIZE];
 	
 	/**
 	 * Create a new OGG decoder
@@ -23,16 +25,13 @@ public class OggDecoder {
 	}
 	
 	/**
-	 * Get the data out of an OGG file 
+	 * Get the data out of an OGG file
 	 * 
 	 * @param input The input stream from which to read the OGG file
 	 * @return The data describing the OGG thats been read
 	 * @throws IOException Indicaites a failure to read the OGG file
 	 */
 	public OggData getData(InputStream input) throws IOException {
-		if (input == null) {
-			throw new IOException("Failed to read OGG, source does not exist?");
-		}
 		ByteArrayOutputStream dataout = new ByteArrayOutputStream();
 		
 //		SyncState oy = new SyncState(); // sync and verify incoming physical bitstream

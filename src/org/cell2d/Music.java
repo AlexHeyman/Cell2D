@@ -1,5 +1,9 @@
 package org.cell2d;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * <p>A Music track is a piece of music that can be played in the background of
  * a CellGame. All playing and stopping of Music tracks is controlled by methods
@@ -135,12 +139,16 @@ public class Music implements Loadable {
     
     @Override
     public final boolean load() {
-        if (loaded) {
-            return false;
+        if (!loaded) {
+            loaded = true;
+            try {
+                audio = new Audio(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return true;
         }
-        loaded = true;
-        audio = new Audio(path);
-        return true;
+        return false;
     }
     
     @Override

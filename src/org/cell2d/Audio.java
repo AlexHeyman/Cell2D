@@ -1,9 +1,8 @@
 package org.cell2d;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.IntBuffer;
-import org.cell2d.celick.openal.AiffData;
 import org.cell2d.celick.openal.OggData;
 import org.cell2d.celick.openal.OggDecoder;
 import org.cell2d.celick.openal.WaveData;
@@ -29,7 +28,7 @@ class Audio {
     private int timesSourcePlayed = -1;
     private final float length;
     
-    Audio(String path) {
+    Audio(String path) throws IOException {
         if (!initialized) {
             init();
         }
@@ -37,25 +36,16 @@ class Audio {
         AL10.alGenBuffers(buf);
         buffer = buf.get(0);
         String lowerPath = path.toLowerCase();
+        InputStream stream = ResourceLoader.getResourceAsStream(path);
         if (lowerPath.endsWith(".wav")) {
-            WaveData data = WaveData.create(ResourceLoader.getResourceAsStream(path));
+            WaveData data = WaveData.create(stream);
             AL10.alBufferData(buffer, data.format, data.data, data.samplerate);
         } else if (lowerPath.endsWith(".ogg")) {
-            OggData ogg;
-            try {
-                ogg = new OggDecoder().getData(ResourceLoader.getResourceAsStream(path));
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load an OGG-format audio file: " + path);
-            }
+            OggData ogg = new OggDecoder().getData(stream);
             AL10.alBufferData(buffer, ogg.channels > 1 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
                     ogg.data, ogg.rate);
-        } else if (lowerPath.endsWith(".aif") || lowerPath.endsWith(".aiff")) {
-            AiffData data = AiffData.create(
-                    new BufferedInputStream(ResourceLoader.getResourceAsStream(path)));
-            AL10.alBufferData(buffer, data.format, data.data, data.samplerate);
         } else {
-            throw new RuntimeException("Attempted to load an audio file with an unsupported format: "
-                    + path);
+            throw new IOException("Attempted to load an audio file with an unsupported format: " + path);
         }
         int bytes = AL10.alGetBufferi(buffer, AL10.AL_SIZE);
         int bits = AL10.alGetBufferi(buffer, AL10.AL_BITS);

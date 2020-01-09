@@ -2,6 +2,7 @@ package org.cell2d.celick.util;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,13 +48,14 @@ public class ResourceLoader {
 		locations.clear();
 	}
 	
-	/**
-	 * Get a resource
-	 * 
-	 * @param ref The reference to the resource to retrieve
-	 * @return A stream from which the resource can be read
-	 */
-	public static InputStream getResourceAsStream(String ref) {
+        /**
+         * Get a resource
+         * 
+         * @param ref The reference to the resource to retrieve
+         * @return A stream from which the resource can be read
+         * @throws java.io.FileNotFoundException if no resource is found for the reference
+         */
+	public static InputStream getResourceAsStream(String ref) throws FileNotFoundException {
 		InputStream in = null;
 		
 		for (int i=0;i<locations.size();i++) {
@@ -66,7 +68,7 @@ public class ResourceLoader {
 		
 		if (in == null)
 		{
-			throw new RuntimeException("Resource not found: "+ref);
+                    throw new FileNotFoundException("Resource not found: "+ref);
 		}
 			
 		return new BufferedInputStream(in);
@@ -79,17 +81,12 @@ public class ResourceLoader {
 	 * @return True if the resource can be located
 	 */
 	public static boolean resourceExists(String ref) {
-		URL url = null;
-		
-		for (int i=0;i<locations.size();i++) {
-			ResourceLocation location = locations.get(i);
-			url = location.getResource(ref);
-			if (url != null) {
-				return true;
-			}
-		}
-		
-		return false;
+            for (int i = 0; i < locations.size(); i++) {
+                if (locations.get(i).getResource(ref) != null) {
+                    return true;
+                }
+            }
+            return false;
 	}
 	
 	/**
@@ -97,8 +94,9 @@ public class ResourceLoader {
 	 * 
 	 * @param ref The reference to the resource to retrieve
 	 * @return A URL from which the resource can be read
+         * @throws java.io.FileNotFoundException if no resource is found for the reference
 	 */
-	public static URL getResource(String ref) {
+	public static URL getResource(String ref) throws FileNotFoundException {
 
 		URL url = null;
 		
@@ -112,7 +110,7 @@ public class ResourceLoader {
 		
 		if (url == null)
 		{
-			throw new RuntimeException("Resource not found: "+ref);
+			throw new FileNotFoundException("Resource not found: "+ref);
 		}
 			
 		return url;

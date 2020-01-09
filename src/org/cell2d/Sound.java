@@ -1,5 +1,7 @@
 package org.cell2d;
 
+import java.io.IOException;
+
 /**
  * <p>A Sound is a sound effect. Like other Loadables, Sounds can be manually
  * loaded and unloaded into and out of memory. Loading may take a moment, but
@@ -60,7 +62,11 @@ public class Sound implements Loadable {
     public final boolean load() {
         if (!loaded) {
             loaded = true;
-            audio = new Audio(path);
+            try {
+                audio = new Audio(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             return true;
         }
         return false;
