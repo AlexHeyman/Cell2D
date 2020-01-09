@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cell2d.Color;
 import org.cell2d.celick.opengl.renderer.Renderer;
 import org.cell2d.celick.opengl.renderer.SGL;

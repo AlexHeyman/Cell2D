@@ -1,8 +1,6 @@
 package org.cell2d;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A Music track is a piece of music that can be played in the background of
