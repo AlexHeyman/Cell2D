@@ -82,9 +82,9 @@ public class Music implements Loadable {
     }
     
     /**
-     * Constructs a Music track from an audio file. Files of WAV, OGG, and
-     * AIF(F) formats are supported. When this Music track is looping, it will
-     * return to the start of the track once it reaches the end.
+     * Constructs a Music track from an audio file. Files of WAV and OGG formats
+     * are supported. When this Music track is looping, it will return to the
+     * start of the track once it reaches the end.
      * @param path The relative path to the audio file
      * @param load Whether this Music track should load upon creation
      */
@@ -93,8 +93,8 @@ public class Music implements Loadable {
     }
     
     /**
-     * Constructs a Music track from an audio file. Files of WAV, OGG, and
-     * AIF(F) formats are supported.
+     * Constructs a Music track from an audio file. Files of WAV and OGG formats
+     * are supported.
      * @param path The relative path to the audio file
      * @param loopStart The position in seconds in this Music track to which it
      * should return at the start of a loop

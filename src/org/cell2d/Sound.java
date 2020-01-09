@@ -41,8 +41,8 @@ public class Sound implements Loadable {
     private Audio audio = null;
     
     /**
-     * Constructs a Sound from an audio file. Files of WAV, OGG, and AIF(F)
-     * formats are supported.
+     * Constructs a Sound from an audio file. Files of WAV and OGG formats are
+     * supported.
      * @param path The relative path to the audio file
      * @param load Whether this Sound should load upon creation
      */
