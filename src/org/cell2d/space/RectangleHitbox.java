@@ -228,22 +228,6 @@ public class RectangleHitbox extends Hitbox {
         return absBottom;
     }
     
-    /**
-     * Returns this RectangleHitbox's width.
-     * @return This RectangleHitbox's width
-     */
-    public final long getWidth() {
-        return absRight - absLeft;
-    }
-    
-    /**
-     * Returns this RectangleHitbox's height.
-     * @return This RectangleHitbox's height
-     */
-    public final long getHeight() {
-        return absBottom - absTop;
-    }
-    
     @Override
     public final long getLeftEdge() {
         return getAbsX() + absLeft;

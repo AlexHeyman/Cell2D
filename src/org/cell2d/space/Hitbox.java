@@ -760,6 +760,28 @@ public abstract class Hitbox {
     public abstract long getBottomEdge();
     
     /**
+     * Returns the difference between the x-coordinates of this Hitbox's
+     * absolute right and left boundaries. This is equal to getRightEdge() -
+     * getLeftEdge().
+     * @return The difference between the x-coordinates of this Hitbox's
+     * absolute right and left boundaries
+     */
+    public final long getWidth() {
+        return getRightEdge() - getLeftEdge();
+    }
+    
+    /**
+     * Returns the difference between the y-coordinates of this Hitbox's
+     * absolute bottom and top boundaries. This is equal to getBottomEdge() -
+     * getTopEdge().
+     * @return The difference between the y-coordinates of this Hitbox's
+     * absolute bottom and top boundaries
+     */
+    public final long getHeight() {
+        return getBottomEdge() - getTopEdge();
+    }
+    
+    /**
      * Returns the absolute distance from this Hitbox's position to the
      * specified Hitbox's position.
      * @param hitbox The Hitbox to return the distance to

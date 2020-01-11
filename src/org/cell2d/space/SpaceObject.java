@@ -511,6 +511,28 @@ public abstract class SpaceObject {
     }
     
     /**
+     * Returns the difference between the x-coordinates of this SpaceObject's
+     * absolute right and left boundaries. This is equal to getRightEdge() -
+     * getLeftEdge().
+     * @return The difference between the x-coordinates of this SpaceObject's
+     * absolute right and left boundaries
+     */
+    public final long getWidth() {
+        return getRightEdge() - getLeftEdge();
+    }
+    
+    /**
+     * Returns the difference between the y-coordinates of this SpaceObject's
+     * absolute bottom and top boundaries. This is equal to getBottomEdge() -
+     * getTopEdge().
+     * @return The difference between the y-coordinates of this SpaceObject's
+     * absolute bottom and top boundaries
+     */
+    public final long getHeight() {
+        return getBottomEdge() - getTopEdge();
+    }
+    
+    /**
      * Returns this SpaceObject's center's offset.
      * @return This SpaceObject's center's offset
      */
