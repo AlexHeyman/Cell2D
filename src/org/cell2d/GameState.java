@@ -65,7 +65,7 @@ public abstract class GameState<T extends CellGame,
         super(gameClass, stateClass, subThinkerClass);
         thisState = (U)this;
         if (game == null) {
-            throw new RuntimeException("Attempted to create a GameState with no CellGame");
+            throw new RuntimeException("Attempted to construct a GameState with no CellGame");
         }
         this.game = game;
         this.id = id;

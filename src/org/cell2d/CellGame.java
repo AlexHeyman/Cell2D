@@ -241,7 +241,7 @@ public abstract class CellGame {
         game = new CelickGame();
         this.title = title;
         if (numCommands < 0) {
-            throw new RuntimeException("Attempted to create a CellGame with negative number of commands "
+            throw new RuntimeException("Attempted to construct a CellGame with negative number of commands "
                     + numCommands);
         }
         commandStates = new CommandState[numCommands];

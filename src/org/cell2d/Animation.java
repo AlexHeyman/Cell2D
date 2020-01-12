@@ -89,10 +89,10 @@ public class Animation implements Animatable {
      */
     public Animation(Animatable[] frames, long... frameDurations) {
         if (frames.length == 0) {
-            throw new RuntimeException("Attempted to create an empty Animation");
+            throw new RuntimeException("Attempted to construct an empty Animation");
         }
         if (frames.length != frameDurations.length) {
-            throw new RuntimeException("Attempted to create an Animation with " + frames.length
+            throw new RuntimeException("Attempted to construct an Animation with " + frames.length
                     + " frames, but " + frameDurations.length + " frame durations");
         }
         for (int i = 0; i < frames.length; i++) {
@@ -124,8 +124,8 @@ public class Animation implements Animatable {
             SpriteSheet spriteSheet, int x1, int y1, int x2, int y2, boolean columns) {
         if (x1 < 0 || x2 >= spriteSheet.getWidth() || y1 < 0 || y2 >= spriteSheet.getHeight()
                 || x2 < x1 || y2 < y1) {
-            throw new RuntimeException("Attempted to create an Animation from a SpriteSheet region defined"
-                    + " by invalid coordinates (" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")");
+            throw new RuntimeException("Attempted to construct an Animation from a SpriteSheet region"
+                    + " defined by invalid coordinates (" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + ")");
         }
         Animatable[] frames = new Animatable[(x2 - x1 + 1)*(y2 - y1 + 1)];
         int i = 0;

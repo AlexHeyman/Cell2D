@@ -173,7 +173,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
      */
     public Sprite(Sprite sprite, Filter filter, boolean load) {
         if (sprite.spriteSheet != null) {
-            throw new RuntimeException("Attempted to create a Sprite from part of a SpriteSheet");
+            throw new RuntimeException("Attempted to construct a Sprite from part of a SpriteSheet");
         }
         blank = false;
         loaded = false;
