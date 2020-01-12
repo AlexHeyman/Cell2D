@@ -135,6 +135,25 @@ public class SpriteSheet implements Loadable {
     private SpriteSheet(SpriteSheet basedOn, Filter basedFilter, String path,
             Color transColor, Set<Filter> filters, int width, int height,
             int spriteWidth, int spriteHeight, int spriteSpacing, int originX, int originY, boolean load) {
+        if (width <= 0) {
+            throw new RuntimeException("Attempted to create a SpriteSheet with non-positive width " + width);
+        }
+        if (height <= 0) {
+            throw new RuntimeException("Attempted to create a SpriteSheet with non-positive height "
+                    + height);
+        }
+        if (spriteWidth <= 0) {
+            throw new RuntimeException("Attempted to create a SpriteSheet with non-positive sprite width "
+                    + spriteWidth);
+        }
+        if (spriteHeight <= 0) {
+            throw new RuntimeException("Attempted to create a SpriteSheet with non-positive sprite height "
+                    + spriteHeight);
+        }
+        if (spriteSpacing < 0) {
+            throw new RuntimeException("Attempted to create a SpriteSheet with negative sprite spacing "
+                    + spriteSpacing);
+        }
         this.basedOn = basedOn;
         this.basedFilter = basedFilter;
         this.path = path;

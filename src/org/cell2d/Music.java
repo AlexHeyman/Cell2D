@@ -108,7 +108,8 @@ public class Music implements Loadable {
         if (loopStart < 0) {
             throw new RuntimeException("Attempted to give a Music track negative loop start position "
                     + loopStart);
-        } else if (loopEnd >= 0 && loopStart >= loopEnd) {
+        }
+        if (loopEnd >= 0 && loopStart >= loopEnd) {
             throw new RuntimeException("Attempted to give a Music track a loop start position ("
                     + loopStart + ") after or equal to its loop end position (" + loopEnd + ")");
         }
