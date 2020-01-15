@@ -19,6 +19,8 @@ import java.math.BigInteger;
  */
 public final class Frac {
     
+    private Frac() {}
+    
     /**
      * 32, the number of bits by which an integer must be shifted left to be
      * converted to fracunit scale, and by which a number in fracunit scale must
@@ -29,8 +31,6 @@ public final class Frac {
      * One fracunit, equal to 2 to the power of BITS, or 4294967296.
      */
     public static final long UNIT = 1L << BITS;
-    
-    private Frac() {}
     
     /**
      * Returns the equivalent of the specified <code>double</code> in fracunit

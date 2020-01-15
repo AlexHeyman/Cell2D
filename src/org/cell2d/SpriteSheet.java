@@ -30,7 +30,7 @@ public class SpriteSheet implements Loadable {
     private final Color transColor;
     private final Set<Filter> filters;
     private final HashMap<Filter,Image> images = new HashMap<>();
-    private final int spriteWidth, spriteHeight, spriteSpacing, originX, originY;
+    private final int spriteWidth, spriteHeight, spacing, margin, originX, originY;
     private int width = 0;
     private int height = 0;
     private final Sprite[][] sprites;
@@ -43,8 +43,10 @@ public class SpriteSheet implements Loadable {
      * @param height The height in Sprites of this SpriteSheet
      * @param spriteWidth The width in pixels of each Sprite
      * @param spriteHeight The height in pixels of each Sprite
-     * @param spriteSpacing The horizontal and vertical spacing in pixels
-     * between Sprites
+     * @param spacing The horizontal and vertical spacing in pixels between
+     * Sprites
+     * @param margin The horizontal and vertical spacing in pixels between the
+     * grid of Sprites and the edges of the image
      * @param originX The x-coordinate in pixels on each Sprite of that Sprite's
      * origin
      * @param originY The y-coordinate in pixels on each Sprite of that Sprite's
@@ -55,8 +57,8 @@ public class SpriteSheet implements Loadable {
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(String path, int width, int height, int spriteWidth, int spriteHeight,
-            int spriteSpacing, int originX, int originY, Set<Filter> filters, boolean load) {
-        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing,
+            int spacing, int margin, int originX, int originY, Set<Filter> filters, boolean load) {
+        this(path, width, height, spriteWidth, spriteHeight, spacing, margin,
                 originX, originY, null, (filters == null ? null : new HashSet<>(filters)), load);
     }
     
@@ -67,8 +69,10 @@ public class SpriteSheet implements Loadable {
      * @param height The height in Sprites of this SpriteSheet
      * @param spriteWidth The width in pixels of each Sprite
      * @param spriteHeight The height in pixels of each Sprite
-     * @param spriteSpacing The horizontal and vertical spacing in pixels
-     * between Sprites
+     * @param spacing The horizontal and vertical spacing in pixels between
+     * Sprites
+     * @param margin The horizontal and vertical spacing in pixels between the
+     * grid of Sprites and the edges of the image
      * @param originX The x-coordinate in pixels on each Sprite of that Sprite's
      * origin
      * @param originY The y-coordinate in pixels on each Sprite of that Sprite's
@@ -81,10 +85,10 @@ public class SpriteSheet implements Loadable {
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(String path, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
-            int originY, Color transColor, Set<Filter> filters, boolean load) {
+            int spriteWidth, int spriteHeight, int spacing, int margin,
+            int originX, int originY, Color transColor, Set<Filter> filters, boolean load) {
         this(null, null, path, transColor, (filters == null ? null : new HashSet<>(filters)),
-                width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY, load);
+                width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY, load);
     }
     
     /**
@@ -94,8 +98,10 @@ public class SpriteSheet implements Loadable {
      * @param height The height in Sprites of this SpriteSheet
      * @param spriteWidth The width in pixels of each Sprite
      * @param spriteHeight The height in pixels of each Sprite
-     * @param spriteSpacing The horizontal and vertical spacing in pixels
-     * between Sprites
+     * @param spacing The horizontal and vertical spacing in pixels between
+     * Sprites
+     * @param margin The horizontal and vertical spacing in pixels between the
+     * grid of Sprites and the edges of the image
      * @param originX The x-coordinate in pixels on each Sprite of that Sprite's
      * origin
      * @param originY The y-coordinate in pixels on each Sprite of that Sprite's
@@ -112,9 +118,9 @@ public class SpriteSheet implements Loadable {
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(String path, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int originX,
-            int originY, int transR, int transG, int transB, Set<Filter> filters, boolean load) {
-        this(path, width, height, spriteWidth, spriteHeight, spriteSpacing, originX, originY,
+            int spriteWidth, int spriteHeight, int spacing, int margin, int originX, int originY,
+            int transR, int transG, int transB, Set<Filter> filters, boolean load) {
+        this(path, width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY,
                 new Color(transR, transG, transB), (filters == null ? null : new HashSet<>(filters)), load);
     }
     
@@ -128,13 +134,13 @@ public class SpriteSheet implements Loadable {
      */
     public SpriteSheet(SpriteSheet spriteSheet, Filter filter, boolean load) {
         this(spriteSheet, filter, null, null, spriteSheet.filters, spriteSheet.width, spriteSheet.height,
-                spriteSheet.spriteWidth, spriteSheet.spriteHeight, spriteSheet.spriteSpacing,
+                spriteSheet.spriteWidth, spriteSheet.spriteHeight, spriteSheet.spacing, spriteSheet.margin,
                 spriteSheet.originX, spriteSheet.originY, load);
     }
     
-    private SpriteSheet(SpriteSheet basedOn, Filter basedFilter, String path,
-            Color transColor, Set<Filter> filters, int width, int height,
-            int spriteWidth, int spriteHeight, int spriteSpacing, int originX, int originY, boolean load) {
+    private SpriteSheet(SpriteSheet basedOn, Filter basedFilter, String path, Color transColor,
+            Set<Filter> filters, int width, int height, int spriteWidth, int spriteHeight,
+            int spacing, int margin, int originX, int originY, boolean load) {
         if (width <= 0) {
             throw new RuntimeException("Attempted to construct a SpriteSheet with non-positive width "
                     + width);
@@ -151,9 +157,13 @@ public class SpriteSheet implements Loadable {
             throw new RuntimeException("Attempted to construct a SpriteSheet with non-positive sprite"
                     + " height " + spriteHeight);
         }
-        if (spriteSpacing < 0) {
-            throw new RuntimeException("Attempted to construct a SpriteSheet with negative sprite spacing "
-                    + spriteSpacing);
+        if (spacing < 0) {
+            throw new RuntimeException("Attempted to construct a SpriteSheet with negative spacing "
+                    + spacing);
+        }
+        if (margin < 0) {
+            throw new RuntimeException("Attempted to construct a SpriteSheet with negative margin "
+                    + margin);
         }
         this.basedOn = basedOn;
         this.basedFilter = basedFilter;
@@ -164,7 +174,8 @@ public class SpriteSheet implements Loadable {
         this.height = height;
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
-        this.spriteSpacing = spriteSpacing;
+        this.spacing = spacing;
+        this.margin = margin;
         this.originX = originX;
         this.originY = originY;
         sprites = new Sprite[width][height];
@@ -223,7 +234,7 @@ public class SpriteSheet implements Loadable {
     
     private void loadFilter(Filter filter, Image image) {
         org.cell2d.celick.SpriteSheet spriteSheet = new org.cell2d.celick.SpriteSheet(
-                image, spriteWidth, spriteHeight, spriteSpacing);
+                image, spriteWidth, spriteHeight, spacing, margin);
         for (int x = 0; x < sprites.length; x++) {
             Sprite[] column = sprites[x];
             for (int y = 0; y < column.length; y++) {
