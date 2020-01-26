@@ -19,29 +19,32 @@ import java.util.Set;
  * assigned to a GameState if it is assigned to another Thinker that is itself
  * assigned to the GameState.</p>
  * 
- * <p>A Thinker's assigned GameState will keep track of its time, thus allowing
- * it to take its own time-dependent actions, while the GameState is active. A
- * Thinker's <i>time factor</i> represents the average number of discrete time
- * units the Thinker will experience each frame while assigned to an active
- * GameState. If its time factor is negative, as it is by default, a Thinker
- * will use a default time factor that depends on whether it is a GameState or a
- * SubThinker. If a Thinker is assigned to an inactive GameState or none at all,
- * time will not pass for it.</p>
+ * <p>A Thinker's assigned GameState will keep track of time for the Thinker,
+ * thus allowing the Thinker to take its own time-dependent actions, while the
+ * GameState is active. A Thinker's <i>time factor</i> represents the average
+ * number of discrete time units the Thinker will experience each frame while
+ * assigned to an active GameState. If its time factor is negative, as it is by
+ * default, a Thinker will use a time factor of one fracunit (if it is a
+ * GameState) or share the time factor of the Thinker to which it is assigned
+ * (if it is a SubThinker). If a Thinker is assigned to an inactive GameState or
+ * none at all, time will not pass for it.</p>
  * 
  * <p>A Thinker has <i>timers</i> that can perform Events after a certain number
- * of time units. Timers have integer values, with a positive value x indicating
- * that the Event will be performed in x time units, a negative value indicating
- * that the timer is not running, and a value of 0 indicating that either the
- * Event was performed or the value was deliberately set to 0 this time unit.
- * Each time unit, a Thinker decreases its non-negative timers' values by 1 and
- * performs the Events whose timers have reached 0. Each frame, each Thinker
- * experiences all of its time units immediately before its assigned SubThinkers
- * do.</p>
+ * of time units. Timers have integer values, with a positive value <i>x</i>
+ * indicating that the Event will be performed in <i>x</i> time units, a
+ * negative value indicating that the timer is not running, and a value of 0
+ * indicating that either the Event was performed, or the value was deliberately
+ * set to 0, this time unit. Each time unit, a Thinker decreases its
+ * non-negative timers' values by 1 and performs the Events whose timers have
+ * reached 0. Each frame, each Thinker experiences all of its time units
+ * immediately before its assigned SubThinkers experience any of theirs.</p>
  * 
  * <p>A Thinker has frameActions() that it takes exactly once each frame, after
  * all Thinkers have experienced all of their time units for that frame. It also
  * has an EventGroup of <i>frame Events</i> that it performs once each frame
- * immediately after it takes its frameActions().</p>
+ * immediately after it takes its frameActions(). Both taking frameActions() and
+ * performing frame Events count as time-dependent actions, and thus a Thinker
+ * will only do them when assigned to an active GameState.</p>
  * 
  * <p>SubThinkers may be assigned to one Thinker each. Because a Thinker's
  * internal list of SubThinkers cannot be modified while it is being iterated

@@ -12,7 +12,9 @@ import org.cell2d.SubThinker;
  * before its SpaceState moves its assigned MobileObjects. Like a SpaceState, it
  * also has an EventGroup of <i>before-movement Events</i> that it performs once
  * each frame. A SpaceThinker performs these events immediately after it takes
- * its beforeMovementActions().</p>
+ * its beforeMovementActions(). Both taking beforeMovementActions() and
+ * performing before-movement Events count as time-dependent actions, and thus a
+ * SpaceThinker will only do them when assigned to an active SpaceState.</p>
  * 
  * <p>Similarly to its frameActions(), the process in which a SpaceThinker takes
  * its beforeMovementActions() and then performs its before-movement Events is
