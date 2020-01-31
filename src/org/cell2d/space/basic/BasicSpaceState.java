@@ -1,7 +1,6 @@
 package org.cell2d.space.basic;
 
 import org.cell2d.CellGame;
-import org.cell2d.space.DrawMode;
 import org.cell2d.space.SpaceState;
 
 /**
