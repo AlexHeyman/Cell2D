@@ -92,6 +92,34 @@ import org.cell2d.celick.Graphics;
 public abstract class SpaceState<T extends CellGame,
         U extends SpaceState<T,U,V>, V extends SpaceThinker<T,U,V>> extends GameState<T,U,V> {
     
+    /**
+     * <p>A DrawMode is a procedure by which a SpaceState determines the order
+     * in which to draw SpaceObjects with the same draw priority over one
+     * another.</p>
+     * @see SpaceObject
+     * @author Alex Heyman
+     */
+    public static enum DrawMode {
+        /**
+         * SpaceObjects with the same draw priority are drawn in an arbitrary
+         * order. This is the most efficient DrawMode when the plane of the
+         * level is supposed to be perpendicular to the camera.
+         */
+        FLAT,
+        /**
+         * SpaceObjects with the same draw priority are drawn with the ones with
+         * higher y-coordinates in front. This creates the illusion that the
+         * camera is looking diagonally down from over the plane of the level.
+         */
+        OVER,
+        /**
+         * SpaceObjects with the same draw priority are drawn with the ones with
+         * lower y-coordinates in front. This creates the illusion that the
+         * camera is looking diagonally up from under the plane of the level.
+         */
+        UNDER
+    }
+    
     private static final Comparator<MobileObject> movementPriorityComparator = (object1, object2) -> {
         int priorityDiff = object2.movementPriority - object1.movementPriority;
         return (priorityDiff == 0 ?
