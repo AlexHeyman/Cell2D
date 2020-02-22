@@ -51,7 +51,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         path = null;
         transColor = null;
-        filters = null;
+        filters = Collections.emptySet();
         originX = 0;
         originY = 0;
     }
@@ -64,7 +64,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         this.spriteSheet = spriteSheet;
         path = null;
         transColor = null;
-        filters = null;
+        filters = Collections.emptySet();
         originX = spriteSheet.getOriginX();
         originY = spriteSheet.getOriginY();
     }
@@ -104,7 +104,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         this.path = path;
         this.transColor = transColor;
-        this.filters = (filters == null ? null : new HashSet<>(filters));
+        this.filters = (filters == null ? Collections.emptySet() : new HashSet<>(filters));
         this.originX = originX;
         this.originY = originY;
         if (load) {
@@ -149,7 +149,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         path = null;
         transColor = null;
-        this.filters = (filters == null ? null : new HashSet<>(filters));
+        this.filters = (filters == null ? Collections.emptySet() : new HashSet<>(filters));
         originX = (int)Math.round(image.getCenterOfRotationX());
         originY = (int)Math.round(image.getCenterOfRotationY());
         Image spriteImage;
@@ -222,10 +222,8 @@ public class Sprite implements Animatable, Drawable, Loadable {
                 throw new RuntimeException("Attempted to reload a Sprite that cannot be reloaded");
             }
             loadFilter(null, image);
-            if (filters != null) {
-                for (Filter filter : filters) {
-                    loadFilter(filter, filter.getFilteredImage(image));   
-                }
+            for (Filter filter : filters) {
+                loadFilter(filter, filter.getFilteredImage(image));   
             }
         } else {
             spriteSheet.load();
@@ -342,7 +340,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
      * applied to it with draw()
      */
     public final Set<Filter> getFilters() {
-        return (filters == null ? Collections.emptySet() : Collections.unmodifiableSet(filters));
+        return Collections.unmodifiableSet(filters);
     }
     
     /**
@@ -406,7 +404,8 @@ public class Sprite implements Animatable, Drawable, Loadable {
         }
         image.setRotation(-angle);
         image.setAlpha(alpha);
-        g.drawImage(image, x, y, x + (right - left)*scale, y + (bottom - top)*scale, left, top, right, bottom);
+        g.drawImage(image, x, y, x + (right - left)*scale, y + (bottom - top)*scale,
+                left, top, right, bottom);
     }
     
     @Override
@@ -437,7 +436,8 @@ public class Sprite implements Animatable, Drawable, Loadable {
         if (!blank && loaded && right > left && bottom > top) {
             left += originX;
             top += originY;
-            draw(g, x + left, y + top, left, right + originX, top, bottom + originY, 1, false, false, 0, 1, null);
+            draw(g, x + left, y + top, left, right + originX, top, bottom + originY,
+                    1, false, false, 0, 1, null);
         }
     }
     
@@ -459,7 +459,8 @@ public class Sprite implements Animatable, Drawable, Loadable {
             right += originX;
             top += originY;
             bottom += originY;
-            CellVector vector = new CellVector((long)left << Frac.BITS, (long)top << Frac.BITS).changeAngle(angle);
+            CellVector vector = new CellVector((long)left << Frac.BITS,
+                    (long)top << Frac.BITS).changeAngle(angle);
             draw(g, x + (float)Frac.toDouble(vector.getX()), y + (float)Frac.toDouble(vector.getY()),
                     left, right, top, bottom, 1, xFlip, yFlip, (float)angle, (float)alpha, filter);
         }

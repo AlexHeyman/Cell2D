@@ -58,8 +58,8 @@ public class SpriteSheet implements Loadable {
      */
     public SpriteSheet(String path, int width, int height, int spriteWidth, int spriteHeight,
             int spacing, int margin, int originX, int originY, Set<Filter> filters, boolean load) {
-        this(path, width, height, spriteWidth, spriteHeight, spacing, margin,
-                originX, originY, null, (filters == null ? null : new HashSet<>(filters)), load);
+        this(path, width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY,
+                null, (filters == null ? Collections.emptySet() : new HashSet<>(filters)), load);
     }
     
     /**
@@ -87,7 +87,8 @@ public class SpriteSheet implements Loadable {
     public SpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spacing, int margin,
             int originX, int originY, Color transColor, Set<Filter> filters, boolean load) {
-        this(null, null, path, transColor, (filters == null ? null : new HashSet<>(filters)),
+        this(null, null, path, transColor,
+                (filters == null ? Collections.emptySet() : new HashSet<>(filters)),
                 width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY, load);
     }
     
@@ -120,8 +121,9 @@ public class SpriteSheet implements Loadable {
     public SpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spacing, int margin, int originX, int originY,
             int transR, int transG, int transB, Set<Filter> filters, boolean load) {
-        this(path, width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY,
-                new Color(transR, transG, transB), (filters == null ? null : new HashSet<>(filters)), load);
+        this(path, width, height, spriteWidth, spriteHeight,
+                spacing, margin, originX, originY, new Color(transR, transG, transB),
+                (filters == null ? Collections.emptySet() : new HashSet<>(filters)), load);
     }
     
     /**
@@ -222,10 +224,8 @@ public class SpriteSheet implements Loadable {
             }
             numSpritesLoaded = width*height;
             loadFilter(null, image);
-            if (filters != null) {
-                for (Filter filter : filters) {
-                    loadFilter(filter, filter.getFilteredImage(image));
-                }
+            for (Filter filter : filters) {
+                loadFilter(filter, filter.getFilteredImage(image));
             }
             return true;
         }
@@ -299,7 +299,7 @@ public class SpriteSheet implements Loadable {
      * Sprites when applied to them with draw()
      */
     public final Set<Filter> getFilters() {
-        return (filters == null ? Collections.emptySet() : Collections.unmodifiableSet(filters));
+        return Collections.unmodifiableSet(filters);
     }
     
     /**
