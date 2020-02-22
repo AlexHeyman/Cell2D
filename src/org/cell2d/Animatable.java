@@ -36,9 +36,9 @@ public interface Animatable {
     Animatable getFrame(int index);
     
     /**
-     * Returns the duration of the frame at the specified index.
+     * Returns the duration of this Animatable's frame at the specified index.
      * @param index The index of the frame whose duration is to be returned
-     * @return The duration of the frame at the specified index
+     * @return The duration of this Animatable's frame at the specified index
      * @throws IndexOutOfBoundsException if the index is out of range
      */
     long getFrameDuration(int index);
