@@ -299,26 +299,6 @@ public class SpriteSheet implements Loadable {
     }
     
     /**
-     * Returns the x-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of that Sprite's origin.
-     * @return The x-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of that Sprite's origin
-     */
-    public final int getOriginX() {
-        return originX;
-    }
-    
-    /**
-     * Returns the y-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of that Sprite's origin.
-     * @return The y-coordinate in pixels on each of this SpriteSheet's Sprites
-     * of that Sprite's origin
-     */
-    public final int getOriginY() {
-        return originY;
-    }
-    
-    /**
      * Returns the width in Sprites of this SpriteSheet.
      * @return The width in Sprites of this SpriteSheet
      */
@@ -346,6 +326,61 @@ public class SpriteSheet implements Loadable {
                     + " coordinates (" + x + ", " + y + ")");
         }
         return sprites[x][y];
+    }
+    
+    /**
+     * Returns the width in pixels of each of this SpriteSheet's sprites.
+     * @return The width of each of this SpriteSheet's sprites
+     */
+    public final int getSpriteWidth() {
+        return spriteWidth;
+    }
+    
+    /**
+     * Returns the height in pixels of each of this SpriteSheet's sprites.
+     * @return The height of each of this SpriteSheet's sprites
+     */
+    public final int getSpriteHeight() {
+        return spriteHeight;
+    }
+    
+    /**
+     * Returns the horizontal and vertical spacing in pixels between Sprites in
+     * this SpriteSheet.
+     * @return The spacing between Sprites in this SpriteSheet
+     */
+    public final int getSpacing() {
+        return spacing;
+    }
+    
+    /**
+     * Returns the horizontal and vertical spacing in pixels between this
+     * SpriteSheet's grid of Sprites and the edges of its image.
+     * @return The spacing between this SpriteSheet's grid of Sprites and the
+     * edges of its image
+     */
+    public final int getMargin() {
+        return margin;
+    }
+    
+    /**
+     * Returns the x-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of that Sprite's origin.
+     * @return The x-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of that Sprite's origin
+     */
+    public final int getOriginX() {
+        return originX;
+    }
+    
+    /**
+     * Returns the y-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of that Sprite's origin.
+     * @return The y-coordinate in pixels on each of this SpriteSheet's Sprites
+     * of that Sprite's origin
+     */
+    public final int getOriginY() {
+        return originY;
     }
     
 }
