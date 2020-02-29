@@ -30,9 +30,7 @@ public class SpriteSheet implements Loadable {
     private final Color transColor;
     private final Set<Filter> filters;
     private final HashMap<Filter,Image> images = new HashMap<>();
-    private final int spriteWidth, spriteHeight, spacing, margin, originX, originY;
-    private int width = 0;
-    private int height = 0;
+    private final int width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY;
     private final Sprite[][] sprites;
     private int numSpritesLoaded = 0;
     
@@ -181,9 +179,9 @@ public class SpriteSheet implements Loadable {
         this.originX = originX;
         this.originY = originY;
         sprites = new Sprite[width][height];
-        for (int x = 0; x < sprites.length; x++) {
+        for (int x = 0; x < width; x++) {
             Sprite[] column = sprites[x];
-            for (int y = 0; y < column.length; y++) {
+            for (int y = 0; y < height; y++) {
                 column[y] = new Sprite(this);
             }
         }
@@ -288,8 +286,6 @@ public class SpriteSheet implements Loadable {
             throw new RuntimeException(e);
         }
         images.clear();
-        width = 0;
-        height = 0;
     }
     
     /**
@@ -345,7 +341,7 @@ public class SpriteSheet implements Loadable {
      * @return The Sprite at the specified coordinates
      */
     public Sprite getSprite(int x, int y) {
-        if (x < 0 || x >= sprites.length || y < 0 || y >= sprites[x].length) {
+        if (x < 0 || x >= width || y < 0 || y >= height) {
             throw new RuntimeException("Attempted to retrieve a Sprite from a SpriteSheet at invalid"
                     + " coordinates (" + x + ", " + y + ")");
         }
