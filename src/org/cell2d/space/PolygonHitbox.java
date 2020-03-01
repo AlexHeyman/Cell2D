@@ -23,9 +23,9 @@ public class PolygonHitbox extends Hitbox {
         private final CellVector rel;
         private final CellVector abs;
         
-        private RelAbsPair(CellVector rel, CellVector abs) {
+        private RelAbsPair(CellVector rel) {
             this.rel = rel;
-            this.abs = abs;
+            abs = new CellVector();
         }
         
     }
@@ -54,7 +54,7 @@ public class PolygonHitbox extends Hitbox {
         super(relX, relY);
         vertices = new ArrayList<>(relVertices.length);
         for (CellVector relVertex : relVertices) {
-            vertices.add(new RelAbsPair(new CellVector(relVertex), null));
+            vertices.add(new RelAbsPair(new CellVector(relVertex)));
         }
         updateData();
     }
@@ -119,7 +119,7 @@ public class PolygonHitbox extends Hitbox {
     public Hitbox getCopy() {
         List<RelAbsPair> newVertices = new ArrayList<>(vertices.size());
         for (RelAbsPair vertex : vertices) {
-            newVertices.add(new RelAbsPair(new CellVector(vertex.rel), null));
+            newVertices.add(new RelAbsPair(new CellVector(vertex.rel)));
         }
         return new PolygonHitbox(0, 0, newVertices);
     }
@@ -249,7 +249,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relVertex The new relative vertex
      */
     public final void addVertex(CellVector relVertex) {
-        vertices.add(new RelAbsPair(new CellVector(relVertex), null));
+        vertices.add(new RelAbsPair(new CellVector(relVertex)));
         updateData();
     }
     
@@ -260,7 +260,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relY The y-coordinate of the new relative vertex
      */
     public final void addVertex(long relX, long relY) {
-        vertices.add(new RelAbsPair(new CellVector(relX, relY), null));
+        vertices.add(new RelAbsPair(new CellVector(relX, relY)));
         updateData();
     }
     
@@ -271,7 +271,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relVertex The new relative vertex
      */
     public final void addVertex(int index, CellVector relVertex) {
-        vertices.add(index, new RelAbsPair(new CellVector(relVertex), null));
+        vertices.add(index, new RelAbsPair(new CellVector(relVertex)));
         updateData();
     }
     
@@ -283,7 +283,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relY The y-coordinate of the new relative vertex
      */
     public final void addVertex(int index, long relX, long relY) {
-        vertices.add(index, new RelAbsPair(new CellVector(relX, relY), null));
+        vertices.add(index, new RelAbsPair(new CellVector(relX, relY)));
         updateData();
     }
     
@@ -294,7 +294,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relVertex The new relative vertex
      */
     public final void setRelVertex(int index, CellVector relVertex) {
-        vertices.set(index, new RelAbsPair(new CellVector(relVertex), null));
+        vertices.set(index, new RelAbsPair(new CellVector(relVertex)));
         updateData();
     }
     
@@ -306,7 +306,7 @@ public class PolygonHitbox extends Hitbox {
      * @param relY The y-coordinate of the new relative vertex
      */
     public final void setRelVertex(int index, long relX, long relY) {
-        vertices.set(index, new RelAbsPair(new CellVector(relX, relY), null));
+        vertices.set(index, new RelAbsPair(new CellVector(relX, relY)));
         updateData();
     }
     
