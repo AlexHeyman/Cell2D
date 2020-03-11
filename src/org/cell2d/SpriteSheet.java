@@ -319,11 +319,13 @@ public class SpriteSheet implements Loadable {
      * @param x The x-coordinate in Sprites of the Sprite
      * @param y The y-coordinate in Sprites of the Sprite
      * @return The Sprite at the specified coordinates
+     * @throws IndexOutOfBoundsException if the location is out of this
+     * SpriteSheet's bounds
      */
     public Sprite getSprite(int x, int y) {
         if (x < 0 || x >= width || y < 0 || y >= height) {
-            throw new RuntimeException("Attempted to retrieve a Sprite from a SpriteSheet at invalid"
-                    + " coordinates (" + x + ", " + y + ")");
+            throw new IndexOutOfBoundsException("Attempted to retrieve a Sprite from a SpriteSheet at"
+                    + " invalid coordinates (" + x + ", " + y + ")");
         }
         return sprites[x][y];
     }
