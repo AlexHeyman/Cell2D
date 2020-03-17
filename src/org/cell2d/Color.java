@@ -101,7 +101,7 @@ public class Color implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Color) {
-            Color color = (Color) obj;
+            Color color = (Color)obj;
             return r == color.r && g == color.g && b == color.b && a == color.a;
         }
         return false;
