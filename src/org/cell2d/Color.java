@@ -39,7 +39,7 @@ public class Color implements Serializable {
     private final float r, g, b, a;
     
     /**
-     * Constructs a Color with the specified values.
+     * Constructs a Color with the specified RGBA values.
      * @param r The Color's red value
      * @param g The Color's green value
      * @param b The Color's blue value
@@ -63,8 +63,8 @@ public class Color implements Serializable {
     }
     
     /**
-     * Constructs a Color with the specified values, given as integers from 0 to
-     * 255.
+     * Constructs a Color with the specified RGBA values, given as integers from
+     * 0 to 255.
      * @param r The Color's red value
      * @param g The Color's green value
      * @param b The Color's blue value
@@ -83,6 +83,16 @@ public class Color implements Serializable {
      */
     public Color(int r, int g, int b) {
         this(byteToFloat(r), byteToFloat(g), byteToFloat(b), 1f);
+    }
+    
+    /**
+     * Constructs a Color that shares the RGBA values of the specified
+     * java.awt.Color.
+     * @param color The java.awt.Color to copy the Color's RGBA values from
+     */
+    public Color(java.awt.Color color) {
+        this(byteToFloat(color.getRed()), byteToFloat(color.getGreen()),
+                byteToFloat(color.getBlue()), byteToFloat(color.getAlpha()));
     }
     
     @Override
