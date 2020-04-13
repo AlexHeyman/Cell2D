@@ -1,7 +1,7 @@
 package org.cell2d;
 
+import java.awt.Rectangle;
 import org.cell2d.celick.Graphics;
-import org.cell2d.celick.geom.Rectangle;
 
 /**
  * <p>A Drawable object is one that visually represents itself with an image
@@ -135,30 +135,27 @@ public interface Drawable {
             double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter);
     
     /**
-     * Returns the region of the specified Graphics context that can currently
-     * be rendered to, given as the coordinates of the region's edges in the
-     * following order: left edge, top edge, right edge, bottom edge. If a
-     * CellGame is currently rendering to the Graphics context, the returned
-     * region will be the one occupied by the CellGame's screen - or, if the
-     * view through a SpaceState's Viewport is currently being rendered, the
-     * region will be the one occupied by that Viewport. These facts are true as
-     * long as the Graphics context's setWorldClip() method has not been called
-     * outside of Cell2D's code, as the returned region is the same as the
-     * Graphics context's world clip region with its edges each rounded to the
-     * nearest integer.
+     * Returns the rectangular region of the specified Graphics context that can
+     * currently be rendered to. If a CellGame is currently rendering to the
+     * Graphics context, the returned region will be the one occupied by the
+     * CellGame's screen - or, if the view through a SpaceState's Viewport is
+     * currently being rendered, the region will be the one occupied by that
+     * Viewport. These facts are true as long as the Graphics context's
+     * setWorldClip() method has not been called outside of Cell2D's code, as
+     * the returned region is the same as the Graphics context's world clip
+     * region with its edges each rounded to the nearest integer.
      * @param g The Graphics context to examine
      * @return The region of the specified Graphics context that can currently
      * be rendered to
      */
-    public static int[] getRenderableRegion(Graphics g) {
-        Rectangle worldClip = g.getWorldClip();
-        float x1 = worldClip.getX();
-        float y1 = worldClip.getY();
-        float x2 = x1 + worldClip.getWidth();
-        float y2 = y1 + worldClip.getHeight();
-        int[] edges = {(int)Math.round(x1), (int)Math.round(y1),
-            (int)Math.round(x2), (int)Math.round(y2)};
-        return edges;
+    public static Rectangle getRenderableRegion(Graphics g) {
+        org.cell2d.celick.geom.Rectangle worldClip = g.getWorldClip();
+        float x = worldClip.getX();
+        float y = worldClip.getY();
+        float width = worldClip.getWidth();
+        float height = worldClip.getHeight();
+        return new Rectangle((int)Math.round(x), (int)Math.round(y),
+                (int)Math.round(width), (int)Math.round(height));
     }
     
 }
