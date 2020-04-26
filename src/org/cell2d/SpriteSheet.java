@@ -3,6 +3,7 @@ package org.cell2d;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
@@ -21,7 +22,7 @@ import org.cell2d.celick.SlickException;
  * @see Filter
  * @author Alex Heyman
  */
-public class SpriteSheet implements Loadable {
+public class SpriteSheet implements Iterable<Sprite>, Loadable {
     
     private boolean loaded = false;
     private final SpriteSheet basedOn;
@@ -31,7 +32,7 @@ public class SpriteSheet implements Loadable {
     private final Set<Filter> filters;
     private final HashMap<Filter,Image> images = new HashMap<>();
     private final int width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY;
-    private final Sprite[][] sprites;
+    private final Sprite[] sprites;
     private int numSpritesLoaded = 0;
     
     /**
@@ -178,16 +179,41 @@ public class SpriteSheet implements Loadable {
         this.margin = margin;
         this.originX = originX;
         this.originY = originY;
-        sprites = new Sprite[width][height];
-        for (int x = 0; x < width; x++) {
-            Sprite[] column = sprites[x];
-            for (int y = 0; y < height; y++) {
-                column[y] = new Sprite(this);
-            }
+        sprites = new Sprite[width*height];
+        for (int i = 0; i < sprites.length; i++) {
+            sprites[i] = new Sprite(this);
         }
         if (load) {
             load();
         }
+    }
+    
+    private class SpriteIterator implements Iterator<Sprite> {
+        
+        private int i = 0;
+        
+        @Override
+        public boolean hasNext() {
+            return (i < sprites.length);
+        }
+        
+        @Override
+        public Sprite next() {
+            Sprite next = sprites[i];
+            i++;
+            return next;
+        }
+        
+    }
+    
+    /**
+     * Returns an Iterator over this SpriteSheet's Sprites. The Iterator does
+     * not support the remove operation.
+     * @return An Iterator over this SpriteSheet's Sprites
+     */
+    @Override
+    public final Iterator<Sprite> iterator() {
+        return new SpriteIterator();
     }
     
     @Override
@@ -215,12 +241,10 @@ public class SpriteSheet implements Loadable {
                 basedOn.load();
                 image = basedFilter.getFilteredImage(basedOn.images.get(null));
             }
-            for (Sprite[] column : sprites) {
-                for (Sprite sprite : column) {
-                    sprite.loaded = true;
-                }
+            for (Sprite sprite : sprites) {
+                sprite.loaded = true;
             }
-            numSpritesLoaded = width*height;
+            numSpritesLoaded = sprites.length;
             loadFilter(null, image);
             for (Filter filter : filters) {
                 loadFilter(filter, filter.getFilteredImage(image));
@@ -233,10 +257,11 @@ public class SpriteSheet implements Loadable {
     private void loadFilter(Filter filter, Image image) {
         org.cell2d.celick.SpriteSheet spriteSheet = new org.cell2d.celick.SpriteSheet(
                 image, spriteWidth, spriteHeight, spacing, margin);
-        for (int x = 0; x < sprites.length; x++) {
-            Sprite[] column = sprites[x];
-            for (int y = 0; y < column.length; y++) {
-                column[y].loadFilter(filter, spriteSheet.getSubImage(x, y));
+        int i = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                sprites[i].loadFilter(filter, spriteSheet.getSubImage(x, y));
+                i++;
             }
         }
         images.put(filter, image);
@@ -252,11 +277,9 @@ public class SpriteSheet implements Loadable {
         if (loaded) {
             loaded = false;
             destroyAndClear();
-            for (Sprite[] column : sprites) {
-                for (Sprite sprite : column) {
-                    sprite.loaded = false;
-                    sprite.clear();
-                }
+            for (Sprite sprite : sprites) {
+                sprite.loaded = false;
+                sprite.clear();
             }
             numSpritesLoaded = 0;
             return true;
@@ -269,10 +292,8 @@ public class SpriteSheet implements Loadable {
         if (numSpritesLoaded == 0) {
             loaded = false;
             destroyAndClear();
-            for (Sprite[] column : sprites) {
-                for (Sprite sprite : column) {
-                    sprite.clear();
-                }
+            for (Sprite sprite : sprites) {
+                sprite.clear();
             }
         }
     }
@@ -327,7 +348,7 @@ public class SpriteSheet implements Loadable {
             throw new IndexOutOfBoundsException("Attempted to retrieve a Sprite from a SpriteSheet at"
                     + " invalid coordinates (" + x + ", " + y + ")");
         }
-        return sprites[x][y];
+        return sprites[y*width + x];
     }
     
     /**
