@@ -319,9 +319,19 @@ public class Sprite implements Animatable, Drawable, Loadable {
     public final boolean framesAreCompatible(int index1, int index2) {
         if (index1 != 0 || index2 != 0) {
             throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at"
-                    + " invalid pair of indices " + index1 + ", " + index2);
+                    + " invalid pair of indices (" + index1 + ", " + index2 + ")");
         }
         return true;
+    }
+    
+    /**
+     * Returns a Drawable instantiation of this Sprite - which is simply this
+     * Sprite itself, since Sprites are already Drawables.
+     * @return A Drawable instantiation of this Sprite
+     */
+    @Override
+    public final Drawable getInstance() {
+        return this;
     }
     
     /**

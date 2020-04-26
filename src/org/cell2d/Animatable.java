@@ -59,4 +59,10 @@ public interface Animatable {
      */
     boolean framesAreCompatible(int index1, int index2);
     
+    /**
+     * Returns a Drawable instantiation of this Animatable.
+     * @return A Drawable instantiation of this Animatable
+     */
+    Drawable getInstance();
+    
 }

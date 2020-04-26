@@ -10,7 +10,7 @@ import java.util.Arrays;
  * duration in fracunits. Durations of 0 or less are interpreted as infinite.
  * </p>
  * 
- * <p>The frames of Animations may be other Animations in addition to single
+ * <p>The frames of an Animation may be other Animations in addition to single
  * Sprites, which allows for the creation of multi-dimensional Animations in a
  * similar manner to multi-dimensional arrays.</p>
  * 
@@ -236,12 +236,23 @@ public class Animation implements Animatable {
         if (index1 < 0 || index1 >= frames.length
                 || index2 < 0 || index2 >= frames.length) {
             throw new IndexOutOfBoundsException("Attempted to get an Animatable's frame compatibility at"
-                    + " invalid pair of indices " + index1 + ", " + index2);
+                    + " invalid pair of indices (" + index1 + ", " + index2 + ")");
         }
         if (index2 > index1) {
             return compatibilities[index2][index1];
         }
         return compatibilities[index1][index2];
+    }
+    
+    /**
+     * Returns a Drawable instantiation of this Animation - that is, a new
+     * AnimationInstance of this Animation, with its indices and speeds at each
+     * level starting at 0.
+     * @return A Drawable instantiation of this Animation
+     */
+    @Override
+    public final Drawable getInstance() {
+        return new AnimationInstance(this);
     }
     
 }
