@@ -3087,8 +3087,8 @@ public abstract class SpaceState<T extends CellGame,
                                         && locatorHitbox.getTopEdge() < bottomEdge
                                         && locatorHitbox.getBottomEdge() > topEdge) {
                                     locatorHitbox.getObject().draw(g,
-                                            vx1 + Frac.intRound(locatorHitbox.getAbsX() - leftEdge),
-                                            vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge));
+                                            scx + Frac.intRound(locatorHitbox.getAbsX() - cx),
+                                            scy + Frac.intRound(locatorHitbox.getAbsY() - cy));
                                 }
                             }
                         }
@@ -3115,8 +3115,8 @@ public abstract class SpaceState<T extends CellGame,
                                         && locatorHitbox.getTopEdge() < bottomEdge
                                         && locatorHitbox.getBottomEdge() > topEdge) {
                                     locatorHitbox.getObject().draw(g,
-                                            vx1 + Frac.intRound(locatorHitbox.getAbsX() - leftEdge),
-                                            vy1 + Frac.intRound(locatorHitbox.getAbsY() - topEdge));
+                                            scx + Frac.intRound(locatorHitbox.getAbsX() - cx),
+                                            scy + Frac.intRound(locatorHitbox.getAbsY() - cy));
                                 }
                                 lastHitbox = locatorHitbox;
                             }
