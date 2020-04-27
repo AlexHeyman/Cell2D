@@ -1,6 +1,5 @@
 package org.cell2d.space;
 
-import java.util.Collection;
 import org.cell2d.CellGame;
 
 /**
@@ -19,17 +18,18 @@ import org.cell2d.CellGame;
 public interface Area<T extends CellGame, U extends SpaceState<T,U,?>> {
     
     /**
-     * Actions for this Area to take in order for the specified SpaceState to
-     * load it. All of the SpaceObjects in the Collection of SpaceObjects that
-     * this method returns will be added to the SpaceState as part of this Area,
-     * but only if they have not already been added to a SpaceState. The
-     * positions of these SpaceObjects are relative to the origin point about
-     * which this Area is being loaded.
+     * Actions for this Area to take to in order for the specified SpaceState to
+     * load it. This method should involve constructing a set of SpaceObjects
+     * for the SpaceState to add to itself. These SpaceObjects should not be
+     * added to a SpaceState in the course of this method. The positions of the
+     * SpaceObjects will be treated as relative to the origin point about which
+     * this Area is being loaded. The SpaceObjects must be returned as an
+     * Iterable, such as a List or Set, that contains each SpaceObject exactly
+     * once.
      * @param game The CellGame of the SpaceState that is loading this Area
      * @param state The SpaceState that is loading this Area
-     * @return All of the SpaceObjects to be added to the SpaceState as part of
-     * this Area
+     * @return The SpaceObjects for the SpaceState to add to itself
      */
-    Collection<SpaceObject> load(T game, U state);
+    Iterable<SpaceObject> load(T game, U state);
     
 }
