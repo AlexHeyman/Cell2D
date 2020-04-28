@@ -15,6 +15,7 @@ import org.cell2d.celick.SlickException;
  * replaced with that of the key's value in the Map. The Map's values' alpha
  * values are irrelevant to the ColorMapFilter's behavior, and the alpha values
  * of the original image's pixels are left unchanged in the filtered image.</p>
+ * @see Color
  * @author Alex Heyman
  */
 public class ColorMapFilter extends Filter {
