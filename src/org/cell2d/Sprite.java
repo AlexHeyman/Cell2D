@@ -7,7 +7,6 @@ import java.util.Set;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
-import org.cell2d.celick.geom.Vector2f;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
