@@ -7,6 +7,7 @@ import java.util.Set;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
+import org.cell2d.celick.geom.Vector2f;
 
 /**
  * <p>A Sprite is a static image that can be drawn to a Graphics context. Like
@@ -234,6 +235,13 @@ public class Sprite implements Animatable, Drawable, Loadable {
     final void loadFilter(Filter filter, Image image) {
         image.getWidth(); //Prompt the image to initialize itself if it hasn't already
         Image[] imageArray = new Image[4];
+        if (filter == null) {
+            defaultImages = imageArray;
+            width = image.getWidth();
+            height = image.getHeight();
+            right = width - originX;
+            bottom = height - originY;
+        }
         imageArray[0] = image;
         imageArray[0].setCenterOfRotation(originX, originY);
         imageArray[1] = image.getFlippedCopy(true, false);
@@ -242,13 +250,6 @@ public class Sprite implements Animatable, Drawable, Loadable {
         imageArray[2].setCenterOfRotation(originX, bottom);
         imageArray[3] = image.getFlippedCopy(true, true);
         imageArray[3].setCenterOfRotation(right, bottom);
-        if (filter == null) {
-            defaultImages = imageArray;
-            width = image.getWidth();
-            height = image.getHeight();
-            right = width - originX;
-            bottom = height - originY;
-        }
         images.put(filter, imageArray);
     }
     

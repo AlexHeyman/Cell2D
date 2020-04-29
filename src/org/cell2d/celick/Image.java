@@ -888,8 +888,11 @@ public class Image implements Renderable {
      * @param angle The angle to be set
      */
     public void setRotation(float angle) { 
-        this.angle = angle % 360.0f; 
-    } 
+        this.angle = angle % 360;
+        if (this.angle < 0) {
+            this.angle += 360;
+        }
+    }
     
     /**
      * Get the current angle of rotation for this image.

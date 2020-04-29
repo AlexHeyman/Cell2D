@@ -57,14 +57,7 @@ public strictfp class Vector2f implements Serializable {
 		if (theta < 0) {
 			theta = 360 + theta;
 		}
-		double oldTheta = getTheta();
-		if ((theta < -360) || (theta > 360)) {
-			oldTheta = oldTheta % 360;
-		}
-		if (theta < 0) {
-			oldTheta = 360 + oldTheta;
-		}
-
+                
 		float len = length();
 		x = len * (float) Math.cos(StrictMath.toRadians(theta));
 		y = len * (float) Math.sin(StrictMath.toRadians(theta));
