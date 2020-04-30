@@ -87,9 +87,9 @@ import org.lwjgl.opengl.DisplayMode;
 public abstract class CellGame {
     
     /**
-     * The version number of Cell2D, currently 2.0.2.
+     * The version number of Cell2D, currently 2.1.0.
      */
-    public static final String VERSION = "2.0.2";
+    public static final String VERSION = "2.1.0";
     
     private static final SGL GL = Renderer.get();
     
