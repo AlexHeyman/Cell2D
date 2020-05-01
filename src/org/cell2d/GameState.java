@@ -116,7 +116,7 @@ public abstract class GameState<T extends CellGame,
     
     /**
      * Returns the number of AnimationInstances that are assigned to this
-     * GameState.
+     * GameState, with or without IDs.
      * @return The number of AnimationInstances that are assigned to this
      * GameState
      */
@@ -143,8 +143,8 @@ public abstract class GameState<T extends CellGame,
     }
     
     /**
-     * Adds a new AnimationInstance of the specified Animation to this
-     * GameState without an ID.
+     * Adds a new AnimationInstance of the specified Animation to this GameState
+     * without an ID.
      * @param animation The Animation to add a new AnimationInstance of
      * @return The new AnimationInstance
      */
@@ -206,12 +206,12 @@ public abstract class GameState<T extends CellGame,
             return true;
         }
         if (instance.state == null) {
+            animInstancesToIDs.put(instance, id);
             AnimationInstance oldInstance = idsToAnimInstances.put(id, instance);
             if (oldInstance != null) {
                 animInstancesToIDs.remove(oldInstance);
                 oldInstance.state = null;
             }
-            animInstancesToIDs.put(instance, id);
             instance.state = this;
             return true;
         }
@@ -256,12 +256,12 @@ public abstract class GameState<T extends CellGame,
                 return AnimationInstance.BLANK;
             }
             instance = new AnimationInstance(animation);
+            animInstancesToIDs.put(instance, id);
             AnimationInstance oldInstance = idsToAnimInstances.put(id, instance);
             if (oldInstance != null) {
                 animInstancesToIDs.remove(oldInstance);
                 oldInstance.state = null;
             }
-            animInstancesToIDs.put(instance, id);
             instance.state = this;
         }
         return instance;

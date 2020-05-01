@@ -57,13 +57,13 @@ import org.cell2d.celick.Graphics;
  * SpaceObjects with higher draw priorities are drawn in front of those with
  * lower ones.</p>
  * 
- * <p>If an AnimationInstance is not already assigned to a GameState, it may be
- * assigned to a SpaceObject with an integer ID in the context of that
- * SpaceObject. Only one AnimationInstance may be assigned to a given
- * SpaceObject with a given ID at once. A SpaceObject will automatically set its
- * assigned AnimationInstances' time factors and add and remove them from
- * SpaceStates as appropriate to match its own time factor and assigned
- * SpaceState.</p>
+ * <p>An AnimationInstance may be assigned to a SpaceObject with or without an
+ * integer ID in the context of that SpaceObject, if the AnimationInstance is
+ * not already assigned to a GameState or SpaceObject. Only one
+ * AnimationInstance may be assigned to a given SpaceObject with a given ID at
+ * once. A SpaceObject will automatically set its assigned AnimationInstances'
+ * time factors and add and remove them from SpaceStates as appropriate to match
+ * its own time factor and assigned SpaceState.</p>
  * @see Hitbox
  * @see SpaceState#addObject(org.cell2d.space.SpaceObject)
  * @see #setAppearance(org.cell2d.Drawable)
@@ -84,7 +84,15 @@ public abstract class SpaceObject {
     boolean moved = false;
     private int drawPriority = 0;
     private Drawable appearance = Sprite.BLANK;
-    private final Map<Integer,AnimationInstance> animInstances = new HashMap<>();
+    
+    private static final Map<AnimationInstance,SpaceObject> animInstancesToObjects = new HashMap<>();
+    
+    //If an AnimationInstance was not added with an ID, it's in this Map, but with a null value
+    private final Map<AnimationInstance,Integer> animInstancesToIDs = new HashMap<>();
+    
+    //If an AnimationInstance was not added with an ID, it's not in this Map
+    private final Map<Integer,AnimationInstance> idsToAnimInstances = new HashMap<>();
+    
     private double alpha = 1;
     private Filter filter = null;
     
@@ -158,8 +166,8 @@ public abstract class SpaceObject {
     
     void addNonCellData() {
         locatorHitbox.setGameState(state);
-        if (!animInstances.isEmpty()) {
-            for (AnimationInstance instance : animInstances.values()) {
+        if (!animInstancesToIDs.isEmpty()) {
+            for (AnimationInstance instance : animInstancesToIDs.keySet()) {
                 state.addAnimInstance(instance);
             }
         }
@@ -175,8 +183,8 @@ public abstract class SpaceObject {
         if (solidHitbox != null) {
             state.removeHitbox(solidHitbox, HitboxRole.SOLID);
         }
-        if (!animInstances.isEmpty()) {
-            for (AnimationInstance instance : animInstances.values()) {
+        if (!animInstancesToIDs.isEmpty()) {
+            for (AnimationInstance instance : animInstancesToIDs.keySet()) {
                 state.removeAnimInstance(instance);
             }
         }
@@ -210,8 +218,8 @@ public abstract class SpaceObject {
     }
     
     void setTimeFactorActions(long timeFactor) {
-        if (!animInstances.isEmpty()) {
-            for (AnimationInstance instance : animInstances.values()) {
+        if (!animInstancesToIDs.isEmpty()) {
+            for (AnimationInstance instance : animInstancesToIDs.keySet()) {
                 instance.setTimeFactor(timeFactor);
             }
         }
@@ -1057,6 +1065,79 @@ public abstract class SpaceObject {
     }
     
     /**
+     * Returns the number of AnimationInstances that are assigned to this
+     * SpaceObject, with or without IDs.
+     * @return The number of AnimationInstances that are assigned to this
+     * SpaceObject
+     */
+    public final int getNumAnimInstances() {
+        return animInstancesToIDs.size();
+    }
+    
+    /**
+     * Adds the specified AnimationInstance to this SpaceObject without an ID,
+     * if it is not already assigned to a GameState.
+     * @param instance The AnimationInstance to add
+     * @return Whether the addition occurred
+     */
+    public final boolean addAnimInstance(AnimationInstance instance) {
+        if (instance == AnimationInstance.BLANK) {
+            return true;
+        }
+        if (instance.getGameState() == null && animInstancesToObjects.get(instance) == null) {
+            instance.setTimeFactor(timeFactor);
+            animInstancesToObjects.put(instance, this);
+            animInstancesToIDs.put(instance, null);
+            if (state != null) {
+                state.addAnimInstance(instance);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Adds a new AnimationInstance of the specified Animation to this
+     * SpaceObject without an ID.
+     * @param animation The Animation to add a new AnimationInstance of
+     * @return The new AnimationInstance
+     */
+    public final AnimationInstance addAnimInstance(Animation animation) {
+        if (animation == Animation.BLANK) {
+            return AnimationInstance.BLANK;
+        }
+        AnimationInstance instance = new AnimationInstance(animation);
+        instance.setTimeFactor(timeFactor);
+        animInstancesToObjects.put(instance, this);
+        animInstancesToIDs.put(instance, null);
+        if (state != null) {
+            state.addAnimInstance(instance);
+        }
+        return instance;
+    }
+    
+    /**
+     * Removes the specified AnimationInstance from this SpaceObject if it is
+     * currently assigned to this GameState without an ID.
+     * @param instance The AnimationInstance to remove
+     * @return Whether the removal occurred
+     */
+    public final boolean removeAnimInstance(AnimationInstance instance) {
+        if (instance == AnimationInstance.BLANK) {
+            return true;
+        }
+        if (animInstancesToIDs.containsKey(instance) && animInstancesToIDs.get(instance) == null) {
+            animInstancesToObjects.remove(instance);
+            animInstancesToIDs.remove(instance);
+            if (state != null) {
+                state.removeAnimInstance(instance);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    /**
      * Returns the AnimationInstance that is assigned to this SpaceObject with
      * the specified ID, or AnimationInstance.BLANK if there is none.
      * @param id The ID of the AnimationInstance to be returned
@@ -1064,7 +1145,7 @@ public abstract class SpaceObject {
      * the specified ID
      */
     public final AnimationInstance getAnimInstance(int id) {
-        AnimationInstance instance = animInstances.get(id);
+        AnimationInstance instance = idsToAnimInstances.get(id);
         return (instance == null ? AnimationInstance.BLANK : instance);
     }
     
@@ -1075,7 +1156,7 @@ public abstract class SpaceObject {
      * ID 0
      */
     public final AnimationInstance getAnimInstance() {
-        AnimationInstance instance = animInstances.get(0);
+        AnimationInstance instance = idsToAnimInstances.get(0);
         return (instance == null ? AnimationInstance.BLANK : instance);
     }
     
@@ -1090,19 +1171,28 @@ public abstract class SpaceObject {
      */
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
-            AnimationInstance oldInstance = animInstances.remove(id);
-            if (oldInstance != null && state != null) {
-                state.removeAnimInstance(oldInstance);
+            AnimationInstance oldInstance = idsToAnimInstances.remove(id);
+            if (oldInstance != null) {
+                animInstancesToObjects.remove(oldInstance);
+                animInstancesToIDs.remove(oldInstance);
+                if (state != null) {
+                    state.removeAnimInstance(oldInstance);
+                }
             }
             return true;
         }
-        if (instance.getGameState() == null) {
+        if (instance.getGameState() == null && animInstancesToObjects.get(instance) == null) {
             instance.setTimeFactor(timeFactor);
-            AnimationInstance oldInstance = animInstances.put(id, instance);
-            if (state != null) {
-                if (oldInstance != null) {
+            animInstancesToIDs.put(instance, id);
+            AnimationInstance oldInstance = idsToAnimInstances.put(id, instance);
+            if (oldInstance != null) {
+                animInstancesToObjects.remove(oldInstance);
+                animInstancesToIDs.remove(oldInstance);
+                if (state != null) {
                     state.removeAnimInstance(oldInstance);
                 }
+            }
+            if (state != null) {
                 state.addAnimInstance(instance);
             }
             return true;
@@ -1163,19 +1253,28 @@ public abstract class SpaceObject {
         AnimationInstance instance = getAnimInstance(id);
         if (instance.getAnimation() != animation) {
             if (animation == Animation.BLANK) {
-                AnimationInstance oldInstance = animInstances.remove(id);
-                if (oldInstance != null && state != null) {
-                    state.removeAnimInstance(oldInstance);
+                AnimationInstance oldInstance = idsToAnimInstances.remove(id);
+                if (oldInstance != null) {
+                    animInstancesToObjects.remove(oldInstance);
+                    animInstancesToIDs.remove(oldInstance);
+                    if (state != null) {
+                        state.removeAnimInstance(oldInstance);
+                    }
                 }
                 return AnimationInstance.BLANK;
             }
             instance = new AnimationInstance(animation);
             instance.setTimeFactor(timeFactor);
-            AnimationInstance oldInstance = animInstances.put(id, instance);
-            if (state != null) {
-                if (oldInstance != null) {
+            animInstancesToIDs.put(instance, id);
+            AnimationInstance oldInstance = idsToAnimInstances.put(id, instance);
+            if (oldInstance != null) {
+                animInstancesToObjects.remove(oldInstance);
+                animInstancesToIDs.remove(oldInstance);
+                if (state != null) {
                     state.removeAnimInstance(oldInstance);
                 }
+            }
+            if (state != null) {
                 state.addAnimInstance(instance);
             }
         }
@@ -1204,12 +1303,14 @@ public abstract class SpaceObject {
      * assigned to it.
      */
     public final void clearAnimInstances() {
-        if (state != null) {
-            for (AnimationInstance instance : animInstances.values()) {
+        for (AnimationInstance instance : animInstancesToIDs.keySet()) {
+            animInstancesToObjects.remove(instance);
+            if (state != null) {
                 state.removeAnimInstance(instance);
             }
         }
-        animInstances.clear();
+        animInstancesToIDs.clear();
+        idsToAnimInstances.clear();
     }
     
     /**
