@@ -639,8 +639,9 @@ public abstract class SpaceObject {
     }
     
     /**
-     * Returns the SpaceObject of the specified class in this SpaceObject's
-     * SpaceState that is nearest to it.
+     * Returns the SpaceObject of the specified class that is nearest to this
+     * SpaceObject in its SpaceState - or null if this SpaceObject has no
+     * SpaceState, or its SpaceState contains no SpaceObject of that class.
      * @param <O> The subclass of SpaceObject to search for
      * @param cls The Class object that represents the SpaceObject subclass
      * @return The SpaceObject of the specified class that is nearest to this
@@ -653,7 +654,8 @@ public abstract class SpaceObject {
     /**
      * Returns the SpaceObject of the specified class within the specified
      * rectangular region in this SpaceObject's SpaceState that is nearest to
-     * it.
+     * it - or null if this SpaceObject has no SpaceState, or the region
+     * contains no SpaceObject of that class.
      * @param <O> The subclass of SpaceObject to search for
      * @param x1 The x-coordinate of the region's left edge
      * @param y1 The y-coordinate of the region's top edge
@@ -669,7 +671,9 @@ public abstract class SpaceObject {
     
     /**
      * Returns the SpaceObject of the specified class within the specified
-     * circular region in this SpaceObject's SpaceState that is nearest to it.
+     * circular region in this SpaceObject's SpaceState that is nearest to it -
+     * or null if this SpaceObject has no SpaceState, or the region contains no
+     * SpaceObject of that class.
      * @param <O> The subclass of SpaceObject to search for
      * @param center The region's center
      * @param radius The region's radius
@@ -683,7 +687,9 @@ public abstract class SpaceObject {
     
     /**
      * Returns the SpaceObject of the specified class within the specified
-     * circular region in this SpaceObject's SpaceState that is nearest to it.
+     * circular region in this SpaceObject's SpaceState that is nearest to it -
+     * or null if this SpaceObject has no SpaceState, or the region contains no
+     * SpaceObject of that class.
      * @param <O> The subclass of SpaceObject to search for
      * @param centerX The x-coordinate of the region's center
      * @param centerY The y-coordinate of the region's center
@@ -698,7 +704,9 @@ public abstract class SpaceObject {
     
     /**
      * Returns the SpaceObject of the specified class that overlaps the
-     * specified Hitbox in this SpaceObject's SpaceState that is nearest to it.
+     * specified Hitbox in this SpaceObject's SpaceState that is nearest to it -
+     * or null if this SpaceObject has no SpaceState, or no SpaceObject of that
+     * class is overlapping the Hitbox.
      * @param <O> The subclass of SpaceObject to search for
      * @param hitbox The Hitbox to check for overlapping
      * @param cls The Class object that represents the SpaceObject subclass
@@ -711,7 +719,8 @@ public abstract class SpaceObject {
     
     /**
      * Returns whether there are any SpaceObjects of the specified class within
-     * the specified radius of this SpaceObject in its SpaceState.
+     * the specified radius of this SpaceObject in its SpaceState, or false if
+     * this SpaceObject has no SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
@@ -724,7 +733,8 @@ public abstract class SpaceObject {
     
     /**
      * Returns a SpaceObject of the specified class within the specified radius
-     * of this SpaceObject in its SpaceState, or null if there is none.
+     * of this SpaceObject in its SpaceState - or null if there is none, or if
+     * this SpaceObject has no SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
@@ -737,7 +747,8 @@ public abstract class SpaceObject {
     
     /**
      * Returns all of the SpaceObjects of the specified class within the
-     * specified radius of this SpaceObject in its SpaceState.
+     * specified radius of this SpaceObject in its SpaceState, or an empty list
+     * if this SpaceObject has no SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
@@ -750,7 +761,8 @@ public abstract class SpaceObject {
     
     /**
      * Returns the SpaceObject of the specified class within the specified
-     * radius of this SpaceObject in its SpaceState that is nearest to it.
+     * radius of this SpaceObject in its SpaceState that is nearest to it - or
+     * null if there is none, or if this SpaceObject has no SpaceState.
      * @param <O> The subclass of SpaceObject to search for
      * @param radius The radius of this SpaceObject to search within
      * @param cls The Class object that represents the SpaceObject subclass
