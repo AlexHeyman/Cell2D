@@ -219,8 +219,7 @@ public abstract class GameState<T extends CellGame,
     
     /**
      * Returns the Animation of the AnimationInstance assigned to this GameState
-     * with the specified ID, or Animation.BLANK if there is no such
-     * AnimationInstance.
+     * with the specified ID, or Animation.BLANK if there is none.
      * @param id The ID of the AnimationInstance whose Animation is to be
      * returned
      * @return The Animation of the AnimationInstance assigned to this GameState
