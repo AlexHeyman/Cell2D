@@ -44,10 +44,10 @@ public abstract class GameState<T extends CellGame,
     private final int id;
     boolean active = false;
     
-    //If an AnimationInstance was not added with an ID, it's in this map, but with a null value
+    //If an AnimationInstance was not added with an ID, it's in this Map, but with a null value
     private final Map<AnimationInstance,Integer> animInstancesToIDs = new HashMap<>();
     
-    //If an AnimationInstance was not added with an ID, it's not in this map
+    //If an AnimationInstance was not added with an ID, it's not in this Map
     private final Map<Integer,AnimationInstance> idsToAnimInstances = new HashMap<>();
     
     /**
@@ -200,6 +200,7 @@ public abstract class GameState<T extends CellGame,
         if (instance == AnimationInstance.BLANK) {
             AnimationInstance oldInstance = idsToAnimInstances.remove(id);
             if (oldInstance != null) {
+                animInstancesToIDs.remove(oldInstance);
                 oldInstance.state = null;
             }
             return true;
