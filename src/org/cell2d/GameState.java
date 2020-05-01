@@ -1,9 +1,7 @@
 package org.cell2d;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.cell2d.celick.Graphics;
 
 /**
@@ -45,8 +43,12 @@ public abstract class GameState<T extends CellGame,
     final T game;
     private final int id;
     boolean active = false;
-    private final Set<AnimationInstance> animInstances = new HashSet<>();
-    private final Map<Integer,AnimationInstance> IDInstances = new HashMap<>();
+    
+    //If an AnimationInstance was not added with an ID, it's in this map, but with a null value
+    private final Map<AnimationInstance,Integer> animInstancesToIDs = new HashMap<>();
+    
+    //If an AnimationInstance was not added with an ID, it's not in this map
+    private final Map<Integer,AnimationInstance> IDsToAnimInstances = new HashMap<>();
     
     /**
      * Constructs a GameState of the specified CellGame with the specified ID.
@@ -119,12 +121,12 @@ public abstract class GameState<T extends CellGame,
      * GameState
      */
     public final int getNumAnimInstances() {
-        return animInstances.size();
+        return animInstancesToIDs.size();
     }
     
     /**
-     * Adds the specified AnimationInstance to this GameState if it is not
-     * already assigned to a GameState.
+     * Adds the specified AnimationInstance to this GameState without an ID, if
+     * it is not already assigned to a GameState.
      * @param instance The AnimationInstance to add
      * @return Whether the addition occurred
      */
@@ -133,7 +135,7 @@ public abstract class GameState<T extends CellGame,
             return true;
         }
         if (instance.state == null) {
-            animInstances.add(instance);
+            animInstancesToIDs.put(instance, null);
             instance.state = this;
             return true;
         }
@@ -142,7 +144,7 @@ public abstract class GameState<T extends CellGame,
     
     /**
      * Adds a new AnimationInstance of the specified Animation to this
-     * GameState.
+     * GameState without an ID.
      * @param animation The Animation to add a new AnimationInstance of
      * @return The new AnimationInstance
      */
@@ -151,14 +153,14 @@ public abstract class GameState<T extends CellGame,
             return AnimationInstance.BLANK;
         }
         AnimationInstance instance = new AnimationInstance(animation);
-        animInstances.add(instance);
+        animInstancesToIDs.put(instance, null);
         instance.state = this;
         return instance;
     }
     
     /**
      * Removes the specified AnimationInstance from this GameState if it is
-     * currently assigned to this GameState.
+     * currently assigned to this GameState without an ID.
      * @param instance The AnimationInstance to remove
      * @return Whether the removal occurred
      */
@@ -166,8 +168,8 @@ public abstract class GameState<T extends CellGame,
         if (instance == AnimationInstance.BLANK) {
             return true;
         }
-        if (instance.state == this) {
-            animInstances.remove(instance);
+        if (animInstancesToIDs.containsKey(instance) && animInstancesToIDs.get(instance) == null) {
+            animInstancesToIDs.remove(instance);
             instance.state = null;
             return true;
         }
@@ -176,14 +178,13 @@ public abstract class GameState<T extends CellGame,
     
     /**
      * Returns the AnimationInstance that is assigned to this GameState with the
-     * specified ID.
+     * specified ID, or AnimationInstance.BLANK if there is none.
      * @param id The ID of the AnimationInstance to be returned
      * @return The AnimationInstance that is assigned to this GameState with the
      * specified ID
      */
     public final AnimationInstance getAnimInstance(int id) {
-        AnimationInstance instance = IDInstances.get(id);
-        return (instance == null ? AnimationInstance.BLANK : instance);
+        return IDsToAnimInstances.getOrDefault(id, AnimationInstance.BLANK);
     }
     
     /**
@@ -197,19 +198,19 @@ public abstract class GameState<T extends CellGame,
      */
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
-            AnimationInstance oldInstance = IDInstances.remove(id);
+            AnimationInstance oldInstance = IDsToAnimInstances.remove(id);
             if (oldInstance != null) {
                 oldInstance.state = null;
             }
             return true;
         }
         if (instance.state == null) {
-            AnimationInstance oldInstance = IDInstances.put(id, instance);
+            AnimationInstance oldInstance = IDsToAnimInstances.put(id, instance);
             if (oldInstance != null) {
-                animInstances.remove(oldInstance);
+                animInstancesToIDs.remove(oldInstance);
                 oldInstance.state = null;
             }
-            animInstances.add(instance);
+            animInstancesToIDs.put(instance, id);
             instance.state = this;
             return true;
         }
@@ -218,14 +219,15 @@ public abstract class GameState<T extends CellGame,
     
     /**
      * Returns the Animation of the AnimationInstance assigned to this GameState
-     * with the specified ID, if there is one.
+     * with the specified ID, or Animation.BLANK if there is no such
+     * AnimationInstance.
      * @param id The ID of the AnimationInstance whose Animation is to be
      * returned
      * @return The Animation of the AnimationInstance assigned to this GameState
      * with the specified ID
      */
     public final Animation getAnimation(int id) {
-        AnimationInstance instance = IDInstances.get(id);
+        AnimationInstance instance = IDsToAnimInstances.get(id);
         return (instance == null ? Animation.BLANK : instance.getAnimation());
     }
     
@@ -239,26 +241,27 @@ public abstract class GameState<T extends CellGame,
      * from this GameState.
      * @param id The ID with which to assign the new AnimationInstance
      * @param animation The Animation to add a new AnimationInstance of
-     * @return The AnimationInstance assigned with the specified ID
+     * @return The AnimationInstance assigned with the specified ID, or
+     * AnimationInstance.BLANK if there is none
      */
     public final AnimationInstance setAnimation(int id, Animation animation) {
         AnimationInstance instance = getAnimInstance(id);
         if (instance.getAnimation() != animation) {
             if (animation == Animation.BLANK) {
-                AnimationInstance oldInstance = IDInstances.remove(id);
+                AnimationInstance oldInstance = IDsToAnimInstances.remove(id);
                 if (oldInstance != null) {
-                    animInstances.remove(oldInstance);
+                    animInstancesToIDs.remove(oldInstance);
                     oldInstance.state = null;
                 }
                 return AnimationInstance.BLANK;
             }
             instance = new AnimationInstance(animation);
-            AnimationInstance oldInstance = IDInstances.put(id, instance);
+            AnimationInstance oldInstance = IDsToAnimInstances.put(id, instance);
             if (oldInstance != null) {
-                animInstances.remove(oldInstance);
+                animInstancesToIDs.remove(oldInstance);
                 oldInstance.state = null;
             }
-            animInstances.add(instance);
+            animInstancesToIDs.put(instance, id);
             instance.state = this;
         }
         return instance;
@@ -269,11 +272,11 @@ public abstract class GameState<T extends CellGame,
      * assigned to it, with or without IDs.
      */
     public final void clearAnimInstances() {
-        for (AnimationInstance instance : animInstances) {
+        for (AnimationInstance instance : animInstancesToIDs.keySet()) {
             instance.state = null;
         }
-        animInstances.clear();
-        IDInstances.clear();
+        animInstancesToIDs.clear();
+        IDsToAnimInstances.clear();
     }
     
     /**
@@ -289,7 +292,7 @@ public abstract class GameState<T extends CellGame,
     public void leftActions(T game) {}
     
     final void stateUpdate() {
-        for (AnimationInstance instance : animInstances) {
+        for (AnimationInstance instance : animInstancesToIDs.keySet()) {
             instance.update();
         }
         update(game, thisState, Frac.UNIT);
