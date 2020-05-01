@@ -1,9 +1,12 @@
 package org.cell2d.space.map;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import org.cell2d.AnimationInstance;
 import org.cell2d.CellVector;
+import org.cell2d.Drawable;
 import org.cell2d.Frac;
 import org.cell2d.space.RectangleHitbox;
 import org.cell2d.space.SpaceObject;
@@ -16,11 +19,11 @@ public class TileGridObject extends SpaceObject {
     
     private final TileGrid grid;
     
-    public TileGridObject(CellVector position, TileGrid grid, int drawPriority) {
-        this(position.getX(), position.getY(), grid, drawPriority);
+    public TileGridObject(CellVector position, TileGrid grid, int drawPriority, boolean addAnimInstances) {
+        this(position.getX(), position.getY(), grid, drawPriority, addAnimInstances);
     }
     
-    public TileGridObject(long x, long y, TileGrid grid, int drawPriority) {
+    public TileGridObject(long x, long y, TileGrid grid, int drawPriority, boolean addAnimInstances) {
         long left = grid.getLeftmostColumn()*grid.getTileWidth()*Frac.UNIT;
         long right = (grid.getRightmostColumn() + 1)*grid.getTileWidth()*Frac.UNIT;
         long top = grid.getTopmostRow()*grid.getTileHeight()*Frac.UNIT;
@@ -30,6 +33,14 @@ public class TileGridObject extends SpaceObject {
         setAppearance(grid);
         setDrawPriority(drawPriority);
         this.grid = grid;
+        if (addAnimInstances) {
+            for (Point point : grid.getTileLocations()) {
+                Drawable tile = grid.getTile(point.x, point.y);
+                if (tile instanceof AnimationInstance) {
+                    addAnimInstance((AnimationInstance)tile);
+                }
+            }
+        }
     }
     
     public final TileGrid getGrid() {

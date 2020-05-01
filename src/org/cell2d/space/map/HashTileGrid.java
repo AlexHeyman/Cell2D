@@ -2,9 +2,11 @@ package org.cell2d.space.map;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.cell2d.Drawable;
 
 /**
@@ -64,6 +66,11 @@ public class HashTileGrid extends TileGrid {
     @Override
     public final int getBottommostRow() {
         return bottommostRow;
+    }
+    
+    @Override
+    public final Set<Point> getTileLocations() {
+        return Collections.unmodifiableSet(tiles.keySet());
     }
     
     @Override

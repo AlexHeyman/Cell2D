@@ -198,7 +198,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
             tileGrid.setTileYFlip(point.x, point.y, yFlip);
             tileGrid.setTileAngle(point.x, point.y, angle);
         }
-        TileGridObject gridObject = new TileGridObject(offsetX, offsetY, tileGrid, drawPriority);
+        TileGridObject gridObject = new TileGridObject(offsetX, offsetY, tileGrid, drawPriority, true);
         objects.add(gridObject);
         if (layer == solidLayer) {
             for (RectangleHitbox hitbox : gridObject.cover()) {

@@ -128,6 +128,8 @@ public abstract class TileGrid implements Drawable {
     
     public abstract int getBottommostRow();
     
+    public abstract Set<Point> getTileLocations();
+    
     public abstract Drawable getTile(int column, int row);
     
     public abstract boolean setTile(int column, int row, Drawable tile);

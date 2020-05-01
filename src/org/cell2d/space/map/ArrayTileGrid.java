@@ -1,7 +1,11 @@
 package org.cell2d.space.map;
 
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.AbstractSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.cell2d.Drawable;
 
 /**
@@ -17,6 +21,7 @@ public class ArrayTileGrid extends TileGrid {
     
     private final int leftmostColumn, topmostRow;
     private final Drawable[][] tiles;
+    private int numNonNullTiles;
     private final byte[][] flags;
     
     public ArrayTileGrid(int numColumns, int numRows, int tileWidth, int tileHeight) {
@@ -42,6 +47,7 @@ public class ArrayTileGrid extends TileGrid {
         int numColumns = rightmostColumn - leftmostColumn + 1;
         int numRows = bottommostRow - topmostRow + 1;
         tiles = new Drawable[numColumns][numRows];
+        numNonNullTiles = 0;
         flags = new byte[numColumns][numRows];
     }
     
@@ -65,6 +71,72 @@ public class ArrayTileGrid extends TileGrid {
         return topmostRow + tiles[0].length - 1;
     }
     
+    private class TileLocationsIterator implements Iterator<Point> {
+        
+        private int i, j;
+        
+        private TileLocationsIterator() {
+            i = -1;
+            j = 0;
+            advance();
+        }
+        
+        private void advance() {
+            do {
+                i++;
+                if (i >= tiles.length) {
+                    i = 0;
+                    j++;
+                }
+            } while (j < tiles[0].length && tiles[i][j] == null);
+        }
+        
+        @Override
+        public final boolean hasNext() {
+            return j < tiles[0].length;
+        }
+        
+        @Override
+        public final Point next() {
+            Point next = new Point(leftmostColumn + i, topmostRow + j);
+            advance();
+            return next;
+        }
+        
+    }
+    
+    private class TileLocationsSet extends AbstractSet<Point> {
+        
+        @Override
+        public final int size() {
+            return numNonNullTiles;
+        }
+        
+        @Override
+        public final boolean contains(Object o) {
+            if (o instanceof Point) {
+                Point point = (Point)o;
+                int i = point.x - leftmostColumn;
+                int j = point.y - topmostRow;
+                if (i >= 0 && i < tiles.length && j >= 0 && j < tiles[0].length) {
+                    return (tiles[i][j] != null);
+                }
+            }
+            return false;
+        }
+        
+        @Override
+        public final Iterator<Point> iterator() {
+            return new TileLocationsIterator();
+        }
+        
+    }
+    
+    @Override
+    public final Set<Point> getTileLocations() {
+        return new TileLocationsSet();
+    }
+    
     @Override
     public final Drawable getTile(int column, int row) {
         int i = column - leftmostColumn;
@@ -81,6 +153,9 @@ public class ArrayTileGrid extends TileGrid {
         int j = row - topmostRow;
         if (i < 0 || i >= tiles.length || j < 0 || j >= tiles[0].length) {
             return false;
+        }
+        if ((tiles[i][j] == null) != (tile == null)) {
+            numNonNullTiles += (tile == null ? -1 : 1);
         }
         tiles[i][j] = tile;
         return true;
