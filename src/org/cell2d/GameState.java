@@ -48,7 +48,7 @@ public abstract class GameState<T extends CellGame,
     private final Map<AnimationInstance,Integer> animInstancesToIDs = new HashMap<>();
     
     //If an AnimationInstance was not added with an ID, it's not in this map
-    private final Map<Integer,AnimationInstance> IDsToAnimInstances = new HashMap<>();
+    private final Map<Integer,AnimationInstance> idsToAnimInstances = new HashMap<>();
     
     /**
      * Constructs a GameState of the specified CellGame with the specified ID.
@@ -184,7 +184,7 @@ public abstract class GameState<T extends CellGame,
      * specified ID
      */
     public final AnimationInstance getAnimInstance(int id) {
-        return IDsToAnimInstances.getOrDefault(id, AnimationInstance.BLANK);
+        return idsToAnimInstances.getOrDefault(id, AnimationInstance.BLANK);
     }
     
     /**
@@ -198,14 +198,14 @@ public abstract class GameState<T extends CellGame,
      */
     public final boolean setAnimInstance(int id, AnimationInstance instance) {
         if (instance == AnimationInstance.BLANK) {
-            AnimationInstance oldInstance = IDsToAnimInstances.remove(id);
+            AnimationInstance oldInstance = idsToAnimInstances.remove(id);
             if (oldInstance != null) {
                 oldInstance.state = null;
             }
             return true;
         }
         if (instance.state == null) {
-            AnimationInstance oldInstance = IDsToAnimInstances.put(id, instance);
+            AnimationInstance oldInstance = idsToAnimInstances.put(id, instance);
             if (oldInstance != null) {
                 animInstancesToIDs.remove(oldInstance);
                 oldInstance.state = null;
@@ -226,7 +226,7 @@ public abstract class GameState<T extends CellGame,
      * with the specified ID
      */
     public final Animation getAnimation(int id) {
-        AnimationInstance instance = IDsToAnimInstances.get(id);
+        AnimationInstance instance = idsToAnimInstances.get(id);
         return (instance == null ? Animation.BLANK : instance.getAnimation());
     }
     
@@ -247,7 +247,7 @@ public abstract class GameState<T extends CellGame,
         AnimationInstance instance = getAnimInstance(id);
         if (instance.getAnimation() != animation) {
             if (animation == Animation.BLANK) {
-                AnimationInstance oldInstance = IDsToAnimInstances.remove(id);
+                AnimationInstance oldInstance = idsToAnimInstances.remove(id);
                 if (oldInstance != null) {
                     animInstancesToIDs.remove(oldInstance);
                     oldInstance.state = null;
@@ -255,7 +255,7 @@ public abstract class GameState<T extends CellGame,
                 return AnimationInstance.BLANK;
             }
             instance = new AnimationInstance(animation);
-            AnimationInstance oldInstance = IDsToAnimInstances.put(id, instance);
+            AnimationInstance oldInstance = idsToAnimInstances.put(id, instance);
             if (oldInstance != null) {
                 animInstancesToIDs.remove(oldInstance);
                 oldInstance.state = null;
@@ -275,7 +275,7 @@ public abstract class GameState<T extends CellGame,
             instance.state = null;
         }
         animInstancesToIDs.clear();
-        IDsToAnimInstances.clear();
+        idsToAnimInstances.clear();
     }
     
     /**
