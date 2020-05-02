@@ -169,8 +169,17 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         List<SpaceObject> objects = new ArrayList<>();
         long offsetX = Frac.units(layer.getAbsOffsetX());
         long offsetY = Frac.units(layer.getAbsOffsetY());
-        TileGrid tileGrid = new HashTileGrid(layer.getX1(), layer.getX2(),
-                layer.getY1(), layer.getY2(), map.getTileWidth(), map.getTileHeight());
+        int layerArea = (layer.getX2() - layer.getX1() + 1)*(layer.getY2() - layer.getY1() + 1);
+        TileGrid tileGrid;
+        if (layer.getTileLocations().size() < ((double)layerArea)/4) {
+            //Layer's tiles are sparse; use HashTileGrid
+            tileGrid = new HashTileGrid(layer.getX1(), layer.getX2(),
+                    layer.getY1(), layer.getY2(), map.getTileWidth(), map.getTileHeight());
+        } else {
+            //Layer's tiles are dense; use ArrayTileGrid
+            tileGrid = new ArrayTileGrid(layer.getX1(), layer.getX2(),
+                    layer.getY1(), layer.getY2(), map.getTileWidth(), map.getTileHeight());
+        }
         Map<TiledTile,Drawable> tilesToDrawables = new HashMap<>();
         for (Point point : layer.getTileLocations()) {
             TiledTile tile = layer.getTile(point.x, point.y);

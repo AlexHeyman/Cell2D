@@ -84,7 +84,7 @@ public class ArrayTileGrid extends TileGrid {
         private void advance() {
             do {
                 i++;
-                if (i >= tiles.length) {
+                if (i == tiles.length) {
                     i = 0;
                     j++;
                 }
