@@ -206,7 +206,7 @@ public abstract class TileGrid implements Drawable {
                     int drawOffsetX = (absXFlip ^ (tileAngle == 180 || tileAngle == 270) ? tileWidth : 0);
                     int drawOffsetY = (absYFlip ^ (tileAngle == 90 || tileAngle == 180) ? tileHeight : 0);
                     tile.draw(g, drawX + drawOffsetX, drawY + drawOffsetY,
-                            tileXFlip, tileYFlip, tileAngle, alpha, null);
+                            tileXFlip, tileYFlip, tileAngle, alpha, filter);
                 }
                 drawY += tileHeight;
                 row++;
