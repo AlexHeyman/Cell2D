@@ -9,6 +9,10 @@ import org.cell2d.celick.Graphics;
  * on the image have x-coordinates that increase from left to right, as well as
  * y-coordinates that increase from top to bottom. The image has an origin point
  * somewhere on (or off) it around which it is flipped, rotated, and scaled.</p>
+ * 
+ * <p>The Drawable interface also contains the static method
+ * getRenderableRegion(), which is useful for checking whether a particular
+ * Drawable's image would be visible if drawn at a particular location.</p>
  * @author Alex Heyman
  */
 public interface Drawable {
