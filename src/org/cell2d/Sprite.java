@@ -444,10 +444,11 @@ public class Sprite implements Animatable, Drawable, Loadable {
     @Override
     public final void draw(Graphics g, int x, int y, int left, int right, int top, int bottom) {
         if (!blank && loaded && right > left && bottom > top) {
-            left += originX;
-            top += originY;
-            draw(g, x + left, y + top, left, right + originX, top, bottom + originY,
-                    1, false, false, 0, 1, null);
+            left = Math.max(left + originX, 0);
+            right = Math.min(right + originX, width);
+            top = Math.max(top + originY, 0);
+            bottom = Math.min(bottom + originY, height);
+            draw(g, x + left, y + top, left, right, top, bottom, 1, false, false, 0, 1, null);
         }
     }
     
@@ -471,6 +472,10 @@ public class Sprite implements Animatable, Drawable, Loadable {
                 top += originY;
                 bottom += originY;
             }
+            left = Math.max(left, 0);
+            right = Math.min(right, width);
+            top = Math.max(top, 0);
+            bottom = Math.min(bottom, height);
             CellVector vector = new CellVector((long)left << Frac.BITS,
                     (long)top << Frac.BITS).changeAngle(angle);
             draw(g, x + (float)Frac.toDouble(vector.getX()), y + (float)Frac.toDouble(vector.getY()),
@@ -498,6 +503,10 @@ public class Sprite implements Animatable, Drawable, Loadable {
                 top += originY;
                 bottom += originY;
             }
+            left = Math.max(left, 0);
+            right = Math.min(right, width);
+            top = Math.max(top, 0);
+            bottom = Math.min(bottom, height);
             draw(g, x + (float)(left*scale), y + (float)(top*scale),
                     left, right, top, bottom, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
