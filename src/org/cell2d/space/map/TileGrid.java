@@ -148,19 +148,26 @@ public abstract class TileGrid implements Drawable {
     
     public abstract List<Rectangle> cover();
     
-    @Override
-    public void draw(Graphics g, int x, int y) {
-        draw(g, x, y, false, false, 0, 1, null);
+    private void draw(Graphics g, int x, int y, double alpha, Filter filter) {
+        Rectangle region = Drawable.getRenderableRegion(g);
+        draw(region.x, region.y, region.x + region.width, region.y + region.height, g, x, y, alpha, filter);
     }
     
-    @Override
-    public void draw(Graphics g, int x, int y,
-            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
+    private void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
+            double alpha, Filter filter) {
         Rectangle region = Drawable.getRenderableRegion(g);
-        int x1 = region.x;
-        int y1 = region.y;
-        int x2 = x1 + region.width;
-        int y2 = y1 + region.height;
+        int x1 = Math.max(region.x, x + left);
+        int y1 = Math.max(region.y, y + top);
+        int x2 = Math.min(region.x + region.width, x + right);
+        int y2 = Math.min(region.y + region.height, y + bottom);
+        org.cell2d.celick.geom.Rectangle worldClip = g.getWorldClip();
+        g.setWorldClip(x1, y1, x2 - x1, y2 - y1);
+        draw(x1, y1, x2, y2, g, x, y, alpha, filter);
+        g.setWorldClip(worldClip);
+    }
+    
+    private void draw(int x1, int y1, int x2, int y2, Graphics g,
+            int x, int y, double alpha, Filter filter) {
         int leftColumn = getLeftmostColumn();
         int left = x + leftColumn*tileWidth;
         if (left <= x1 - tileWidth) {
@@ -210,26 +217,37 @@ public abstract class TileGrid implements Drawable {
     }
     
     @Override
+    public void draw(Graphics g, int x, int y) {
+        draw(g, x, y, 1, null);
+    }
+    
+    @Override
+    public void draw(Graphics g, int x, int y,
+            boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
+        draw(g, x, y, alpha, filter);
+    }
+    
+    @Override
     public void draw(Graphics g, int x, int y,
             double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter) {
-        draw(g, x, y, false, false, 0, alpha, filter);
+        draw(g, x, y, alpha, filter);
     }
     
     @Override
     public void draw(Graphics g, int x, int y, int left, int right, int top, int bottom) {
-        draw(g, x, y, false, false, 0, 1, null);
+        draw(g, x, y, left, right, top, bottom, 1, null);
     }
     
     @Override
     public void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             boolean xFlip, boolean yFlip, double angle, double alpha, Filter filter) {
-        draw(g, x, y, false, false, 0, alpha, filter);
+        draw(g, x, y, left, right, top, bottom, alpha, filter);
     }
     
     @Override
     public void draw(Graphics g, int x, int y, int left, int right, int top, int bottom,
             double scale, boolean xFlip, boolean yFlip, double alpha, Filter filter) {
-        draw(g, x, y, false, false, 0, alpha, filter);
+        draw(g, x, y, left, right, top, bottom, alpha, filter);
     }
     
 }
