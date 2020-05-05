@@ -457,18 +457,20 @@ public class Sprite implements Animatable, Drawable, Loadable {
         if (!blank && loaded && right > left && bottom > top && alpha > 0) {
             if (xFlip) {
                 int temp = left;
-                left = -right;
-                right = -temp;
+                left = -right + this.right;
+                right = -temp + this.right;
+            } else {
+                left += originX;
+                right += originX;
             }
             if (yFlip) {
                 int temp = bottom;
-                bottom = -top;
-                top = -temp;
+                bottom = -top + this.bottom;
+                top = -temp + this.bottom;
+            } else {
+                top += originY;
+                bottom += originY;
             }
-            left += originX;
-            right += originX;
-            top += originY;
-            bottom += originY;
             CellVector vector = new CellVector((long)left << Frac.BITS,
                     (long)top << Frac.BITS).changeAngle(angle);
             draw(g, x + (float)Frac.toDouble(vector.getX()), y + (float)Frac.toDouble(vector.getY()),
@@ -482,18 +484,20 @@ public class Sprite implements Animatable, Drawable, Loadable {
         if (!blank && loaded && right > left && bottom > top && scale > 0 && alpha > 0) {
             if (xFlip) {
                 int temp = left;
-                left = -right;
-                right = -temp;
+                left = -right + this.right;
+                right = -temp + this.right;
+            } else {
+                left += originX;
+                right += originX;
             }
             if (yFlip) {
                 int temp = bottom;
-                bottom = -top;
-                top = -temp;
+                bottom = -top + this.bottom;
+                top = -temp + this.bottom;
+            } else {
+                top += originY;
+                bottom += originY;
             }
-            left += originX;
-            right += originX;
-            top += originY;
-            bottom += originY;
             draw(g, x + (float)(left*scale), y + (float)(top*scale),
                     left, right, top, bottom, (float)scale, xFlip, yFlip, 0, (float)alpha, filter);
         }
