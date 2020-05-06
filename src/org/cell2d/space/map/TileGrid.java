@@ -13,7 +13,38 @@ import org.cell2d.Frac;
 import org.cell2d.celick.Graphics;
 
 /**
+ * <p>A TileGrid is a Drawable that displays a rectangular grid of other
+ * Drawables, called "tiles". A TileGrid's tiles are assumed to all be
+ * rectangular, of equal width and equal height, and with their origins at their
+ * top left corners - though these requirements are not enforced. It is the
+ * responsibility of the creators and modifiers of a TileGrid to ensure that
+ * the TileGrid is not set as one of its own tiles, or otherwise involved in a
+ * hierarchy of composite Drawables containing an infinite loop.</p>
  * 
+ * <p>A TileGrid's columns are labeled with indices that increase from left to
+ * right, and its rows are labeled with indices that increase from top to
+ * bottom. A TileGrid's leftmost and rightmost column indices, and its topmost
+ * and bottommost row indices, are specified upon its creation. A TileGrid's
+ * origin is the top left corner of its grid cell with column index 0 and row
+ * index 0 (or, if such a grid cell does not exist, where the top left corner of
+ * that grid cell would be if it existed).</p>
+ * 
+ * <p>Each cell in a TileGrid can be assigned at most one Drawable, which is the
+ * tile at that cell's location. A single Drawable can be set as the tile at
+ * multiple locations. Tiles at individual locations can also be set to be drawn
+ * flipped horizontally or vertically, or rotated in increments of 90 degrees.
+ * (Rotation assumes that tiles are square, but again, this is not enforced.)
+ * However, a TileGrid itself cannot be flipped, rotated, or scaled via
+ * parameters of its draw() method; such parameters are simply ignored.</p>
+ * 
+ * <p>The computational time taken to draw a TileGrid is proportional to the
+ * number of its grid cells that are visible on screen, not to its total number
+ * of grid cells. This means that memory usage is the only factor limiting a
+ * TileGrid's size in practice.</p>
+ * 
+ * <p>The TileGrid class also contains the static methods coverObjects() and
+ * coverPoints(), which are useful for compactly representing the occupied
+ * regions of large grids of objects.</p>
  * @author Alex Heyman
  */
 public abstract class TileGrid implements Drawable {
@@ -79,6 +110,26 @@ public abstract class TileGrid implements Drawable {
         return rectangles;
     }
     
+    /**
+     * Returns a list of non-overlapping rectangles that collectively overlap or
+     * "cover" all and only the non-null locations in the specified 2D object
+     * array. Each of the rectangles may be of any width and any height. The
+     * number of returned rectangles is not necessarily the smallest possible
+     * number that can satisfy the requirements, but it is likely to be close
+     * (almost certainly within a factor of 2).  The computational time taken by
+     * this method is at most proportional to the number of locations in the
+     * object array.
+     * @param x1 The x-coordinate (in the space of the returned rectangles) of
+     * column 0 of the object array
+     * @param y1 The y-coordinate (in the space of the returned rectangles) of
+     * row 0 of the object array
+     * @param objects The 2D array of objects to cover. The array's first index
+     * is the column index, and the second is the row index. An index increase
+     * of 1 corresponds to an increase of 1 in the corresponding coordinate in
+     * the space of the returned rectangles.
+     * @return A list of non-overlapping rectangles that collectively cover the
+     * non-null locations in the object array
+     */
     public static List<Rectangle> coverObjects(int x1, int y1, Object[][] objects) {
         Set<Point> points = new HashSet<>();
         for (int i = 0; i < objects.length; i++) {
@@ -93,6 +144,23 @@ public abstract class TileGrid implements Drawable {
         return coverAndClearPoints(points);
     }
     
+    /**
+     * Returns a list of non-overlapping rectangles that collectively overlap or
+     * "cover" all and only the points in the specified set. The points are
+     * treated as locations in a rectangular grid with cells that have integer
+     * coordinates; thus, each point is treated as having a width of 1 and a
+     * height of 1 in the coordinate space of the returned rectangles. (For
+     * instance, if the set contains only the point (0, 0), this method will
+     * return the rectangle with top left corner (0, 0) and bottom right corner
+     * (1, 1).) Each of the rectangles may be of any width and any height. The
+     * number of returned rectangles is not necessarily the smallest possible
+     * number that can satisfy the requirements, but it is likely to be close
+     * (almost certainly within a factor of 2). The computational time taken by
+     * this method is at most proportional to the number of points in the set.
+     * @param points The set of points to cover
+     * @return A list of non-overlapping rectangles that collectively cover the
+     * points in the set
+     */
     public static List<Rectangle> coverPoints(Set<Point> points) {
         return coverAndClearPoints(new HashSet<>(points));
     }
