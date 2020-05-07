@@ -34,8 +34,12 @@ import org.cell2d.celick.Graphics;
  * multiple locations. Tiles at individual locations can also be set to be drawn
  * flipped horizontally or vertically, or rotated in increments of 90 degrees.
  * (Rotation assumes that tiles are square, but again, this is not enforced.)
- * However, a TileGrid itself cannot be flipped, rotated, or scaled via
- * parameters of its draw() method; such parameters are simply ignored.</p>
+ * A TileGrid remembers the angle and flipped status of the tile at each
+ * location, even while there is no tile at that location.</p>
+ * 
+ * <p>Though a TileGrid's tiles can be flipped and rotated, a TileGrid itself
+ * cannot be flipped, rotated, or scaled via parameters of its draw() method;
+ * such parameters are simply ignored.</p>
  * 
  * <p>The computational time taken to draw a TileGrid is proportional to the
  * number of its grid cells that are visible on screen, not to its total number
@@ -124,9 +128,9 @@ public abstract class TileGrid implements Drawable {
      * @param y1 The y-coordinate (in the space of the returned rectangles) of
      * row 0 of the object array
      * @param objects The 2D array of objects to cover. The array's first index
-     * is the column index, and the second is the row index. An index increase
-     * of 1 corresponds to an increase of 1 in the corresponding coordinate in
-     * the space of the returned rectangles.
+     * is the x-coordinate, and the second is the y-coordinate. An index
+     * increase of 1 corresponds to an increase of 1 in the corresponding
+     * coordinate in the space of the returned rectangles.
      * @return A list of non-overlapping rectangles that collectively cover the
      * non-null locations in the object array
      */
@@ -151,12 +155,13 @@ public abstract class TileGrid implements Drawable {
      * coordinates; thus, each point is treated as having a width of 1 and a
      * height of 1 in the coordinate space of the returned rectangles. (For
      * instance, if the set contains only the point (0, 0), this method will
-     * return the rectangle with top left corner (0, 0) and bottom right corner
-     * (1, 1).) Each of the rectangles may be of any width and any height. The
-     * number of returned rectangles is not necessarily the smallest possible
-     * number that can satisfy the requirements, but it is likely to be close
-     * (almost certainly within a factor of 2). The computational time taken by
-     * this method is at most proportional to the number of points in the set.
+     * return only the rectangle with top left corner (0, 0) and bottom right
+     * corner (1, 1).) Each of the rectangles may be of any width and any
+     * height. The number of returned rectangles is not necessarily the smallest
+     * possible number that can satisfy the requirements, but it is likely to be
+     * close (almost certainly within a factor of 2). The computational time
+     * taken by this method is at most proportional to the number of points in
+     * the set.
      * @param points The set of points to cover
      * @return A list of non-overlapping rectangles that collectively cover the
      * points in the set
@@ -245,8 +250,8 @@ public abstract class TileGrid implements Drawable {
     
     /**
      * Sets the tile at the specified location in this TileGrid to the specified
-     * Drawable. If the specified location is outside the bounds of this
-     * TileGrid, the operation will fail and this method will do nothing.
+     * Drawable. If the location is outside the bounds of this TileGrid, the
+     * operation will fail and this method will do nothing.
      * @param column The location's column index
      * @param row The location's row index
      * @param tile The Drawable to set as the tile at the specified location, or
@@ -255,18 +260,90 @@ public abstract class TileGrid implements Drawable {
      */
     public abstract boolean setTile(int column, int row, Drawable tile);
     
+    /**
+     * Returns whether the tile at the specified location in this TileGrid is
+     * flipped horizontally, or false if the location is outside the bounds of
+     * this TileGrid.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @return Whether the tile at the specified location is flipped
+     * horizontally
+     */
     public abstract boolean getTileXFlip(int column, int row);
     
+    /**
+     * Sets whether the tile at the specified location in this TileGrid is
+     * flipped horizontally. If the location is outside the bounds of this
+     * TileGrid, the operation will fail and this method will do nothing.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @param xFlip Whether the tile at the specified location should be flipped
+     * horizontally
+     * @return Whether the operation was successful
+     */
     public abstract boolean setTileXFlip(int column, int row, boolean xFlip);
     
+    /**
+     * Returns whether the tile at the specified location in this TileGrid is
+     * flipped vertically, or false if the location is outside the bounds of
+     * this TileGrid.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @return Whether the tile at the specified location is flipped vertically
+     */
     public abstract boolean getTileYFlip(int column, int row);
     
+    /**
+     * Sets whether the tile at the specified location in this TileGrid is
+     * flipped vertically. If the location is outside the bounds of this
+     * TileGrid, the operation will fail and this method will do nothing.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @param yFlip Whether the tile at the specified location should be flipped
+     * vertically
+     * @return Whether the operation was successful
+     */
     public abstract boolean setTileYFlip(int column, int row, boolean yFlip);
     
+    /**
+     * Returns the angle by which the tile at the specified location in this
+     * TileGrid is rotated, or 0 if the location is outside the bounds of this
+     * TileGrid. The returned angle is normalized to be between 0 and 360
+     * degrees.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @return The angle by which the tile at the specified location is rotated
+     */
     public abstract double getTileAngle(int column, int row);
     
+    /**
+     * Sets to the specified value the angle by which the tile at the specified
+     * location in this TileGrid is rotated. If the value is not a multiple of
+     * 90 degrees, or the location is outside the bounds of this TileGrid, the
+     * operation will fail and this method will do nothing.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @param angle The angle in degrees by which the tile at the specified
+     * location should be rotated
+     * @return Whether the operation was successful
+     */
     public abstract boolean setTileAngle(int column, int row, double angle);
     
+    /**
+     * Returns a list of non-overlapping rectangles that collectively overlap or
+     * "cover" all and only the grid cells in this TileGrid that are occupied by
+     * tiles. The coordinate space of the returned rectangles has this
+     * TileGrid's column indices as its x-coordinates and this TileGrid's row
+     * indices as its y-coordinates. (For instance, if the only tile in this
+     * TileGrid is at column index 0 and row index 0, this method will return
+     * only the rectangle with top left corner (0, 0) and bottom right corner
+     * (1, 1).) Each of the rectangles may be of any width and any height. The
+     * number of returned rectangles is not necessarily the smallest possible
+     * number that can satisfy the requirements, but it is likely to be close
+     * (almost certainly within a factor of 2).
+     * @return A list of non-overlapping rectangles that collectively cover the
+     * grid cells that are occupied by tiles
+     */
     public abstract List<Rectangle> cover();
     
     private void draw(Graphics g, int x, int y, double alpha, Filter filter) {
