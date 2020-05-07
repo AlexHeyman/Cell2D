@@ -83,7 +83,11 @@ public class HashTileGrid extends TileGrid {
         if (column < leftmostColumn || column > rightmostColumn || row < topmostRow || row > bottommostRow) {
             return false;
         }
-        tiles.put(new Point(column, row), tile);
+        if (tile == null) {
+            tiles.remove(new Point(column, row));
+        } else {
+            tiles.put(new Point(column, row), tile);
+        }
         return true;
     }
     

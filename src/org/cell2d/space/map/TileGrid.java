@@ -14,7 +14,7 @@ import org.cell2d.celick.Graphics;
 
 /**
  * <p>A TileGrid is a Drawable that displays a rectangular grid of other
- * Drawables, called "tiles". A TileGrid's tiles are assumed to all be
+ * Drawables, called <i>tiles</i>. A TileGrid's tiles are assumed to all be
  * rectangular, of equal width and equal height, and with their origins at their
  * top left corners - though these requirements are not enforced. It is the
  * responsibility of the creators and modifiers of a TileGrid to ensure that
@@ -167,6 +167,11 @@ public abstract class TileGrid implements Drawable {
     
     private final int tileWidth, tileHeight;
     
+    /**
+     * Constructs a TileGrid with all of its grid cells unoccupied by tiles.
+     * @param tileWidth The width in pixels of each of this TileGrid's tiles
+     * @param tileHeight The height in pixels of each of this TileGrid's tiles
+     */
     public TileGrid(int tileWidth, int tileHeight) {
         if (tileWidth <= 0) {
             throw new RuntimeException("Attempted to construct a TileGrid with non-positive tile width "
@@ -180,26 +185,74 @@ public abstract class TileGrid implements Drawable {
         this.tileHeight = tileHeight;
     }
     
+    /**
+     * Returns the width in pixels of each of this TileGrid's tiles.
+     * @return The width in pixels of each of this TileGrid's tiles
+     */
     public final int getTileWidth() {
         return tileWidth;
     }
     
+    /**
+     * Returns the height in pixels of each of this TileGrid's tiles.
+     * @return The height in pixels of each of this TileGrid's tiles
+     */
     public final int getTileHeight() {
         return tileHeight;
     }
     
+    /**
+     * Returns the index of this TileGrid's leftmost column.
+     * @return The index of this TileGrid's leftmost column
+     */
     public abstract int getLeftmostColumn();
     
+    /**
+     * Returns the index of this TileGrid's rightmost column.
+     * @return The index of this TileGrid's rightmost column
+     */
     public abstract int getRightmostColumn();
     
+    /**
+     * Returns the index of this TileGrid's topmost row.
+     * @return The index of this TileGrid's topmost row
+     */
     public abstract int getTopmostRow();
     
+    /**
+     * Returns the index of this TileGrid's bottommost row.
+     * @return The index of this TileGrid's bottommost row
+     */
     public abstract int getBottommostRow();
     
+    /**
+     * Returns an unmodifiable Set view of the locations in this TileGrid that
+     * are occupied by tiles. The x-coordinate of each returned point is the
+     * column index of one of these locations, and the y-coordinate of that
+     * point is the location's row index.
+     * @return The locations in this TileGrid that are occupied by tiles
+     */
     public abstract Set<Point> getTileLocations();
     
+    /**
+     * Returns the tile at the specified location in this TileGrid, or null if
+     * there is none.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @return The tile at the specified location
+     */
     public abstract Drawable getTile(int column, int row);
     
+    /**
+     * Sets the tile at the specified location in this TileGrid to the specified
+     * Drawable. If the specified location is outside the bounds of this
+     * TileGrid, the operation will fail and this method will do nothing.
+     * @param column The location's column index
+     * @param row The location's row index
+     * @param tile The Drawable to set as the tile at the specified location, or
+     * null if there should be no tile at that location
+     * @return Whether the operation was successful
+     */
     public abstract boolean setTile(int column, int row, Drawable tile);
     
     public abstract boolean getTileXFlip(int column, int row);
