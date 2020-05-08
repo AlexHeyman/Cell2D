@@ -173,7 +173,8 @@ public abstract class TileGrid implements Drawable {
     private final int tileWidth, tileHeight;
     
     /**
-     * Constructs a TileGrid with all of its grid cells unoccupied by tiles.
+     * Constructs a TileGrid with all of its grid cells unoccupied by tiles, and
+     * with none of its tiles set to be flipped or rotated.
      * @param tileWidth The width in pixels of each of this TileGrid's tiles
      * @param tileHeight The height in pixels of each of this TileGrid's tiles
      */

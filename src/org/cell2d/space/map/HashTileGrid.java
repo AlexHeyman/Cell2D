@@ -10,7 +10,12 @@ import java.util.Set;
 import org.cell2d.Drawable;
 
 /**
- * 
+ * <p>A HashTileGrid is a type of TileGrid that stores its tile data in HashMaps
+ * with grid locations as keys. A HashTileGrid's memory usage is proportional to
+ * the number of its grid locations that are occupied by tiles, plus the number
+ * of grid locations at which tiles are set to be flipped or rotated. The time
+ * needed to iterate through a HashTileGrid's set of tile locations is
+ * proportional only to the number of those locations.</p>
  * @author Alex Heyman
  */
 public class HashTileGrid extends TileGrid {
@@ -24,10 +29,32 @@ public class HashTileGrid extends TileGrid {
     private final Map<Point,Drawable> tiles = new HashMap<>();
     private final Map<Point,Integer> flags = new HashMap<>();
     
+    /**
+     * Constructs a HashTileGrid with all of its grid cells unoccupied by tiles,
+     * and with none of its tiles set to be flipped or rotated.
+     * @param numColumns The number of this HashTileGrid's columns. Column
+     * indices will range from 0 to numColumns - 1.
+     * @param numRows The number of this HashTileGrid's rows. Row indices will
+     * range from 0 to numRows - 1.
+     * @param tileWidth The width in pixels of each of this HashTileGrid's tiles
+     * @param tileHeight The height in pixels of each of this HashTileGrid's
+     * tiles
+     */
     public HashTileGrid(int numColumns, int numRows, int tileWidth, int tileHeight) {
         this(0, numColumns - 1, 0, numRows - 1, tileWidth, tileHeight);
     }
     
+    /**
+     * Constructs a HashTileGrid with all of its grid cells unoccupied by tiles,
+     * and with none of its tiles set to be flipped or rotated.
+     * @param leftmostColumn The index of this HashTileGrid's leftmost column
+     * @param rightmostColumn The index of this HashTileGrid's rightmost column
+     * @param topmostRow The index of this HashTileGrid's topmost row
+     * @param bottommostRow The index of this HashTileGrid's bottommost row
+     * @param tileWidth The width in pixels of each of this HashTileGrid's tiles
+     * @param tileHeight The height in pixels of each of this HashTileGrid's
+     * tiles
+     */
     public HashTileGrid(int leftmostColumn, int rightmostColumn, int topmostRow, int bottommostRow,
             int tileWidth, int tileHeight) {
         super(tileWidth, tileHeight);

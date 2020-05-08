@@ -9,7 +9,11 @@ import java.util.Set;
 import org.cell2d.Drawable;
 
 /**
- * 
+ * <p>An ArrayTileGrid is a type of TileGrid that stores its tile data in a
+ * rectangular two-dimensional array. An ArrayTileGrid's memory usage, and the
+ * time needed to iterate through the set of its tile locations, are both
+ * proportional to the number of its columns multiplied by the number of its
+ * rows.</p>
  * @author Alex Heyman
  */
 public class ArrayTileGrid extends TileGrid {
@@ -24,10 +28,34 @@ public class ArrayTileGrid extends TileGrid {
     private int numNonNullTiles;
     private final byte[][] flags;
     
+    /**
+     * Constructs an ArrayTileGrid with all of its grid cells unoccupied by
+     * tiles, and with none of its tiles set to be flipped or rotated.
+     * @param numColumns The number of this ArrayTileGrid's columns. Column
+     * indices will range from 0 to numColumns - 1.
+     * @param numRows The number of this ArrayTileGrid's rows. Row indices will
+     * range from 0 to numRows - 1.
+     * @param tileWidth The width in pixels of each of this ArrayTileGrid's
+     * tiles
+     * @param tileHeight The height in pixels of each of this ArrayTileGrid's
+     * tiles
+     */
     public ArrayTileGrid(int numColumns, int numRows, int tileWidth, int tileHeight) {
         this(0, numColumns - 1, 0, numRows - 1, tileWidth, tileHeight);
     }
     
+    /**
+     * Constructs an ArrayTileGrid with all of its grid cells unoccupied by
+     * tiles, and with none of its tiles set to be flipped or rotated.
+     * @param leftmostColumn The index of this ArrayTileGrid's leftmost column
+     * @param rightmostColumn The index of this ArrayTileGrid's rightmost column
+     * @param topmostRow The index of this ArrayTileGrid's topmost row
+     * @param bottommostRow The index of this ArrayTileGrid's bottommost row
+     * @param tileWidth The width in pixels of each of this ArrayTileGrid's
+     * tiles
+     * @param tileHeight The height in pixels of each of this ArrayTileGrid's
+     * tiles
+     */
     public ArrayTileGrid(int leftmostColumn, int rightmostColumn, int topmostRow, int bottommostRow,
             int tileWidth, int tileHeight) {
         super(tileWidth, tileHeight);
