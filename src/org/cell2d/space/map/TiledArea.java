@@ -112,30 +112,6 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         TiledConverter.addArea(this);
     }
     
-    private static class ImageLayerObject extends SpaceObject {
-        
-        private ImageLayerObject(long x, long y, int width, int height, Sprite sprite,
-                double alpha, int drawPriority) {
-            width = (width < 0 ? sprite.getWidth() : Math.min(width, sprite.getWidth()));
-            height = (height < 0 ? sprite.getHeight() : Math.min(height, sprite.getHeight()));
-            setLocatorHitbox(new RectangleHitbox(x, y, 0, width*Frac.UNIT, 0, height*Frac.UNIT));
-            setAppearance(sprite);
-            setAlpha(alpha);
-            setDrawPriority(drawPriority);
-        }
-        
-    }
-    
-    private static class SolidTilesObject extends SpaceObject {
-        
-        private SolidTilesObject(RectangleHitbox hitbox) {
-            setLocatorHitbox(hitbox);
-            setSolidHitbox(hitbox);
-            setSolid(true);
-        }
-        
-    }
-    
     @Override
     public Iterable<SpaceObject> load(T game, U state) {
         loadLoadables();
@@ -163,6 +139,16 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
             }
         }
         return objects;
+    }
+    
+    private static class SolidTilesObject extends SpaceObject {
+        
+        private SolidTilesObject(RectangleHitbox hitbox) {
+            setLocatorHitbox(hitbox);
+            setSolidHitbox(hitbox);
+            setSolid(true);
+        }
+        
     }
     
     public Iterable<SpaceObject> loadTileLayer(T game, U state, TiledTileLayer layer, int drawPriority) {
@@ -220,15 +206,25 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
     public abstract Iterable<SpaceObject> loadObjectLayer(
             T game, U state, TiledObjectLayer layer, int drawPriority);
     
+    private static class ImageLayerObject extends SpaceObject {
+        
+        private ImageLayerObject(long x, long y, Sprite sprite, double alpha, int drawPriority) {
+            setLocatorHitbox(new RectangleHitbox(x, y,
+                    0, sprite.getWidth()*Frac.UNIT, 0, sprite.getHeight()*Frac.UNIT));
+            setAppearance(sprite);
+            setAlpha(alpha);
+            setDrawPriority(drawPriority);
+        }
+        
+    }
+    
     public Iterable<SpaceObject> loadImageLayer(T game, U state, TiledImageLayer layer, int drawPriority) {
         List<SpaceObject> objects = new ArrayList<>();
         long offsetX = Frac.units(layer.getAbsOffsetX());
         long offsetY = Frac.units(layer.getAbsOffsetY());
         double alpha = (layer.getAbsVisible() ? layer.getAbsOpacity() : 0);
-        TiledImage image = layer.getImage();
         Sprite sprite = imageLayerSprites.get(layer);
-        objects.add(new ImageLayerObject(offsetX, offsetY,
-                image.getWidth(), image.getHeight(), sprite, alpha, drawPriority));
+        objects.add(new ImageLayerObject(offsetX, offsetY, sprite, alpha, drawPriority));
         return objects;
     }
     
@@ -271,6 +267,10 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         for (Loadable loadable : loadables) {
             loadable.unload();
         }
+    }
+    
+    public final Sprite getSprite(TiledImageLayer layer) {
+        return imageLayerSprites.get(layer);
     }
     
 }

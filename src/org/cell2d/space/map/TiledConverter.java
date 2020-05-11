@@ -33,8 +33,8 @@ public final class TiledConverter {
     private static class AssetData {
         
         private Object asset = null;
-        private Set<TiledResource> referToThis = new HashSet<>();
-        private Set<TiledResource> referencedByThis = new HashSet<>();
+        private final Set<TiledResource> referToThis = new HashSet<>();
+        private final Set<TiledResource> referencedByThis = new HashSet<>();
         
     }
     
