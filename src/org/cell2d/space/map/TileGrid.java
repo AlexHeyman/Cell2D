@@ -343,7 +343,7 @@ public abstract class TileGrid implements Drawable {
      * number that can satisfy the requirements, but it is likely to be close
      * (almost certainly within a factor of 2).
      * @return A list of non-overlapping rectangles that collectively cover the
-     * grid cells that are occupied by tiles
+     * grid cells in this TileGrid that are occupied by tiles
      */
     public abstract List<Rectangle> cover();
     
