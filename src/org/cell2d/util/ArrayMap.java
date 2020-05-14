@@ -8,11 +8,12 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * An ArrayMap is a Map implemented as a resizable array, just like that of an
- * ArrayList. An ArrayMap takes up less memory than other Map types, and offers
- * at-least-comparable performance to a HashMap when the Map size is very small.
- * For best results, the initial capacity of an ArrayMap should be set to the
- * smallest number that the ArrayMap's size will almost certainly never exceed.
+ * <p>An ArrayMap is a Map implemented as a resizable array, just like that of
+ * an ArrayList. An ArrayMap takes up less memory than other Map types, and
+ * offers at-least-comparable performance to a HashMap when the Map size is very
+ * small. For best results, the initial capacity of an ArrayMap should be set to
+ * the smallest number that the ArrayMap's size will almost certainly never
+ * exceed.</p>
  * @param <K> The type of keys maintained by this ArrayMap
  * @param <V> The type of mapped values
  * @see java.util.ArrayList

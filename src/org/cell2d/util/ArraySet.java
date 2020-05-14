@@ -6,11 +6,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * An ArraySet is a Set implemented as a resizable array, just like that of an
- * ArrayList. An ArraySet takes up less memory than other Set types, and offers
- * at-least-comparable performance to a HashSet when the Set size is very small.
- * For best results, the initial capacity of an ArraySet should be set to the
- * smallest number that the ArraySet's size will almost certainly never exceed.
+ * <p>An ArraySet is a Set implemented as a resizable array, just like that of
+ * an ArrayList. An ArraySet takes up less memory than other Set types, and
+ * offers at-least-comparable performance to a HashSet when the Set size is very
+ * small. For best results, the initial capacity of an ArraySet should be set to
+ * the smallest number that the ArraySet's size will almost certainly never
+ * exceed.</p>
  * @see java.util.ArrayList
  * @param <E> The type of elements in this ArraySet
  * @author Alex Heyman
