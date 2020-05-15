@@ -23,7 +23,36 @@ import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileset;
 
 /**
- *
+ * <p>The TiledConverter class, along with the TiledArea class, allow Cell2D
+ * games to incorporate information from files created with the map editor
+ * <a href="https://www.mapeditor.org/">Tiled</a>. They accomplish this by
+ * interfacing with the <a href="https://github.com/AlexHeyman/TiledReader">
+ * TiledReader</a> library, which is a dependency of Cell2D. The TiledConverter
+ * class cannot be instantiated; instead, it contains static methods for
+ * converting data structures from the TiledReader library into data structures
+ * native to Cell2D.</p>
+ * 
+ * <p>The TiledConverter class stores pointers to the Sprites and Animations
+ * corresponding to the TiledTilesets it has converted, as well as to the
+ * TiledAreas corresponding to the TiledMaps they have been constructed from.
+ * The TiledConverter class will use these pointers to return the very same
+ * Sprites and Animations if asked to convert the same TiledTileset multiple
+ * times. This is mainly to ensure that, if multiple TiledMaps reference the
+ * same TiledTileset, the TiledTileset will not be wastefully converted and
+ * stored in memory multiple times. However, the TiledConverter class also
+ * contains static methods that can be called manually to remove these pointers.
+ * Removing the pointers to no-longer-needed Sprites, Animations, and TiledAreas
+ * is necessary to make those objects vulnerable to the Java garbage collector.
+ * (Keep in mind, however, that unloading the Sprites is also necessary to fully
+ * free the memory they take up.)</p>
+ * 
+ * <p>Tiled stores the durations of tile animation frames in milliseconds, but
+ * Cell2D stores the durations of Animation frames in fracunits. The
+ * TiledConverter class converts milliseconds to fracunits using a consistent
+ * rate, which by default is one fracunit for every 16 milliseconds. The
+ * TiledConverter also contains static methods for getting and setting this
+ * conversion rate.</p>
+ * @see TiledArea
  * @author Alex Heyman
  */
 public final class TiledConverter {
@@ -46,18 +75,30 @@ public final class TiledConverter {
     }
     
     private static final Map<TiledTile,Animatable> tilesToAnimatables = new HashMap<>();
-    private static long framesPerMS = 10*Frac.UNIT;
+    private static long fracunitsPerMS = Frac.UNIT/16;
     
-    public static long getFramesPerMS() {
-        return framesPerMS;
+    /**
+     * Returns the TiledConverter class' milliseconds-to-fracunits conversion
+     * rate, in fracunits per millisecond.
+     * @return The TiledConverter class' milliseconds-to-fracunits conversion
+     * rate
+     */
+    public static long getFracunitsPerMS() {
+        return fracunitsPerMS;
     }
     
-    public static void setFramesPerMS(long framesPerMS) {
-        if (framesPerMS <= 0) {
-            throw new RuntimeException("Attempted to set TiledConverter's frames-per-millisecond rate to a"
-                    + " non-positive value (about " + Frac.toDouble(framesPerMS) + " fracunits)");
+    /**
+     * Sets the TiledConverter class' milliseconds-to-fracunits conversion rate
+     * to the specified value.
+     * @param fracunitsPerMS The new conversion rate, in fracunits per
+     * millisecond
+     */
+    public static void setFracunitsPerMS(long fracunitsPerMS) {
+        if (fracunitsPerMS <= 0) {
+            throw new RuntimeException("Attempted to set TiledConverter's fracunits-per-millisecond rate to"
+                    + " a non-positive value (about " + Frac.toDouble(fracunitsPerMS) + " fracunits)");
         }
-        TiledConverter.framesPerMS = framesPerMS;
+        TiledConverter.fracunitsPerMS = fracunitsPerMS;
     }
     
     static <T extends CellGame, U extends SpaceState<T,U,?>> void addArea(TiledArea<T,U> area) {
@@ -129,7 +170,7 @@ public final class TiledConverter {
                     long[] frameDurations = new long[numFrames];
                     for (int i = 0; i < numFrames; i++) {
                         frames[i] = tilesToSprites.get(tile.getAnimationFrame(i));
-                        frameDurations[i] = tile.getAnimationFrameDuration(i)*framesPerMS;
+                        frameDurations[i] = tile.getAnimationFrameDuration(i)*fracunitsPerMS;
                     }
                     tilesToAnimatables.put(tile, new Animation(frames, frameDurations));
                 }

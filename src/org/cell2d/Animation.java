@@ -85,7 +85,8 @@ public class Animation implements Animatable {
      * array of frames. Each frame will have a duration that is the value at its
      * corresponding index in the sequence of frame durations.
      * @param frames The array of the Animation's frames
-     * @param frameDurations The sequence of the Animation's frame durations
+     * @param frameDurations The sequence of the Animation's frame durations in
+     * fracunits
      */
     public Animation(Animatable[] frames, long... frameDurations) {
         if (frames.length == 0) {

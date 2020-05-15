@@ -13,12 +13,12 @@ import org.cell2d.celick.Graphics;
  * 
  * <p>At each of its levels, an AnimationInstance has an <i>index</i> of its
  * current position in that level of the Animation, as well as a <i>speed</i>
- * that represents how fast, in fracunits per time unit, it advances through
- * that level. Each level's index and speed are both initially 0. If a level's
- * speed is negative, the AnimationInstance will cycle through the Animation at
- * that level backward. If an AnimationInstance moves forward past a level's end
- * or backward past its beginning, it will loop back to the beginning or end,
- * respectively.</p>
+ * that represents how fast, in fracunits per GameState time unit, it advances
+ * through that level. Each level's index and speed are both initially 0. If a
+ * level's speed is negative, the AnimationInstance will cycle through the
+ * Animation at that level backward. If an AnimationInstance moves forward past
+ * a level's end or backward past its beginning, it will loop back to the
+ * beginning or end, respectively.</p>
  * 
  * <p>When an AnimationInstance is drawn, it will appear as the Sprite in its
  * Animation that its current indices specify. The Filters that can be

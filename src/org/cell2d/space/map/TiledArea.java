@@ -34,6 +34,7 @@ import org.tiledreader.TiledTileset;
  * 
  * @param <T>
  * @param <U>
+ * @see TiledConverter
  * @author Alex Heyman
  */
 public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>> implements Area<T,U> {

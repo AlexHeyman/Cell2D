@@ -1,9 +1,9 @@
 package org.cell2d;
 
 /**
- * A Loadable object is an asset, such as an image or sound effect, that can be
- * manually loaded and unloaded into and out of memory. Loading may take a
- * moment, but while a Loadable is not loaded, it cannot be used.
+ * <p>A Loadable object is an asset, such as an image or sound effect, that can
+ * be manually loaded and unloaded into and out of memory. Loading may take a
+ * moment, but while a Loadable is not loaded, it cannot be used.</p>
  * @author Alex Heyman
  */
 public interface Loadable {
