@@ -104,7 +104,7 @@ public final class TiledConverter {
     static <T extends CellGame, U extends SpaceState<T,U,?>> void addArea(TiledArea<T,U> area) {
         TiledMap map = area.getMap();
         if (assets.containsKey(map)) {
-            removeAsset(map, false, false);
+            removeAssets(map, false, false);
         }
         AssetData data = new AssetData();
         assets.put(map, data);
@@ -117,13 +117,23 @@ public final class TiledConverter {
     }
     
     /**
-     * 
-     * @param tileset
-     * @param filters Note that this only determines the filters of the returned
-     * Sprites if the tileset had not been converted before (improve this
-     * description later)
-     * @param load
-     * @return 
+     * Converts the specified TiledTileset, if it has not already been
+     * converted, and returns an Iterable of the Sprites corresponding to all of
+     * the TiledTileset's TiledTiles. If the TiledTileset is a single-image
+     * tileset, the Iterable will be a SpriteSheet with the same grid layout as
+     * the TiledTileset. If the TiledTileset is instead an image collection
+     * tileset, the Iterable will be a List of Sprites, given in order from
+     * lowest to highest local ID of the TiledTiles to which they correspond.
+     * @param tileset The TiledTileset whose corresponding Sprites are to be
+     * returned
+     * @param filters If the TiledTileset has not yet been converted, this
+     * parameter determines the Set of Filters that should have an effect on the
+     * TiledTileset's Sprites when applied to them with draw(). If this is null,
+     * no Filters will have an effect.
+     * @param load If the TiledTileset has not yet been converted and this
+     * parameter is true, all of the TiledTileset's Sprites will be loaded upon
+     * their creation.
+     * @return An Iterable of the TiledTileset's Sprites
      */
     public static Iterable<Sprite> getSprites(TiledTileset tileset, Set<Filter> filters, boolean load) {
         AssetData data = assets.get(tileset);
@@ -179,13 +189,53 @@ public final class TiledConverter {
         return (Iterable<Sprite>)(data.asset);
     }
     
+    /**
+     * Converts the TiledTileset to which the specified TiledTile belongs, if it
+     * has not already been converted, and returns the Animatable representation
+     * of the specified TiledTile. If the TiledTile is an animated tile, the
+     * returned object will be an Animation whose frames are the Sprites
+     * corresponding to the TiledTile frames of the original tile animation. If
+     * the specified TiledTile is not animated, the returned object will simply
+     * be the static Sprite corresponding to the TiledTile.
+     * @param tile The TiledTile for which the representative Animatable is to
+     * be returned
+     * @param filters If the TiledTile's TiledTileset has not yet been
+     * converted, this parameter determines the Set of Filters that should have
+     * an effect on the TiledTileset's Sprites when applied to them with draw().
+     * If this is null, no Filters will have an effect.
+     * @param load If the TiledTile's TiledTileset has not yet been converted
+     * and this parameter is true, all of the TiledTileset's Sprites will be
+     * loaded upon their creation.
+     * @return The Animatable representation of the specified TiledTile
+     */
     public static Animatable getAnimatable(TiledTile tile, Set<Filter> filters, boolean load) {
         TiledTileset tileset = tile.getTileset();
         getSprites(tileset, filters, load);
         return tilesToAnimatables.get(tile);
     }
     
-    public static boolean removeAsset(TiledResource resource, boolean cleanUp, boolean removeResources) {
+    /**
+     * Removes the TiledConverter class' pointer to the assets converted from
+     * the specified resource, if it has been converted before.
+     * @param resource The resource to forget about
+     * @param cleanUp If true, also remove the pointers to all of the assets
+     * referenced by the assets from the specified resource, and not referenced
+     * by any of the other assets that the TiledConverter class still points to.
+     * This parameter applies recursively, so if the removal of any of these
+     * "orphaned" assets causes more assets to be orphaned, those will be
+     * removed as well.
+     * @param removeResources If true, also remove the TiledReader class'
+     * pointer to the specified resource, if that pointer exists. Note that the
+     * removal is based on the resource's source path rather than its identity
+     * as an Object, and so if the resource from that same path has already been
+     * removed from and re-read by the TiledReader class, the TiledReader class
+     * <i>will</i> remove its pointer to the new resource. The cleanUp parameter
+     * applies here as well; if it is true, the TiledReader class will also
+     * clean up its orphaned resources.
+     * @return Whether the specified resource had been converted before this
+     * method was called, and hence whether the removal occurred
+     */
+    public static boolean removeAssets(TiledResource resource, boolean cleanUp, boolean removeResources) {
         AssetData data = assets.get(resource);
         if (data == null) {
             return false;
@@ -203,7 +253,7 @@ public final class TiledConverter {
                 }
             }
             for (TiledResource orphanedResource : orphanedResources) {
-                removeAsset(orphanedResource, true, removeResources);
+                removeAssets(orphanedResource, true, removeResources);
             }
         } else {
             for (TiledResource referencedResource : data.referencedByThis) {
@@ -220,6 +270,10 @@ public final class TiledConverter {
         return true;
     }
     
+    /**
+     * Removes all of the TiledConverter class' pointers to the assets that have
+     * been converted from Tiled resources.
+     */
     public static void clearAssets() {
         assets.clear();
         tilesToAnimatables.clear();
