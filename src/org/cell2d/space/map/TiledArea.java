@@ -63,11 +63,13 @@ import org.tiledreader.TiledTileset;
  * orientation is orthogonal and ignore its within-tile-layer rendering order.
  * </b> loadObjectLayer() has no default implementation, because no such
  * implementation could account for the diversity of custom SpaceObject
- * subclasses that Cell2D games may use.</p>
+ * subclasses that Cell2D games may use. Each non-group layer is translated with
+ * a particular draw priority, which is intended to be (and by default is) the
+ * draw priority of the SpaceObjects generated from it.</p>
  * 
  * <p>A TiledArea stores a list of Loadables used by its content, including
  * the Sprites corresponding to TiledImageLayers and the Sprites and
- * SpriteSheets corresponding to TiledTilesets. These Lodables can be manually
+ * SpriteSheets corresponding to TiledTilesets. These Loadables can be manually
  * loaded and unloaded in bulk, and any unloaded ones will be automatically
  * loaded by the TiledArea's load() method.</p>
  * @param <T> The type of CellGame that uses the SpaceStates that can load this
@@ -113,18 +115,16 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * Constructs a TiledArea that represents the contents of the specified
      * TiledMap.
      * @param map The TiledMap to construct the TiledArea from
-     * @param drawPrioritySpacing The difference in the draw priorities of the
-     * SpaceObjects representing successive non-group layers. For instance, if
-     * this is set to 100, then if one non-group layer has SpaceObjects with
-     * draw priority 0, the next frontmost non-group layer will have
-     * SpaceObjects with draw priority 100, and the next frontmost non-group
-     * layer after that will have SpaceObjects with draw priority 200, etc. 
+     * @param drawPrioritySpacing The difference in the draw priorities of
+     * successive non-group layers. For instance, if this is set to 100, then if
+     * one non-group layer has draw priority 0, the next frontmost non-group
+     * layer will have draw priority 100, and the next frontmost non-group layer
+     * after that will have draw priority 200, etc.
      * @param zeroPriorityLayerName The name (accessed via getName()) of the
-     * non-group layer whose SpaceObjects will have draw priority 0. This
-     * parameter may be null. If no non-group layer has this parameter as a
-     * name, the first non-group layer will have draw priority 0. If multiple
-     * non-group layers have this parameter as a name, the hindmost one will
-     * have draw priority 0.
+     * non-group layer with draw priority 0. This parameter may be null. If no
+     * non-group layer has this parameter as a name, the first non-group layer
+     * will have draw priority 0. If multiple non-group layers have this
+     * parameter as a name, the hindmost one will have draw priority 0.
      * @param solidLayerName
      * <p>The name (accessed via getName()) of the
      * TiledTileLayer whose tiles will be overlaid with solid SpaceObjects by
@@ -140,12 +140,12 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * a name, none of the TiledTileLayers will be made solid. If multiple
      * TiledTileLayers have this parameter as a name, only the hindmost one will
      * be made solid.</p>
-     * @param backgroundColorLayerID If the TiledMap's background color is not
-     * null, the default implementation of load() will assign a ColorSpaceLayer
-     * displaying the background color to the loading SpaceState. This parameter
-     * is the integer ID with which the ColorSpaceLayer is assigned to the
-     * SpaceState. This parameter can be any number except 0, although if it is
-     * positive, the "background" color will appear in the foreground.
+     * @param backgroundColorLayerID If the TiledMap has a background color, the
+     * default implementation of load() will assign a ColorSpaceLayer displaying
+     * the background color to the loading SpaceState. This parameter is the
+     * integer ID with which the ColorSpaceLayer is assigned to the SpaceState.
+     * This parameter can be any number except 0, although if it is positive,
+     * the "background" color will appear in the foreground.
      * @param load If this is true, all of this TiledArea's Loadables (that are
      * not already loaded) will be loaded upon the TiledArea's creation.
      */
@@ -161,9 +161,9 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * @param map The TiledMap to construct the TiledArea from
      * @param drawPriorities An array whose length is the same as the number of
      * non-group layers in the TiledMap. The array element at each index
-     * <i>i</i> will be the draw priority of the SpaceObjects representing the
-     * non-group layer at index <i>i</i> in the TiledMap's list of non-group
-     * layers (accessed via getNonGroupLayers()).
+     * <i>i</i> will be the draw priority of the non-group layer at index <i>i
+     * </i> in the TiledMap's list of non-group layers (accessed via
+     * getNonGroupLayers()).
      * @param solidLayerName
      * <p>The name (accessed via getName()) of the
      * TiledTileLayer whose tiles will be overlaid with solid SpaceObjects by
@@ -179,12 +179,12 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * a name, none of the TiledTileLayers will be made solid. If multiple
      * TiledTileLayers have this parameter as a name, only the hindmost one will
      * be made solid.</p>
-     * @param backgroundColorLayerID If the TiledMap's background color is not
-     * null, the default implementation of load() will assign a ColorSpaceLayer
-     * displaying the background color to the loading SpaceState. This parameter
-     * is the integer ID with which the ColorSpaceLayer is assigned to the
-     * SpaceState. This parameter can be any number except 0, although if it is
-     * positive, the "background" color will appear in the foreground.
+     * @param backgroundColorLayerID If the TiledMap has a background color, the
+     * default implementation of load() will assign a ColorSpaceLayer displaying
+     * the background color to the loading SpaceState. This parameter is the
+     * integer ID with which the ColorSpaceLayer is assigned to the SpaceState.
+     * This parameter can be any number except 0, although if it is positive,
+     * the "background" color will appear in the foreground.
      * @param load If this is true, all of this TiledArea's Loadables (that are
      * not already loaded) will be loaded upon the TiledArea's creation.
      */
@@ -389,10 +389,23 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         return objects;
     }
     
+    /**
+     * Returns the TiledMap whose contents this TiledArea represents.
+     * @return This TiledArea's TiledMap
+     */
     public final TiledMap getMap() {
         return map;
     }
     
+    /**
+     * Returns the draw priority of the non-group layer at the specified index
+     * in this TiledArea's TiledMap's list of non-group layers (accessed via
+     * getNonGroupLayers()).
+     * @param index The index of the non-group layer whose draw priority is to
+     * be returned
+     * @return The draw priority of the non-group layer at the specified index
+     * @throws IndexOutOfBoundsException if the index is out of range
+     */
     public final int getLayerDrawPriority(int index) {
         if (index < 0 || index >= drawPriorities.length) {
             throw new IndexOutOfBoundsException("Attempted to get a TiledArea's layer draw priority at"
@@ -402,34 +415,61 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
     }
     
     /**
-     * Returns the TiledTileLayer that this TiledArea treats as solid, or null
-     * if there is none.
-     * @return The TiledTileLayer that this TiledArea treats as solid
+     * Returns the TiledTileLayer that this TiledArea makes solid via the
+     * default implementation of loadTileLayer(), or null if there is no such
+     * TiledTileLayer.
+     * @return The TiledTileLayer that this TiledArea makes solid
      */
     public final TiledTileLayer getSolidLayer() {
         return solidLayer;
     }
     
+    /**
+     * Returns the integer ID with which this TiledArea's background color
+     * SpaceLayer is assigned to the SpaceStates that load it. If this
+     * TiledArea's TiledMap has no background color, this value is meaningless.
+     * @return The ID of this TiledArea's background color SpaceLayer
+     */
     public final int getBackgroundColorLayerID() {
         return backgroundColorLayerID;
     }
     
+    /**
+     * Returns an unmodifiable List view of this TiledArea's stored Loadables.
+     * @return This TiledArea's stored Loadables
+     */
     public final List<Loadable> getLoadables() {
         return loadables;
     }
     
+    /**
+     * Loads all of this TiledArea's stored Loadables (that are not already
+     * loaded).
+     */
     public final void loadLoadables() {
         for (Loadable loadable : loadables) {
             loadable.load();
         }
     }
     
+    /**
+     * Unloads all of this TiledArea's stored Loadables that are currently
+     * loaded.
+     */
     public final void unloadLoadables() {
         for (Loadable loadable : loadables) {
             loadable.unload();
         }
     }
     
+    /**
+     * Returns the Sprite that this TiledArea constructed to represent the
+     * specified TiledImageLayer, or null if the TiledImageLayer is not part of
+     * this TiledArea's TiledMap.
+     * @param layer The TiledImageLayer whose corresponding Sprite is to be
+     * returned
+     * @return The Sprite representing the specified TiledImageLayer
+     */
     public final Sprite getSprite(TiledImageLayer layer) {
         TiledImage image = layer.getImage();
         File file = getCanonicalFile(image.getSource());
