@@ -31,9 +31,33 @@ import org.tiledreader.TiledTileLayer;
 import org.tiledreader.TiledTileset;
 
 /**
+ * <p>The TiledArea class, along with the TiledConverter class, allow Cell2D
+ * games to incorporate information from files created with the map editor
+ * <a href="https://www.mapeditor.org/">Tiled</a>. They accomplish this by
+ * interfacing with the <a href="https://github.com/AlexHeyman/TiledReader">
+ * TiledReader</a> library, which is a dependency of Cell2D. An instance of the
+ * TiledArea class is a type of Area that represents the contents of a TiledMap.
+ * </p>
  * 
- * @param <T>
- * @param <U>
+ * <p>Constructing a TiledArea from a TiledMap constitutes "converting" the
+ * TiledMap in the view of the TiledConverter class, and that class thus stores
+ * a pointer to each new TiledArea that is constructed. A newly constructed
+ * TiledArea will replace the TiledConverter class' pointer to any existing
+ * TiledArea constructed from the same TiledMap. When a TiledArea is constructed
+ * from a TiledMap, the TiledArea will also cause all of the TiledTilesets used
+ * in the TiledMap to be converted if they have not been already.</p>
+ * 
+ * <p>A TiledArea's load() method translates its TiledMap's non-group layers one
+ * by one into sets of SpaceObjects. As part of this process, it calls three
+ * other methods: loadTileLayer(), loadObjectLayer(), and loadImageLayer(), for
+ * loading each TiledTileLayer, TiledObjectLayer, and TiledImageLayer,
+ * respectively. loadTileLayer() and loadImageLayer() have default
+ * implementations, but can be overridden. loadObjectLayer() has no default
+ * implementation, because no such implementation could account for the
+ * diversity of custom SpaceObject subclasses that Cell2D games may use.</p>
+ * @param <T> The type of CellGame that uses the SpaceStates that can load this
+ * TiledArea
+ * @param <U> The type of SpaceState that can load this TiledArea
  * @see TiledConverter
  * @author Alex Heyman
  */
