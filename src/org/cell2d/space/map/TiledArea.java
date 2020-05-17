@@ -43,18 +43,33 @@ import org.tiledreader.TiledTileset;
  * TiledMap in the view of the TiledConverter class, and that class thus stores
  * a pointer to each new TiledArea that is constructed. A newly constructed
  * TiledArea will replace the TiledConverter class' pointer to any existing
- * TiledArea constructed from the same TiledMap. When a TiledArea is constructed
- * from a TiledMap, the TiledArea will also cause all of the TiledTilesets used
- * in the TiledMap to be converted if they have not been already.</p>
+ * TiledArea constructed from the same TiledMap.</p>
  * 
- * <p>A TiledArea's load() method translates its TiledMap's non-group layers one
- * by one into sets of SpaceObjects. As part of this process, it calls three
- * other methods: loadTileLayer(), loadObjectLayer(), and loadImageLayer(), for
- * loading each TiledTileLayer, TiledObjectLayer, and TiledImageLayer,
- * respectively. loadTileLayer() and loadImageLayer() have default
- * implementations, but can be overridden. loadObjectLayer() has no default
- * implementation, because no such implementation could account for the
- * diversity of custom SpaceObject subclasses that Cell2D games may use.</p>
+ * <p>When a TiledArea is constructed from a TiledMap, the TiledArea will cause
+ * all of the TiledTilesets used in the TiledMap to be converted if they have
+ * not been already. The TiledArea will also construct Sprites that display the
+ * images of the TiledMap's TiledImageLayers. (TiledImageLayers with identical
+ * images will share a single Sprite.) Any new Sprites converted or constructed
+ * upon a TiledArea's creation will not be affected by any Filters applied to
+ * them with draw().</p>
+ * 
+ * <p>The default implementation of a TiledArea's load() method translates its
+ * TiledMap's non-group layers one by one into sets of SpaceObjects. As part of
+ * this process, it calls three other methods: loadTileLayer(),
+ * loadObjectLayer(), and loadImageLayer(), for loading each TiledTileLayer,
+ * TiledObjectLayer, and TiledImageLayer, respectively. loadTileLayer() and
+ * loadImageLayer() have default implementations, but can be overridden. <b>
+ * Currently, these default implementations assume that the TiledMap's
+ * orientation is orthogonal and ignore its within-tile-layer rendering order.
+ * </b> loadObjectLayer() has no default implementation, because no such
+ * implementation could account for the diversity of custom SpaceObject
+ * subclasses that Cell2D games may use.</p>
+ * 
+ * <p>A TiledArea stores a list of Loadables used by its content, including
+ * the Sprites corresponding to TiledImageLayers and the Sprites and
+ * SpriteSheets corresponding to TiledTilesets. These Lodables can be manually
+ * loaded and unloaded in bulk, and any unloaded ones will be automatically
+ * loaded by the TiledArea's load() method.</p>
  * @param <T> The type of CellGame that uses the SpaceStates that can load this
  * TiledArea
  * @param <U> The type of SpaceState that can load this TiledArea
@@ -94,12 +109,85 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         return drawPriorities;
     }
     
+    /**
+     * Constructs a TiledArea that represents the contents of the specified
+     * TiledMap.
+     * @param map The TiledMap to construct the TiledArea from
+     * @param drawPrioritySpacing The difference in the draw priorities of the
+     * SpaceObjects representing successive non-group layers. For instance, if
+     * this is set to 100, then if one non-group layer has SpaceObjects with
+     * draw priority 0, the next frontmost non-group layer will have
+     * SpaceObjects with draw priority 100, and the next frontmost non-group
+     * layer after that will have SpaceObjects with draw priority 200, etc. 
+     * @param zeroPriorityLayerName The name (accessed via getName()) of the
+     * non-group layer whose SpaceObjects will have draw priority 0. This
+     * parameter may be null. If no non-group layer has this parameter as a
+     * name, the first non-group layer will have draw priority 0. If multiple
+     * non-group layers have this parameter as a name, the hindmost one will
+     * have draw priority 0.
+     * @param solidLayerName
+     * <p>The name (accessed via getName()) of the
+     * TiledTileLayer whose tiles will be overlaid with solid SpaceObjects by
+     * the default implementation of loadTileLayer(). This layer can be a
+     * visible layer that depicts a part of the game world, or it can be an
+     * invisible "solidity layer" whose only purpose is to specify collision
+     * information. loadTileLayer() will use the output of
+     * TileGridObject.cover() to generate a small set of solid, invisible,
+     * rectangular SpaceObjects that overlap all and only the grid locations in
+     * the TiledTileLayer that are occupied by tiles.</p>
+     * 
+     * <p>This parameter may be null. If no TiledTileLayer has this parameter as
+     * a name, none of the TiledTileLayers will be made solid. If multiple
+     * TiledTileLayers have this parameter as a name, only the hindmost one will
+     * be made solid.</p>
+     * @param backgroundColorLayerID If the TiledMap's background color is not
+     * null, the default implementation of load() will assign a ColorSpaceLayer
+     * displaying the background color to the loading SpaceState. This parameter
+     * is the integer ID with which the ColorSpaceLayer is assigned to the
+     * SpaceState. This parameter can be any number except 0, although if it is
+     * positive, the "background" color will appear in the foreground.
+     * @param load If this is true, all of this TiledArea's Loadables (that are
+     * not already loaded) will be loaded upon the TiledArea's creation.
+     */
     public TiledArea(TiledMap map, int drawPrioritySpacing, String zeroPriorityLayerName,
             String solidLayerName, int backgroundColorLayerID, boolean load) {
         this(map, makeDrawPriorities(map, drawPrioritySpacing, zeroPriorityLayerName),
                 solidLayerName, backgroundColorLayerID, load);
     }
     
+    /**
+     * Constructs a TiledArea that represents the contents of the specified
+     * TiledMap.
+     * @param map The TiledMap to construct the TiledArea from
+     * @param drawPriorities An array whose length is the same as the number of
+     * non-group layers in the TiledMap. The array element at each index
+     * <i>i</i> will be the draw priority of the SpaceObjects representing the
+     * non-group layer at index <i>i</i> in the TiledMap's list of non-group
+     * layers (accessed via getNonGroupLayers()).
+     * @param solidLayerName
+     * <p>The name (accessed via getName()) of the
+     * TiledTileLayer whose tiles will be overlaid with solid SpaceObjects by
+     * the default implementation of loadTileLayer(). This layer can be a
+     * visible layer that depicts a part of the game world, or it can be an
+     * invisible "solidity layer" whose only purpose is to specify collision
+     * information. loadTileLayer() will use the output of
+     * TileGridObject.cover() to generate a small set of solid, invisible,
+     * rectangular SpaceObjects that overlap all and only the grid locations in
+     * the TiledTileLayer that are occupied by tiles.</p>
+     * 
+     * <p>This parameter may be null. If no TiledTileLayer has this parameter as
+     * a name, none of the TiledTileLayers will be made solid. If multiple
+     * TiledTileLayers have this parameter as a name, only the hindmost one will
+     * be made solid.</p>
+     * @param backgroundColorLayerID If the TiledMap's background color is not
+     * null, the default implementation of load() will assign a ColorSpaceLayer
+     * displaying the background color to the loading SpaceState. This parameter
+     * is the integer ID with which the ColorSpaceLayer is assigned to the
+     * SpaceState. This parameter can be any number except 0, although if it is
+     * positive, the "background" color will appear in the foreground.
+     * @param load If this is true, all of this TiledArea's Loadables (that are
+     * not already loaded) will be loaded upon the TiledArea's creation.
+     */
     public TiledArea(TiledMap map, int[] drawPriorities, String solidLayerName,
             int backgroundColorLayerID, boolean load) {
         List<TiledLayer> layers = map.getNonGroupLayers();
@@ -192,6 +280,17 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         
     }
     
+    /**
+     * Generates a set of SpaceObjects to represent the specified
+     * TiledTileLayer. This method is called as part of a TiledArea's default
+     * implementation of load().
+     * @param game The CellGame of the SpaceState that is loading this TiledArea
+     * @param state The SpaceState that is loading this TiledArea
+     * @param layer The TiledTileLayer to represent
+     * @param drawPriority The draw priority that the generated SpaceObjects
+     * should have
+     * @return An Iterable of the generated SpaceObjects
+     */
     public Iterable<SpaceObject> loadTileLayer(T game, U state, TiledTileLayer layer, int drawPriority) {
         List<SpaceObject> objects = new ArrayList<>();
         long offsetX = Frac.units(layer.getAbsOffsetX());
@@ -244,6 +343,17 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         return objects;
     }
     
+    /**
+     * Generates a set of SpaceObjects to represent the specified
+     * TiledObjectLayer. This method is called as part of a TiledArea's default
+     * implementation of load().
+     * @param game The CellGame of the SpaceState that is loading this TiledArea
+     * @param state The SpaceState that is loading this TiledArea
+     * @param layer The TiledObjectLayer to represent
+     * @param drawPriority The draw priority that the generated SpaceObjects
+     * should have
+     * @return An Iterable of the generated SpaceObjects
+     */
     public abstract Iterable<SpaceObject> loadObjectLayer(
             T game, U state, TiledObjectLayer layer, int drawPriority);
     
@@ -259,6 +369,17 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         
     }
     
+    /**
+     * Generates a set of SpaceObjects to represent the specified
+     * TiledImageLayer. This method is called as part of a TiledArea's default
+     * implementation of load().
+     * @param game The CellGame of the SpaceState that is loading this TiledArea
+     * @param state The SpaceState that is loading this TiledArea
+     * @param layer The TiledImageLayer to represent
+     * @param drawPriority The draw priority that the generated SpaceObjects
+     * should have
+     * @return An Iterable of the generated SpaceObjects
+     */
     public Iterable<SpaceObject> loadImageLayer(T game, U state, TiledImageLayer layer, int drawPriority) {
         List<SpaceObject> objects = new ArrayList<>();
         long offsetX = Frac.units(layer.getAbsOffsetX());

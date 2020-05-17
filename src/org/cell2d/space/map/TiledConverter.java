@@ -130,9 +130,8 @@ public final class TiledConverter {
      * parameter determines the Set of Filters that should have an effect on the
      * TiledTileset's Sprites when applied to them with draw(). If this is null,
      * no Filters will have an effect.
-     * @param load If the TiledTileset has not yet been converted and this
-     * parameter is true, all of the TiledTileset's Sprites will be loaded upon
-     * their creation.
+     * @param load If this is true, all of the TiledTileset's Sprites (that are
+     * not already loaded) will be loaded before this method returns.
      * @return An Iterable of the TiledTileset's Sprites
      */
     public static Iterable<Sprite> getSprites(TiledTileset tileset, Set<Filter> filters, boolean load) {
@@ -185,6 +184,14 @@ public final class TiledConverter {
                     tilesToAnimatables.put(tile, new Animation(frames, frameDurations));
                 }
             }
+        } else if (load) {
+            if (data.asset instanceof SpriteSheet) {
+                ((SpriteSheet)(data.asset)).load();
+            } else {
+                for (Sprite sprite : (Iterable<Sprite>)(data.asset)) {
+                    sprite.load();
+                }
+            }
         }
         return (Iterable<Sprite>)(data.asset);
     }
@@ -203,9 +210,8 @@ public final class TiledConverter {
      * converted, this parameter determines the Set of Filters that should have
      * an effect on the TiledTileset's Sprites when applied to them with draw().
      * If this is null, no Filters will have an effect.
-     * @param load If the TiledTile's TiledTileset has not yet been converted
-     * and this parameter is true, all of the TiledTileset's Sprites will be
-     * loaded upon their creation.
+     * @param load If this is true, all of the TiledTileset's Sprites (that are
+     * not already loaded) will be loaded before this method returns.
      * @return The Animatable representation of the specified TiledTile
      */
     public static Animatable getAnimatable(TiledTile tile, Set<Filter> filters, boolean load) {
