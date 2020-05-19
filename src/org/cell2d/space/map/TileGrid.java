@@ -119,10 +119,9 @@ public abstract class TileGrid implements Drawable {
      * "cover" all and only the non-null locations in the specified 2D object
      * array. Each of the rectangles may be of any width and any height. The
      * number of returned rectangles is not necessarily the smallest possible
-     * number that can satisfy the requirements, but it is likely to be close
-     * (almost certainly within a factor of 2).  The computational time taken by
-     * this method is at most proportional to the number of locations in the
-     * object array.
+     * number that can satisfy the requirements, but it is likely to be close.
+     * The computational time taken by this method is at most proportional to
+     * the number of locations in the object array.
      * @param x1 The x-coordinate (in the space of the returned rectangles) of
      * column 0 of the object array
      * @param y1 The y-coordinate (in the space of the returned rectangles) of
@@ -159,9 +158,8 @@ public abstract class TileGrid implements Drawable {
      * corner (1, 1).) Each of the rectangles may be of any width and any
      * height. The number of returned rectangles is not necessarily the smallest
      * possible number that can satisfy the requirements, but it is likely to be
-     * close (almost certainly within a factor of 2). The computational time
-     * taken by this method is at most proportional to the number of points in
-     * the set.
+     * close. The computational time taken by this method is at most
+     * proportional to the number of points in the set.
      * @param points The set of points to cover
      * @return A list of non-overlapping rectangles that collectively cover the
      * points in the set
@@ -340,8 +338,7 @@ public abstract class TileGrid implements Drawable {
      * only the rectangle with top left corner (0, 0) and bottom right corner
      * (1, 1).) Each of the rectangles may be of any width and any height. The
      * number of returned rectangles is not necessarily the smallest possible
-     * number that can satisfy the requirements, but it is likely to be close
-     * (almost certainly within a factor of 2).
+     * number that can satisfy the requirements, but it is likely to be close.
      * @return A list of non-overlapping rectangles that collectively cover the
      * grid cells in this TileGrid that are occupied by tiles
      */

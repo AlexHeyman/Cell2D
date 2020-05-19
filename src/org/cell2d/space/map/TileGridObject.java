@@ -95,7 +95,7 @@ public class TileGridObject extends SpaceObject {
      * of any width and any height, and each of them has its origin at its top
      * left corner. The number of returned RectangleHitboxes is not necessarily
      * the smallest possible number that can satisfy the requirements, but it is
-     * likely to be close (almost certainly within a factor of 2).
+     * likely to be close.
      * @return A list of non-overlapping RectangleHitboxes that collectively
      * cover this TileGridObject's TileGrid's cells that are occupied by tiles
      */
