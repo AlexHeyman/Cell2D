@@ -14,6 +14,12 @@ import org.cell2d.celick.SlickException;
  * memory. Loading may take a moment, but while a Sprite is not loaded, it
  * cannot be drawn. A Sprite may also be treated as an Animatable with exactly
  * one frame, namely itself, that has a duration of 0.</p>
+ * 
+ * <p>A Sprite has a fixed set of Filters, specified upon its creation, that can
+ * have an effect on it when applied to it with its draw() method. The Sprite
+ * makes this possible by making a copy of its image data with each Filter
+ * applied upon being loaded. Thus, the amount of memory that a loaded Sprite
+ * occupies is proportional to its number of applicable Filters plus 1.</p>
  * @see Filter
  * @see SpriteSheet
  * @see Animation
