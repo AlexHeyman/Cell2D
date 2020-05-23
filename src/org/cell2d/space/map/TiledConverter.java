@@ -26,7 +26,7 @@ import org.tiledreader.TiledTileset;
  * <p>The TiledConverter class, along with the TiledArea class, allow Cell2D
  * games to incorporate information from files created with the map editor
  * <a href="https://www.mapeditor.org/">Tiled</a>. They accomplish this by
- * interfacing with the <a href="https://github.com/AlexHeyman/TiledReader">
+ * interfacing with the <a href="http://www.alexheyman.org/tiledreader/">
  * TiledReader</a> library, which is a dependency of Cell2D. The TiledConverter
  * class cannot be instantiated; instead, it contains static methods for
  * converting data structures from the TiledReader library into data structures

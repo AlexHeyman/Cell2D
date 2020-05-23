@@ -34,7 +34,7 @@ import org.tiledreader.TiledTileset;
  * <p>The TiledArea class, along with the TiledConverter class, allow Cell2D
  * games to incorporate information from files created with the map editor
  * <a href="https://www.mapeditor.org/">Tiled</a>. They accomplish this by
- * interfacing with the <a href="https://github.com/AlexHeyman/TiledReader">
+ * interfacing with the <a href="http://www.alexheyman.org/tiledreader/">
  * TiledReader</a> library, which is a dependency of Cell2D. An instance of the
  * TiledArea class is a type of Area that represents the contents of a TiledMap.
  * </p>
