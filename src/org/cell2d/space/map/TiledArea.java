@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.util.Pair;
+import org.cell2d.AnimationInstance;
 import org.cell2d.CellGame;
 import org.cell2d.Color;
 import org.cell2d.Drawable;
@@ -312,6 +313,9 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
             Drawable drawable = tilesToDrawables.get(tile);
             if (drawable == null) {
                 drawable = TiledConverter.getAnimatable(tile, null, false).getInstance();
+                if (drawable instanceof AnimationInstance) {
+                    ((AnimationInstance)drawable).setSpeed(Frac.UNIT);
+                }
                 tilesToDrawables.put(tile, drawable);
             }
             tileGrid.setTile(point.x, point.y, drawable);
