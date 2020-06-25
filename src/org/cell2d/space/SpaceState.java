@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -19,7 +20,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import javafx.util.Pair;
 import org.cell2d.CellGame;
 import org.cell2d.CellVector;
 import org.cell2d.Direction;
@@ -142,13 +142,25 @@ public abstract class SpaceState<T extends CellGame,
                 System.identityHashCode(hitbox1) - System.identityHashCode(hitbox2) : priorityDiff);
     };
     
-    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> flatModeComparator = (pair1, pair2) -> {
-        return drawPriorityComparator.compare(pair1.getKey(), pair2.getKey());
+    private static class HitboxIteratorData {
+        
+        private final Iterator<Hitbox> iterator;
+        private Hitbox currentHitbox;
+        
+        private HitboxIteratorData(Iterator<Hitbox> iterator, Hitbox currentHitbox) {
+            this.iterator = iterator;
+            this.currentHitbox = currentHitbox;
+        }
+        
+    }
+    
+    private static final Comparator<HitboxIteratorData> flatModeComparator = (data1, data2) -> {
+        return drawPriorityComparator.compare(data1.currentHitbox, data2.currentHitbox);
     };
     
-    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> overModeComparator = (pair1, pair2) -> {
-        Hitbox hitbox1 = pair1.getKey();
-        Hitbox hitbox2 = pair2.getKey();
+    private static final Comparator<HitboxIteratorData> overModeComparator = (data1, data2) -> {
+        Hitbox hitbox1 = data1.currentHitbox;
+        Hitbox hitbox2 = data2.currentHitbox;
         int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
         if (priorityDiff == 0) {
             long yDiff = hitbox1.getAbsY() - hitbox2.getAbsY();
@@ -159,9 +171,9 @@ public abstract class SpaceState<T extends CellGame,
         return priorityDiff;
     };
     
-    private static final Comparator<Pair<Hitbox,Iterator<Hitbox>>> underModeComparator = (pair1, pair2) -> {
-        Hitbox hitbox1 = pair1.getKey();
-        Hitbox hitbox2 = pair2.getKey();
+    private static final Comparator<HitboxIteratorData> underModeComparator = (data1, data2) -> {
+        Hitbox hitbox1 = data1.currentHitbox;
+        Hitbox hitbox2 = data2.currentHitbox;
         int priorityDiff = hitbox1.drawPriority - hitbox2.drawPriority;
         if (priorityDiff == 0) {
             long yDiff = hitbox2.getAbsY() - hitbox1.getAbsY();
@@ -187,7 +199,7 @@ public abstract class SpaceState<T extends CellGame,
     private int cellTop = 0;
     private int cellBottom = 0;
     private DrawMode drawMode;
-    private Comparator<Pair<Hitbox,Iterator<Hitbox>>> drawComparator;
+    private Comparator<HitboxIteratorData> drawComparator;
     private final Map<Integer,Viewport<T,U>> viewports = new HashMap<>();
     private HUD hud = null;
     private final SortedMap<Integer,SpaceLayer> spaceLayers = new TreeMap<>();
@@ -3098,17 +3110,17 @@ public abstract class SpaceState<T extends CellGame,
                         while (iterator.hasNext()) {
                             hitboxesList.add(iterator.next().hitboxes.get(HitboxRole.LOCATOR));
                         }
-                        PriorityQueue<Pair<Hitbox,Iterator<Hitbox>>> queue = new PriorityQueue<>(drawComparator);
+                        PriorityQueue<HitboxIteratorData> queue = new PriorityQueue<>(drawComparator);
                         for (Set<Hitbox> locatorHitboxes : hitboxesList) {
                             if (!locatorHitboxes.isEmpty()) {
                                 Iterator<Hitbox> hitboxIterator = locatorHitboxes.iterator();
-                                queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
+                                queue.add(new HitboxIteratorData(hitboxIterator, hitboxIterator.next()));
                             }
                         }
                         Hitbox lastHitbox = null;
                         while (!queue.isEmpty()) {
-                            Pair<Hitbox,Iterator<Hitbox>> pair = queue.poll();
-                            Hitbox locatorHitbox = pair.getKey();
+                            HitboxIteratorData data = queue.poll();
+                            Hitbox locatorHitbox = data.currentHitbox;
                             if (locatorHitbox != lastHitbox) {
                                 if (locatorHitbox.getLeftEdge() < rightEdge
                                         && locatorHitbox.getRightEdge() > leftEdge
@@ -3120,9 +3132,9 @@ public abstract class SpaceState<T extends CellGame,
                                 }
                                 lastHitbox = locatorHitbox;
                             }
-                            Iterator<Hitbox> hitboxIterator = pair.getValue();
-                            if (hitboxIterator.hasNext()) {
-                                queue.add(new Pair<>(hitboxIterator.next(), hitboxIterator));
+                            if (data.iterator.hasNext()) {
+                                data.currentHitbox = data.iterator.next();
+                                queue.add(data);
                             }
                         }
                     }

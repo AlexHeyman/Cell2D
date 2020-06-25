@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.util.Pair;
+import java.util.Objects;
 import org.cell2d.AnimationInstance;
 import org.cell2d.CellGame;
 import org.cell2d.Color;
@@ -86,7 +86,34 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
     private TiledTileLayer solidLayer;
     private final int backgroundColorLayerID;
     private List<Loadable> loadables;
-    private final Map<Pair<File,Color>,Sprite> imageLayerSprites = new HashMap<>();
+    
+    private static class ImageLayerDef {
+        
+        private final File imageSource;
+        private final Color transColor;
+        
+        private ImageLayerDef(File imageSource, Color transColor) {
+            this.imageSource = imageSource;
+            this.transColor = transColor;
+        }
+        
+        @Override
+        public final boolean equals(Object o) {
+            if (o instanceof ImageLayerDef) {
+                ImageLayerDef def = (ImageLayerDef)o;
+                return (imageSource.equals(def.imageSource) && transColor.equals(def.transColor));
+            }
+            return false;
+        }
+        
+        @Override
+        public final int hashCode() {
+            return Objects.hash(imageSource, transColor);
+        }
+        
+    }
+    
+    private final Map<ImageLayerDef,Sprite> imageLayerSprites = new HashMap<>();
     
     private static File getCanonicalFile(String path) {
         try {
@@ -229,11 +256,11 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
                 File file = getCanonicalFile(image.getSource());
                 java.awt.Color awtTransColor = image.getTransColor();
                 Color transColor = (awtTransColor == null ? null : new Color(awtTransColor));
-                Pair<File,Color> pair = new Pair<>(file, transColor);
-                Sprite sprite = imageLayerSprites.get(pair);
+                ImageLayerDef def = new ImageLayerDef(file, transColor);
+                Sprite sprite = imageLayerSprites.get(def);
                 if (sprite == null) {
                     sprite = new Sprite(image.getSource(), 0, 0, transColor, null, load);
-                    imageLayerSprites.put(pair, sprite);
+                    imageLayerSprites.put(def, sprite);
                     loadables.add(sprite);
                 }
             }
@@ -479,7 +506,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         File file = getCanonicalFile(image.getSource());
         java.awt.Color awtTransColor = image.getTransColor();
         Color transColor = (awtTransColor == null ? null : new Color(awtTransColor));
-        return imageLayerSprites.get(new Pair<>(file, transColor));
+        return imageLayerSprites.get(new ImageLayerDef(file, transColor));
     }
     
 }
