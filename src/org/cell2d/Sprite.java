@@ -1,8 +1,10 @@
 package org.cell2d;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
@@ -40,14 +42,25 @@ public class Sprite implements Animatable, Drawable, Loadable {
     private final SpriteSheet spriteSheet;
     private final String path;
     private final Color transColor;
-    private final Set<Filter> filters;
-    private final HashMap<Filter,Image[]> images = new HashMap<>();
-    private Image[] defaultImages = null;
+    private Image[] defaultImages;
+    private Map<Filter,Image[]> filterImages;
     private final int originX, originY;
     private int width = 0;
     private int height = 0;
     private int right = 0;
     private int bottom = 0;
+    
+    private void initImageStorage(Collection<Filter> filters) {
+        defaultImages = new Image[4];
+        if (filters.isEmpty()) {
+            filterImages = Collections.emptyMap();
+        } else {
+            filterImages = new HashMap<>();
+            for (Filter filter : filters) {
+                filterImages.put(filter, new Image[4]);
+            }
+        }
+    }
     
     private Sprite() {
         blank = true;
@@ -57,7 +70,8 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         path = null;
         transColor = null;
-        filters = Collections.emptySet();
+        defaultImages = null;
+        filterImages = null;
         originX = 0;
         originY = 0;
     }
@@ -70,7 +84,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         this.spriteSheet = spriteSheet;
         path = null;
         transColor = null;
-        filters = Collections.emptySet();
+        initImageStorage(spriteSheet.getFilters());
         originX = spriteSheet.getOriginX();
         originY = spriteSheet.getOriginY();
     }
@@ -80,13 +94,12 @@ public class Sprite implements Animatable, Drawable, Loadable {
      * @param path The relative path to the image file
      * @param originX The x-coordinate in pixels of the origin on the image
      * @param originY The y-coordinate in pixels of the origin on the image
-     * @param filters The Set of Filters that should have an effect on this
-     * Sprite when applied to it with draw(), or null if no Filters should have
-     * an effect
      * @param load Whether this Sprite should load upon creation
+     * @param filters The Filters that should have an effect on this
+     * Sprite when applied to it with draw()
      */
-    public Sprite(String path, int originX, int originY, Set<Filter> filters, boolean load) {
-        this(path, originX, originY, null, filters, load);
+    public Sprite(String path, int originX, int originY, boolean load, Filter... filters) {
+        this(path, originX, originY, null, load, filters);
     }
     
     /**
@@ -96,13 +109,12 @@ public class Sprite implements Animatable, Drawable, Loadable {
      * @param originY The y-coordinate in pixels of the origin on the image
      * @param transColor This Sprite's transparent color, or null if there
      * should be none
-     * @param filters The Set of Filters that should have an effect on this
-     * Sprite when applied to it with draw(), or null if no Filters should have
-     * an effect
      * @param load Whether this Sprite should load upon creation
+     * @param filters The Filters that should have an effect on this
+     * Sprite when applied to it with draw()
      */
     public Sprite(String path, int originX, int originY,
-            Color transColor, Set<Filter> filters, boolean load) {
+            Color transColor, boolean load, Filter... filters) {
         blank = false;
         loaded = false;
         basedOn = null;
@@ -110,7 +122,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         this.path = path;
         this.transColor = transColor;
-        this.filters = (filters == null ? Collections.emptySet() : new HashSet<>(filters));
+        initImageStorage(Arrays.asList(filters));
         this.originX = originX;
         this.originY = originY;
         if (load) {
@@ -126,14 +138,13 @@ public class Sprite implements Animatable, Drawable, Loadable {
      * @param transR The red value (0-255) of this Sprite's transparent color
      * @param transG The green value (0-255) of this Sprite's transparent color
      * @param transB The blue value (0-255) of this Sprite's transparent color
-     * @param filters The Set of Filters that should have an effect on this
-     * Sprite when applied to it with draw(), or null if no Filters should have
-     * an effect
      * @param load Whether this Sprite should load upon creation
+     * @param filters The Filters that should have an effect on this
+     * Sprite when applied to it with draw()
      */
     public Sprite(String path, int originX, int originY,
-            int transR, int transG, int transB, Set<Filter> filters, boolean load) {
-        this(path, originX, originY,  new Color(transR, transG, transB), filters, load);
+            int transR, int transG, int transB, boolean load, Filter... filters) {
+        this(path, originX, originY,  new Color(transR, transG, transB), load, filters);
     }
     
     /**
@@ -143,11 +154,10 @@ public class Sprite implements Animatable, Drawable, Loadable {
      * which it is created. This Sprite will be considered to be loaded from the
      * start, and once unloaded, it cannot be reloaded.
      * @param image The Image to create this Sprite from
-     * @param filters The Set of Filters that should have an effect on this
-     * Sprite when applied to it with draw(), or null if no Filters should have
-     * an effect
+     * @param filters The Filters that should have an effect on this Sprite when
+     * applied to it with draw()
      */
-    public Sprite(Image image, Set<Filter> filters) {
+    public Sprite(Image image, Filter... filters) {
         blank = false;
         loaded = true;
         basedOn = null;
@@ -155,13 +165,15 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         path = null;
         transColor = null;
-        this.filters = (filters == null ? Collections.emptySet() : new HashSet<>(filters));
+        initImageStorage(Arrays.asList(filters));
         originX = (int)Math.round(image.getCenterOfRotationX());
         originY = (int)Math.round(image.getCenterOfRotationY());
         Image spriteImage;
         try {
             spriteImage = new Image(image.getWidth(), image.getHeight());
-            spriteImage.getGraphics().drawImage(image, 0, 0);
+            Graphics graphics = spriteImage.getGraphics();
+            graphics.drawImage(image, 0, 0);
+            graphics.flush();
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
@@ -171,7 +183,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
     /**
      * Constructs a Sprite from an existing Sprite with a Filter applied to it.
      * The existing Sprite must not have been created as part of a SpriteSheet.
-     * The new Sprite will have the same Set of Filters that are usable with
+     * The new Sprite will have the same set of Filters that are usable with
      * draw() as the existing Sprite.
      * @param sprite The Sprite to create this Sprite from
      * @param filter The Filter to apply to the existing Sprite
@@ -188,7 +200,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         path = null;
         transColor = null;
-        filters = sprite.filters;
+        initImageStorage(sprite.filterImages.keySet());
         originX = sprite.originX;
         originY = sprite.originY;
         if (load) {
@@ -228,7 +240,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
                 throw new RuntimeException("Attempted to reload a Sprite that cannot be reloaded");
             }
             loadFilter(null, image);
-            for (Filter filter : filters) {
+            for (Filter filter : filterImages.keySet()) {
                 loadFilter(filter, filter.getFilteredImage(image));   
             }
         } else {
@@ -239,13 +251,15 @@ public class Sprite implements Animatable, Drawable, Loadable {
     
     final void loadFilter(Filter filter, Image image) {
         image.getWidth(); //Prompt the image to initialize itself if it hasn't already
-        Image[] imageArray = new Image[4];
+        Image[] imageArray;
         if (filter == null) {
-            defaultImages = imageArray;
+            imageArray = defaultImages;
             width = image.getWidth();
             height = image.getHeight();
             right = width - originX;
             bottom = height - originY;
+        } else {
+            imageArray = filterImages.get(filter);
         }
         imageArray[0] = image;
         imageArray[0].setCenterOfRotation(originX, originY);
@@ -255,7 +269,6 @@ public class Sprite implements Animatable, Drawable, Loadable {
         imageArray[2].setCenterOfRotation(originX, bottom);
         imageArray[3] = image.getFlippedCopy(true, true);
         imageArray[3].setCenterOfRotation(right, bottom);
-        images.put(filter, imageArray);
     }
     
     /**
@@ -272,7 +285,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
             spriteSheet.unloadSprite();
         } else {
             try {
-                for (Image[] imageArray : images.values()) {
+                for (Image[] imageArray : filterImages.values()) {
                     imageArray[0].destroy();
                 }
             } catch (SlickException e) {
@@ -285,8 +298,12 @@ public class Sprite implements Animatable, Drawable, Loadable {
     }
     
     final void clear() {
-        images.clear();
         defaultImages = null;
+        for (Image[] images : filterImages.values()) {
+            for (int i = 0; i < images.length; i++) {
+                images[i] = null;
+            }
+        }
         width = 0;
         height = 0;
         right = 0;
@@ -356,7 +373,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
      * applied to it with draw()
      */
     public final Set<Filter> getFilters() {
-        return Collections.unmodifiableSet(filters);
+        return Collections.unmodifiableSet(filterImages.keySet());
     }
     
     /**
@@ -415,7 +432,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         if (filter == null) {
             image = defaultImages[index];
         } else {
-            Image[] imageArray = images.get(filter);
+            Image[] imageArray = filterImages.get(filter);
             image = (imageArray == null ? defaultImages[index] : imageArray[index]);
         }
         image.setRotation(-angle);

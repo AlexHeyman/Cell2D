@@ -3,6 +3,7 @@ package org.cell2d;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
@@ -41,6 +42,27 @@ public class ColorMapFilter extends Filter {
         colorMap.put(key, value);
     }
     
+    @Override
+    public final int hashCode() {
+        return Objects.hash(colorMap);
+    }
+    
+    /**
+     * Returns whether the specified object is a ColorMapFilter that is equal to
+     * this ColorMapFilter. Two ColorMapFilters are equal if and only if the
+     * Maps they use are equal.
+     * @param obj The object to be compared with this ColorMapFilter
+     * @return Whether the specified object is a ColorMapFilter that is equal to
+     * this ColorMapFilter
+     */
+    @Override
+    public final boolean equals(Object obj) {
+        if (obj instanceof ColorMapFilter) {
+            return colorMap.equals(((ColorMapFilter)obj).colorMap);
+        }
+        return false;
+    }
+    
     /**
      * Returns an unmodifiable view of the Map that this ColorMapFilter uses.
      * @return The Map that this ColorMapFilter uses
@@ -74,7 +96,6 @@ public class ColorMapFilter extends Filter {
                 newGraphics.fillRect(x, y, 1, 1);
             }
         }
-        image.flushPixelData();
         newGraphics.flush();
         return newImage;
     }

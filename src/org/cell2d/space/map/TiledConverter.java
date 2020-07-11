@@ -126,15 +126,14 @@ public final class TiledConverter {
      * lowest to highest local ID of the TiledTiles to which they correspond.
      * @param tileset The TiledTileset whose corresponding Sprites are to be
      * returned
-     * @param filters If the TiledTileset has not yet been converted, this
-     * parameter determines the Set of Filters that should have an effect on the
-     * TiledTileset's Sprites when applied to them with draw(). If this is null,
-     * no Filters will have an effect.
      * @param load If this is true, all of the TiledTileset's Sprites (that are
      * not already loaded) will be loaded before this method returns.
+     * @param filters If the TiledTileset has not yet been converted, this
+     * parameter determines the Filters that should have an effect on the
+     * TiledTileset's Sprites when applied to them with draw().
      * @return An Iterable of the TiledTileset's Sprites
      */
-    public static Iterable<Sprite> getSprites(TiledTileset tileset, Set<Filter> filters, boolean load) {
+    public static Iterable<Sprite> getSprites(TiledTileset tileset, boolean load, Filter... filters) {
         AssetData data = assets.get(tileset);
         if (data == null) {
             data = new AssetData();
@@ -150,7 +149,7 @@ public final class TiledConverter {
                     java.awt.Color transColor = image.getTransColor();
                     Sprite sprite = new Sprite(image.getSource(),
                             -tileset.getTileOffsetX(), -tileset.getTileOffsetY(),
-                            (transColor == null ? null : new Color(transColor)), filters, load);
+                            (transColor == null ? null : new Color(transColor)), load, filters);
                     spriteList.add(sprite);
                     tilesToSprites.put(tile, sprite);
                 }
@@ -161,7 +160,7 @@ public final class TiledConverter {
                         tileset.getHeight(), tileset.getTileWidth(), tileset.getTileHeight(),
                         tileset.getSpacing(), tileset.getMargin(),
                         -tileset.getTileOffsetX(), -tileset.getTileOffsetY(),
-                        (transColor == null ? null : new Color(transColor)), filters, load);
+                        (transColor == null ? null : new Color(transColor)), load, filters);
                 data.asset = spriteSheet;
                 for (int x = 0; x < tileset.getWidth(); x++) {
                     for (int y = 0; y < tileset.getHeight(); y++) {
@@ -206,17 +205,16 @@ public final class TiledConverter {
      * be the static Sprite corresponding to the TiledTile.
      * @param tile The TiledTile for which the representative Animatable is to
      * be returned
-     * @param filters If the TiledTile's TiledTileset has not yet been
-     * converted, this parameter determines the Set of Filters that should have
-     * an effect on the TiledTileset's Sprites when applied to them with draw().
-     * If this is null, no Filters will have an effect.
      * @param load If this is true, all of the TiledTileset's Sprites (that are
      * not already loaded) will be loaded before this method returns.
+     * @param filters If the TiledTile's TiledTileset has not yet been
+     * converted, this parameter determines the Filters that should have an
+     * effect on the TiledTileset's Sprites when applied to them with draw().
      * @return The Animatable representation of the specified TiledTile
      */
-    public static Animatable getAnimatable(TiledTile tile, Set<Filter> filters, boolean load) {
+    public static Animatable getAnimatable(TiledTile tile, boolean load, Filter... filters) {
         TiledTileset tileset = tile.getTileset();
-        getSprites(tileset, filters, load);
+        getSprites(tileset, load, filters);
         return tilesToAnimatables.get(tile);
     }
     

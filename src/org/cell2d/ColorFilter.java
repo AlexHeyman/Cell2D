@@ -1,5 +1,6 @@
 package org.cell2d;
 
+import java.util.Objects;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
@@ -25,6 +26,27 @@ public class ColorFilter extends Filter {
      */
     public ColorFilter(Color color) {
         this.color = color;
+    }
+    
+    @Override
+    public final int hashCode() {
+        return Objects.hash(color);
+    }
+    
+    /**
+     * Returns whether the specified object is a ColorFilter that is equal to
+     * this ColorFilter. Two ColorFilters are equal if and only if the Colors
+     * they use are equal.
+     * @param obj The object to be compared with this ColorFilter
+     * @return Whether the specified object is a ColorFilter that is equal to
+     * this CellVector
+     */
+    @Override
+    public final boolean equals(Object obj) {
+        if (obj instanceof ColorFilter) {
+            return color.equals(((ColorFilter)obj).color);
+        }
+        return false;
     }
     
     /**
@@ -76,7 +98,6 @@ public class ColorFilter extends Filter {
                 }
             }
         }
-        image.flushPixelData();
         newGraphics.flush();
         return newImage;
     }

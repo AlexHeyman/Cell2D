@@ -1,9 +1,11 @@
 package org.cell2d;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
@@ -36,8 +38,8 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
     private final Filter basedFilter;
     private final String path;
     private final Color transColor;
-    private final Set<Filter> filters;
-    private final HashMap<Filter,Image> images = new HashMap<>();
+    private Image defaultImage = null;
+    private final Map<Filter,Image> filterImages;
     private final int width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY;
     private final Sprite[] sprites;
     private int numSpritesLoaded = 0;
@@ -57,15 +59,14 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
      * origin
      * @param originY The y-coordinate in pixels on each Sprite of that Sprite's
      * origin
-     * @param filters The Set of Filters that will have an effect on this
-     * SpriteSheet's Sprites when applied to them with draw(), or null if no
-     * Filters should have an effect
      * @param load Whether this SpriteSheet should load upon creation
+     * @param filters The Filters that will have an effect on this SpriteSheet's
+     * Sprites when applied to them with draw()
      */
     public SpriteSheet(String path, int width, int height, int spriteWidth, int spriteHeight,
-            int spacing, int margin, int originX, int originY, Set<Filter> filters, boolean load) {
+            int spacing, int margin, int originX, int originY, boolean load, Filter... filters) {
         this(path, width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY,
-                null, (filters == null ? Collections.emptySet() : new HashSet<>(filters)), load);
+                null, load, filters);
     }
     
     /**
@@ -85,16 +86,14 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
      * origin
      * @param transColor The transparent color of this SpriteSheet's Sprites, or
      * null if there should be none
-     * @param filters The Set of Filters that will have an effect on this
-     * SpriteSheet's Sprites when applied to them with draw(), or null if no
-     * Filters should have an effect
      * @param load Whether this SpriteSheet should load upon creation
+     * @param filters The Filters that will have an effect on this SpriteSheet's
+     * Sprites when applied to them with draw()
      */
     public SpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spacing, int margin,
-            int originX, int originY, Color transColor, Set<Filter> filters, boolean load) {
-        this(null, null, path, transColor,
-                (filters == null ? Collections.emptySet() : new HashSet<>(filters)),
+            int originX, int originY, Color transColor, boolean load, Filter... filters) {
+        this(null, null, path, transColor, Arrays.asList(filters),
                 width, height, spriteWidth, spriteHeight, spacing, margin, originX, originY, load);
     }
     
@@ -119,35 +118,33 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
      * transparent color
      * @param transB The blue value (0-255) of this SpriteSheet's Sprites'
      * transparent color
-     * @param filters The Set of Filters that will have an effect on this
-     * SpriteSheet's Sprites when applied to them with draw(), or null if no
-     * Filters should have an effect
      * @param load Whether this SpriteSheet should load upon creation
+     * @param filters The Filters that will have an effect on this SpriteSheet's
+     * Sprites when applied to them with draw()
      */
     public SpriteSheet(String path, int width, int height,
             int spriteWidth, int spriteHeight, int spacing, int margin, int originX, int originY,
-            int transR, int transG, int transB, Set<Filter> filters, boolean load) {
+            int transR, int transG, int transB, boolean load, Filter... filters) {
         this(path, width, height, spriteWidth, spriteHeight,
-                spacing, margin, originX, originY, new Color(transR, transG, transB),
-                (filters == null ? Collections.emptySet() : new HashSet<>(filters)), load);
+                spacing, margin, originX, originY, new Color(transR, transG, transB), load, filters);
     }
     
     /**
      * Constructs a SpriteSheet from an existing SpriteSheet with a Filter
-     * applied to it. The new SpriteSheet will have the same Set of Filters that
+     * applied to it. The new SpriteSheet will have the same set of Filters that
      * are usable with its Sprites' draw() methods as the existing Sprite.
      * @param spriteSheet The SpriteSheet to create this SpriteSheet from
      * @param filter The Filter to apply to the existing SpriteSheet
      * @param load Whether this SpriteSheet should load upon creation
      */
     public SpriteSheet(SpriteSheet spriteSheet, Filter filter, boolean load) {
-        this(spriteSheet, filter, null, null, spriteSheet.filters, spriteSheet.width, spriteSheet.height,
-                spriteSheet.spriteWidth, spriteSheet.spriteHeight, spriteSheet.spacing, spriteSheet.margin,
-                spriteSheet.originX, spriteSheet.originY, load);
+        this(spriteSheet, filter, null, null, spriteSheet.filterImages.keySet(),
+                spriteSheet.width, spriteSheet.height, spriteSheet.spriteWidth, spriteSheet.spriteHeight,
+                spriteSheet.spacing, spriteSheet.margin, spriteSheet.originX, spriteSheet.originY, load);
     }
     
     private SpriteSheet(SpriteSheet basedOn, Filter basedFilter, String path, Color transColor,
-            Set<Filter> filters, int width, int height, int spriteWidth, int spriteHeight,
+            Collection<Filter> filters, int width, int height, int spriteWidth, int spriteHeight,
             int spacing, int margin, int originX, int originY, boolean load) {
         if (width <= 0) {
             throw new RuntimeException("Attempted to construct a SpriteSheet with non-positive width "
@@ -177,7 +174,14 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
         this.basedFilter = basedFilter;
         this.path = path;
         this.transColor = transColor;
-        this.filters = filters;
+        if (filters.isEmpty()) {
+            filterImages = Collections.emptyMap();
+        } else {
+            filterImages = new HashMap<>();
+            for (Filter filter : filters) {
+                filterImages.put(filter, null);
+            }
+        }
         this.width = width;
         this.height = height;
         this.spriteWidth = spriteWidth;
@@ -246,15 +250,19 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
                 }
             } else {
                 basedOn.load();
-                image = basedFilter.getFilteredImage(basedOn.images.get(null));
+                image = basedFilter.getFilteredImage(basedOn.filterImages.get(null));
             }
             for (Sprite sprite : sprites) {
                 sprite.loaded = true;
             }
             numSpritesLoaded = sprites.length;
             loadFilter(null, image);
-            for (Filter filter : filters) {
-                loadFilter(filter, filter.getFilteredImage(image));
+            defaultImage = image;
+            for (Map.Entry<Filter,Image> entry : filterImages.entrySet()) {
+                Filter filter = entry.getKey();
+                Image filteredImage = filter.getFilteredImage(image);
+                loadFilter(filter, filteredImage);
+                entry.setValue(filteredImage);
             }
             return true;
         }
@@ -271,7 +279,6 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
                 i++;
             }
         }
-        images.put(filter, image);
     }
     
     /**
@@ -307,13 +314,15 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
     
     private void destroyAndClear() {
         try {
-            for (Image image : images.values()) {
-                image.destroy();
+            defaultImage.destroy();
+            defaultImage = null;
+            for (Map.Entry<Filter,Image> entry : filterImages.entrySet()) {
+                entry.getValue().destroy();
+                entry.setValue(null);
             }
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
-        images.clear();
     }
     
     /**
@@ -323,7 +332,7 @@ public class SpriteSheet implements Iterable<Sprite>, Loadable {
      * Sprites when applied to them with draw()
      */
     public final Set<Filter> getFilters() {
-        return Collections.unmodifiableSet(filters);
+        return Collections.unmodifiableSet(filterImages.keySet());
     }
     
     /**

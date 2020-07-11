@@ -234,7 +234,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         this.backgroundColorLayerID = backgroundColorLayerID;
         loadables = new ArrayList<>();
         for (TiledTileset tileset : map.getTilesets()) {
-            Iterable<Sprite> sprites = TiledConverter.getSprites(tileset, null, load);
+            Iterable<Sprite> sprites = TiledConverter.getSprites(tileset, load);
             if (sprites instanceof SpriteSheet) {
                 loadables.add((SpriteSheet)sprites);
             } else {
@@ -259,7 +259,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
                 ImageLayerDef def = new ImageLayerDef(file, transColor);
                 Sprite sprite = imageLayerSprites.get(def);
                 if (sprite == null) {
-                    sprite = new Sprite(image.getSource(), 0, 0, transColor, null, load);
+                    sprite = new Sprite(image.getSource(), 0, 0, transColor, load);
                     imageLayerSprites.put(def, sprite);
                     loadables.add(sprite);
                 }
@@ -339,7 +339,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
             TiledTile tile = layer.getTile(point.x, point.y);
             Drawable drawable = tilesToDrawables.get(tile);
             if (drawable == null) {
-                drawable = TiledConverter.getAnimatable(tile, null, false).getInstance();
+                drawable = TiledConverter.getAnimatable(tile, false).getInstance();
                 if (drawable instanceof AnimationInstance) {
                     ((AnimationInstance)drawable).setSpeed(Frac.UNIT);
                 }
