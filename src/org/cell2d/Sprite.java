@@ -148,11 +148,13 @@ public class Sprite implements Animatable, Drawable, Loadable {
     }
     
     /**
-     * Constructs a Sprite from a Celick Image. This Sprite's origin will be the
-     * Image's center of rotation with its coordinates rounded to the nearest
-     * integer. Once created, this Sprite will be independent of the Image from
-     * which it is created. This Sprite will be considered to be loaded from the
-     * start, and once unloaded, it cannot be reloaded.
+     * Constructs a Sprite from a
+     * <a href="https://cell2d.gitbook.io/cell2d-documentation/general/celick">Celick</a>
+     * Image. This Sprite's origin will be the Image's center of rotation with
+     * its coordinates rounded to the nearest integer. Once created, this Sprite
+     * will be independent of the Image from which it is created. This Sprite
+     * will be considered to be loaded from the start, and once unloaded, it
+     * cannot be reloaded.
      * @param image The Image to create this Sprite from
      * @param filters The Filters that should have an effect on this Sprite when
      * applied to it with draw()

@@ -2,6 +2,7 @@ package org.cell2d.celick;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import org.cell2d.Color;
 import org.cell2d.celick.opengl.ImageData;
 import org.cell2d.celick.opengl.InternalTextureLoader;
@@ -88,17 +89,20 @@ public class Image implements Renderable {
 	 * @param other The other texture to copy
 	 */
 	protected Image(Image other) {
-		this.width = other.getWidth();
-		this.height = other.getHeight();
-		this.texture = other.texture;
-		this.textureWidth = other.textureWidth;
-		this.textureHeight = other.textureHeight;
-		this.ref = other.ref;
-		this.textureOffsetX = other.textureOffsetX;
-		this.textureOffsetY = other.textureOffsetY;
-	
-		centerX = width / 2;
-		centerY = height / 2;
+		width = other.getWidth();
+		height = other.getHeight();
+		texture = other.texture;
+		textureWidth = other.textureWidth;
+		textureHeight = other.textureHeight;
+		ref = other.ref;
+		textureOffsetX = other.textureOffsetX;
+		textureOffsetY = other.textureOffsetY;
+                filter = other.filter;
+		centerX = other.centerX;
+		centerY = other.centerY;
+                angle = other.angle;
+                alpha = other.alpha;
+                corners = Arrays.copyOf(other.corners, other.corners.length);
 		inited = true;
 	}
 	
@@ -242,7 +246,7 @@ public class Image implements Renderable {
 		
 		init();
 	}
-	
+        
 	/**
 	 * Create an image based on a file at the specified location
 	 * 
@@ -313,7 +317,25 @@ public class Image implements Renderable {
 			Log.error(e);
 		}
 	}
-
+        
+        /**
+         * Constructs and returns a new Image that is identical to this one in
+         * every way, including width and height, except that its actual pixel
+         * data is blank.
+         * @return A copy of this Image with blank pixel data
+         * @throws SlickException Indicates a failure to create the underlying resource
+         */
+        public final Image getBlankCopy() throws SlickException {
+            Image image = new Image(width, height, filter);
+            image.filter = filter;
+            image.centerX = centerX;
+            image.centerY = centerY;
+            image.angle = angle;
+            image.alpha = alpha;
+            image.corners = Arrays.copyOf(corners, corners.length);
+            return image;
+        }
+        
 	/** 
 	 * Get the OpenGL image filter in use
 	 * 

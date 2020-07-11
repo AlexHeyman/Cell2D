@@ -19,7 +19,7 @@ import org.cell2d.celick.SlickException;
  * @see Color
  * @author Alex Heyman
  */
-public class ColorMapFilter extends Filter {
+public class ColorMapFilter implements Filter {
     
     private final Map<Color,Color> colorMap;
     
@@ -72,13 +72,13 @@ public class ColorMapFilter extends Filter {
     }
     
     @Override
-    final Image getFilteredImage(Image image) {
+    public final Image getFilteredImage(Image image) {
         int width = image.getWidth();
         int height = image.getHeight();
         Image newImage;
         Graphics newGraphics;
         try {
-            newImage = new Image(width, height, image.getFilter());
+            newImage = image.getBlankCopy();
             newGraphics = newImage.getGraphics();
         } catch (SlickException e) {
             throw new RuntimeException(e);

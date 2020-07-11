@@ -13,8 +13,15 @@ import org.cell2d.celick.Image;
  * @see SpriteSheet
  * @author Alex Heyman
  */
-public abstract class Filter {
+public interface Filter {
     
-    abstract Image getFilteredImage(Image image);
+    /**
+     * Returns the transformation through this Filter of the specified
+     * <a href="https://cell2d.gitbook.io/cell2d-documentation/general/celick">Celick</a>
+     * image.
+     * @param image The Image to be transformed
+     * @return The transformation of the specified Image
+     */
+    Image getFilteredImage(Image image);
     
 }
