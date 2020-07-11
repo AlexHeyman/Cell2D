@@ -172,7 +172,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         originY = (int)Math.round(image.getCenterOfRotationY());
         Image spriteImage;
         try {
-            spriteImage = new Image(image.getWidth(), image.getHeight());
+            spriteImage = image.getBlankCopy();
             Graphics graphics = spriteImage.getGraphics();
             graphics.drawImage(image, 0, 0);
             graphics.flush();
@@ -180,6 +180,9 @@ public class Sprite implements Animatable, Drawable, Loadable {
             throw new RuntimeException(e);
         }
         loadFilter(null, spriteImage);
+        for (Filter filter : filterImages.keySet()) {
+            loadFilter(filter, filter.getFilteredImage(spriteImage));   
+        }
     }
     
     /**

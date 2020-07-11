@@ -102,7 +102,8 @@ public class Image implements Renderable {
 		centerY = other.centerY;
                 angle = other.angle;
                 alpha = other.alpha;
-                corners = Arrays.copyOf(other.corners, other.corners.length);
+                corners = (other.corners == null ? null :
+                        Arrays.copyOf(other.corners, other.corners.length));
 		inited = true;
 	}
 	
@@ -332,7 +333,7 @@ public class Image implements Renderable {
             image.centerY = centerY;
             image.angle = angle;
             image.alpha = alpha;
-            image.corners = Arrays.copyOf(corners, corners.length);
+            image.corners = (corners == null ? null : Arrays.copyOf(corners, corners.length));
             return image;
         }
         
