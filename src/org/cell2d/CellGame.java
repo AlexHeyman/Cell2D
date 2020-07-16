@@ -1163,10 +1163,10 @@ public abstract class CellGame {
     }
     
     /**
-     * Returns the Set of Music tracks that are assigned to the greatest
-     * priority in this CellGame's music stack, or an empty Set if the music
-     * stack is empty. These Music tracks are those that are currently playing.
-     * Changes to the returned Set will not be reflected in the music stack.
+     * Returns an unmodifiable Set view of the Music tracks that are assigned to
+     * the greatest priority in this CellGame's music stack, or an unmodifiable
+     * empty Set if the music stack is empty. These Music tracks are those that
+     * are currently playing.
      * @return The Set of Music tracks assigned to the music stack's greatest
      * priority
      */
