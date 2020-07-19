@@ -32,8 +32,8 @@ public class MouseButtonControl extends Control {
     }
     
     @Override
-    public int hashCode() {
-        return Objects.hash("MouseButton", buttonCode);
+    public final int hashCode() {
+        return Objects.hash("MouseButtonControl", buttonCode);
     }
     
     /**
@@ -45,7 +45,7 @@ public class MouseButtonControl extends Control {
      * equal to this MouseButtonControl
      */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (obj instanceof MouseButtonControl) {
             return ((MouseButtonControl)obj).buttonCode == buttonCode;
         }

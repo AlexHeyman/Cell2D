@@ -40,8 +40,8 @@ public class ControllerDirectionControl extends ControllerControl {
     }
     
     @Override
-    public int hashCode() {
-        return Objects.hash("ControllerDirection", getControllerNum(), direction);
+    public final int hashCode() {
+        return Objects.hash("ControllerDirectionControl", getControllerNum(), direction);
     }
     
     /**
@@ -54,7 +54,7 @@ public class ControllerDirectionControl extends ControllerControl {
      * is equal to this ControllerDirectionControl
      */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (obj instanceof ControllerDirectionControl) {
             ControllerDirectionControl control = (ControllerDirectionControl)obj;
             return (control.getControllerNum() == getControllerNum()

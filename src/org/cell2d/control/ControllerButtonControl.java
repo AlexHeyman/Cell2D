@@ -36,8 +36,8 @@ public class ControllerButtonControl extends ControllerControl {
     }
     
     @Override
-    public int hashCode() {
-        return Objects.hash("ControllerButton", getControllerNum(), buttonNum);
+    public final int hashCode() {
+        return Objects.hash("ControllerButtonControl", getControllerNum(), buttonNum);
     }
     
     /**
@@ -50,7 +50,7 @@ public class ControllerButtonControl extends ControllerControl {
      * equal to this ControllerButtonControl
      */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (obj instanceof ControllerButtonControl) {
             ControllerButtonControl control = (ControllerButtonControl)obj;
             return (control.getControllerNum() == getControllerNum()

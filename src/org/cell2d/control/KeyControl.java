@@ -333,8 +333,8 @@ public class KeyControl extends Control {
     }
     
     @Override
-    public int hashCode() {
-        return Objects.hash("Key", keyCode);
+    public final int hashCode() {
+        return Objects.hash("KeyControl", keyCode);
     }
     
     /**
@@ -346,7 +346,7 @@ public class KeyControl extends Control {
      * this KeyControl
      */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (obj instanceof KeyControl) {
             return ((KeyControl)obj).keyCode == keyCode;
         }
