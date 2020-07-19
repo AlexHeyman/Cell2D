@@ -30,7 +30,7 @@ public class ColorFilter implements Filter {
     
     @Override
     public final int hashCode() {
-        return Objects.hash(color);
+        return Objects.hash("ColorFilter", color);
     }
     
     /**
@@ -39,7 +39,7 @@ public class ColorFilter implements Filter {
      * they use are equal.
      * @param obj The object to be compared with this ColorFilter
      * @return Whether the specified object is a ColorFilter that is equal to
-     * this CellVector
+     * this ColorFilter
      */
     @Override
     public final boolean equals(Object obj) {

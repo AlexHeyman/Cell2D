@@ -44,7 +44,7 @@ public class ColorMapFilter implements Filter {
     
     @Override
     public final int hashCode() {
-        return Objects.hash(colorMap);
+        return Objects.hash("ColorMapFilter", colorMap);
     }
     
     /**
