@@ -61,7 +61,7 @@ public class CellVector {
     
     @Override
     public final int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash("CellVector", x, y);
     }
     
     /**
