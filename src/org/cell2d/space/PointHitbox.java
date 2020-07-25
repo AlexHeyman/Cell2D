@@ -27,7 +27,7 @@ public class PointHitbox extends Hitbox {
     }
     
     @Override
-    public Hitbox getCopy() {
+    public final PointHitbox getCopy() {
         return new PointHitbox(0, 0);
     }
     

@@ -68,7 +68,7 @@ public class RectangleHitbox extends Hitbox {
     }
     
     @Override
-    public Hitbox getCopy() {
+    public final RectangleHitbox getCopy() {
         return new RectangleHitbox(0, 0, relLeft, relRight, relTop, relBottom);
     }
     

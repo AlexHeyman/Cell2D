@@ -116,7 +116,7 @@ public class PolygonHitbox extends Hitbox {
     }
     
     @Override
-    public Hitbox getCopy() {
+    public final PolygonHitbox getCopy() {
         List<RelAbsPair> newVertices = new ArrayList<>(vertices.size());
         for (RelAbsPair vertex : vertices) {
             newVertices.add(new RelAbsPair(new CellVector(vertex.rel)));

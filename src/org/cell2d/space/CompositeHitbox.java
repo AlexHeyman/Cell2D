@@ -41,7 +41,7 @@ public class CompositeHitbox extends Hitbox {
     }
     
     @Override
-    public Hitbox getCopy() {
+    public final CompositeHitbox getCopy() {
         CompositeHitbox copy = new CompositeHitbox(0, 0);
         for (Map.Entry<Integer,Hitbox> entry : components.entrySet()) {
             Hitbox component = entry.getValue();

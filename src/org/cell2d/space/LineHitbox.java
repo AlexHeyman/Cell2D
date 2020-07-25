@@ -39,7 +39,7 @@ public class LineHitbox extends Hitbox {
     }
     
     @Override
-    public Hitbox getCopy() {
+    public final LineHitbox getCopy() {
         return new LineHitbox(new CellVector(0, 0), relDifference);
     }
     

@@ -39,7 +39,7 @@ public class CircleHitbox extends Hitbox {
     }
     
     @Override
-    public Hitbox getCopy() {
+    public final CircleHitbox getCopy() {
         return new CircleHitbox(0, 0, radius);
     }
     
@@ -66,22 +66,22 @@ public class CircleHitbox extends Hitbox {
     }
     
     @Override
-    public long getLeftEdge() {
+    public final long getLeftEdge() {
         return getAbsX() - radius;
     }
     
     @Override
-    public long getRightEdge() {
+    public final long getRightEdge() {
         return getAbsX() + radius;
     }
     
     @Override
-    public long getTopEdge() {
+    public final long getTopEdge() {
         return getAbsY() - radius;
     }
     
     @Override
-    public long getBottomEdge() {
+    public final long getBottomEdge() {
         return getAbsY() + radius;
     }
     
