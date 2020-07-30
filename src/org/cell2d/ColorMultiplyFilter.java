@@ -66,13 +66,12 @@ public class ColorMultiplyFilter implements Filter {
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
+        newGraphics.setDrawMode(Graphics.MODE_SCREEN);
         float rotation = image.getRotation();
         float alpha = image.getAlpha();
         image.setRotation(0);
         image.setAlpha(1);
-        GL11.glDisable(GL11.GL_BLEND);
         newGraphics.drawImage(image, 0, 0, color);
-        GL11.glEnable(GL11.GL_BLEND);
         newGraphics.flush();
         image.setRotation(rotation);
         image.setAlpha(alpha);

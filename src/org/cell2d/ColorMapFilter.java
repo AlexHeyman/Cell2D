@@ -85,7 +85,7 @@ public class ColorMapFilter implements Filter {
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
-        GL11.glDisable(GL11.GL_BLEND);
+        newGraphics.setDrawMode(Graphics.MODE_SCREEN);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Color pixelColor = image.getColor(x, y);
@@ -99,7 +99,6 @@ public class ColorMapFilter implements Filter {
                 newGraphics.fillRect(x, y, 1, 1);
             }
         }
-        GL11.glEnable(GL11.GL_BLEND);
         newGraphics.flush();
         return newImage;
     }
