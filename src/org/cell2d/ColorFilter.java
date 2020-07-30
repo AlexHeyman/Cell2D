@@ -4,6 +4,7 @@ import java.util.Objects;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
+import org.lwjgl.opengl.GL11;
 
 /**
  * <p>A ColorFilter is a Filter that blends the RGB value of each pixel in the
@@ -69,6 +70,7 @@ public class ColorFilter implements Filter {
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
+        GL11.glDisable(GL11.GL_BLEND);
         float blendAlpha = color.getA();
         if (blendAlpha == 1) {
             float newR = color.getR();
@@ -98,6 +100,7 @@ public class ColorFilter implements Filter {
                 }
             }
         }
+        GL11.glEnable(GL11.GL_BLEND);
         newGraphics.flush();
         return newImage;
     }

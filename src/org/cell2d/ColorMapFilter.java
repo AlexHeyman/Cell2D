@@ -7,15 +7,17 @@ import java.util.Objects;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
+import org.lwjgl.opengl.GL11;
 
 /**
  * <p>A ColorMapFilter is a Filter that uses a Map&lt;Color,Color&gt; to replace
  * some RGB values with others in the filtered image. For each key in the
  * ColorMapFilter's Map with an alpha value of 1, all pixels in the original
  * image that share their RGB value with that key will have their RGB value
- * replaced with that of the key's value in the Map. The Map's values' alpha
- * values are irrelevant to the ColorMapFilter's behavior, and the alpha values
- * of the original image's pixels are left unchanged in the filtered image.</p>
+ * replaced with that of the key's value in the Map. The alpha values of the
+ * original image's pixels are left unchanged in the filtered image, and the
+ * alpha values of the Map's values are irrelevant to the ColorMapFilter's
+ * behavior.</p>
  * @see Color
  * @author Alex Heyman
  */
@@ -83,6 +85,7 @@ public class ColorMapFilter implements Filter {
         } catch (SlickException e) {
             throw new RuntimeException(e);
         }
+        GL11.glDisable(GL11.GL_BLEND);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Color pixelColor = image.getColor(x, y);
@@ -96,6 +99,7 @@ public class ColorMapFilter implements Filter {
                 newGraphics.fillRect(x, y, 1, 1);
             }
         }
+        GL11.glEnable(GL11.GL_BLEND);
         newGraphics.flush();
         return newImage;
     }
