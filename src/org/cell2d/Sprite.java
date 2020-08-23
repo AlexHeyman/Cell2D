@@ -39,6 +39,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
     boolean loaded;
     private final Sprite basedOn;
     private final Filter basedFilter;
+    private Map<Filter,Sprite> filteredCopies = null;
     private final SpriteSheet spriteSheet;
     private final String path;
     private final Color transColor;
@@ -70,8 +71,8 @@ public class Sprite implements Animatable, Drawable, Loadable {
         spriteSheet = null;
         path = null;
         transColor = null;
-        defaultImages = null;
-        filterImages = null;
+        defaultImages = new Image[4];
+        filterImages = Collections.emptyMap();
         originX = 0;
         originY = 0;
     }
@@ -185,19 +186,7 @@ public class Sprite implements Animatable, Drawable, Loadable {
         }
     }
     
-    /**
-     * Constructs a Sprite from an existing Sprite with a Filter applied to it.
-     * The existing Sprite must not have been created as part of a SpriteSheet.
-     * The new Sprite will have the same set of Filters that are usable with
-     * draw() as the existing Sprite.
-     * @param sprite The Sprite to create this Sprite from
-     * @param filter The Filter to apply to the existing Sprite
-     * @param load Whether this Sprite should load upon creation
-     */
-    public Sprite(Sprite sprite, Filter filter, boolean load) {
-        if (sprite.spriteSheet != null) {
-            throw new RuntimeException("Attempted to construct a Sprite from part of a SpriteSheet");
-        }
+    private Sprite(Sprite sprite, Filter filter, boolean load) {
         blank = false;
         loaded = false;
         basedOn = sprite;
@@ -350,6 +339,27 @@ public class Sprite implements Animatable, Drawable, Loadable {
                     + " invalid pair of indices (" + index1 + ", " + index2 + ")");
         }
         return true;
+    }
+    
+    @Override
+    public final Set<Sprite> getSprites() {
+        return Collections.singleton(this);
+    }
+    
+    @Override
+    public final Sprite getFilteredCopy(Filter filter, boolean load) {
+        Sprite copy = null;
+        if (filteredCopies != null) {
+            copy = filteredCopies.get(filter);
+        }
+        if (copy == null) {
+            copy = new Sprite(this, filter, load);
+            if (filteredCopies == null) {
+                filteredCopies = new HashMap<>();
+            }
+            filteredCopies.put(filter, copy);
+        }
+        return copy;
     }
     
     /**

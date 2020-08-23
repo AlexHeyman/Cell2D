@@ -1,6 +1,9 @@
 package org.cell2d;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>An Animation is a sequence of one or more Animatable <i>frames</i> that
@@ -68,7 +71,7 @@ public class Animation implements Animatable {
      * @param frame The Animatable object out of which to make the Animation
      */
     public Animation(Animatable frame) {
-        this(arrayOf(frame), new long[1]);
+        this(arrayOf(frame), 0);
     }
     
     /**
@@ -96,23 +99,23 @@ public class Animation implements Animatable {
             throw new RuntimeException("Attempted to construct an Animation with " + frames.length
                     + " frames, but " + frameDurations.length + " frame durations");
         }
-        for (int i = 0; i < frames.length; i++) {
-            if (frames[i] == null) {
-                frames[i] = Sprite.BLANK;
+        this.frames = frames.clone();
+        for (int i = 0; i < this.frames.length; i++) {
+            if (this.frames[i] == null) {
+                this.frames[i] = Sprite.BLANK;
             }
         }
-        this.frames = frames.clone();
         this.frameDurations = frameDurations.clone();
-        compatibilities = new boolean[frames.length][0];
-        for (int i = frames.length - 1; i >= 0; i--) {
+        compatibilities = new boolean[this.frames.length][0];
+        for (int i = this.frames.length - 1; i >= 0; i--) {
             compatibilities[i] = new boolean[i + 1];
             compatibilities[i][i] = true;
             for (int j = 0; j < i; j++) {
-                compatibilities[i][j] = checkCompatibility(frames[i], frames[j]);
+                compatibilities[i][j] = checkCompatibility(this.frames[i], this.frames[j]);
             }
         }
         int maxLevel = 0;
-        for (Animatable frame : frames) {
+        for (Animatable frame : this.frames) {
             int frameLevel = frame.getLevel();
             if (frameLevel > maxLevel) {
                 maxLevel = frameLevel;
@@ -243,6 +246,33 @@ public class Animation implements Animatable {
             return compatibilities[index2][index1];
         }
         return compatibilities[index1][index2];
+    }
+    
+    private void addSpritesToSet(Set<Sprite> sprites) {
+        for (int i = 0; i < frames.length; i++) {
+            Animatable frame = frames[i];
+            if (frame instanceof Sprite) {
+                sprites.add((Sprite)frame);
+            } else {
+                ((Animation)frame).addSpritesToSet(sprites);
+            }
+        }
+    }
+    
+    @Override
+    public final Set<Sprite> getSprites() {
+        Set<Sprite> sprites = new HashSet<>();
+        addSpritesToSet(sprites);
+        return Collections.unmodifiableSet(sprites);
+    }
+    
+    @Override
+    public final Animation getFilteredCopy(Filter filter, boolean load) {
+        Animatable[] copyFrames = new Animatable[frames.length];
+        for (int i = 0; i < frames.length; i++) {
+            copyFrames[i] = frames[i].getFilteredCopy(filter, load);
+        }
+        return new Animation(copyFrames, frameDurations);
     }
     
     /**

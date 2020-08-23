@@ -1,12 +1,14 @@
 package org.cell2d;
 
+import java.util.Set;
+
 /**
  * <p>An Animatable object is one that may be incorporated into an Animation as
- * one of its frames. For simplicity's sake, all Animatable objects, not just
- * Animations, may be treated as consisting of one or more Animatable frames,
- * indexed by the integers from 0 to getNumFrames() - 1 inclusive, each with its
- * own duration in fracunits. Durations of 0 or less are interpreted as
- * infinite. An Animatable object that is not an Animation has exactly one
+ * one of its frames. Every Animatable object is either a Sprite or an
+ * Animation. For simplicity's sake, both Sprites and Animations may be treated
+ * as consisting of one or more Animatable frames, indexed by the integers from
+ * 0 to getNumFrames() - 1 inclusive, each with its own duration in fracunits.
+ * Durations of 0 or less are interpreted as infinite. A Sprite has exactly one
  * frame, namely itself, with a duration of 0.</p>
  * @see Animation
  * @author Alex Heyman
@@ -59,6 +61,33 @@ public interface Animatable {
      * range
      */
     boolean framesAreCompatible(int index1, int index2);
+    
+    /**
+     * Returns an unmodifiable Set view of all of the Sprites that ultimately
+     * compose this Animatable. If this Animatable is a Sprite, the returned Set
+     * will only contain the Sprite itself. If this Animatable is an Animation,
+     * the returned Set will be equal to the union of the return values of
+     * getSprites() for each of the Animation's frames.
+     * @return The Sprites that ultimately compose this Animatable
+     */
+    Set<Sprite> getSprites();
+    
+    /**
+     * Returns a new Animatable created by applying a Filter to all of the
+     * Sprites of which this Animatable is ultimately composed. The returned
+     * Animatable will have the same hierarchical Animation structure as this
+     * Animatable. In particular, if this Animatable is a Sprite, the returned
+     * Animatable will also be a Sprite. To avoid redundant Sprite creation,
+     * Sprites keep track of the filtered copies of themselves that have been
+     * created, so applying this method to the same Sprite twice will cause the
+     * same filtered Sprite to be returned twice.
+     * @param filter The Filter to apply to this Animatable's Sprites to create
+     * the new Animatable
+     * @param load Whether the new Animatable should load its Sprites upon its
+     * creation
+     * @return A filtered copy of this Animatable
+     */
+    Animatable getFilteredCopy(Filter filter, boolean load);
     
     /**
      * Returns a Drawable instantiation of this Animatable.
