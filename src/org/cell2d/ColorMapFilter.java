@@ -7,7 +7,6 @@ import java.util.Objects;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
-import org.lwjgl.opengl.GL11;
 
 /**
  * <p>A ColorMapFilter is a Filter that uses a Map&lt;Color,Color&gt; to replace

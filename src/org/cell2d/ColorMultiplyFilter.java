@@ -4,7 +4,6 @@ import java.util.Objects;
 import org.cell2d.celick.Graphics;
 import org.cell2d.celick.Image;
 import org.cell2d.celick.SlickException;
-import org.lwjgl.opengl.GL11;
 
 /**
  * <p>A ColorMultiplyFilter is a Filter that multiplies the red, green, blue,
