@@ -1,22 +1,24 @@
 package org.cell2d.space.map;
 
 import java.awt.Point;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import org.cell2d.Animatable;
 import org.cell2d.AnimationInstance;
 import org.cell2d.CellGame;
 import org.cell2d.Color;
+import org.cell2d.ColorMultiplyFilter;
 import org.cell2d.Drawable;
+import org.cell2d.Filter;
 import org.cell2d.Frac;
 import org.cell2d.Loadable;
 import org.cell2d.Sprite;
-import org.cell2d.SpriteSheet;
 import org.cell2d.space.Area;
 import org.cell2d.space.ColorSpaceLayer;
 import org.cell2d.space.RectangleHitbox;
@@ -40,15 +42,17 @@ import org.tiledreader.TiledTileset;
  * TiledArea class is a type of Area that represents the contents of a TiledMap.
  * </p>
  * 
- * <p>Constructing a TiledArea from a TiledMap constitutes "converting" the
- * TiledMap in the view of the TiledConverter class, and that class thus stores
- * a pointer to each new TiledArea that is constructed. A newly constructed
- * TiledArea will replace the TiledConverter class' pointer to any existing
+ * <p>A TiledArea has an associated TiledConverter, specified upon its
+ * construction. This TiledConverter's associated TiledReader must be the same
+ * one that read the TiledArea's TiledMap. Constructing a TiledArea constitutes
+ * "converting" its TiledMap in the view of its TiledConverter, and the
+ * TiledConverter thus stores a pointer to the newly constructed TiledArea. The
+ * new TiledArea will replace the TiledConverter's pointer to any previous
  * TiledArea constructed from the same TiledMap.</p>
  * 
- * <p>When a TiledArea is constructed from a TiledMap, the TiledArea will cause
- * all of the TiledTilesets used in the TiledMap to be converted if they have
- * not been already. The TiledArea will also construct Sprites that display the
+ * <p>When a TiledArea is constructed, it will cause all of the TiledTilesets
+ * used in its TiledMap to be converted by its TiledCoverter if they have not
+ * been already. The TiledArea will also construct Sprites that display the
  * images of the TiledMap's TiledImageLayers. (TiledImageLayers with identical
  * images will share a single Sprite.) Any new Sprites converted or constructed
  * upon a TiledArea's creation will not be affected by any Filters applied to
@@ -69,10 +73,9 @@ import org.tiledreader.TiledTileset;
  * draw priority of the SpaceObjects generated from it.</p>
  * 
  * <p>A TiledArea stores a list of Loadables used by its content, including
- * the Sprites corresponding to TiledImageLayers and the Sprites and
- * SpriteSheets corresponding to TiledTilesets. These Loadables can be manually
- * loaded and unloaded in bulk, and any unloaded ones will be automatically
- * loaded by the TiledArea's load() method.</p>
+ * the Sprites corresponding to TiledTiles and TiledImageLayers. These Loadables
+ * can be manually loaded and unloaded in bulk, and any unloaded ones will be
+ * automatically loaded by the TiledArea's load() method.</p>
  * @param <T> The type of CellGame that uses the SpaceStates that can load this
  * TiledArea
  * @param <U> The type of SpaceState that can load this TiledArea
@@ -82,45 +85,105 @@ import org.tiledreader.TiledTileset;
 public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>> implements Area<T,U> {
     
     private final TiledMap map;
+    private final TiledConverter converter;
     private final int[] drawPriorities;
     private TiledTileLayer solidLayer;
     private final int backgroundColorLayerID;
     private List<Loadable> loadables;
     
-    private static class ImageLayerDef {
+    private static class TileImageDef {
         
-        private final File imageSource;
-        private final Color transColor;
+        private final TiledTile tile;
+        private final Color tintColor;
         
-        private ImageLayerDef(File imageSource, Color transColor) {
-            this.imageSource = imageSource;
-            this.transColor = transColor;
-        }
-        
-        @Override
-        public final boolean equals(Object o) {
-            if (o instanceof ImageLayerDef) {
-                ImageLayerDef def = (ImageLayerDef)o;
-                return (imageSource.equals(def.imageSource) && transColor.equals(def.transColor));
-            }
-            return false;
+        private TileImageDef(TiledTile tile, Color tintColor) {
+            this.tile = tile;
+            this.tintColor = tintColor;
         }
         
         @Override
         public final int hashCode() {
-            return Objects.hash(imageSource, transColor);
+            return Objects.hash(tile, tintColor);
+        }
+        
+        @Override
+        public final boolean equals(Object o) {
+            if (o instanceof TileImageDef) {
+                TileImageDef def = (TileImageDef)o;
+                return (tile.equals(def.tile) && tintColor.equals(def.tintColor));
+            }
+            return false;
         }
         
     }
     
-    private final Map<ImageLayerDef,Sprite> imageLayerSprites = new HashMap<>();
+    private final Map<TileImageDef,Animatable> tileAnimatables = new HashMap<>();
     
-    private static File getCanonicalFile(String path) {
-        try {
-            return new File(path).getCanonicalFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private static class ImageLayerImageDef {
+        
+        private final String imageSource;
+        private final Color transColor, tintColor;
+        
+        private ImageLayerImageDef(String imageSource, Color transColor, Color tintColor) {
+            this.imageSource = imageSource;
+            this.transColor = transColor;
+            this.tintColor = tintColor;
         }
+        
+        @Override
+        public final int hashCode() {
+            return Objects.hash(imageSource, transColor, tintColor);
+        }
+        
+        @Override
+        public final boolean equals(Object o) {
+            if (o instanceof ImageLayerImageDef) {
+                ImageLayerImageDef def = (ImageLayerImageDef)o;
+                return (imageSource.equals(def.imageSource)
+                        && transColor.equals(def.transColor) && tintColor.equals(def.tintColor));
+            }
+            return false;
+        }
+        
+    }
+    
+    private final Map<ImageLayerImageDef,Sprite> imageLayerSprites = new HashMap<>();
+    
+    private static float byteToFloat(int n) {
+        return ((float)n)/255;
+    }
+    
+    /**
+     * Returns the transparent color of the specified TiledImage as a Cell2D
+     * Color, or null if the TiledImage does not have a transparent color.
+     * @param image The TiledImage
+     * @return The TiledImage's transparent color
+     */
+    public static Color getTransColor(TiledImage image) {
+        java.awt.Color transColor = image.getTransColor();
+        return (transColor == null ? null : new Color(transColor));
+    }
+    
+    /**
+     * Returns a Cell2D Color that represents the tint color of the specified
+     * TiledLayer. The Cell2D Color will not necessarily have the same RGBA
+     * values as the TiledLayer's actual tint color. However, when used in a
+     * ColorMultiplyFilter, the Cell2D Color will have the same effect as the
+     * TiledLayer's tint color does in the Tiled editor's visuals. (The
+     * discrepancy is because the alpha value of a ColorMultiplyFilter's color
+     * controls transparency, while the alpha value of a TiledLayer's tint color
+     * controls brightness. Thus, different RGBA values may be necessary to
+     * achieve the same visual effect in both cases.)
+     * @param layer The TiledLayer
+     * @return A representation of the TiledLayer's tint color
+     */
+    public static Color getTintColor(TiledLayer layer) {
+        java.awt.Color color = layer.getAbsTintColor();
+        float r = byteToFloat(color.getRed());
+        float g = byteToFloat(color.getGreen());
+        float b = byteToFloat(color.getBlue());
+        float a = byteToFloat(color.getAlpha());
+        return new Color(r*a, g*a, b*a, 1f);
     }
     
     private static int[] makeDrawPriorities(TiledMap map, int spacing, String zeroPriorityLayerName) {
@@ -143,6 +206,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * Constructs a TiledArea that represents the contents of the specified
      * TiledMap.
      * @param map The TiledMap to construct the TiledArea from
+     * @param converter The TiledArea's associated TiledConverter
      * @param drawPrioritySpacing The difference in the draw priorities of
      * successive non-group layers. For instance, if this is set to 100, then if
      * one non-group layer has draw priority 0, the next frontmost non-group
@@ -154,15 +218,14 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * will have draw priority 0. If multiple non-group layers have this
      * parameter as a name, the hindmost one will have draw priority 0.
      * @param solidLayerName
-     * <p>The name (accessed via getName()) of the
-     * TiledTileLayer whose tiles will be overlaid with solid SpaceObjects by
-     * the default implementation of loadTileLayer(). This layer can be a
-     * visible layer that depicts a part of the game world, or it can be an
-     * invisible "solidity layer" whose only purpose is to specify collision
-     * information. loadTileLayer() will use the output of
-     * TileGridObject.cover() to generate a small set of solid, invisible,
-     * rectangular SpaceObjects that overlap all and only the grid locations in
-     * the TiledTileLayer that are occupied by tiles.</p>
+     * <p>The name (accessed via getName()) of the TiledTileLayer whose tiles
+     * will be overlaid with solid SpaceObjects by the default implementation of
+     * loadTileLayer(). This layer can be a visible layer that depicts a part of
+     * the game world, or it can be an invisible "solidity layer" whose only
+     * purpose is to specify collision information. loadTileLayer() will use the
+     * output of TileGridObject.cover() to generate a small set of solid,
+     * invisible, rectangular SpaceObjects that overlap all and only the grid
+     * locations in the TiledTileLayer that are occupied by tiles.</p>
      * 
      * <p>This parameter may be null. If no TiledTileLayer has this parameter as
      * a name, none of the TiledTileLayers will be made solid. If multiple
@@ -177,9 +240,9 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * @param load If this is true, all of this TiledArea's Loadables (that are
      * not already loaded) will be loaded upon the TiledArea's creation.
      */
-    public TiledArea(TiledMap map, int drawPrioritySpacing, String zeroPriorityLayerName,
-            String solidLayerName, int backgroundColorLayerID, boolean load) {
-        this(map, makeDrawPriorities(map, drawPrioritySpacing, zeroPriorityLayerName),
+    public TiledArea(TiledMap map, TiledConverter converter, int drawPrioritySpacing,
+            String zeroPriorityLayerName, String solidLayerName, int backgroundColorLayerID, boolean load) {
+        this(map, converter, makeDrawPriorities(map, drawPrioritySpacing, zeroPriorityLayerName),
                 solidLayerName, backgroundColorLayerID, load);
     }
     
@@ -187,21 +250,21 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * Constructs a TiledArea that represents the contents of the specified
      * TiledMap.
      * @param map The TiledMap to construct the TiledArea from
+     * @param converter The TiledArea's associated TiledConverter
      * @param drawPriorities An array whose length is the same as the number of
      * non-group layers in the TiledMap. The array element at each index
      * <i>i</i> will be the draw priority of the non-group layer at index <i>i
      * </i> in the TiledMap's list of non-group layers (accessed via
      * getNonGroupLayers()).
      * @param solidLayerName
-     * <p>The name (accessed via getName()) of the
-     * TiledTileLayer whose tiles will be overlaid with solid SpaceObjects by
-     * the default implementation of loadTileLayer(). This layer can be a
-     * visible layer that depicts a part of the game world, or it can be an
-     * invisible "solidity layer" whose only purpose is to specify collision
-     * information. loadTileLayer() will use the output of
-     * TileGridObject.cover() to generate a small set of solid, invisible,
-     * rectangular SpaceObjects that overlap all and only the grid locations in
-     * the TiledTileLayer that are occupied by tiles.</p>
+     * <p>The name (accessed via getName()) of the TiledTileLayer whose tiles
+     * will be overlaid with solid SpaceObjects by the default implementation of
+     * loadTileLayer(). This layer can be a visible layer that depicts a part of
+     * the game world, or it can be an invisible "solidity layer" whose only
+     * purpose is to specify collision information. loadTileLayer() will use the
+     * output of TileGridObject.cover() to generate a small set of solid,
+     * invisible, rectangular SpaceObjects that overlap all and only the grid
+     * locations in the TiledTileLayer that are occupied by tiles.</p>
      * 
      * <p>This parameter may be null. If no TiledTileLayer has this parameter as
      * a name, none of the TiledTileLayers will be made solid. If multiple
@@ -216,8 +279,12 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      * @param load If this is true, all of this TiledArea's Loadables (that are
      * not already loaded) will be loaded upon the TiledArea's creation.
      */
-    public TiledArea(TiledMap map, int[] drawPriorities, String solidLayerName,
-            int backgroundColorLayerID, boolean load) {
+    public TiledArea(TiledMap map, TiledConverter converter, int[] drawPriorities,
+            String solidLayerName, int backgroundColorLayerID, boolean load) {
+        if (map.getReader() != converter.getReader()) {
+            throw new RuntimeException("Attempted to construct a TiledArea using a TiledMap and a"
+                    + " TiledConverter with two different TiledReaders");
+        }
         List<TiledLayer> layers = map.getNonGroupLayers();
         if (drawPriorities.length != layers.size()) {
             throw new RuntimeException("Attempted to construct a TiledArea with an array of layer draw"
@@ -230,43 +297,62 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
                     + " of 0");
         }
         this.map = map;
+        this.converter = converter;
         this.drawPriorities = drawPriorities;
         this.backgroundColorLayerID = backgroundColorLayerID;
         loadables = new ArrayList<>();
-        for (TiledTileset tileset : map.getTilesets()) {
-            Iterable<Sprite> sprites = TiledConverter.getSprites(tileset, load);
-            if (sprites instanceof SpriteSheet) {
-                loadables.add((SpriteSheet)sprites);
-            } else {
-                for (Sprite sprite : sprites) {
-                    loadables.add(sprite);
-                }
-            }
-        }
         solidLayer = null;
+        
+        //Make super-sure all of the map's tilesets get converted, as promised
+        for (TiledTileset tileset : map.getTilesets()) {
+            converter.getSprites(tileset, load);
+        }
+        
+        Set<Sprite> tileSprites = new HashSet<>();
         for (int layerIndex = 0; layerIndex < layers.size(); layerIndex++) {
             TiledLayer layer = layers.get(layerIndex);
             if (layer instanceof TiledTileLayer) {
+                TiledTileLayer tileLayer = (TiledTileLayer)layer;
+                Color tintColor = getTintColor(layer);
+                Filter tintFilter = new ColorMultiplyFilter(tintColor);
+                for (Point point : tileLayer.getTileLocations()) {
+                    TiledTile tile = tileLayer.getTile(point.x, point.y);
+                    TileImageDef def = new TileImageDef(tile, tintColor);
+                    Animatable animatable = tileAnimatables.get(def);
+                    if (animatable == null) {
+                        animatable = converter.getAnimatable(tile, load);
+                        tileSprites.addAll(animatable.getSprites());
+                        if (!tintColor.equals(Color.WHITE)) {
+                            animatable = animatable.getFilteredCopy(tintFilter, load);
+                            tileSprites.addAll(animatable.getSprites());
+                        }
+                        tileAnimatables.put(def, animatable);
+                    }
+                }
                 if (solidLayer == null && layer.getName().equals(solidLayerName)) {
                     solidLayer = (TiledTileLayer)layer;
                 }
             } else if (layer instanceof TiledImageLayer) {
                 TiledImageLayer imageLayer = (TiledImageLayer)layer;
                 TiledImage image = imageLayer.getImage();
-                File file = getCanonicalFile(image.getSource());
-                java.awt.Color awtTransColor = image.getTransColor();
-                Color transColor = (awtTransColor == null ? null : new Color(awtTransColor));
-                ImageLayerDef def = new ImageLayerDef(file, transColor);
+                Color transColor = getTransColor(image);
+                Color tintColor = getTintColor(layer);
+                ImageLayerImageDef def = new ImageLayerImageDef(image.getSource(), transColor, tintColor);
                 Sprite sprite = imageLayerSprites.get(def);
                 if (sprite == null) {
                     sprite = new Sprite(image.getSource(), 0, 0, transColor, load);
-                    imageLayerSprites.put(def, sprite);
                     loadables.add(sprite);
+                    if (!tintColor.equals(Color.WHITE)) {
+                        sprite = sprite.getFilteredCopy(new ColorMultiplyFilter(tintColor), load);
+                        loadables.add(sprite);
+                    }
+                    imageLayerSprites.put(def, sprite);
                 }
             }
         }
+        loadables.addAll(tileSprites);
         loadables = Collections.unmodifiableList(loadables);
-        TiledConverter.addArea(this);
+        converter.addArea(this);
     }
     
     @Override
@@ -323,6 +409,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
         List<SpaceObject> objects = new ArrayList<>();
         long offsetX = Frac.units(layer.getAbsOffsetX());
         long offsetY = Frac.units(layer.getAbsOffsetY());
+        Color tintColor = getTintColor(layer);
         int layerArea = (layer.getX2() - layer.getX1() + 1)*(layer.getY2() - layer.getY1() + 1);
         TileGrid tileGrid;
         if (layer.getTileLocations().size() < ((double)layerArea)/4) {
@@ -339,7 +426,7 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
             TiledTile tile = layer.getTile(point.x, point.y);
             Drawable drawable = tilesToDrawables.get(tile);
             if (drawable == null) {
-                drawable = TiledConverter.getAnimatable(tile, false).getInstance();
+                drawable = tileAnimatables.get(new TileImageDef(tile, tintColor)).getInstance();
                 if (drawable instanceof AnimationInstance) {
                     ((AnimationInstance)drawable).setSpeed(Frac.UNIT);
                 }
@@ -429,6 +516,14 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
     }
     
     /**
+     * Returns this TiledArea's associated TiledConverter.
+     * @return This TiledArea's associated TiledConverter
+     */
+    public final TiledConverter getConverter() {
+        return converter;
+    }
+    
+    /**
      * Returns the draw priority of the non-group layer at the specified index
      * in this TiledArea's TiledMap's list of non-group layers (accessed via
      * getNonGroupLayers()).
@@ -503,10 +598,8 @@ public abstract class TiledArea<T extends CellGame, U extends SpaceState<T,U,?>>
      */
     public final Sprite getSprite(TiledImageLayer layer) {
         TiledImage image = layer.getImage();
-        File file = getCanonicalFile(image.getSource());
-        java.awt.Color awtTransColor = image.getTransColor();
-        Color transColor = (awtTransColor == null ? null : new Color(awtTransColor));
-        return imageLayerSprites.get(new ImageLayerDef(file, transColor));
+        return imageLayerSprites.get(new ImageLayerImageDef(
+                image.getSource(), getTransColor(image), getTintColor(layer)));
     }
     
 }
