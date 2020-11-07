@@ -94,4 +94,25 @@ public enum Direction {
         }
     }
     
+    /**
+     * Returns the Direction that the specified angle most closely points in.
+     * For instance, Direction.ofAngle(250) returns DOWN. This method is
+     * effectively the inverse of toAngle().
+     * @param angle The angle to approximate with a Direction
+     * @return The Direction that the specified angle most closely points in
+     */
+    public static Direction ofAngle(double angle) {
+        if (angle < 45) {
+            return RIGHT;
+        } else if (angle < 135) {
+            return UP;
+        } else if (angle < 225) {
+            return LEFT;
+        } else if (angle < 315) {
+            return DOWN;
+        } else {
+            return RIGHT;
+        }
+    }
+    
 }
