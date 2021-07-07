@@ -230,7 +230,7 @@ public class Music implements Loadable {
     
     /**
      * Returns the music player's position in seconds in this Music track, or 0
-     * if it is not currently playing.
+     * if it is not currently playing or paused.
      * @return The music player's position in seconds in this Music track
      */
     public final double getPosition() {
@@ -239,7 +239,7 @@ public class Music implements Loadable {
     
     /**
      * Sets the music player's position in seconds in this Music track, if it is
-     * currently playing.
+     * currently playing or paused.
      * @param position The music player's new position in seconds in this Music
      * track
      */
